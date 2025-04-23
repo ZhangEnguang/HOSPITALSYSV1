@@ -1,0 +1,27 @@
+/* Tab按钮样式 */
+.tabButton {
+  transition: all 0.2s ease;
+}
+
+/* 非活动状态 */
+.tabButtonInactive {
+  background-color: transparent;
+  color: var(--muted-foreground);
+}
+
+/* 活动状态 */
+.tabButtonActive {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+/* 确保每次重新渲染时样式正确应用 */
+.tabButtonActive:global(.active) {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.tabButtonInactive:global(.active) {
+  background-color: transparent;
+  color: var(--muted-foreground);
+}

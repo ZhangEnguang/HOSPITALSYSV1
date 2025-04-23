@@ -1,0 +1,271 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { X } from "lucide-react"
+import { Separator } from "@/components/ui/separator"
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { cn } from "@/lib/utils"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card } from "@/components/ui/card"
+
+export interface ProjectCategoryDetailProps {
+  id: string
+  categoryCode?: string
+  name: string
+  code: string
+  category?: string
+  feeCode?: string
+  eduStatistics?: string
+  projectSource?: string
+  projectLevel?: string
+  paymentSource?: string
+  budgetControl?: boolean
+  note?: string
+  level?: string
+  projectCount?: number
+  fundingStandard?: string
+  accountingType?: string
+  fundingForm?: string
+  managementMethod?: string
+  projectManagementMethod?: string
+  undergradCardRequirement?: string
+  masterCardRequirement?: string
+  phdCardRequirement?: string
+  description?: string
+  status: string
+  enabled?: boolean
+  createdAt: string
+  type?: string
+  parentId?: string | null
+  children?: string[]
+  budgetStandards?: any[]
+}
+
+interface ProjectCategoryViewDrawerProps {
+  isOpen: boolean
+  onClose: () => void
+  category: ProjectCategoryDetailProps | null
+}
+
+export function ProjectCategoryViewDrawer({
+  isOpen,
+  onClose,
+  category,
+}: ProjectCategoryViewDrawerProps) {
+  const [isVisible, setIsVisible] = useState(false)
+  const [activeTab, setActiveTab] = useState("basic-info")
+
+  // 控制抽屉显示/隐藏的动画
+  useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true)
+    } else {
+      setIsVisible(false)
+    }
+  }, [isOpen])
+
+  // 处理关闭抽屉
+  const handleClose = () => {
+    setIsVisible(false)
+    // 动画结束后再关闭
+    setTimeout(() => {
+      onClose()
+    }, 300)
+  }
+
+  if (!category) return null
+
+  return (
+    <>
+      {/* 遮罩层 - 点击时关闭抽屉 */}
+      <div
+        className={cn(
+          "fixed inset-0 z-30 bg-black/50 transition-opacity duration-300",
+          isVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}
+        onClick={handleClose}
+      />
+
+      {/* 抽屉内容 - 非模态，去掉遮罩层 */}
+      <div
+        className={cn(
+          "fixed inset-y-0 right-0 z-40 w-auto min-w-[600px] max-w-[800px] bg-gradient-to-br from-white to-slate-50 shadow-xl overflow-hidden transition-transform duration-300 ease-in-out border-l border-slate-200",
+          isVisible ? "translate-x-0" : "translate-x-full"
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex h-full flex-col">
+          {/* 抽屉头部 */}
+          <div className="flex items-center justify-between border-b px-6 py-4 bg-gradient-to-r from-blue-50 to-blue-100">
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold text-blue-800">查看项目分类</h2>
+              <p className="text-sm text-blue-600">{category.code} - {category.name}</p>
+            </div>
+            <Button variant="ghost" size="icon" onClick={handleClose} className="rounded-full hover:bg-white/80">
+              <X className="h-5 w-5 text-blue-600" />
+              <span className="sr-only">关闭</span>
+            </Button>
+          </div>
+
+          {/* 抽屉内容区域 - 使用滚动区域 */}
+          <ScrollArea className="flex-1 p-6 bg-gradient-to-b from-white to-slate-50">
+            <Tabs defaultValue="basic-info" className="w-full" onValueChange={setActiveTab} value={activeTab}>
+              <TabsList className="w-full mb-6 grid grid-cols-3 gap-2 rounded-lg bg-muted/30 p-1">
+                <TabsTrigger 
+                  value="basic-info" 
+                  className="rounded-md data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:shadow-sm transition-all duration-200"
+                >
+                  基本信息
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="budget-management" 
+                  className="rounded-md data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:shadow-sm transition-all duration-200"
+                >
+                  预算与管理
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="card-rules" 
+                  className="rounded-md data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:shadow-sm transition-all duration-200"
+                >
+                  卡号规则
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="basic-info" className="mt-0 space-y-4">
+                <Card className="p-6 border border-blue-100 bg-blue-50/30 shadow-sm">
+                  <h3 className="text-lg font-medium text-blue-800 mb-4">基本信息</h3>
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                    <InfoField label="项目分类编号" value={category.categoryCode || category.code} />
+                    <InfoField label="名称" value={category.name} />
+                    <InfoField label="编码" value={category.code} />
+                    <InfoField label="类别" value={category.category} />
+                    <InfoField label="项目级别" value={category.projectLevel || category.level} />
+                    <InfoField label="项目来源" value={category.projectSource} />
+                    <InfoField label="项目数" value={category.projectCount?.toString()} />
+                    <InfoField 
+                      label="状态" 
+                      value={category.status} 
+                      isStatus 
+                    />
+                    <InfoField 
+                      label="备注" 
+                      value={category.note || category.description} 
+                      className="col-span-2"
+                    />
+                    <InfoField label="创建时间" value={category.createdAt} className="col-span-2" />
+                    <InfoField label="上级分类ID" value={category.parentId || "无 (根分类)"} />
+                  </div>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="budget-management" className="mt-0 space-y-4">
+                <Card className="p-6 border border-green-100 bg-green-50/30 shadow-sm">
+                  <h3 className="text-lg font-medium text-green-800 mb-4">预算与管理</h3>
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                    <InfoField label="预算标准" value={category.fundingStandard} />
+                    <InfoField label="财务账号" value={category.feeCode} />
+                    <InfoField label="教育部统计归属" value={category.eduStatistics} />
+                    <InfoField label="支付来源" value={category.paymentSource} />
+                    <InfoField 
+                      label="是否管控预算" 
+                      value={
+                        category.budgetControl === true ? "是" : 
+                        category.budgetControl === false ? "否" : 
+                        undefined
+                      } 
+                    />
+                    <InfoField label="账卡形式" value={category.accountingType} />
+                    <InfoField label="预算分方式" value={category.fundingForm} />
+                    <InfoField label="管理规程方案" value={category.managementMethod} />
+                    <InfoField label="项目管理方案" value={category.projectManagementMethod} />
+                  </div>
+                </Card>
+                
+                {/* 预算标准详情 */}
+                {category.budgetStandards && category.budgetStandards.length > 0 && (
+                  <Card className="p-6 border border-green-100 bg-green-50/30 shadow-sm mt-4">
+                    <h3 className="text-lg font-medium text-green-800 mb-4">预算标准列表</h3>
+                    <div className="space-y-3">
+                      {category.budgetStandards.map((standard, index) => (
+                        <div key={index} className="p-3 bg-white rounded-md border border-green-100 shadow-sm">
+                          <p className="font-medium">{standard.standard}</p>
+                          {standard.startDate && standard.endDate && (
+                            <p className="text-sm text-gray-500 mt-1">
+                              有效期: {standard.startDate} 至 {standard.endDate}
+                            </p>
+                          )}
+                          {standard.note && (
+                            <p className="text-sm mt-1">{standard.note}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="card-rules" className="mt-0 space-y-4">
+                <Card className="p-6 border border-purple-100 bg-purple-50/30 shadow-sm">
+                  <h3 className="text-lg font-medium text-purple-800 mb-4">卡号规则</h3>
+                  <div className="grid grid-cols-1 gap-4">
+                    <InfoField 
+                      label="本科卡号规则" 
+                      value={category.undergradCardRequirement} 
+                    />
+                    <InfoField 
+                      label="硕士卡号规则" 
+                      value={category.masterCardRequirement} 
+                    />
+                    <InfoField 
+                      label="博士卡号规则" 
+                      value={category.phdCardRequirement} 
+                    />
+                  </div>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </ScrollArea>
+        </div>
+      </div>
+    </>
+  )
+}
+
+// 信息字段组件
+function InfoField({ 
+  label, 
+  value, 
+  isStatus = false,
+  className
+}: { 
+  label: string; 
+  value?: string | null; 
+  isStatus?: boolean;
+  className?: string;
+}) {
+  if (!value) return null;
+  
+  return (
+    <div className={cn("space-y-2 bg-white/60 p-3 rounded-md shadow-sm border border-slate-100", className)}>
+      <p className="text-sm font-medium text-slate-500">{label}</p>
+      {isStatus ? (
+        <Badge variant={value === "启用" ? "outline" : "secondary"} className="mt-1 px-3 py-1 text-sm font-medium">
+          {value === "启用" ? 
+            <span className="flex items-center gap-1 text-emerald-600">
+              <span className="inline-block w-2 h-2 bg-emerald-500 rounded-full"></span>
+              {value}
+            </span> : 
+            <span className="flex items-center gap-1 text-slate-500">
+              <span className="inline-block w-2 h-2 bg-slate-400 rounded-full"></span>
+              {value}
+            </span>
+          }
+        </Badge>
+      ) : (
+        <p className="font-medium text-base text-slate-800">{value}</p>
+      )}
+    </div>
+  );
+}

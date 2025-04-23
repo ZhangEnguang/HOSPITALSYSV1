@@ -1,0 +1,896 @@
+"use client"
+
+import type React from "react"
+
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ArrowLeft, Plus, Trash2, Upload } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { cn } from "@/lib/utils"
+import { format } from "date-fns"
+import { CalendarIcon } from "lucide-react"
+
+// 模板数据
+const templateData = [
+  {
+    id: "nsfc",
+    name: "国家自然科学基金年度申报",
+    title: "2025年度国家自然科学基金项目",
+    icon: "🔬",
+    category: "国家级",
+    duration: "每年3月1日-3月20日",
+    description: "国家自然科学基金委员会年度常规项目申报",
+    tags: ["面上项目", "青年项目", "重点项目", "形式审查", "限项管理"],
+    details: {
+      cycle: "每年3月1日-3月20日（系统自动按年度+1更新）",
+      fundingScope: ["面上项目：60-100万元", "青年项目：20-30万元", "重点项目：300-500万元"],
+      materials: ["申请书（模板自动挂接最新版）", "申请人简历（在线生成）", "伦理审查证明（需上传）"],
+      keyDates: ["校内截止：3月10日（可修改）", "形式审查：3月11-15日", "提交基金委：3月20日"],
+      specialRequirements: ["限项说明：高级职称限2项（根据年度政策自动更新）", "合作单位盖章：需提前10个工作日申请"],
+    },
+    defaultValues: {
+      name: "2025年度国家自然科学基金项目",
+      description: "国家自然科学基金委员会年度常规项目申报，包括面上项目、青年项目和重点项目",
+      type: "国家级",
+      category: "自然科学",
+      startDate: new Date("2025-03-01"),
+      endDate: new Date("2025-03-20"),
+      amount: 1000,
+      autoEnd: "yes",
+      canReview: "yes",
+      hasQuota: "yes",
+      guide:
+        "国家自然科学基金委员会2025年度项目申报指南。本年度重点支持基础研究和前沿探索，鼓励原创性研究。申请人须符合国家自然科学基金委员会规定的申请资格。",
+      template: "请按照国家自然科学基金委员会最新发布的申请书模板填写，注意遵循字数限制格式要求。",
+      materials: [
+        { id: "m1", name: "申请书", description: "模板自动挂接最新版" },
+        { id: "m2", name: "申请人简历", description: "在线生成" },
+        { id: "m3", name: "伦理审查证明", description: "需上传" },
+      ],
+      keyDates: [
+        { id: "d1", name: "校内截止", date: new Date("2025-03-10") },
+        { id: "d2", name: "形式审查", date: new Date("2025-03-15") },
+        { id: "d3", name: "提交基金委", date: new Date("2025-03-20") },
+      ],
+      requirements: [
+        { id: "r1", content: "限项说明：高级职称限2项（根据年度政策自动更新）" },
+        { id: "r2", content: "合作单位盖章：需提前10个工作日申请" },
+      ],
+      notes: "本批次申报将由科研处统一组织形式审查，请各申请人务必在校内截止日期前提交。",
+    },
+  },
+  {
+    id: "provincial-rd",
+    name: "省级重点研发计划申报",
+    title: "2025Q2浙江省重点研发计划",
+    icon: "🏢",
+    category: "省部级",
+    duration: "每季度首月1日-10日",
+    description: "省科技厅季度重点研发计划项目申报",
+    tags: ["人工智能", "生物医药", "新材料", "预评审", "限额推荐"],
+    details: {
+      cycle: "每季度首月1日-10日（例：Q2为4月1日-10日）",
+      fundingScope: ["人工智能：200-500万元", "生物医药：100-300万元", "新材料：150-400万元"],
+      materials: ["可行性报告（省科技厅模板）", "预算书（财务处预审）", "联合申报协议（自动生成范本）"],
+      processRules: ["校内预评审：季度首月5日前（可调整）", "限额推荐：每个学院限报3项", "公示要求：校内公示至少3天"],
+    },
+    defaultValues: {
+      name: "2025Q2浙江省重点研发计划",
+      description: "浙江省科技厅季度重点研发计划项目申报，重点支持人工智能、生物医药和新材料领域",
+      type: "省部级",
+      category: "工程技术",
+      startDate: new Date("2025-04-01"),
+      endDate: new Date("2025-04-10"),
+      amount: 800,
+      autoEnd: "yes",
+      canReview: "yes",
+      hasQuota: "yes",
+      guide:
+        "浙江省科技厅2025年第二季度重点研发计划项目申报指南。本季度重点支持人工智能、生物医药和新材���领域的应用研究和技术开发。",
+      template: "请按照省科技厅提供的可行性报告模板填写，重点阐述项目的创新性、可行性和预期成果。",
+      materials: [
+        { id: "m1", name: "可行性报告", description: "省科技厅模板" },
+        { id: "m2", name: "预算书", description: "财务处预审" },
+        { id: "m3", name: "联合申报协议", description: "自动生成范本" },
+      ],
+      keyDates: [
+        { id: "d1", name: "校内预评审", date: new Date("2025-04-05") },
+        { id: "d2", name: "校内公示", date: new Date("2025-04-07") },
+        { id: "d3", name: "提交省科技厅", date: new Date("2025-04-10") },
+      ],
+      requirements: [
+        { id: "r1", content: "限额推荐：每个学院限报3项" },
+        { id: "r2", content: "公示要求：校内公示至少3天" },
+      ],
+      notes: "本批次申报采用限额推荐方式，请各学院做好项目遴选工作。",
+    },
+  },
+  {
+    id: "university-youth",
+    name: "校级青年基金申报",
+    title: "2025年度XX大学青年科研启动基金",
+    icon: "🎓",
+    category: "校级",
+    duration: "每年9月1日-9月30日",
+    description: "面向青年教师的校级科研启动资金",
+    tags: ["青年教师", "启动资金", "新入职", "专家评审"],
+    details: {
+      cycle: "每年9月1日-9月30日",
+      fundingTarget: ["年龄≤35岁", "新入职3年内教师"],
+      fundingAmount: ["理工科：10-20万元", "文科：5-10万元"],
+      materials: ["研究计划书（校级模板）", "导师推荐信（仅限博士后）", "职称证明（人事处自动核验）"],
+      reviewProcess: ["形式审查：10月1-7日", "专家评审：10月8-20日", "结果公示：10月25日"],
+    },
+    defaultValues: {
+      name: "2025年度XX大学青年科研启动基金",
+      description: "面向青年教师的校级科研启动资金，支持新入职教师开展科研工作",
+      type: "校级",
+      category: "综合",
+      startDate: new Date("2025-09-01"),
+      endDate: new Date("2025-09-30"),
+      amount: 200,
+      autoEnd: "yes",
+      canReview: "no",
+      hasQuota: "no",
+      guide:
+        "XX大学2025年度青年科研启动基金申报指南。本基金面向年龄不超过35岁或新入职3年内的青年教师，旨在支持青年教师开展创新性科研工作。",
+      template: "请按照学校科研处提供的研究计划书模板填写，重点阐述研究思路、创新点和预期成果。",
+      materials: [
+        { id: "m1", name: "研究计划书", description: "校级模板" },
+        { id: "m2", name: "导师推荐信", description: "仅限博士后" },
+        { id: "m3", name: "职称证明", description: "人事处自动核验" },
+      ],
+      keyDates: [
+        { id: "d1", name: "形式审查", date: new Date("2025-10-07") },
+        { id: "d2", name: "专家评审", date: new Date("2025-10-20") },
+        { id: "d3", name: "结果公示", date: new Date("2025-10-25") },
+      ],
+      requirements: [
+        { id: "r1", content: "年龄≤35岁" },
+        { id: "r2", content: "新入职3年内教师" },
+      ],
+      notes: "本基金旨在支持青年教师开展创新性科研工作，优先支持新入职教师。",
+    },
+  },
+  {
+    id: "international",
+    name: "国际合作专项申报",
+    title: "2025年度中德联合研究计划",
+    icon: "🌏",
+    category: "国际合作",
+    duration: "指南发布后1周内",
+    description: "中德科技合作联合研究项目",
+    tags: ["国际合作", "双语申报", "伦理审查", "外方合作"],
+    details: {
+      trigger: '科技部发布"中德合作指南"后1周内',
+      fundingFocus: ["新能源技术", "高端装备制造"],
+      materials: ["中外双方案（中英文）", "德方合作意向书", "预算（欧元/人民币双版本）"],
+      specialReminders: ["校内截止：指南截止前20天（自动推算）", "伦理审查：涉及人体实验需提前2个月"],
+    },
+    defaultValues: {
+      name: "2025年度中德联合研究计划",
+      description: "中德科技合作联合研究项目，重点支持新能源技术和高端装备制造领域",
+      type: "国际合作",
+      category: "工程技术",
+      startDate: new Date("2025-05-01"),
+      endDate: new Date("2025-05-30"),
+      amount: 500,
+      autoEnd: "no",
+      canReview: "yes",
+      hasQuota: "no",
+      guide:
+        "科技部2025年度中德联合研究计划申报指南。本计划重点支持中德双方在新能源技术和高端装备制造领域的联合研究项目。",
+      template: "请按照科技部要求准备中英文双语申请材料，并确保德方合作伙伴同步提交德方申请。",
+      materials: [
+        { id: "m1", name: "中外双方案（中英文）", description: "双语版本" },
+        { id: "m2", name: "德方合作意向书", description: "需德方签章" },
+        { id: "m3", name: "预算（欧元/人民币双版本）", description: "按统一汇率换算" },
+      ],
+      keyDates: [
+        { id: "d1", name: "校内截止", date: new Date("2025-05-10") },
+        { id: "d2", name: "提交科技部", date: new Date("2025-05-30") },
+      ],
+      requirements: [
+        { id: "r1", content: "伦理审查：涉及人体实验需提前2个月" },
+        { id: "r2", content: "需提供外方合作证明材料" },
+      ],
+      notes: "本批次申报需中德双方同步提交申请，请确保与德方合作伙伴保持良好沟通。",
+    },
+  },
+]
+
+// 类型定义
+type Material = {
+  id: string
+  name: string
+  description: string
+}
+
+type KeyDate = {
+  id: string
+  name: string
+  date: Date
+}
+
+type Requirement = {
+  id: string
+  content: string
+}
+
+type FormData = {
+  name: string
+  description: string
+  type: string
+  category: string
+  startDate: Date
+  endDate: Date
+  amount: number
+  autoEnd: string
+  canReview: string
+  hasQuota: string
+  guide: string
+  template: string
+  materials: Material[]
+  keyDates: KeyDate[]
+  requirements: Requirement[]
+  notes: string
+}
+
+type Attachment = {
+  id: string
+  name: string
+  size: number
+  type: string
+}
+
+export default function CreateApplicationPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const templateId = searchParams.get("template")
+
+  // 默认表单数据
+  const defaultFormData: FormData = {
+    name: "",
+    description: "",
+    type: "",
+    category: "",
+    startDate: new Date(),
+    endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+    amount: 0,
+    autoEnd: "no",
+    canReview: "no",
+    hasQuota: "no",
+    guide: "",
+    template: "",
+    materials: [{ id: "default-1", name: "", description: "" }],
+    keyDates: [{ id: "default-1", name: "", date: new Date() }],
+    requirements: [{ id: "default-1", content: "" }],
+    notes: "",
+  }
+
+  // 初始化表单数据
+  const getInitialFormData = () => {
+    if (templateId) {
+      const template = templateData.find((t) => t.id === templateId)
+      if (template && template.defaultValues) {
+        return {
+          ...template.defaultValues,
+          startDate: new Date(template.defaultValues.startDate),
+          endDate: new Date(template.defaultValues.endDate),
+          keyDates: template.defaultValues.keyDates.map((date) => ({
+            ...date,
+            date: new Date(date.date),
+          })),
+        }
+      }
+    }
+    return defaultFormData
+  }
+
+  const [formData, setFormData] = useState<FormData>(getInitialFormData())
+  const [activeTab, setActiveTab] = useState("basic")
+  const [attachments, setAttachments] = useState<Attachment[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  // 加载模板数据
+  useEffect(() => {
+    if (templateId && !isLoaded) {
+      const template = templateData.find((t) => t.id === templateId)
+      if (template && template.defaultValues) {
+        const newFormData = {
+          ...template.defaultValues,
+          startDate: new Date(template.defaultValues.startDate),
+          endDate: new Date(template.defaultValues.endDate),
+          keyDates: template.defaultValues.keyDates.map((date) => ({
+            ...date,
+            date: new Date(date.date),
+          })),
+        }
+        setFormData(newFormData)
+        setIsLoaded(true)
+        console.log("已加载模板数据:", template.name)
+      }
+    }
+  }, [templateId, isLoaded])
+
+  // 处理函数
+  const handleAddMaterial = () => {
+    const newId = `material-${Date.now()}`
+    setFormData({
+      ...formData,
+      materials: [...formData.materials, { id: newId, name: "", description: "" }],
+    })
+  }
+
+  const handleRemoveMaterial = (id: string) => {
+    setFormData({
+      ...formData,
+      materials: formData.materials.filter((item) => item.id !== id),
+    })
+  }
+
+  const handleUpdateMaterial = (id: string, field: keyof Material, value: string) => {
+    setFormData({
+      ...formData,
+      materials: formData.materials.map((item) => (item.id === id ? { ...item, [field]: value } : item)),
+    })
+  }
+
+  const handleAddKeyDate = () => {
+    const newId = `date-${Date.now()}`
+    setFormData({
+      ...formData,
+      keyDates: [...formData.keyDates, { id: newId, name: "", date: new Date() }],
+    })
+  }
+
+  const handleRemoveKeyDate = (id: string) => {
+    setFormData({
+      ...formData,
+      keyDates: formData.keyDates.filter((item) => item.id !== id),
+    })
+  }
+
+  const handleUpdateKeyDate = (id: string, field: keyof KeyDate, value: any) => {
+    setFormData({
+      ...formData,
+      keyDates: formData.keyDates.map((item) => (item.id === id ? { ...item, [field]: value } : item)),
+    })
+  }
+
+  const handleAddRequirement = () => {
+    const newId = `req-${Date.now()}`
+    setFormData({
+      ...formData,
+      requirements: [...formData.requirements, { id: newId, content: "" }],
+    })
+  }
+
+  const handleRemoveRequirement = (id: string) => {
+    setFormData({
+      ...formData,
+      requirements: formData.requirements.filter((item) => item.id !== id),
+    })
+  }
+
+  const handleUpdateRequirement = (id: string, content: string) => {
+    setFormData({
+      ...formData,
+      requirements: formData.requirements.map((item) => (item.id === id ? { ...item, content } : item)),
+    })
+  }
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files) return
+
+    const newAttachments: Attachment[] = []
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      if (attachments.length + newAttachments.length >= 10) break
+
+      newAttachments.push({
+        id: `file-${Date.now()}-${i}`,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+      })
+    }
+
+    setAttachments([...attachments, ...newAttachments])
+  }
+
+  const handleRemoveAttachment = (id: string) => {
+    setAttachments(attachments.filter((item) => item.id !== id))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+
+    // 模拟提交
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    // 提交成功后返回列表页
+    router.push("/applications")
+  }
+
+  // 格式化文件大小
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
+
+  return (
+    <div className="container py-6 max-w-5xl">
+      {process.env.NODE_ENV === "development" && templateId && false && (
+        <div className="bg-muted p-2 mb-4 rounded text-sm">
+          <p>当前模板ID: {templateId}</p>
+          <p>模板名称: {templateData.find((t) => t.id === templateId)?.name || "未找到"}</p>
+          <p>表单名称: {formData.name || "未设置"}</p>
+        </div>
+      )}
+
+      <div className="flex items-center gap-2 mb-6">
+        <Button variant="ghost" size="icon" onClick={() => router.back()}>
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <h1 className="text-2xl font-bold">创建申报批次</h1>
+        {templateId && (
+          <Badge variant="outline" className="ml-2">
+            使用模板: {templateData.find((t) => t.id === templateId)?.name}
+          </Badge>
+        )}
+      </div>
+
+      <form onSubmit={handleSubmit}>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="basic">基本信息</TabsTrigger>
+            <TabsTrigger value="materials">申报材料</TabsTrigger>
+            <TabsTrigger value="dates">时间节点</TabsTrigger>
+            <TabsTrigger value="requirements">特殊要求</TabsTrigger>
+          </TabsList>
+
+          {/* 基本信息选项卡 */}
+          <TabsContent value="basic" className="space-y-6 mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>基本信息</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="name" className="flex items-center">
+                      申请计划名称 <span className="text-red-500 ml-1">*</span>
+                    </Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="请输入申请计划名称"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="startDate" className="flex items-center">
+                      申请开始日期 <span className="text-red-500 ml-1">*</span>
+                    </Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !formData.startDate && "text-muted-foreground",
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {formData.startDate ? format(formData.startDate, "PPP") : <span>选择日期</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={formData.startDate}
+                          onSelect={(date) => date && setFormData({ ...formData, startDate: date })}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="endDate" className="flex items-center">
+                      申请结束日期 <span className="text-red-500 ml-1">*</span>
+                    </Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !formData.endDate && "text-muted-foreground",
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {formData.endDate ? format(formData.endDate, "PPP") : <span>选择日期</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={formData.endDate}
+                          onSelect={(date) => date && setFormData({ ...formData, endDate: date })}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="flex items-center">到期自动结束</Label>
+                    <RadioGroup
+                      value={formData.autoEnd}
+                      onValueChange={(value) => setFormData({ ...formData, autoEnd: value })}
+                      className="flex space-x-4"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="yes" id="auto-end-yes" />
+                        <Label htmlFor="auto-end-yes">是</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="no" id="auto-end-no" />
+                        <Label htmlFor="auto-end-no">否</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="category" className="flex items-center">
+                      项目分类 <span className="text-red-500 ml-1">*</span>
+                    </Label>
+                    <Select
+                      value={formData.category}
+                      onValueChange={(value) => setFormData({ ...formData, category: value })}
+                      required
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="请选择项目分类" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="自然科学">自然科学</SelectItem>
+                        <SelectItem value="工程技术">工程技术</SelectItem>
+                        <SelectItem value="农业科学">农业科学</SelectItem>
+                        <SelectItem value="医药科学">医药科学</SelectItem>
+                        <SelectItem value="人文社科">人文社科</SelectItem>
+                        <SelectItem value="教育科学">教育科学</SelectItem>
+                        <SelectItem value="综合">综合</SelectItem>
+                        <SelectItem value="其他">其他</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="flex items-center">是否可转入评审</Label>
+                    <RadioGroup
+                      value={formData.canReview}
+                      onValueChange={(value) => setFormData({ ...formData, canReview: value })}
+                      className="flex space-x-4"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="yes" id="can-review-yes" />
+                        <Label htmlFor="can-review-yes">是</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="no" id="can-review-no" />
+                        <Label htmlFor="can-review-no">否</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="flex items-center">是否单位限额</Label>
+                    <RadioGroup
+                      value={formData.hasQuota}
+                      onValueChange={(value) => setFormData({ ...formData, hasQuota: value })}
+                      className="flex space-x-4"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="yes" id="has-quota-yes" />
+                        <Label htmlFor="has-quota-yes">是</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="no" id="has-quota-no" />
+                        <Label htmlFor="has-quota-no">否</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-2">
+                  <Label htmlFor="guide" className="flex items-center">
+                    申请指南 <span className="text-red-500 ml-1">*</span>
+                  </Label>
+                  <Textarea
+                    id="guide"
+                    value={formData.guide}
+                    onChange={(e) => setFormData({ ...formData, guide: e.target.value })}
+                    placeholder="请输入申请指南内容"
+                    rows={4}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="template">申请书模板</Label>
+                  <Textarea
+                    id="template"
+                    value={formData.template}
+                    onChange={(e) => setFormData({ ...formData, template: e.target.value })}
+                    placeholder="请输入申请书模板内容或上传模板文件"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="notes">备注</Label>
+                  <Textarea
+                    id="notes"
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    placeholder="请输入备注信息"
+                    rows={3}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* 申报材料选项卡 */}
+          <TabsContent value="materials" className="space-y-6 mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>附件上传</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                  <div className="flex flex-col items-center justify-center space-y-2">
+                    <Upload className="h-8 w-8 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">拖拽文件到此处或点击上传</p>
+                    <p className="text-xs text-muted-foreground">最多可上传10个附件，每个附件大小不超过20M</p>
+                    <Input
+                      type="file"
+                      className="hidden"
+                      id="file-upload"
+                      multiple
+                      onChange={handleFileUpload}
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => document.getElementById("file-upload")?.click()}
+                      disabled={attachments.length >= 10}
+                    >
+                      选择文件
+                    </Button>
+                  </div>
+                </div>
+
+                {attachments.length > 0 && (
+                  <div className="space-y-2 mt-4">
+                    <h3 className="text-sm font-medium">已上传文件 ({attachments.length}/10)</h3>
+                    <div className="space-y-2">
+                      {attachments.map((file) => (
+                        <div key={file.id} className="flex items-center justify-between p-2 border rounded-md">
+                          <div className="flex items-center space-x-2">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{file.name}</p>
+                              <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
+                            </div>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveAttachment(file.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>材料清单</CardTitle>
+                <Button type="button" variant="outline" size="sm" onClick={handleAddMaterial}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  添加材料
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {formData.materials.map((material) => (
+                  <div key={material.id} className="flex items-start space-x-3 p-3 border rounded-md">
+                    <div className="flex-1 space-y-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <Label htmlFor={`material-name-${material.id}`}>材料名称</Label>
+                          <Input
+                            id={`material-name-${material.id}`}
+                            value={material.name}
+                            onChange={(e) => handleUpdateMaterial(material.id, "name", e.target.value)}
+                            placeholder="例如：申请书"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor={`material-desc-${material.id}`}>材料说明</Label>
+                          <Input
+                            id={`material-desc-${material.id}`}
+                            value={material.description}
+                            onChange={(e) => handleUpdateMaterial(material.id, "description", e.target.value)}
+                            placeholder="例如：模板自动挂接最新版"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveMaterial(material.id)}
+                      disabled={formData.materials.length <= 1}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* 时间节点选项卡 */}
+          <TabsContent value="dates" className="space-y-6 mt-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>关键时间节点</CardTitle>
+                <Button type="button" variant="outline" size="sm" onClick={handleAddKeyDate}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  添加时间节点
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {formData.keyDates.map((keyDate) => (
+                  <div key={keyDate.id} className="flex items-start space-x-3 p-3 border rounded-md">
+                    <div className="flex-1 space-y-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <Label htmlFor={`keydate-name-${keyDate.id}`}>节点名称</Label>
+                          <Input
+                            id={`keydate-name-${keyDate.id}`}
+                            value={keyDate.name}
+                            onChange={(e) => handleUpdateKeyDate(keyDate.id, "name", e.target.value)}
+                            placeholder="例如：校内截止"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor={`keydate-date-${keyDate.id}`}>日期</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className={cn(
+                                  "w-full justify-start text-left font-normal",
+                                  !keyDate.date && "text-muted-foreground",
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {keyDate.date ? format(keyDate.date, "PPP") : <span>选择日期</span>}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                              <Calendar
+                                mode="single"
+                                selected={keyDate.date}
+                                onSelect={(date) => date && handleUpdateKeyDate(keyDate.id, "date", date)}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveKeyDate(keyDate.id)}
+                      disabled={formData.keyDates.length <= 1}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* 特殊要求选项卡 */}
+          <TabsContent value="requirements" className="space-y-6 mt-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>特殊要求</CardTitle>
+                <Button type="button" variant="outline" size="sm" onClick={handleAddRequirement}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  添加要求
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {formData.requirements.map((requirement) => (
+                  <div key={requirement.id} className="flex items-start space-x-3 p-3 border rounded-md">
+                    <div className="flex-1 space-y-1">
+                      <Label htmlFor={`requirement-${requirement.id}`}>要求内容</Label>
+                      <Textarea
+                        id={`requirement-${requirement.id}`}
+                        value={requirement.content}
+                        onChange={(e) => handleUpdateRequirement(requirement.id, e.target.value)}
+                        placeholder="例如：限项说明：高级职称限2项"
+                        rows={2}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveRequirement(requirement.id)}
+                      disabled={formData.requirements.length <= 1}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        <div className="flex justify-end gap-4 mt-8">
+          {process.env.NODE_ENV === "development" && false && (
+            <Button type="button" variant="outline" onClick={() => console.log("当前表单数据:", formData)}>
+              调试数据
+            </Button>
+          )}
+          <Button variant="outline" type="button" onClick={() => router.back()}>
+            取消
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "提交中..." : "提交"}
+          </Button>
+        </div>
+      </form>
+    </div>
+  )
+}
+

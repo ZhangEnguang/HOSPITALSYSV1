@@ -1,0 +1,9 @@
+export { default as DictSelect } from './DictSelect';
+export { default as DictText } from './DictText';
+export { default as DictTag } from './DictTag';
+export { default as DictCheckboxGroup } from './DictCheckboxGroup';
+export { default as DictProvider } from './DictProvider';
+export { default as DictTreeSelect } from './DictTreeSelect';
+export { default as DictRadioGroup } from './DictRadioGroup';
+export { default as Dict } from './Dict';
+export type { DictDisplayType, DictProps } from './Dict'; 

@@ -1,0 +1,148 @@
+"use client"
+
+import { cn } from "@/lib/utils"
+import { Check, AlertCircle } from "lucide-react"
+
+// 定义步骤类型
+export interface Step {
+  id: number
+  name: string
+  description?: string
+}
+
+// 定义步骤列表
+export const STEPS: Step[] = [
+  {
+    id: 0,
+    name: "基本信息",
+    description: "填写项目基本信息",
+  },
+  {
+    id: 1,
+    name: "结项详情",
+    description: "填写结项详细信息",
+  },
+  {
+    id: 2,
+    name: "成果信息",
+    description: "填写项目成果信息",
+  },
+  {
+    id: 3,
+    name: "验收信息",
+    description: "填写项目验收信息",
+  },
+  {
+    id: 4,
+    name: "完成",
+    description: "确认并提交",
+  },
+]
+
+interface StepNavigationProps {
+  currentStep: number
+  goToStep?: (step: number) => void
+  validationErrors?: Record<string, boolean>
+  completedSteps?: number[]
+}
+
+export function StepNavigation({
+  currentStep,
+  goToStep,
+  validationErrors = {},
+  completedSteps = [],
+}: StepNavigationProps) {
+  // 检查步骤是否有错误
+  const hasStepError = (step: number) => {
+    if (step === 0) {
+      return Object.keys(validationErrors).some(
+        (key) => ["projectName", "projectCode", "projectType", "projectManager", "department"].includes(key) && validationErrors[key],
+      )
+    }
+    if (step === 1) {
+      return Object.keys(validationErrors).some(
+        (key) => ["completionDate", "completionRate", "completionStatus", "completionDescription"].includes(key) && validationErrors[key],
+      )
+    }
+    if (step === 2) {
+      return Object.keys(validationErrors).some(
+        (key) => ["achievements"].includes(key) && validationErrors[key],
+      )
+    }
+    if (step === 3) {
+      return Object.keys(validationErrors).some(
+        (key) => ["acceptanceResult"].includes(key) && validationErrors[key],
+      )
+    }
+    return false
+  }
+
+  // 检查步骤是否已完成
+  const isStepCompleted = (step: number) => {
+    return completedSteps.includes(step)
+  }
+
+  // 处理步骤点击
+  const handleStepClick = (step: number) => {
+    if (goToStep && (step <= currentStep || isStepCompleted(step))) {
+      goToStep(step);
+    }
+  };
+
+  return (
+    <div className="w-full">
+      <div className="flex items-center justify-between">
+        {STEPS.map((step, index) => (
+          <div key={step.id} className="flex flex-col items-center relative w-full">
+            {/* 连接线 */}
+            {index < STEPS.length - 1 && (
+              <div
+                className={cn(
+                  "absolute top-4 left-1/2 w-full h-[2px]",
+                  currentStep > index ? "bg-primary" : isStepCompleted(index) ? "bg-primary" : "bg-muted-foreground/20",
+                )}
+              />
+            )}
+
+            {/* 步骤圆点 */}
+            <button
+              onClick={() => handleStepClick(index)}
+              disabled={currentStep < index && !isStepCompleted(index)}
+              className={cn(
+                "relative z-10 flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all",
+                currentStep === index
+                  ? "bg-primary border-primary text-primary-foreground"
+                  : currentStep > index || isStepCompleted(index)
+                    ? "bg-primary border-primary text-primary-foreground"
+                    : "bg-background border-muted-foreground/30 text-muted-foreground",
+                hasStepError(index) && "border-destructive bg-destructive/10",
+              )}
+            >
+              {hasStepError(index) ? (
+                <AlertCircle className="h-4 w-4 text-destructive" />
+              ) : currentStep > index || isStepCompleted(index) ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <span className="text-xs">{index + 1}</span>
+              )}
+            </button>
+
+            {/* 步骤名称 */}
+            <span
+              className={cn(
+                "mt-2 text-xs font-medium",
+                currentStep === index
+                  ? "text-primary"
+                  : currentStep > index || isStepCompleted(index)
+                    ? "text-primary"
+                    : "text-muted-foreground",
+              )}
+            >
+              {step.name}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}

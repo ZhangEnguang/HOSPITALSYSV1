@@ -1,0 +1,7 @@
+services:
+  kyalpha-frontend:
+    build: .
+    container_name: kyalpha-frontend
+    ports:
+      - "3200:3200"
+    restart: always

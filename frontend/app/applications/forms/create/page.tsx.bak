@@ -1,0 +1,302 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { ArrowLeft, ChevronLeft, ChevronRight, Save } from "lucide-react"
+import { toast } from "@/hooks/use-toast"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+
+import { StepNavigation } from "./components/step-navigation"
+import { CompletionNotice } from "./components/completion-notice"
+import {
+  BasicInfoStep,
+  ProjectDetailStep,
+  BudgetPlanStep,
+  AttachmentsStep
+} from "./form-steps"
+
+// 步骤定义
+export const STEPS = [
+  { id: 0, name: "基本信息", description: "填写申报基本信息" },
+  { id: 1, name: "项目详情", description: "填写项目具体信息" },
+  { id: 2, name: "经费预算", description: "填写经费预算计划" },
+  { id: 3, name: "附件上传", description: "上传相关材料附件" },
+]
+
+export default function CreateApplicationForm() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const batchId = searchParams.get('batchId')
+  
+  const [formData, setFormData] = useState<Record<string, any>>({})
+  const [currentStep, setCurrentStep] = useState(0)
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
+  const [completedSteps, setCompletedSteps] = useState<number[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isCompleted, setIsCompleted] = useState(false)
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false)
+  
+  // 处理输入变化
+  const handleInputChange = (field: string, value: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }))
+
+    // 清除该字段的验证错误
+    if (validationErrors[field]) {
+      setValidationErrors((prev) => {
+        const newErrors = { ...prev }
+        delete newErrors[field]
+        return newErrors
+      })
+    }
+  }
+
+  // 验证当前步骤
+  const validateCurrentStep = () => {
+    let errors: Record<string, string> = {}
+    
+    if (currentStep === 0) {
+      // 基本信息验证
+      if (!formData["项目名称"]) errors["项目名称"] = "项目名称不能为空"
+      if (!formData["负责人"]) errors["负责人"] = "请填写负责人信息"
+      if (!formData["所属单位"]) errors["所属单位"] = "请选择所属单位"
+    } else if (currentStep === 1) {
+      // 项目详情验证
+      if (!formData["研究背景"]) errors["研究背景"] = "请填写研究背景"
+      if (!formData["研究目标"]) errors["研究目标"] = "请填写研究目标"
+      if (!formData["研究内容"]) errors["研究内容"] = "请填写研究内容"
+      if (!formData["预期成果"]) errors["预期成果"] = "请填写预期成果"
+    } else if (currentStep === 2) {
+      // 经费预算验证
+      if (!formData["总预算"]) errors["总预算"] = "请填写总预算"
+      if (formData["总预算"] && isNaN(Number(formData["总预算"]))) {
+        errors["总预算"] = "总预算必须是数字"
+      }
+    }
+
+    setValidationErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  // 下一步
+  const handleNextStep = () => {
+    if (validateCurrentStep()) {
+      if (currentStep < STEPS.length - 1) {
+        // 记录完成的步骤
+        if (!completedSteps.includes(currentStep)) {
+          setCompletedSteps((prev) => [...prev, currentStep])
+        }
+        setCurrentStep((prev) => prev + 1)
+      }
+    }
+  }
+
+  // 上一步
+  const handlePrevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep((prev) => prev - 1)
+    }
+  }
+
+  // 跳转到特定步骤
+  const goToStep = (step: number) => {
+    // 只允许跳转到已完成的步骤或当前步骤
+    if (step <= currentStep || completedSteps.includes(step)) {
+      setCurrentStep(step)
+    }
+  }
+
+  // 处理表单提交
+  const handleSubmit = async () => {
+    // 保存当前步骤
+    const originalStep = currentStep
+    
+    // 验证所有步骤
+    let allValid = true
+    for (let step = 0; step < STEPS.length - 1; step++) {
+      setCurrentStep(step)
+      if (!validateCurrentStep()) {
+        allValid = false
+        break
+      }
+    }
+    
+    // 恢复到原来的步骤
+    setCurrentStep(originalStep)
+    
+    if (!allValid) {
+      toast({
+        title: "表单验证失败",
+        description: "请检查并修正表单中的错误",
+        variant: "destructive",
+      })
+      return
+    }
+    
+    try {
+      setIsSubmitting(true)
+      console.log("提交数据:", formData)
+      
+      // 模拟API调用
+      await new Promise(resolve => setTimeout(resolve, 1200))
+      
+      // 模拟成功响应
+      setIsCompleted(true)
+      setShowCompletionDialog(true)
+      
+    } catch (error) {
+      console.error("提交失败:", error)
+      toast({
+        title: "提交失败",
+        description: "请稍后重试",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // 返回列表页
+  const handleBackToList = () => {
+    router.push('/applications')
+  }
+  
+  // 渲染步骤内容
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <BasicInfoStep
+            formData={formData}
+            handleInputChange={handleInputChange}
+            validationErrors={validationErrors}
+          />
+        )
+      case 1:
+        return (
+          <ProjectDetailStep
+            formData={formData}
+            handleInputChange={handleInputChange}
+            validationErrors={validationErrors}
+          />
+        )
+      case 2:
+        return (
+          <BudgetPlanStep
+            formData={formData}
+            handleInputChange={handleInputChange}
+            validationErrors={validationErrors}
+          />
+        )
+      case 3:
+        return (
+          <AttachmentsStep
+            formData={formData}
+            handleInputChange={handleInputChange}
+            validationErrors={validationErrors}
+          />
+        )
+      default:
+        return null
+    }
+  }
+  
+  return (
+    <div className="container max-w-5xl py-8 space-y-8">
+      {/* 页面标题和返回按钮 */}
+      <div className="flex items-center justify-between">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleBackToList}
+          className="gap-1"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          返回
+        </Button>
+        <h1 className="text-2xl font-semibold">创建申报书</h1>
+        <div className="w-20"></div>
+      </div>
+
+      {/* 步骤条导航 */}
+      <StepNavigation
+        steps={STEPS}
+        currentStep={currentStep}
+        completedSteps={completedSteps}
+        onStepClick={goToStep}
+      />
+
+      {/* 表单主体 */}
+      <Card>
+        <CardContent className="p-6">
+          {/* 步骤标题 */}
+          <div className="mb-6">
+            <h2 className="text-xl font-medium">
+              {STEPS[currentStep].name}
+            </h2>
+            <p className="text-muted-foreground">
+              {STEPS[currentStep].description}
+            </p>
+          </div>
+
+          {/* 步骤内容 */}
+          {renderStepContent()}
+        </CardContent>
+
+        {/* 表单底部操作按钮 */}
+        <CardFooter className="flex justify-between border-t p-6 bg-muted/20">
+          <Button
+            variant="outline"
+            onClick={handlePrevStep}
+            disabled={currentStep === 0}
+          >
+            <ChevronLeft className="h-4 w-4 mr-2" />
+            上一步
+          </Button>
+          <div className="flex gap-2">
+            {currentStep < STEPS.length - 1 ? (
+              <Button onClick={handleNextStep}>
+                下一步
+                <ChevronRight className="h-4 w-4 ml-2" />
+              </Button>
+            ) : (
+              <Button onClick={handleSubmit} disabled={isSubmitting}>
+                {isSubmitting ? "提交中..." : "提交申报"}
+                <Save className="h-4 w-4 ml-2" />
+              </Button>
+            )}
+          </div>
+        </CardFooter>
+      </Card>
+
+      {/* 成功提交对话框 */}
+      <Dialog open={showCompletionDialog} onOpenChange={setShowCompletionDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>申报提交成功</DialogTitle>
+            <DialogDescription>
+              您的申报已成功提交，请等待审核
+            </DialogDescription>
+          </DialogHeader>
+          <CompletionNotice />
+          <DialogFooter className="flex justify-end space-x-2">
+            <Button variant="default" onClick={handleBackToList}>
+              返回申报列表
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+} 
