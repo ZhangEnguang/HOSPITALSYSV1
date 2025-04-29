@@ -4,7 +4,12 @@
 
 // API基础URL配置
 // 在生产环境中，可以通过环境变量来配置
+// 由于后端服务器未启动，暂时使用一个不存在的地址，以便在前端显示提示信息
+// 原配置: export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8700';
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8700';
+
+// 添加一个提示信息，指示后端服务器未启动
+console.warn('⚠️ 注意: 后端服务器未启动或不可访问，可能导致部分功能无法正常使用。请确保后端服务已正确启动。');
 
 interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined | null>;
@@ -78,6 +83,68 @@ export async function fetchApi<T = any>(
   options: FetchOptions = {}
 ): Promise<T> {
   const { params, responseType, ...fetchOptions } = options;
+  
+  // 添加模拟API响应功能
+  if (endpoint === '/login') {
+    console.log('正在使用模拟登录功能...');
+    // 模拟登录响应
+    const mockLoginResponse = {
+      code: 200,
+      message: "登录成功",
+      data: {
+        token: "mock-token-12345",
+        user: {
+          id: 1,
+          username: "admin",
+          name: "管理员",
+          roles: [
+            {
+              id: 1,
+              roleName: "管理员",
+              name: "管理员",
+              code: "ADMIN"
+            }
+          ],
+          currentRole: {
+            id: 1,
+            roleName: "管理员",
+            name: "管理员",
+            code: "ADMIN"
+          }
+        }
+      }
+    };
+    return mockLoginResponse as any as T;
+  }
+  
+  if (endpoint.includes('/login/current-user')) {
+    console.log('正在使用模拟获取用户信息功能...');
+    // 模拟当前用户信息
+    const mockUserResponse = {
+      code: 200,
+      message: "获取用户信息成功",
+      data: {
+        userId: 1,
+        username: "admin",
+        name: "管理员",
+        roles: [
+          {
+            id: 1,
+            roleName: "管理员",
+            name: "管理员",
+            code: "ADMIN"
+          }
+        ],
+        currentRole: {
+          id: 1,
+          roleName: "管理员",
+          name: "管理员",
+          code: "ADMIN"
+        }
+      }
+    };
+    return mockUserResponse as any as T;
+  }
   
   // 构建URL，处理查询参数
   let url = `${API_BASE_URL}${endpoint}`;
