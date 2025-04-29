@@ -26,6 +26,7 @@ import {
   BarChart2,
   MoreHorizontal,
   ChevronDown,
+  Microscope,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -124,6 +125,16 @@ export default function HorizontalMenu() {
         { name: "横向项目", path: "/projects?tab=horizontal" },
         { name: "校级项目", path: "/projects?tab=schoolLevel" },
         { name: "出账合同", path: "/projects?tab=disbursement" },
+      ]
+    },
+    { 
+      name: "伦理项目", 
+      shortName: "伦理",
+      icon: <Microscope className="h-5 w-5" />, 
+      path: "/ethic-projects",
+      subMenus: [
+        { name: "动物伦理", path: "/ethic-projects?tab=animal" },
+        { name: "人体伦理", path: "/ethic-projects?tab=human" },
       ]
     },
     { 

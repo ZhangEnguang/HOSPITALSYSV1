@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card"
 import DataListHeader from "./data-list-header"
 import DataListToolbar from "./data-list-toolbar"
 import DataListTable from "./data-list-table"
-import DataListCard from "./data-list-card"
+import DataListCard, { CardAction } from "./data-list-card"
 import DataListPagination from "./data-list-pagination"
 import DataListBatchActions from "./data-list-batch-actions"
 import { DataListAdvancedFilter } from "./data-list-advanced-filter"
@@ -113,6 +113,12 @@ interface DataListProps {
   }[]
   customTable?: () => React.ReactNode
   showColumnToggle?: boolean
+  customCardRenderer?: (
+    item: any, 
+    actions: CardAction[], 
+    isSelected: boolean, 
+    onToggleSelect: (selected: boolean) => void
+  ) => React.ReactNode
 }
 
 // export const filterCategories = [
@@ -304,6 +310,7 @@ export default function DataList({
   categories = [],
   customTable,
   showColumnToggle,
+  customCardRenderer,
 }: DataListProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">(defaultViewMode)
   const [showBatchActions, setShowBatchActions] = useState(false)
@@ -339,7 +346,71 @@ export default function DataList({
     console.log('Reset advanced filters')
   }
 
+  // Render card view
+  const renderCardView = () => {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {localData.length === 0 ? (
+          <div className="col-span-3 h-[300px] flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-muted-foreground">{noResultsText || "暂无数据"}</p>
+            </div>
+          </div>
+        ) : (
+          localData.map((item) => {
+            // 如果提供了customCardRenderer，则使用自定义卡片渲染函数
+            if (customCardRenderer) {
+              return (
+                <div key={item.id}>
+                  {customCardRenderer(
+                    item, 
+                    cardActions, 
+                    selectedRows.includes(item.id), 
+                    (selected: boolean) => {
+                      if (selected) {
+                        onSelectedRowsChange([...selectedRows, item.id]);
+                      } else {
+                        onSelectedRowsChange(selectedRows.filter((id) => id !== item.id));
+                      }
+                    }
+                  )}
+                </div>
+              );
+            }
 
+            // 使用标准卡片
+            return (
+              <DataListCard
+                key={item.id}
+                item={item}
+                actions={cardActions}
+                fields={cardFields}
+                titleField={titleField}
+                descriptionField={descriptionField}
+                statusField={statusField}
+                statusVariants={statusVariants}
+                getStatusName={getStatusName}
+                priorityField={priorityField}
+                progressField={progressField}
+                tasksField={tasksField}
+                teamSizeField={teamSizeField}
+                onClick={() => onItemClick && onItemClick(item)}
+                detailsUrl={detailsUrlPrefix ? `${detailsUrlPrefix}/${item.id}` : undefined}
+                selected={selectedRows.includes(item.id)}
+                onSelect={(selected) => {
+                  if (selected) {
+                    onSelectedRowsChange([...selectedRows, item.id])
+                  } else {
+                    onSelectedRowsChange(selectedRows.filter((id) => id !== item.id))
+                  }
+                }}
+              />
+            )
+          })
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -404,49 +475,7 @@ export default function DataList({
           </div>
         </div>
       ) : (
-        <div
-          className={cn(
-            "grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 3xl:grid-cols-4 gap-4",
-            showAdvancedFilter && "lg:col-span-2"
-          )}
-        >
-          {localData.length > 0 ? (
-            localData.map((item) => (
-              <DataListCard
-                key={item.id}
-                item={item}
-                fields={cardFields}
-                actions={cardActions}
-                titleField={titleField}
-                descriptionField={descriptionField}
-                statusField={statusField}
-                statusVariants={statusVariants}
-                getStatusName={getStatusName}
-                priorityField={priorityField}
-                progressField={progressField}
-                tasksField={tasksField}
-                teamSizeField={teamSizeField}
-                selected={selectedRows?.includes(item.id)}
-                onSelect={(selected) => {
-                  if (selected) {
-                    onSelectedRowsChange([...selectedRows, item.id])
-                  } else {
-                    onSelectedRowsChange(selectedRows.filter((id) => id !== item.id))
-                  }
-                }}
-                onClick={() => onItemClick(item)}
-              />
-            ))
-          ) : (
-            <div className="col-span-full">
-              <div className="h-24 flex items-center justify-center rounded-md">
-                <span className="text-gray-900 text-sm font-medium">
-                  {noResultsText || "暂无数据"}
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
+        renderCardView()
       )}
 
       <DataListPagination

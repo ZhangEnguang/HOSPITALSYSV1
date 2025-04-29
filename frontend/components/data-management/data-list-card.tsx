@@ -36,7 +36,7 @@ export interface CardField {
   className?: string
 }
 
-interface DataListCardProps {
+export interface DataListCardProps {
   item: any
   actions?: CardAction[]
   fields?: CardField[]
@@ -54,6 +54,7 @@ interface DataListCardProps {
   selected?: boolean
   onSelect?: (selected: boolean) => void
   onClick?: () => void
+  customCardRenderer?: (props: Omit<DataListCardProps, 'customCardRenderer'>) => React.ReactNode
 }
 
 export default function DataListCard({
@@ -74,7 +75,36 @@ export default function DataListCard({
   selected = false,
   onSelect,
   onClick,
+  customCardRenderer
 }: DataListCardProps) {
+  
+  // 如果提供了自定义渲染器并且返回了内容，则使用自定义卡片
+  if (customCardRenderer) {
+    const customCard = customCardRenderer({
+      item,
+      actions,
+      fields,
+      titleField,
+      descriptionField,
+      statusField,
+      statusVariants,
+      getStatusName,
+      priorityField,
+      progressField,
+      tasksField,
+      teamSizeField,
+      detailsUrl,
+      className,
+      selected,
+      onSelect,
+      onClick
+    });
+    
+    if (customCard) {
+      return customCard as React.ReactElement;
+    }
+  }
+
   const title = item[titleField]
   const description = descriptionField ? item[descriptionField] : undefined
   const status = statusField ? item[statusField] : undefined
