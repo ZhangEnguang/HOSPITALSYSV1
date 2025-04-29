@@ -455,16 +455,8 @@ export default function AnimalEthicProjectsPage() {
             {React.createElement(DataList as any, {
               title: "动物伦理",
               data: paginatedProjects,
-              onAddNew: () => {},
+              onAddNew: () => router.push("/ethic-projects/create/animal"),
               addButtonLabel: "新建项目",
-              addButtonDropdownItems: [
-                {
-                  label: "新建动物伦理",
-                  icon: <Microscope className="h-5 w-5 text-blue-500" />,
-                  onClick: () => router.push("/ethic-projects/create/animal"),
-                  showArrow: true,
-                },
-              ],
               onOpenSettings: () => setIsTemplatesDialogOpen(true),
               settingsButtonLabel: "模板库",
               onAIAssist: handleAIAssist,

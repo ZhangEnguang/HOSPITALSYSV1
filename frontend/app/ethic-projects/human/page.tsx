@@ -70,7 +70,7 @@ export default function HumanEthicProjectsPage() {
     try {
       // 这里先使用模拟数据，实际项目中应替换为真实API调用
       const filteredProjects = mockEthicProjects.filter(project => {
-        // 只显示人类伦理项目
+        // 只显示人体伦理项目
         if (project.type !== "人体伦理") return false;
         
         // 搜索条件
@@ -542,18 +542,10 @@ export default function HumanEthicProjectsPage() {
         <div>
           <ClientOnly>
             {React.createElement(DataList as any, {
-              title: "人类伦理", 
+              title: "人体伦理", 
               data: paginatedProjects,
-              onAddNew: () => {},
+              onAddNew: () => router.push("/ethic-projects/create/human"),
               addButtonLabel: "新建项目",
-              addButtonDropdownItems: [
-                {
-                  label: "新建人类伦理",
-                  icon: <User className="h-5 w-5 text-purple-500" />,
-                  onClick: () => router.push("/ethic-projects/create/human"),
-                  showArrow: true,
-                },
-              ],
               onOpenSettings: () => setIsTemplatesDialogOpen(true),
               settingsButtonLabel: "模板库",
               onAIAssist: handleAIAssist,

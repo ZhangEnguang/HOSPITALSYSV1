@@ -13,18 +13,15 @@ export default function EthicProjectsPage() {
     
     // 重定向到各自的页面
     if (tab === 'animal') {
-      router.push('/ethic-projects/animal')
+      router.replace('/ethic-projects/animal')
     } else if (tab === 'human') {
-      router.push('/ethic-projects/human')
+      router.replace('/ethic-projects/human')
+    } else {
+      // 默认重定向到动物伦理页面
+      router.replace('/ethic-projects/animal')
     }
   }, [router, searchParams])
   
-  return (
-    <div className="flex items-center justify-center h-[50vh]">
-      <div className="text-center">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-        <p className="mt-4 text-muted-foreground">正在跳转...</p>
-      </div>
-    </div>
-  )
+  // 返回null，不渲染任何内容，立即重定向
+  return null
 } 

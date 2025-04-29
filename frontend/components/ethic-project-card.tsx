@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -17,11 +17,36 @@ import {
   ClipboardList,
   PawPrint,
   Tag,
-  Bookmark
+  Bookmark,
+  Bell,
+  Calendar,
+  AlertTriangle
 } from "lucide-react";
 import { RatIcon, MouseIcon, RabbitIcon, MonkeyIcon } from "./animal-icons";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogOverlay
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export interface EthicCardAction {
   id: string;
@@ -72,6 +97,12 @@ const getAnimalIcon = (animalType: string) => {
     default:
       return <PawPrint className="h-4 w-4 text-blue-500 flex-shrink-0" />;
   }
+};
+
+// 修改Dialog组件的样式，使遮罩层更透明
+// 添加这个样式到您的全局CSS中（可以在组件中导入或在样式文件中定义）
+const dialogOverlayStyles = {
+  backgroundColor: "rgba(0, 0, 0, 0.4)" // 调整为更透明的黑色
 };
 
 export default function EthicProjectCard({
@@ -152,6 +183,64 @@ export default function EthicProjectCard({
   // 进行中和已完成的任务数量
   const inProgressCount = item.进行中 || Math.floor(Math.random() * 5) + 2;
   const completedCount = item.已完成 || Math.floor(Math.random() * 3) + 1;
+  
+  const [isCreateReviewOpen, setIsCreateReviewOpen] = useState(false);
+  const [reviewType, setReviewType] = useState("");
+  const [reviewMethod, setReviewMethod] = useState("");
+  const [urgencyLevel, setUrgencyLevel] = useState("normal");
+  const [estimatedDuration, setEstimatedDuration] = useState("");
+  const [reviewDescription, setReviewDescription] = useState("");
+  const [reviewFile, setReviewFile] = useState<File | null>(null);
+  const [notifyEmail, setNotifyEmail] = useState(false);
+  const [notifySMS, setNotifySMS] = useState(false);
+  
+  useEffect(() => {
+    if (reviewMethod && urgencyLevel) {
+      // 根据审查方式和紧急程度计算预计审查周期
+      let duration = "";
+      if (reviewMethod === "fast") {
+        duration = urgencyLevel === "normal" ? "3-5 天" : "2-3 天";
+      } else {
+        duration = urgencyLevel === "normal" ? "7-10 天" : "5-7 天";
+      }
+      setEstimatedDuration(duration);
+    }
+  }, [reviewMethod, urgencyLevel]);
+  
+  const getUrgencyBadge = () => {
+    switch (urgencyLevel) {
+      case "high":
+        return <Badge className="bg-orange-500 hover:bg-orange-600">紧急</Badge>;
+      case "urgent":
+        return <Badge className="bg-red-500 hover:bg-red-600">特急</Badge>;
+      default:
+        return null;
+    }
+  };
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setReviewFile(e.target.files[0]);
+    }
+  };
+  
+  const handleCloseReviewDialog = () => {
+    setIsCreateReviewOpen(false);
+    setReviewType("");
+    setReviewMethod("");
+    setUrgencyLevel("normal");
+    setEstimatedDuration("");
+    setReviewDescription("");
+    setReviewFile(null);
+    setNotifyEmail(false);
+    setNotifySMS(false);
+  };
+  
+  const handleSubmitReview = () => {
+    // 处理提交审查表单的逻辑
+    console.log("提交审查表单");
+    handleCloseReviewDialog();
+  };
   
   return (
     <motion.div
@@ -281,8 +370,7 @@ export default function EthicProjectCard({
             className="text-xs h-8 bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm rounded-md"
             onClick={(e) => {
               e.stopPropagation();
-              const editAction = actions.find(a => a.id === "edit");
-              if (editAction) editAction.onClick(item, e);
+              setIsCreateReviewOpen(true);
             }}
           >
             创建审查
@@ -290,6 +378,200 @@ export default function EthicProjectCard({
           </Button>
         </CardFooter>
       </Card>
+      
+      {/* 创建审查弹框 */}
+      <Dialog open={isCreateReviewOpen} onOpenChange={setIsCreateReviewOpen}>
+        <DialogContent className="sm:max-w-[800px]">
+          <DialogHeader>
+            <DialogTitle>创建审查</DialogTitle>
+            <DialogDescription>
+              为项目 "{title}" 创建新的审查申请
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            {/* 第一行：审查类型和审查方式 */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="reviewType">审查类型</Label>
+                <Select
+                  value={reviewType}
+                  onValueChange={setReviewType}
+                >
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="请选择审查类型" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="initial">初次审查</SelectItem>
+                    <SelectItem value="amendment">修订审查</SelectItem>
+                    <SelectItem value="continuation">延续审查</SelectItem>
+                    <SelectItem value="expedited">加急审查</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="reviewMethod">审查方式</Label>
+                <Select
+                  value={reviewMethod}
+                  onValueChange={setReviewMethod}
+                >
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="请选择审查方式" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fast">快速审查</SelectItem>
+                    <SelectItem value="meeting">会议审查</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            {/* 预计审查周期 */}
+            {estimatedDuration && (
+              <div className="rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 p-4 flex items-start gap-3 border border-blue-200 shadow-sm">
+                <div className="bg-white p-2 rounded-full shadow-sm">
+                  <Calendar className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-blue-800 flex items-center gap-2">
+                    预计审查周期
+                    {urgencyLevel !== "normal" && <span className="ml-1">{getUrgencyBadge()}</span>}
+                  </h4>
+                  <p className="text-sm text-blue-700 mt-1">
+                    {reviewMethod === "fast" ? "快速审查" : "会议审查"}：<span className="font-semibold">{estimatedDuration}</span>
+                  </p>
+                  <p className="text-xs text-blue-600/80 mt-1.5 italic">
+                    {urgencyLevel === "normal" 
+                      ? "常规审查流程，按标准时间处理" 
+                      : urgencyLevel === "high" 
+                        ? "紧急申请将优先安排审查" 
+                        : "特急申请将立即安排审查"}
+                  </p>
+                </div>
+              </div>
+            )}
+            
+            {/* 第二行：紧急程度和审查通知 */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>紧急程度</Label>
+                <RadioGroup
+                  value={urgencyLevel}
+                  onValueChange={setUrgencyLevel}
+                  className="flex space-x-4 mt-2"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="normal" id="normal" />
+                    <Label htmlFor="normal" className="cursor-pointer">常规</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="high" id="high" />
+                    <Label htmlFor="high" className="cursor-pointer text-orange-600 font-medium">紧急</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="urgent" id="urgent" />
+                    <Label htmlFor="urgent" className="cursor-pointer text-red-600 font-medium">特急</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              
+              <div>
+                <Label>审查通知</Label>
+                <div className="flex items-center space-x-4 mt-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="email-notify" 
+                      checked={notifyEmail} 
+                      onCheckedChange={(checked) => setNotifyEmail(checked as boolean)} 
+                    />
+                    <Label htmlFor="email-notify" className="cursor-pointer">接收邮件通知</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="sms-notify" 
+                      checked={notifySMS} 
+                      onCheckedChange={(checked) => setNotifySMS(checked as boolean)} 
+                    />
+                    <Label htmlFor="sms-notify" className="cursor-pointer">接收短信通知</Label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* 第三行：审查说明 */}
+            <div>
+              <Label htmlFor="reviewDescription">审查说明</Label>
+              <Textarea
+                id="reviewDescription"
+                value={reviewDescription}
+                onChange={(e) => setReviewDescription(e.target.value)}
+                placeholder="请输入审查说明..."
+                className="mt-2"
+                rows={4}
+              />
+            </div>
+            
+            {/* 说明附件 */}
+            <div>
+              <Label htmlFor="reviewFile">说明附件</Label>
+              <div className="mt-2 border-2 border-dashed border-gray-300 rounded-lg p-4 transition-all hover:border-blue-400 bg-gray-50/50">
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <FileText className="h-8 w-8 text-blue-500" />
+                  <div className="text-sm text-center">
+                    <p className="font-medium text-gray-700">点击或拖拽文件到此区域</p>
+                    <p className="text-gray-500 text-xs mt-1">支持PDF、Word、Excel等格式文件</p>
+                  </div>
+                  <Input
+                    id="reviewFile"
+                    type="file"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-2"
+                    onClick={() => document.getElementById('reviewFile')?.click()}
+                  >
+                    选择文件
+                  </Button>
+                </div>
+                {reviewFile && (
+                  <div className="mt-3 p-2 bg-blue-50 rounded-md flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-blue-500" />
+                    <span className="text-sm font-medium text-blue-700 truncate">{reviewFile.name}</span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="ml-auto h-6 w-6 p-0" 
+                      onClick={() => setReviewFile(null)}
+                    >
+                      <AlertTriangle className="h-4 w-4 text-gray-500" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCloseReviewDialog} className="border-gray-300 hover:bg-gray-50">
+              取消
+            </Button>
+            <Button
+              onClick={handleSubmitReview}
+              disabled={!reviewType || !reviewMethod}
+              className={cn(
+                "bg-blue-600 hover:bg-blue-700 text-white",
+                (!reviewType || !reviewMethod) && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              开始创建
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 } 

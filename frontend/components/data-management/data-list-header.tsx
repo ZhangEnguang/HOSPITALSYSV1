@@ -145,7 +145,7 @@ export default function DataListHeader({
 
         {addButtonLabel && (
           <>
-            {addButtonDropdownItems ? (
+            {addButtonDropdownItems && addButtonDropdownItems.length > 0 ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button className="gap-1">
@@ -179,6 +179,11 @@ export default function DataListHeader({
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
+            ) : onAddNew ? (
+              <Button className="gap-2" onClick={onAddNew}>
+                <Plus className="h-4 w-4" />
+                {addButtonLabel}
+              </Button>
             ) : onCreateProject ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -202,102 +207,6 @@ export default function DataListHeader({
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-            ) : onAddNew ? (
-              <Button
-                className="gap-2"
-                onClick={() => {
-                  // 使用统一的导航逻辑
-                  // 检查是否在特定页面上
-                  if (
-                    (title === "成果管理" || title === "经费管理" || title === "进度管理") &&
-                    tabs &&
-                    tabs.length > 0 &&
-                    activeTab
-                  ) {
-                    // 阻止事件冒泡，确保只有这一个处理函数被执行
-                    // event.stopPropagation();
-                    
-                    // 确定基础路径
-                    let basePath = "";
-                    if (title === "成果管理") basePath = "/achievements";
-                    else if (title === "经费管理") basePath = "/funds";
-                    else if (title === "进度管理") basePath = "/progress";
-                    
-                    // 构建完整路径
-                    let path = "";
-                    
-                    // 经费管理特殊情况
-                    if (title === "经费管理") {
-                      if (activeTab === "income") {
-                        path = `${basePath}/create/income`;
-                      } else if (activeTab === "outbound") {
-                        path = `${basePath}/create/outbound`;
-                      } else if (activeTab === "reimbursement") {
-                        path = `${basePath}/create/reimbursement`;
-                      } else if (activeTab === "carryover") {
-                        path = `${basePath}/create/carryover`;
-                      }
-                    }
-                    // 进度管理特殊情况
-                    else if (title === "进度管理") {
-                      if (activeTab === "projectChange") {
-                        path = `${basePath}/create/projectChange`;
-                      } else if (activeTab === "contractRecognition") {
-                        path = `${basePath}/create/contractRecognition`;
-                      } else if (activeTab === "projectInspection") {
-                        path = `${basePath}/create/projectInspection`;
-                      } else if (activeTab === "projectCompletion") {
-                        path = `${basePath}/create/projectCompletion`;
-                      }
-                    }
-                    // 成果管理特殊情况
-                    else if (title === "成果管理") {
-                      if (activeTab === "academic-papers") {
-                        path = `${basePath}/create/academic-papers`;
-                      } else if (activeTab === "academic-works") {
-                        path = `${basePath}/create/academic-works`;
-                      } else if (activeTab === "evaluated-achievements") {
-                        path = `${basePath}/create/evaluated-achievements`;
-                      } else if (activeTab === "achievement-awards") {
-                        path = `${basePath}/create/achievement-awards`;
-                      } else if (activeTab === "patents") {
-                        path = `${basePath}/create/patents`;
-                      }
-                    }
-                    
-                    // 如果没有匹配到特殊情况，使用通用路径
-                    if (!path) {
-                      path = `${basePath}/create/${activeTab}`;
-                    }
-                    
-                    // 使用 window.location.href 进行页面跳转
-                    // 这比 router.push 更直接，避免了客户端路由的复杂性
-                    console.log("正在跳转到:", path);
-                    window.location.href = path;
-                  } else {
-                    // 对于其他页面（包括成员管理），使用原始处理程序
-                    if (onAddNew) {
-                      onAddNew();
-                    }
-                  }
-                }}
-              >
-                <Plus className="h-4 w-4" />
-                {(title === "成果管理" || title === "经费管理" || title === "进度管理") &&
-                  tabs &&
-                  tabs.length > 0 &&
-                  activeTab
-                  ? (title === "经费管理" && activeTab === "income") 
-                    ? "新建经费入账"
-                    : (title === "经费管理" && activeTab === "outbound")
-                    ? "新建经费外拨"
-                    : (title === "经费管理" && activeTab === "reimbursement")
-                    ? "新建经费报销"
-                    : (title === "经费管理" && activeTab === "carryover")
-                    ? "新建经费结转"
-                    : `新增${tabs.find((tab) => tab.id === activeTab)?.label.replace(/\s*($$\d+$$)/, "") || addButtonLabel}`
-                  : addButtonLabel}
-              </Button>
             ) : null}
           </>
         )}
