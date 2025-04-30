@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -20,7 +20,10 @@ import {
   Bookmark,
   Bell,
   Calendar,
-  AlertTriangle
+  AlertTriangle,
+  ChevronDown,
+  Search,
+  X
 } from "lucide-react";
 import { RatIcon, MouseIcon, RabbitIcon, MonkeyIcon } from "./animal-icons";
 import { cn } from "@/lib/utils";
@@ -105,6 +108,281 @@ const dialogOverlayStyles = {
   backgroundColor: "rgba(0, 0, 0, 0.4)" // 调整为更透明的黑色
 };
 
+// 优化的审查类型选择组件
+interface ReviewTypeSelectProps {
+  value: string;
+  onValueChange: (value: string) => void;
+}
+
+interface ReviewTypeGroup {
+  id: string;
+  label: string;
+  items: { id: string; label: string }[];
+}
+
+const ReviewTypeSelect: React.FC<ReviewTypeSelectProps> = ({ value, onValueChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
+    "tracking": true,
+    "human_genetic": false,
+    "human_genetic_filing": false
+  });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchFocused, setSearchFocused] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const reviewTypes: ReviewTypeGroup[] = [
+    {
+      id: "initial",
+      label: "初始审查",
+      items: []
+    },
+    {
+      id: "tracking",
+      label: "跟踪审查",
+      items: [
+        { id: "amendment", label: "修正案审查" },
+        { id: "annual", label: "年度/定期审查" },
+        { id: "safety", label: "安全性审查" },
+        { id: "deviation", label: "偏离方案审查" },
+        { id: "suspension", label: "暂停/终止研究审查" },
+        { id: "completion", label: "研究完成审查" }
+      ]
+    },
+    {
+      id: "human_genetic",
+      label: "人遗审查",
+      items: [
+        { id: "collection", label: "人遗采集审批" },
+        { id: "preservation", label: "人遗保藏审批" },
+        { id: "international_research", label: "国际合作科学研究审批" },
+        { id: "export", label: "材料出境审批" }
+      ]
+    },
+    {
+      id: "human_genetic_filing",
+      label: "人遗备案",
+      items: [
+        { id: "international_clinical", label: "国际合作临床试验备案" },
+        { id: "external_use", label: "对外提供或开放使用备案" },
+        { id: "important_resource", label: "重要遗传家系和特定地区人遗资源" }
+      ]
+    }
+  ];
+
+  // 获取当前选中项的标签
+  const getSelectedLabel = () => {
+    // 检查是否是主选项
+    const mainType = reviewTypes.find(type => type.id === value);
+    if (mainType && mainType.items.length === 0) {
+      return mainType.label;
+    }
+    
+    // 检查子选项
+    for (const group of reviewTypes) {
+      const item = group.items.find(item => item.id === value);
+      if (item) {
+        return item.label;
+      }
+    }
+    
+    return "请选择审查类型";
+  };
+
+  // 过滤选项
+  const getFilteredOptions = () => {
+    if (!searchQuery) return reviewTypes;
+    
+    return reviewTypes.map(group => {
+      // 过滤子项
+      const filteredItems = group.items.filter(item => 
+        item.label.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      
+      // 如果组标题匹配或有匹配的子项，返回组
+      if (group.label.toLowerCase().includes(searchQuery.toLowerCase()) || filteredItems.length > 0) {
+        return {
+          ...group,
+          items: filteredItems
+        };
+      }
+      
+      // 返回空项目数组表示无匹配
+      return {
+        ...group,
+        items: []
+      };
+    }).filter(group => 
+      // 保留有匹配子项的组或标题匹配的组
+      group.label.toLowerCase().includes(searchQuery.toLowerCase()) || group.items.length > 0
+    );
+  };
+
+  // 切换分组展开状态
+  const toggleGroup = (groupId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedGroups(prev => ({
+      ...prev,
+      [groupId]: !prev[groupId]
+    }));
+  };
+
+  // 选择选项
+  const handleSelect = (id: string) => {
+    onValueChange(id);
+    setIsOpen(false);
+    setSearchQuery("");
+  };
+
+  // 点击外部关闭下拉框
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
+  // 打开下拉框时聚焦搜索框
+  useEffect(() => {
+    if (isOpen && searchInputRef.current) {
+      // 移除默认自动聚焦，让用户主动点击搜索框
+      // setTimeout(() => {
+      //   searchInputRef.current?.focus();
+      // }, 10);
+    }
+  }, [isOpen]);
+
+  // 清除搜索
+  const clearSearch = () => {
+    setSearchQuery("");
+    searchInputRef.current?.focus();
+  };
+
+  const filteredOptions = getFilteredOptions();
+
+  return (
+    <div className="relative mt-2" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-between w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-blue-400 disabled:cursor-not-allowed disabled:opacity-50 transition-all"
+      >
+        <span className={value ? "text-gray-900 font-medium" : "text-gray-500"}>
+          {getSelectedLabel()}
+        </span>
+        <ChevronDown className="h-4 w-4 opacity-50" />
+      </button>
+      
+      {isOpen && (
+        <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg animate-in fade-in-0 zoom-in-95 duration-100">
+          {/* 搜索框 */}
+          <div className="p-2 border-b border-gray-100">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="搜索审查类型..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setSearchFocused(false)}
+                className={cn(
+                  "w-full pl-9 pr-8 py-2 text-sm rounded-md transition-all duration-150",
+                  "border border-gray-200 outline-none",
+                  searchFocused 
+                    ? "ring-1 ring-blue-400 border-blue-400" 
+                    : "ring-0 hover:border-gray-300"
+                )}
+              />
+              {searchQuery && (
+                <button 
+                  className="absolute right-2.5 top-2.5 text-gray-400 hover:text-gray-600"
+                  onClick={clearSearch}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          </div>
+          
+          {/* 选项列表 */}
+          <div className="py-1 max-h-[280px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+            {filteredOptions.length === 0 ? (
+              <div className="px-3 py-2 text-sm text-gray-500 text-center">
+                未找到匹配的审查类型
+              </div>
+            ) : (
+              filteredOptions.map(group => (
+                <div key={group.id} className="mb-1">
+                  {group.items.length === 0 ? (
+                    // 没有子项的选项直接显示
+                    <div
+                      className={cn(
+                        "px-3 py-2 text-sm cursor-pointer hover:bg-blue-50/60 transition-colors",
+                        value === group.id && "bg-blue-50 text-blue-600 font-medium"
+                      )}
+                      onClick={() => handleSelect(group.id)}
+                    >
+                      {group.label}
+                    </div>
+                  ) : (
+                    // 有子项的选项显示为可展开的组
+                    <>
+                      <div
+                        className={cn(
+                          "px-3 py-2 text-sm cursor-pointer hover:bg-gray-50 flex items-center justify-between font-medium text-gray-700 transition-colors",
+                          searchQuery ? "text-blue-700" : ""
+                        )}
+                        onClick={(e) => toggleGroup(group.id, e)}
+                      >
+                        <span>{group.label}</span>
+                        <ChevronDown
+                          className={cn(
+                            "h-4 w-4 transition-transform duration-200",
+                            expandedGroups[group.id] && "transform rotate-180"
+                          )}
+                        />
+                      </div>
+                      {(expandedGroups[group.id] || searchQuery) && group.items.length > 0 && (
+                        <div className="border-l-2 border-blue-100 ml-3 my-1">
+                          {group.items.map(item => (
+                            <div
+                              key={item.id}
+                              className={cn(
+                                "pl-4 pr-3 py-1.5 text-sm cursor-pointer hover:bg-blue-50/60 flex items-center transition-colors",
+                                value === item.id && "bg-blue-50 text-blue-600 font-medium"
+                              )}
+                              onClick={() => handleSelect(item.id)}
+                            >
+                              <div className="w-1.5 h-1.5 rounded-full bg-blue-200 mr-2"></div>
+                              {item.label}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function EthicProjectCard({
   item,
   actions = [],
@@ -142,13 +420,13 @@ export default function EthicProjectCard({
   // 根据项目名称判断，设置合适的动物种类和数量
   let animalType = "";
   let animalCount = "";
-  let ethicsCommittee = item.伦理委员会 || item.ethicsCommittee || "医学院伦理审查委员会";
+  let projectEthicsCommittee = item.伦理委员会 || item.ethicsCommittee || "医学院伦理审查委员会";
   let facilityUnit = item.动物实施设备单位 || item.facilityUnit || "基础医学实验中心";
   
   // 人体伦理项目相关字段
   let projectType = item.项目类型 || item.projectType || "临床研究";
   let projectSource = item.项目来源 || item.projectSource || "院内立项";
-  let humanFacilityUnit = item.实施单位 || item.facilityUnit || "内科学系";
+  let humanFacilityUnit = item.研究单位 || item.facilityUnit || "内科学系";
   
   // 处理动物类型和数量
   if (type === "animal") {
@@ -187,36 +465,9 @@ export default function EthicProjectCard({
   const [isCreateReviewOpen, setIsCreateReviewOpen] = useState(false);
   const [reviewType, setReviewType] = useState("");
   const [reviewMethod, setReviewMethod] = useState("");
-  const [urgencyLevel, setUrgencyLevel] = useState("normal");
-  const [estimatedDuration, setEstimatedDuration] = useState("");
   const [reviewDescription, setReviewDescription] = useState("");
   const [reviewFile, setReviewFile] = useState<File | null>(null);
-  const [notifyEmail, setNotifyEmail] = useState(false);
-  const [notifySMS, setNotifySMS] = useState(false);
-  
-  useEffect(() => {
-    if (reviewMethod && urgencyLevel) {
-      // 根据审查方式和紧急程度计算预计审查周期
-      let duration = "";
-      if (reviewMethod === "fast") {
-        duration = urgencyLevel === "normal" ? "3-5 天" : "2-3 天";
-      } else {
-        duration = urgencyLevel === "normal" ? "7-10 天" : "5-7 天";
-      }
-      setEstimatedDuration(duration);
-    }
-  }, [reviewMethod, urgencyLevel]);
-  
-  const getUrgencyBadge = () => {
-    switch (urgencyLevel) {
-      case "high":
-        return <Badge className="bg-orange-500 hover:bg-orange-600">紧急</Badge>;
-      case "urgent":
-        return <Badge className="bg-red-500 hover:bg-red-600">特急</Badge>;
-      default:
-        return null;
-    }
-  };
+  const [ethicsCommittee, setEthicsCommittee] = useState(projectEthicsCommittee);
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -228,12 +479,9 @@ export default function EthicProjectCard({
     setIsCreateReviewOpen(false);
     setReviewType("");
     setReviewMethod("");
-    setUrgencyLevel("normal");
-    setEstimatedDuration("");
     setReviewDescription("");
     setReviewFile(null);
-    setNotifyEmail(false);
-    setNotifySMS(false);
+    setEthicsCommittee(projectEthicsCommittee);
   };
   
   const handleSubmitReview = () => {
@@ -258,7 +506,7 @@ export default function EthicProjectCard({
         )}
         onClick={handleClick}
       >
-        <CardHeader className={cn("p-4", getHeaderBgColor())}>
+        <CardHeader className={cn("px-6 py-4", getHeaderBgColor())}>
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
@@ -298,7 +546,7 @@ export default function EthicProjectCard({
             </div>
           </div>
         </CardHeader>
-        <CardContent className="px-4 py-3 pt-0">
+        <CardContent className="px-6 py-3 pt-0">
           <div className="grid gap-3">
             <div className="grid grid-cols-1 gap-2">
               {type === "animal" ? (
@@ -317,7 +565,7 @@ export default function EthicProjectCard({
                   <div className="flex items-center gap-2 text-sm whitespace-nowrap">
                     <Building2 className="h-4 w-4 text-blue-500 flex-shrink-0" />
                     <span className="text-gray-600 flex-shrink-0">伦理委员会:</span>
-                    <span className="font-medium truncate">{ethicsCommittee}</span>
+                    <span className="font-medium truncate">{projectEthicsCommittee}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm whitespace-nowrap">
                     <BriefcaseMedical className="h-4 w-4 text-blue-500 flex-shrink-0" />
@@ -341,11 +589,11 @@ export default function EthicProjectCard({
                   <div className="flex items-center gap-2 text-sm whitespace-nowrap">
                     <Building2 className="h-4 w-4 text-blue-500 flex-shrink-0" />
                     <span className="text-gray-600 flex-shrink-0">伦理委员会:</span>
-                    <span className="font-medium truncate">{ethicsCommittee}</span>
+                    <span className="font-medium truncate">{projectEthicsCommittee}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm whitespace-nowrap">
                     <BriefcaseMedical className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                    <span className="text-gray-600 flex-shrink-0">实施单位:</span>
+                    <span className="text-gray-600 flex-shrink-0">研究单位:</span>
                     <span className="font-medium truncate">{humanFacilityUnit}</span>
                   </div>
                 </>
@@ -363,11 +611,11 @@ export default function EthicProjectCard({
             </div>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-end p-4 pt-2 gap-2 bg-gray-50/60">
+        <CardFooter className="flex justify-end px-6 py-4 pt-2 gap-2 bg-gray-50/60">
           <Button 
             variant="default" 
             size="sm" 
-            className="text-xs h-8 bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm rounded-md"
+            className="text-sm h-8 bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm rounded-md"
             onClick={(e) => {
               e.stopPropagation();
               setIsCreateReviewOpen(true);
@@ -394,20 +642,7 @@ export default function EthicProjectCard({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="reviewType">审查类型</Label>
-                <Select
-                  value={reviewType}
-                  onValueChange={setReviewType}
-                >
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="请选择审查类型" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="initial">初次审查</SelectItem>
-                    <SelectItem value="amendment">修订审查</SelectItem>
-                    <SelectItem value="continuation">延续审查</SelectItem>
-                    <SelectItem value="expedited">加急审查</SelectItem>
-                  </SelectContent>
-                </Select>
+                <ReviewTypeSelect value={reviewType} onValueChange={setReviewType} />
               </div>
               
               <div>
@@ -427,79 +662,27 @@ export default function EthicProjectCard({
               </div>
             </div>
             
-            {/* 预计审查周期 */}
-            {estimatedDuration && (
-              <div className="rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 p-4 flex items-start gap-3 border border-blue-200 shadow-sm">
-                <div className="bg-white p-2 rounded-full shadow-sm">
-                  <Calendar className="h-5 w-5 text-blue-600 flex-shrink-0" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-blue-800 flex items-center gap-2">
-                    预计审查周期
-                    {urgencyLevel !== "normal" && <span className="ml-1">{getUrgencyBadge()}</span>}
-                  </h4>
-                  <p className="text-sm text-blue-700 mt-1">
-                    {reviewMethod === "fast" ? "快速审查" : "会议审查"}：<span className="font-semibold">{estimatedDuration}</span>
-                  </p>
-                  <p className="text-xs text-blue-600/80 mt-1.5 italic">
-                    {urgencyLevel === "normal" 
-                      ? "常规审查流程，按标准时间处理" 
-                      : urgencyLevel === "high" 
-                        ? "紧急申请将优先安排审查" 
-                        : "特急申请将立即安排审查"}
-                  </p>
-                </div>
-              </div>
-            )}
-            
-            {/* 第二行：紧急程度和审查通知 */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>紧急程度</Label>
-                <RadioGroup
-                  value={urgencyLevel}
-                  onValueChange={setUrgencyLevel}
-                  className="flex space-x-4 mt-2"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="normal" id="normal" />
-                    <Label htmlFor="normal" className="cursor-pointer">常规</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="high" id="high" />
-                    <Label htmlFor="high" className="cursor-pointer text-orange-600 font-medium">紧急</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="urgent" id="urgent" />
-                    <Label htmlFor="urgent" className="cursor-pointer text-red-600 font-medium">特急</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-              
-              <div>
-                <Label>审查通知</Label>
-                <div className="flex items-center space-x-4 mt-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="email-notify" 
-                      checked={notifyEmail} 
-                      onCheckedChange={(checked) => setNotifyEmail(checked as boolean)} 
-                    />
-                    <Label htmlFor="email-notify" className="cursor-pointer">接收邮件通知</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="sms-notify" 
-                      checked={notifySMS} 
-                      onCheckedChange={(checked) => setNotifySMS(checked as boolean)} 
-                    />
-                    <Label htmlFor="sms-notify" className="cursor-pointer">接收短信通知</Label>
-                  </div>
-                </div>
-              </div>
+            {/* 伦理委员会 */}
+            <div>
+              <Label htmlFor="ethicsCommittee">伦理委员会</Label>
+              <Select
+                value={ethicsCommittee}
+                onValueChange={(value) => setEthicsCommittee(value)}
+              >
+                <SelectTrigger className="mt-2">
+                  <SelectValue placeholder="请选择伦理委员会" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="北京医学伦理委员会">北京医学伦理委员会</SelectItem>
+                  <SelectItem value="医学院伦理审查委员会">医学院伦理审查委员会</SelectItem>
+                  <SelectItem value="临床医学伦理委员会">临床医学伦理委员会</SelectItem>
+                  <SelectItem value="公共卫生伦理委员会">公共卫生伦理委员会</SelectItem>
+                  <SelectItem value="神经科学伦理委员会">神经科学伦理委员会</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             
-            {/* 第三行：审查说明 */}
+            {/* 第二行：审查说明 */}
             <div>
               <Label htmlFor="reviewDescription">审查说明</Label>
               <Textarea
@@ -512,7 +695,7 @@ export default function EthicProjectCard({
               />
             </div>
             
-            {/* 说明附件 */}
+            {/* 第三行：说明附件 */}
             <div>
               <Label htmlFor="reviewFile">说明附件</Label>
               <div className="mt-2 border-2 border-dashed border-gray-300 rounded-lg p-4 transition-all hover:border-blue-400 bg-gray-50/50">

@@ -1,383 +1,215 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Tabs, TabsContent } from "@/components/ui/tabs"
-import ClientOnly from "@/components/client-only"
-import DataList from "@/components/data-management/data-list"
-import { Eye, Pencil, Trash2, FileText, Microscope } from "lucide-react"
-import { mockEthicProjects } from "../data/ethic-project-data"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { toast } from "@/components/ui/use-toast"
-import { CustomCardWrapper } from "../components"
+import { Building2, BriefcaseMedical, Database, FileText, MousePointer2 } from "lucide-react"
 
+import DataList from "@/components/data-management/data-list"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
+import ClientOnly from "@/components/client-only"
+import CustomCardWrapper from "@/components/ethic-project-card"
+import { adaptedStatusColors } from "@/app/ethic-projects/config/status-colors"
+import { useLoading } from "@/hooks/use-loading"
+import { useToast } from "@/components/ui/use-toast"
+
+// 动物伦理项目页面组件
 export default function AnimalEthicProjectsPage() {
   const router = useRouter()
-  const [projects, setProjects] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
-  const [totalItems, setTotalItems] = useState(0)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [filterValues, setFilterValues] = useState<Record<string, any>>({})
-  const [seniorFilterValues, setSeniorFilterValues] = useState<Record<string, any>>({})
-  const [sortOption, setSortOption] = useState("name_asc")
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(12)
-  const [selectedRows, setSelectedRows] = useState<string[]>([])
+  const { toast } = useToast()
+  const { isLoading, startLoading, stopLoading } = useLoading()
+  
+  // 模板对话框状态
   const [isTemplatesDialogOpen, setIsTemplatesDialogOpen] = useState(false)
-  const [projectToDelete, setProjectToDelete] = useState<any>(null)
-  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
-    projectNumber: true,
-    name: true,
-    type: false,
-    status: true,
-    auditStatus: true,
-    leader: true,
-    progress: true,
-    budget: true,
-    dates: true,
-    members: true,
-  })
-
-  // 加载项目数据
-  const fetchProjects = async () => {
-    setLoading(true)
-    
-    try {
-      // 这里先使用模拟数据，实际项目中应替换为真实API调用
-      const filteredProjects = mockEthicProjects.filter(project => {
-        // 只显示动物伦理项目
-        if (project.type !== "动物伦理") return false;
-        
-        // 搜索条件
-        if (searchTerm && 
-            !project.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            !project.projectNumber.toLowerCase().includes(searchTerm.toLowerCase())) {
-          return false;
-        }
-        
-        // 普通筛选条件
-        for (const key in filterValues) {
-          if (filterValues[key] && filterValues[key] !== 'all' && project[key] !== filterValues[key]) {
-            return false;
-          }
-        }
-        
-        // 高级筛选条件
-        for (const key in seniorFilterValues) {
-          if (seniorFilterValues[key] && seniorFilterValues[key] !== 'all' && project[key] !== seniorFilterValues[key]) {
-            return false;
-          }
-        }
-        
-        return true;
-      });
-      
-      // 分页
-      const start = (currentPage - 1) * pageSize;
-      const paginatedProjects = filteredProjects.slice(start, start + pageSize);
-      
-      setProjects(paginatedProjects);
-      setTotalItems(filteredProjects.length);
-    } catch (error) {
-      console.error("获取伦理项目数据失败:", error)
-      toast({
-        title: "获取数据失败",
-        description: "无法获取伦理项目数据，请稍后再试",
-        variant: "destructive",
-      })
-      setProjects([])
-      setTotalItems(0)
-    } finally {
-      setLoading(false)
+  
+  // 删除确认对话框状态
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [currentDeleteId, setCurrentDeleteId] = useState("")
+  
+  // 项目数据
+  const [projects, setProjects] = useState<any[]>([
+    {
+      id: "1",
+      name: "转基因小鼠模型对阿尔茨海默病的研究",
+      description: "利用转基因小鼠模型研究新型抗阿尔茨海默病脑部病理改变的临床疗效效果",
+      status: "进行中",
+      progress: 65,
+      type: "动物伦理",
+      tasks: { completed: 2, total: 5 },
+      animalType: "小鼠",
+      animalCount: "120",
+      leader: "张教授",
+      department: "神经科学系",
+      createdAt: "2023-10-15"
+    },
+    {
+      id: "2",
+      name: "狗肾脏器官移植研究动物伦理评价",
+      description: "研究大型哺乳动物器官移植手术方案及术后护理标准，评估动物伦理合规性",
+      status: "进行中",
+      progress: 45,
+      type: "动物伦理",
+      tasks: { completed: 3, total: 8 },
+      animalType: "犬类",
+      animalCount: "15",
+      leader: "李主任",
+      department: "器官移植研究中心",
+      createdAt: "2023-09-20"
+    },
+    {
+      id: "3",
+      name: "猪心脏移植术后神经系统变化研究",
+      description: "研究猪心脏脏移植术后神经系统变化规律，分析相关生理发症机制",
+      status: "进行中",
+      progress: 30,
+      type: "动物伦理",
+      tasks: { completed: 1, total: 4 },
+      animalType: "猪",
+      animalCount: "8",
+      leader: "王研究员",
+      department: "心血管研究所",
+      createdAt: "2023-11-05"
+    },
+    {
+      id: "4",
+      name: "犬眼科药物治疗方案动物伦理评价",
+      description: "研究大型哺乳动物眼科新药治疗方案，制定动物伦理标准并制定保障措施",
+      status: "已完成",
+      progress: 100,
+      type: "动物伦理",
+      tasks: { completed: 5, total: 5 },
+      animalType: "犬类", 
+      animalCount: "25",
+      leader: "刘研究员",
+      department: "药理学教研室",
+      createdAt: "2023-08-10"
+    },
+    {
+      id: "5",
+      name: "兔耳神经损伤修复实验方案伦理审查",
+      description: "研究兔耳神经损伤修复的实验方案，制定相关伦理标准并动物福利保障",
+      status: "规划中",
+      progress: 10,
+      type: "动物伦理",
+      tasks: { completed: 0, total: 3 },
+      animalType: "兔子",
+      animalCount: "30",
+      leader: "孙博士",
+      department: "神经外科研究所",
+      createdAt: "2023-12-01"
+    },
+    {
+      id: "6",
+      name: "啮齿类动物神经影像学实验标准制定",
+      description: "研究啮齿类动物神经影像学实验的标准流程，评估伦理风险与动物福利",
+      status: "已完成",
+      progress: 100,
+      type: "动物伦理",
+      tasks: { completed: 7, total: 7 },
+      animalType: "大鼠",
+      animalCount: "245",
+      leader: "陈教授",
+      department: "影像医学中心",
+      createdAt: "2023-07-15"
     }
-  }
-
-  // 初始加载和依赖项变化时获取数据
-  useEffect(() => {
-    fetchProjects()
-  }, [searchTerm, filterValues, seniorFilterValues, currentPage, pageSize, sortOption])
-
+  ])
+  
+  // 分页数据
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [totalItems, setTotalItems] = useState(6)
+  
+  // 搜索和过滤
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({})
+  const [sortOption, setSortOption] = useState<string>("latest")
+  
+  // 视图模式
+  const [viewMode, setViewMode] = useState<"card" | "table">("card")
+  
+  // 表格列可见性
+  const [visibleColumns, setVisibleColumns] = useState<string[]>([
+    "name", "status", "animalType", "animalCount", "leader", "department", "createdAt"
+  ])
+  
   // 处理搜索
   const handleSearch = () => {
-    setCurrentPage(1)
-    fetchProjects()
+    console.log("搜索:", searchTerm)
+    // 这里添加搜索逻辑
   }
-
-  // 筛选、排序和删除处理函数
-  const handleDeleteProject = (project: any) => {
-    setProjectToDelete(project)
+  
+  // 处理AI辅助
+  const handleAIAssist = () => {
+    // 显示模态框或跳转到AI辅助页面
+    toast({
+      title: "AI伦理助手启动中",
+      description: "正在为您分析伦理项目数据并提供建议..."
+    })
   }
-
-  const confirmDeleteProject = async () => {
-    if (!projectToDelete) return
-
-    try {
-      // 模拟删除操作，实际项目中应替换为真实API调用
-      setProjects(prevProjects => prevProjects.filter(p => p.id !== projectToDelete.id))
-      setTotalItems(prev => prev - 1)
+  
+  // 处理删除项目
+  const handleDeleteProject = (id: string) => {
+    setCurrentDeleteId(id)
+    setDeleteConfirmOpen(true)
+  }
+  
+  // 确认删除项目
+  const confirmDelete = () => {
+    startLoading()
+    
+    // 模拟删除操作
+    setTimeout(() => {
+      setProjects(prev => prev.filter(project => project.id !== currentDeleteId))
+      setDeleteConfirmOpen(false)
+      stopLoading()
       
       toast({
         title: "删除成功",
-        description: "伦理项目已成功删除",
+        description: "已成功删除该动物伦理项目"
       })
-    } catch (error) {
-      console.error("删除伦理项目失败:", error)
-      toast({
-        title: "删除失败",
-        description: "无法删除伦理项目，请稍后再试",
-        variant: "destructive",
-      })
-    } finally {
-      setProjectToDelete(null)
-    }
+    }, 500)
   }
-
-  // 批量操作函数
-  const handleBatchDelete = async () => {
-    try {
-      // 模拟批量删除，实际项目中应替换为真实API调用
-      setProjects(prevProjects => prevProjects.filter(p => !selectedRows.includes(p.id)))
-      setTotalItems(prev => prev - selectedRows.length)
-      
-      toast({
-        title: "批量删除成功",
-        description: `已删除 ${selectedRows.length} 个伦理项目`,
-      })
-      setSelectedRows([])
-    } catch (error) {
-      console.error("批量删除失败:", error)
-      toast({
-        title: "批量删除失败",
-        description: "操作未能完成，请稍后再试",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const handleBatchApprove = () => {
-    toast({
-      title: "批量审批",
-      description: `已选择 ${selectedRows.length} 个伦理项目进行审批`,
-    })
-  }
-
-  // 获取分页数据
-  const paginatedProjects = projects.slice(0, pageSize)
-
-  // 表格列配置
-  const tableColumns = [
-    {
-      id: "projectNumber",
-      header: "项目编号",
-      accessorKey: "projectNumber",
-      cell: (row: any) => row.projectNumber,
-    },
-    {
-      id: "name",
-      header: "项目名称",
-      accessorKey: "name",
-      cell: (row: any) => <span className="font-medium">{row.name}</span>,
-    },
-    {
-      id: "status",
-      header: "项目状态",
-      accessorKey: "status",
-      cell: (row: any) => row.status,
-    },
-    {
-      id: "auditStatus",
-      header: "审核状态",
-      accessorKey: "auditStatus",
-      cell: (row: any) => row.auditStatus,
-    },
-    {
-      id: "leader",
-      header: "负责人",
-      accessorKey: "leader.name",
-      cell: (row: any) => row.leader?.name || "-",
-    },
-    {
-      id: "dates",
-      header: "项目周期",
-      accessorKey: "startDate",
-      cell: (row: any) => `${row.startDate} ~ ${row.endDate}`,
-    },
-    {
-      id: "budget",
-      header: "预算金额",
-      accessorKey: "budget",
-      cell: (row: any) => `¥${row.budget.toLocaleString()}`,
-    },
-  ]
-
-  // 卡片字段配置
-  const cardFields = [
-    {
-      id: "projectNumber",
-      label: "项目编号",
-      value: (row: any) => row.projectNumber,
-    },
-    {
-      id: "type",
-      label: "项目类型",
-      value: (row: any) => row.type,
-    },
-    {
-      id: "status",
-      label: "项目状态",
-      value: (row: any) => row.status,
-    },
-    {
-      id: "leader",
-      label: "负责人",
-      value: (row: any) => row.leader?.name,
-    },
-    {
-      id: "budget",
-      label: "预算金额",
-      value: (row: any) => `¥${row.budget.toLocaleString()}`,
-    },
-  ]
-
-  // 快速筛选配置
+  
+  // 分页项目数据
+  const paginatedProjects = projects
+  
+  // 快速筛选选项
   const quickFilters = [
     {
       id: "status",
-      label: "项目状态",
+      label: "全部项目状态",
       options: [
         { label: "全部", value: "all" },
         { label: "进行中", value: "进行中" },
         { label: "规划中", value: "规划中" },
         { label: "已完成", value: "已完成" },
-      ],
+        { label: "已暂停", value: "已暂停" }
+      ]
     },
     {
-      id: "auditStatus",
-      label: "审核状态",
+      id: "animalType",
+      label: "全部动物种类",
       options: [
         { label: "全部", value: "all" },
-        { label: "待审核", value: "待审核" },
-        { label: "审核中", value: "审核中" },
-        { label: "审核通过", value: "审核通过" },
-        { label: "审核退回", value: "审核退回" },
-      ],
-    },
+        { label: "小鼠", value: "小鼠" },
+        { label: "大鼠", value: "大鼠" },
+        { label: "兔子", value: "兔子" },
+        { label: "犬类", value: "犬类" },
+        { label: "猪", value: "猪" },
+        { label: "猴", value: "猴" }
+      ]
+    }
   ]
-
+  
   // 排序选项
   const sortOptions = [
-    { label: "项目名称 (升序)", value: "name_asc" },
-    { label: "项目名称 (降序)", value: "name_desc" },
-    { label: "创建日期 (新→旧)", value: "createTime_desc" },
-    { label: "创建日期 (旧→新)", value: "createTime_asc" },
-    { label: "预算金额 (高→低)", value: "budget_desc" },
-    { label: "预算金额 (低→高)", value: "budget_asc" },
+    { label: "最新创建", value: "latest" },
+    { label: "最早创建", value: "oldest" },
+    { label: "名称 A-Z", value: "nameAsc" },
+    { label: "名称 Z-A", value: "nameDesc" },
+    { label: "进度最高", value: "progressDesc" },
+    { label: "进度最低", value: "progressAsc" }
   ]
-
-  // 批量操作配置
-  const batchActions = [
-    {
-      id: "approve",
-      label: "批量审批",
-      onClick: handleBatchApprove,
-    },
-    {
-      id: "delete",
-      label: "批量删除",
-      onClick: handleBatchDelete,
-      type: "destructive",
-    },
-  ]
-
-  // 配置批量操作
-  const configuredBatchActions = [
-    {
-      ...batchActions[0],
-      onClick: handleBatchApprove,
-    },
-    {
-      ...batchActions[1],
-      onClick: handleBatchDelete,
-    },
-  ]
-
-  // AI辅助函数
-  const handleAIAssist = () => {
-    router.push("/ethic-projects/ai-form")
-  }
-
-  // 自定义卡片操作
-  const customCardActions = [
-    {
-      id: "view",
-      label: "查看详情",
-      icon: <Eye className="h-4 w-4" />,
-      onClick: (item: any) => {
-        router.push(`/ethic-projects/${item.id}`)
-      },
-    },
-    {
-      id: "edit",
-      label: "编辑项目",
-      icon: <Pencil className="h-4 w-4" />,
-      onClick: (item: any) => {
-        router.push(`/ethic-projects/edit/animal/${item.id}`);
-      },
-      disabled: (item: any) => item.status === "已完成",
-    },
-    {
-      id: "delete",
-      label: "删除项目",
-      icon: <Trash2 className="h-4 w-4" />,
-      onClick: handleDeleteProject,
-      variant: "destructive",
-    },
-  ]
-
-  // 自定义表格操作
-  const customTableActions = [
-    {
-      id: "view",
-      label: "查看详情",
-      icon: <Eye className="h-4 w-4" />,
-      onClick: (item: any) => router.push(`/ethic-projects/${item.id}`),
-    },
-    {
-      id: "edit",
-      label: "编辑项目",
-      icon: <Pencil className="h-4 w-4" />,
-      onClick: (item: any) => {
-        router.push(`/ethic-projects/edit/animal/${item.id}`);
-      },
-      disabled: (item: any) => item.status === "已完成",
-    },
-    {
-      id: "delete",
-      label: "删除项目",
-      icon: <Trash2 className="h-4 w-4" />,
-      onClick: handleDeleteProject,
-      variant: "destructive",
-    },
-  ];
-
-  // 状态颜色映射
-  const statusColors = {
-    "进行中": "yellow",
-    "规划中": "blue",
-    "已完成": "green",
-    "审核通过": "green",
-    "审核中": "yellow",
-    "待审核": "blue",
-    "审核退回": "red",
-  }
-
-  // 适配状态颜色
-  const adaptedStatusColors = Object.fromEntries(
-    Object.entries(statusColors).map(([key, value]) => [key, value])
-  )
-
+  
   // 高级筛选分类
   const filterCategories = [
     {
@@ -436,27 +268,157 @@ export default function AnimalEthicProjectsPage() {
           ],
         },
       ],
+    }
+  ]
+  
+  // 表格列配置
+  const tableColumns = [
+    {
+      id: "name",
+      label: "项目名称",
+      renderCell: (item: any) => (
+        <div className="flex flex-col">
+          <span className="text-sm font-medium">{item.name}</span>
+          {item.description && (
+            <span className="text-xs text-muted-foreground truncate max-w-xs">
+              {item.description}
+            </span>
+          )}
+        </div>
+      ),
+    },
+    {
+      id: "status",
+      label: "状态",
+      renderCell: (item: any) => (
+        <div className={`px-2.5 py-0.5 rounded-full text-xs font-medium inline-block ${
+          adaptedStatusColors[item.status] || "bg-gray-100 text-gray-800"
+        }`}>
+          {item.status}
+        </div>
+      ),
+    },
+    {
+      id: "animalType",
+      label: "动物种类",
+      renderCell: (item: any) => (
+        <div className="flex items-center">
+          <MousePointer2 className="h-4 w-4 text-blue-500 mr-2" />
+          <span>{item.animalType}</span>
+        </div>
+      ),
+    },
+    {
+      id: "animalCount",
+      label: "动物数量",
+      renderCell: (item: any) => (
+        <div className="flex items-center">
+          <Database className="h-4 w-4 text-blue-500 mr-2" />
+          <span>{item.animalCount}只</span>
+        </div>
+      ),
+    },
+    {
+      id: "leader",
+      label: "负责人",
+      renderCell: (item: any) => item.leader,
+    },
+    {
+      id: "department",
+      label: "所属部门",
+      renderCell: (item: any) => (
+        <div className="flex items-center">
+          <Building2 className="h-4 w-4 text-blue-500 mr-2" />
+          <span>{item.department}</span>
+        </div>
+      ),
+    },
+    {
+      id: "createdAt",
+      label: "创建时间",
+      renderCell: (item: any) => item.createdAt,
+    },
+  ]
+  
+  // 表格行操作
+  const customTableActions = [
+    {
+      label: "查看详情",
+      onClick: (item: any) => router.push(`/ethic-projects/${item.id}`),
+    },
+    {
+      label: "创建审查",
+      onClick: (item: any) => router.push(`/ethic-projects/${item.id}/review/new`),
+    },
+    {
+      label: "删除",
+      onClick: (item: any) => handleDeleteProject(item.id),
+      className: "text-red-600 hover:text-red-800",
+    },
+  ]
+  
+  // 卡片字段配置
+  const cardFields = [
+    {
+      id: "animalType",
+      label: "动物种类",
+      icon: <MousePointer2 className="h-4 w-4 text-blue-500" />,
+      displayValue: (item: any) => item.animalType,
+    },
+    {
+      id: "animalCount",
+      label: "动物数量",
+      icon: <FileText className="h-4 w-4 text-blue-500" />,
+      displayValue: (item: any) => `${item.animalCount}只`,
+    },
+    {
+      id: "department",
+      label: "所属部门",
+      icon: <Building2 className="h-4 w-4 text-blue-500" />,
+      displayValue: (item: any) => item.department,
+    },
+    {
+      id: "facilityUnit",
+      label: "实施单位",
+      icon: <BriefcaseMedical className="h-4 w-4 text-blue-500" />,
+      displayValue: (item: any) => "基础医学实验中心",
+    },
+  ]
+  
+  // 卡片操作
+  const customCardActions = [
+    {
+      label: "查看详情",
+      onClick: (item: any) => router.push(`/ethic-projects/${item.id}`),
+    },
+    {
+      label: "创建审查",
+      onClick: (item: any) => router.push(`/ethic-projects/${item.id}/review/new`),
+    },
+    {
+      label: "删除",
+      onClick: (item: any) => handleDeleteProject(item.id),
+      className: "text-red-600 hover:text-red-800",
     },
   ]
 
-  // 渲染页面
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-4" style={{ background: "#F5F7FA", minHeight: "100%" }}>
         <div
           className="absolute top-0 left-0 right-0 h-[300px] -z-10"
           style={{
-            background: "linear-gradient(180deg, rgba(39, 112, 255, 0.10) 0%, rgba(244, 246, 255, 0.00) 100%)",
+            background: "linear-gradient(180deg, rgba(142, 45, 226, 0.10) 0%, rgba(244, 246, 255, 0.00) 100%)",
           }}
         ></div>
 
         <div>
           <ClientOnly>
             {React.createElement(DataList as any, {
-              title: "动物伦理",
+              title: "动物伦理", 
               data: paginatedProjects,
               onAddNew: () => router.push("/ethic-projects/create/animal"),
-              addButtonLabel: "新建项目",
+              addButtonLabel: "新建动物伦理",
               onOpenSettings: () => setIsTemplatesDialogOpen(true),
               settingsButtonLabel: "模板库",
               onAIAssist: handleAIAssist,
@@ -490,34 +452,33 @@ export default function AnimalEthicProjectsPage() {
               descriptionField: "description",
               statusField: "status",
               statusVariants: adaptedStatusColors,
-              priorityField: "priority",
               progressField: "progress",
               tasksField: { completed: "tasks.completed", total: "tasks.total" },
-              teamSizeField: "members",
-              pageSize: pageSize,
-              currentPage: currentPage,
-              totalItems: totalItems,
-              onPageChange: setCurrentPage,
-              onPageSizeChange: setPageSize,
-              selectedRows: selectedRows,
-              onSelectedRowsChange: setSelectedRows,
-              batchActions: configuredBatchActions,
-              onItemClick: (item: any) => router.push(`/ethic-projects/${item.id}`),
-              detailsUrlPrefix: "/ethic-projects",
-              categories: filterCategories,
-              seniorFilterValues: seniorFilterValues,
-              onAdvancedFilter: (filterValues: Record<string, any>) => {
-                setSeniorFilterValues(prev => ({
-                  ...prev,
-                  ...filterValues
-                }));
-                setCurrentPage(1);
+              pagination: {
+                currentPage: currentPage,
+                pageSize: pageSize,
+                totalItems: totalItems,
+                onPageChange: setCurrentPage,
+                onPageSizeChange: setPageSize
               },
+              advancedFilters: {
+                categories: filterCategories,
+                onApply: () => {
+                  console.log("应用高级筛选")
+                  setCurrentPage(1)
+                }
+              },
+              emptyState: {
+                title: "暂无动物伦理项目",
+                description: "您可以创建新的动物伦理项目或从模板库中选择",
+                icon: <FileText className="h-10 w-10 text-muted-foreground" />,
+              },
+              type: "animal",
               customCardRenderer: (item, actions, isSelected, onToggleSelect) => {
                 // 创建包含动物种系、动物数量等数据的项目对象
                 const extendedItem = {
                   ...item,
-                  动物种系: item.type === "动物伦理" ? "大鼠" : "小鼠",
+                  动物种系: item.animalType || "大鼠",
                   动物数量: item.animalCount || "245只",
                   伦理委员会: "医学院伦理审查委员会",
                   动物实施设备单位: "基础医学实验中心",
@@ -541,6 +502,7 @@ export default function AnimalEthicProjectsPage() {
                     selected={isSelected}
                     onSelect={onToggleSelect}
                     onClick={() => router.push(`/ethic-projects/${item.id}`)}
+                    type="animal"
                   />
                 );
               }
@@ -550,22 +512,46 @@ export default function AnimalEthicProjectsPage() {
       </div>
 
       {/* 删除确认对话框 */}
-      <Dialog open={!!projectToDelete} onOpenChange={(open) => !open && setProjectToDelete(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>确认删除</DialogTitle>
-            <DialogDescription>
-              您确定要删除项目 "{projectToDelete?.name}" 吗？此操作不可撤销。
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setProjectToDelete(null)}>
-              取消
-            </Button>
-            <Button variant="destructive" onClick={confirmDeleteProject}>
-              删除
-            </Button>
-          </DialogFooter>
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <div className="p-6 space-y-6">
+            <h3 className="text-lg font-medium">确认删除</h3>
+            <p className="text-sm text-gray-500">
+              您确定要删除此动物伦理项目吗？此操作无法撤销。
+            </p>
+            <div className="flex justify-end space-x-2">
+              <button
+                className="px-4 py-2 border rounded-md"
+                onClick={() => setDeleteConfirmOpen(false)}
+              >
+                取消
+              </button>
+              <button
+                className="px-4 py-2 bg-red-600 text-white rounded-md"
+                onClick={confirmDelete}
+                disabled={isLoading}
+              >
+                {isLoading ? "删除中..." : "确认删除"}
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 模板库对话框 */}
+      <Dialog open={isTemplatesDialogOpen} onOpenChange={setIsTemplatesDialogOpen}>
+        <DialogContent className="sm:max-w-[900px]">
+          <div className="p-6">
+            <h2 className="text-lg font-medium mb-4">动物伦理模板库</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="border rounded-lg p-4 hover:border-primary cursor-pointer">
+                  <h3 className="font-medium">模板 {i}: 标准动物实验伦理申请</h3>
+                  <p className="text-sm text-gray-500 mt-2">适用于常规动物实验研究的伦理审批流程</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
