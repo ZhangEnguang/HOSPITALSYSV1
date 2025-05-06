@@ -212,24 +212,6 @@ export default function DataListCard({
               </React.Fragment>
             ))}
           </div>
-
-          {progress !== undefined && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">项目进度</span>
-                <span className="font-medium">{progress}%</span>
-              </div>
-              <Progress value={progress} className="h-2 [&>div]:progress-gradient" />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                {tasksField && (
-                  <span>
-                    已完成任务: {item[tasksField.completed]}/{item[tasksField.total]}
-                  </span>
-                )}
-                {/* {teamSizeField && <span>团队成员: {item[teamSizeField]} 人</span>} */}
-              </div>
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>

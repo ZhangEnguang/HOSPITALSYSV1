@@ -76,7 +76,6 @@ interface EthicProjectCardProps {
   descriptionField?: string;
   statusField?: string;
   statusVariants?: Record<string, string>;
-  progressField?: string;
   tasksField?: { completed: string; total: string };
   type: "animal" | "human";
   detailsUrl?: string;
@@ -519,7 +518,6 @@ export default function EthicProjectCard({
   descriptionField,
   statusField,
   statusVariants = {},
-  progressField,
   tasksField,
   type,
   detailsUrl,
@@ -736,16 +734,6 @@ export default function EthicProjectCard({
                   </div>
                 </>
               )}
-            </div>
-
-            <div className="mt-1">
-              <div className="flex items-center gap-2 text-sm">
-                <ClipboardList className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                <span className="text-gray-600">进行中:</span>
-                <span className="font-medium text-blue-600">{inProgressCount}</span>
-                <span className="text-gray-600 ml-4">已完成:</span>
-                <span className="font-medium text-green-600">{completedCount}</span>
-              </div>
             </div>
           </div>
         </CardContent>

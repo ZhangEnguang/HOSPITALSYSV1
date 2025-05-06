@@ -262,40 +262,6 @@ export const quickFilters = [
 // 定义卡片字段
 export const cardFields = [
   {
-    id: "projectId",
-    label: "项目编号",
-    value: (item: any) => item.projectId || "-",
-  },
-  {
-    id: "reviewType",
-    label: "审查类型",
-    value: (item: any) => item.reviewType || "-",
-  },
-  {
-    id: "projectType",
-    label: "项目类型",
-    value: (item: any) => item.projectType || "-",
-  },
-  {
-    id: "status",
-    label: "状态",
-    value: (item: any) => (
-      <Badge variant="outline" className={cn("px-2 py-0.5 border", statusVariants[item.status || ""]?.color || "")}>
-        {item.status || "-"}
-      </Badge>
-    ),
-  },
-  {
-    id: "department",
-    label: "所属院系",
-    value: (item: any) => item.department || "-",
-  },
-  {
-    id: "ethicsCommittee",
-    label: "伦理委员会",
-    value: (item: any) => item.ethicsCommittee || "-",
-  },
-  {
     id: "projectLeader",
     label: "项目负责人",
     value: (item: any) => (
@@ -307,6 +273,21 @@ export const cardFields = [
         <span>{item.projectLeader?.name || "-"}</span>
       </div>
     ),
+  },
+  {
+    id: "projectType",
+    label: "项目类型",
+    value: (item: any) => item.projectType || "-",
+  },
+  {
+    id: "department",
+    label: "所属院系",
+    value: (item: any) => item.department || "-",
+  },
+  {
+    id: "ethicsCommittee",
+    label: "伦理委员会",
+    value: (item: any) => item.ethicsCommittee || "-",
   },
 ]
 

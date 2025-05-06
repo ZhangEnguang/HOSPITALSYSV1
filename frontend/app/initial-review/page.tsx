@@ -394,7 +394,6 @@ function InitialReviewContent() {
         statusVariants={statusVariantsFormatted}
         getStatusName={getStatusName}
         priorityField="priority"
-        progressField="completion"
         pageSize={pageSize}
         currentPage={currentPage}
         totalItems={totalItems}
