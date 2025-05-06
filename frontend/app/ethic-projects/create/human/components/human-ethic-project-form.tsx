@@ -468,6 +468,34 @@ export function HumanEthicProjectForm() {
             </div>
           </div>
 
+          {/* 研究信息部分 */}
+          <SectionTitle 
+            icon={<FileTextIcon className="h-5 w-5" />} 
+            title="研究信息" 
+          />
+          
+          <div className="space-y-2">
+            <Label htmlFor="researchPurpose" className="text-muted-foreground">研究目的</Label>
+            <Textarea 
+              id="researchPurpose" 
+              value={formData.researchPurpose} 
+              onChange={(e) => updateFormData("researchPurpose", e.target.value)} 
+              placeholder="请描述研究目的..."
+              className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 min-h-[100px]"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="researchMethod" className="text-muted-foreground">研究方法</Label>
+            <Textarea 
+              id="researchMethod" 
+              value={formData.researchMethod} 
+              onChange={(e) => updateFormData("researchMethod", e.target.value)} 
+              placeholder="请描述研究方法..."
+              className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 min-h-[100px]"
+            />
+          </div>
+
           {/* 主要研究者信息标题 */}
           <SectionTitle 
             icon={<UserIcon className="h-5 w-5" />} 

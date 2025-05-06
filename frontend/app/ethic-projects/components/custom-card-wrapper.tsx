@@ -1,6 +1,6 @@
 import React from "react";
-import EthicProjectCard from "../../../components/ethic-project-card";
-import { CardAction, CardField } from "../../../components/data-management/data-list-card";
+import EthicProjectCard from "@/components/ethic-project-card";
+import { CardAction, CardField } from "@/components/data-management/data-list-card";
 
 interface CustomCardWrapperProps {
   item: any;
@@ -17,6 +17,7 @@ interface CustomCardWrapperProps {
   selected?: boolean;
   onSelect?: (selected: boolean) => void;
   onClick?: () => void;
+  type?: "animal" | "human";
 }
 
 export default function CustomCardWrapper(props: CustomCardWrapperProps) {
@@ -35,12 +36,16 @@ export default function CustomCardWrapper(props: CustomCardWrapperProps) {
     selected,
     onSelect,
     onClick,
+    type
   } = props;
 
-  // 检查项目类型是否为动物伦理或人体伦理
-  const isEthicProject = item.type === "动物伦理" || item.type === "人体伦理";
+  // 检查项目类型
+  // 1. 首先使用props中的明确type
+  // 2. 如果没有，则检查item.type
+  // 3. 如果上述都没有，则默认为null
+  const projectType = type || (item.type === "动物伦理" ? "animal" : (item.type === "人体伦理" ? "human" : null));
   
-  if (!isEthicProject) {
+  if (!projectType) {
     // 如果不是伦理项目，则返回null，让DataListCard继续处理
     return null;
   }
@@ -62,7 +67,7 @@ export default function CustomCardWrapper(props: CustomCardWrapperProps) {
       statusVariants={statusVariants as Record<string, string>}
       progressField={progressField}
       tasksField={tasksField}
-      type={item.type === "动物伦理" ? "animal" : "human"}
+      type={projectType}
       detailsUrl={detailsUrl}
       className={className}
       selected={selected}

@@ -23,6 +23,7 @@ import {
   ChevronDown,
   BarChart2,
   Microscope,
+  ClipboardCheck,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
@@ -216,6 +217,14 @@ export default function Sidebar() {
       ]
     },
     { 
+      name: "伦理审查", 
+      icon: <ClipboardCheck className="h-5 w-5" />, 
+      path: "#",
+      subMenus: [
+        { name: "初始审查", path: "/initial-review" },
+      ]
+    },
+    { 
       name: "进度管理", 
       icon: <LineChart className="h-5 w-5" />, 
       path: "/progress",
@@ -290,6 +299,10 @@ export default function Sidebar() {
   const handleItemClick = (name: string, path: string) => {
     // 如果点击的是当前活动项，并且有子菜单，则切换展开/折叠状态
     if (activeItem === name && menuItems.find(item => item.name === name)?.subMenus) {
+      setExpandedMenu(expandedMenu === name ? null : name);
+    } else if (name === "伦理审查") {
+      // 对于伦理审查特殊处理，只切换展开/折叠状态，不进行导航
+      setActiveItem(name);
       setExpandedMenu(expandedMenu === name ? null : name);
     } else {
       setActiveItem(name);

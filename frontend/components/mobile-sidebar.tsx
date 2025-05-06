@@ -15,6 +15,8 @@ import {
   Users,
   Wallet,
   LayoutDashboard,
+  ClipboardCheck,
+  Microscope,
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -29,12 +31,15 @@ type MenuItem = {
 export default function MobileSidebar() {
   const pathname = usePathname()
   const [activeItem, setActiveItem] = useState("")
+  const [showEthicSubMenu, setShowEthicSubMenu] = useState(false)
 
   const menuItems: MenuItem[] = [
     { name: "仪表盘", icon: <LayoutDashboard className="h-5 w-5" />, path: "/workbench" },
     { name: "待办事项", icon: <CheckSquare className="h-5 w-5" />, path: "/todos" },
     { name: "申报管理", icon: <ClipboardList className="h-5 w-5" />, path: "/applications" },
     { name: "项目管理", icon: <FolderOpen className="h-5 w-5" />, path: "/projects" },
+    { name: "伦理项目", icon: <Microscope className="h-5 w-5" />, path: "/ethic-projects" },
+    { name: "伦理审查", icon: <ClipboardCheck className="h-5 w-5" />, path: "#" },
     { name: "进度管理", icon: <LineChart className="h-5 w-5" />, path: "/progress" },
     { name: "日历", icon: <Calendar className="h-5 w-5" />, path: "/calendar" },
     { name: "经费管理", icon: <Wallet className="h-5 w-5" />, path: "/funds" },
@@ -46,7 +51,8 @@ export default function MobileSidebar() {
 
   // 根据当前路径设置活动菜单项
   useEffect(() => {
-    const currentPath = pathname === "/" ? "/" : `/${pathname.split("/")[1]}`
+    const safePathname = pathname || "/"; // 处理pathname可能为null的情况
+    const currentPath = safePathname === "/" ? "/" : `/${safePathname.split("/")[1]}`
     const currentMenuItem = menuItems.find((item) => item.path === currentPath)
     if (currentMenuItem) {
       setActiveItem(currentMenuItem.name)
@@ -55,6 +61,11 @@ export default function MobileSidebar() {
 
   const handleItemClick = (name: string) => {
     setActiveItem(name)
+    
+    // 对于伦理审查特殊处理，切换子菜单显示状态
+    if (name === "伦理审查") {
+      setShowEthicSubMenu(!showEthicSubMenu)
+    }
   }
 
   return (
@@ -68,26 +79,60 @@ export default function MobileSidebar() {
         <ul className="space-y-2">
           {menuItems.map((item) => (
             <li key={item.name}>
-              <Link
-                href={item.path}
-                className={cn(
-                  "flex items-center p-2 rounded-md group transition-all text-[14px]",
-                  activeItem === item.name
-                    ? "bg-[#2156FF] text-white"
-                    : "text-gray-700 hover:bg-[#2156FF]/10 hover:text-[#2156FF]",
-                )}
-                onClick={() => handleItemClick(item.name)}
-              >
-                <div
-                  className={cn(
-                    "transition-all",
-                    activeItem === item.name ? "text-white" : "text-gray-600 group-hover:text-[#2156FF]",
+              {item.name === "伦理审查" ? (
+                <>
+                  <div
+                    className={cn(
+                      "flex items-center p-2 rounded-md group transition-all text-[14px]",
+                      activeItem === item.name
+                        ? "bg-[#2156FF] text-white"
+                        : "text-gray-700 hover:bg-[#2156FF]/10 hover:text-[#2156FF]",
+                    )}
+                    onClick={() => handleItemClick(item.name)}
+                  >
+                    <div
+                      className={cn(
+                        "transition-all",
+                        activeItem === item.name ? "text-white" : "text-gray-600 group-hover:text-[#2156FF]",
+                      )}
+                    >
+                      {item.icon}
+                    </div>
+                    <span className="ml-3 transition-all">{item.name}</span>
+                  </div>
+                  {showEthicSubMenu && (
+                    <div className="ml-8 mt-1">
+                      <Link
+                        href="/initial-review"
+                        className="flex items-center p-2 rounded-md text-[13px] text-gray-600 hover:bg-[#2156FF]/10 hover:text-[#2156FF]"
+                      >
+                        <span>初始审查</span>
+                      </Link>
+                    </div>
                   )}
+                </>
+              ) : (
+                <Link
+                  href={item.path}
+                  className={cn(
+                    "flex items-center p-2 rounded-md group transition-all text-[14px]",
+                    activeItem === item.name
+                      ? "bg-[#2156FF] text-white"
+                      : "text-gray-700 hover:bg-[#2156FF]/10 hover:text-[#2156FF]",
+                  )}
+                  onClick={() => handleItemClick(item.name)}
                 >
-                  {item.icon}
-                </div>
-                <span className="ml-3 transition-all">{item.name}</span>
-              </Link>
+                  <div
+                    className={cn(
+                      "transition-all",
+                      activeItem === item.name ? "text-white" : "text-gray-600 group-hover:text-[#2156FF]",
+                    )}
+                  >
+                    {item.icon}
+                  </div>
+                  <span className="ml-3 transition-all">{item.name}</span>
+                </Link>
+              )}
             </li>
           ))}
         </ul>

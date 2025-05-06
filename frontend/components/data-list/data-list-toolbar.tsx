@@ -45,55 +45,7 @@ export default function DataListToolbar({
       </div>
 
       <div className="flex items-center gap-2">
-        {searchable && (
-          <div className="relative">
-            <Input
-              type="search"
-              placeholder="搜索..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="sm:w-[200px] md:w-[240px]"
-            />
-            <Button
-              variant="outline"
-              size="icon"
-              className="absolute right-1 top-1/2 -translate-y-1/2"
-              onClick={handleSearch}
-            >
-              搜索
-            </Button>
-          </div>
-        )}
-
-        {onAdd && (
-          <Button onClick={onAdd}>
-            <Plus className="h-4 w-4 mr-2" />
-            添加
-          </Button>
-        )}
-
-        {onImport && (
-          <Button variant="outline" onClick={onImport}>
-            <Upload className="h-4 w-4 mr-2" />
-            导入
-          </Button>
-        )}
-
-        {onExport && (
-          <Button variant="outline" onClick={onExport}>
-            <Download className="h-4 w-4 mr-2" />
-            导出
-          </Button>
-        )}
-
-        {/* 更多操作 */}
-        <Button variant="outline" size="icon" onClick={() => setShowFilterPanel(!showFilterPanel)}>
-          筛选
-        </Button>
-
-        <Button variant="outline" size="icon" onClick={() => setShowColumnSettings(!showColumnSettings)}>
-          <Settings className="h-4 w-4" />
-        </Button>
+        {/* 所有功能按钮已被移除 */}
       </div>
     </div>
   )

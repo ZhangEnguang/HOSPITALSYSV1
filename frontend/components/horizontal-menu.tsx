@@ -27,6 +27,7 @@ import {
   MoreHorizontal,
   ChevronDown,
   Microscope,
+  ClipboardCheck,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -136,6 +137,12 @@ export default function HorizontalMenu() {
         { name: "动物伦理", path: "/ethic-projects?tab=animal" },
         { name: "人体伦理", path: "/ethic-projects?tab=human" },
       ]
+    },
+    { 
+      name: "初始审查", 
+      shortName: "审查",
+      icon: <ClipboardCheck className="h-5 w-5" />, 
+      path: "/initial-review" 
     },
     { 
       name: "进度管理", 

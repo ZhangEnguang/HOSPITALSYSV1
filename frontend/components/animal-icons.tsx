@@ -166,4 +166,95 @@ export const MonkeyIcon: React.FC<IconProps> = ({ className }) => (
       strokeLinejoin="round"
     />
   </svg>
+);
+
+// 猪图标
+export const PigIcon: React.FC<IconProps> = ({ className }) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg" 
+    stroke="currentColor"
+    className={className}
+  >
+    <path 
+      d="M9 10C9 9.44772 9.44772 9 10 9H14C14.5523 9 15 9.44772 15 10V13C15 14.6569 13.6569 16 12 16C10.3431 16 9 14.6569 9 13V10Z" 
+      strokeWidth="1.5" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    />
+    <path 
+      d="M7 10.5V13C7 15.7614 9.23858 18 12 18C14.7614 18 17 15.7614 17 13V10.5" 
+      strokeWidth="1.5" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    />
+    <path 
+      d="M4 10H7" 
+      strokeWidth="1.5" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    />
+    <path 
+      d="M17 10H20" 
+      strokeWidth="1.5" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    />
+    <path 
+      d="M7 10C7 7.23858 9.23858 5 12 5C14.7614 5 17 7.23858 17 10" 
+      strokeWidth="1.5" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    />
+    <circle cx="9.5" cy="7.5" r="0.5" fill="currentColor" />
+    <circle cx="14.5" cy="7.5" r="0.5" fill="currentColor" />
+    <path 
+      d="M11.5 12C11.5 12.2761 11.7239 12.5 12 12.5C12.2761 12.5 12.5 12.2761 12.5 12C12.5 11.7239 12.2761 11.5 12 11.5C11.7239 11.5 11.5 11.7239 11.5 12Z" 
+      fill="currentColor"
+    />
+  </svg>
+);
+
+// 犬类图标
+export const DogIcon: React.FC<IconProps> = ({ className }) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg" 
+    stroke="currentColor"
+    className={className}
+  >
+    <path 
+      d="M10 5.23607C10 4.47852 10.8654 4.08334 11.4472 4.52786L20.7813 11.2918C21.4403 11.8001 21.4403 12.8284 20.7813 13.3367L11.4472 20.1006C10.8654 20.5451 10 20.1499 10 19.3924V5.23607Z" 
+      strokeWidth="1.5" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    />
+    <path 
+      d="M3 8.5V15.5" 
+      strokeWidth="1.5" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    />
+    <path 
+      d="M7 8.5V15.5" 
+      strokeWidth="1.5" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    />
+    <path 
+      d="M3 12H7" 
+      strokeWidth="1.5" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    />
+    <circle cx="13" cy="9" r="1" fill="currentColor" />
+    <path 
+      d="M13 16L16 13" 
+      strokeWidth="1.5" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    />
+  </svg>
 ); 

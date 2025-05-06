@@ -111,6 +111,22 @@ export default function DataListCard({
   const priority = priorityField ? item[priorityField] : undefined
   const progress = progressField ? item[progressField] : undefined
 
+  // 确保值是可渲染的内容
+  const renderValue = (value: any): React.ReactNode => {
+    if (value === null || value === undefined) return "-";
+    if (typeof value === 'object' && value !== null) {
+      // 如果是对象且有name属性，返回name
+      if ('name' in value) return value.name;
+      // 如果是对象且有label属性，返回label
+      if ('label' in value) return value.label;
+      // 如果是React元素，直接返回
+      if (React.isValidElement(value)) return value;
+      // 其他情况返回JSON字符串
+      return JSON.stringify(value);
+    }
+    return value;
+  };
+
   const getStatusVariant = (status: string) => {
     return statusVariants[status] || "secondary"
   }
@@ -146,15 +162,15 @@ export default function DataListCard({
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-lg transition-colors duration-300 group-hover:text-primary truncate flex-1">{title}</h3>
-              {status && <Badge variant={getStatusVariant(status)}>{getDisplayStatus()}</Badge>}
+              <h3 className="font-semibold text-lg transition-colors duration-300 group-hover:text-primary truncate flex-1">{renderValue(title)}</h3>
+              {status && <Badge variant={getStatusVariant(status)}>{renderValue(getDisplayStatus())}</Badge>}
               {priority === "medium" && (
                 <Badge variant="destructive" className="whitespace-nowrap flex-shrink-0">
                   高
                 </Badge>
               )}
             </div>
-            {description && <p className="text-sm text-muted-foreground truncate mt-1">{description}</p>}
+            {description && <p className="text-sm text-muted-foreground truncate mt-1">{renderValue(description)}</p>}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -190,7 +206,7 @@ export default function DataListCard({
               <React.Fragment key={field.id}>
                 <div className={`grid gap-0.5 text-sm ${field.className || ""}`}>
                   {field.label && <span className="font-medium">{field.label}</span>}
-                  {field.value(item)}
+                  {React.isValidElement(field.value(item)) ? field.value(item) : renderValue(field.value(item))}
                 </div>
                 {index < fields.length - 1 && <Separator orientation="vertical" className="h-8 hidden lg:block" />}
               </React.Fragment>

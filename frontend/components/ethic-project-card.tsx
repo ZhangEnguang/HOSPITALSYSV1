@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -25,7 +25,7 @@ import {
   Search,
   X
 } from "lucide-react";
-import { RatIcon, MouseIcon, RabbitIcon, MonkeyIcon } from "./animal-icons";
+import { RatIcon, MouseIcon, RabbitIcon, MonkeyIcon, PigIcon, DogIcon } from "./animal-icons";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import {
@@ -88,17 +88,23 @@ interface EthicProjectCardProps {
 
 // 动物种类图标渲染函数
 const getAnimalIcon = (animalType: string) => {
+  const iconClass = "h-4 w-4 text-blue-500 flex-shrink-0";
+  
   switch (animalType.toLowerCase()) {
     case "大鼠":
-      return <RatIcon className="h-4 w-4 text-blue-500 flex-shrink-0" />;
+      return <RatIcon className={iconClass} />;
     case "小鼠":
-      return <MouseIcon className="h-4 w-4 text-blue-500 flex-shrink-0" />;
+      return <MouseIcon className={iconClass} />;
     case "兔子":
-      return <RabbitIcon className="h-4 w-4 text-blue-500 flex-shrink-0" />;
+      return <RabbitIcon className={iconClass} />;
     case "猴子":
-      return <MonkeyIcon className="h-4 w-4 text-blue-500 flex-shrink-0" />;
+      return <MonkeyIcon className={iconClass} />;
+    case "猪":
+      return <PigIcon className={iconClass} />;
+    case "犬类":
+      return <DogIcon className={iconClass} />;
     default:
-      return <PawPrint className="h-4 w-4 text-blue-500 flex-shrink-0" />;
+      return <PawPrint className={iconClass} />;
   }
 };
 
@@ -112,6 +118,7 @@ const dialogOverlayStyles = {
 interface ReviewTypeSelectProps {
   value: string;
   onValueChange: (value: string) => void;
+  projectType?: "animal" | "human";
 }
 
 interface ReviewTypeGroup {
@@ -120,10 +127,10 @@ interface ReviewTypeGroup {
   items: { id: string; label: string }[];
 }
 
-const ReviewTypeSelect: React.FC<ReviewTypeSelectProps> = ({ value, onValueChange }) => {
+const ReviewTypeSelect: React.FC<ReviewTypeSelectProps> = ({ value, onValueChange, projectType }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
-    "tracking": true,
+    "tracking": false,
     "human_genetic": false,
     "human_genetic_filing": false
   });
@@ -132,7 +139,7 @@ const ReviewTypeSelect: React.FC<ReviewTypeSelectProps> = ({ value, onValueChang
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const reviewTypes: ReviewTypeGroup[] = [
+  const allReviewTypes: ReviewTypeGroup[] = [
     {
       id: "initial",
       label: "初始审查",
@@ -170,6 +177,16 @@ const ReviewTypeSelect: React.FC<ReviewTypeSelectProps> = ({ value, onValueChang
       ]
     }
   ];
+
+  // 根据项目类型过滤审查类型选项
+  const reviewTypes = useMemo(() => {
+    if (projectType === "animal") {
+      // 动物伦理项目只显示初始审查选项
+      return [allReviewTypes[0]];
+    }
+    // 人体伦理项目显示所有选项
+    return allReviewTypes;
+  }, [projectType]);
 
   // 获取当前选中项的标签
   const getSelectedLabel = () => {
@@ -268,25 +285,86 @@ const ReviewTypeSelect: React.FC<ReviewTypeSelectProps> = ({ value, onValueChang
     searchInputRef.current?.focus();
   };
 
+  // 高亮搜索匹配文本
+  const highlightMatch = (text: string, query: string) => {
+    if (!query) return text;
+    
+    try {
+      const regex = new RegExp(`(${query})`, 'gi');
+      const parts = text.split(regex);
+      
+      return (
+        <>
+          {parts.map((part, i) => 
+            regex.test(part) ? <span key={i} className="bg-yellow-100 text-blue-700 font-medium">{part}</span> : part
+          )}
+        </>
+      );
+    } catch (e) {
+      return text;
+    }
+  };
+
   const filteredOptions = getFilteredOptions();
+  
+  // 智能提示 - 根据搜索内容找出最可能想要选择的选项
+  const topSuggestion = useMemo(() => {
+    if (!searchQuery || searchQuery.length < 2) return null;
+    
+    // 尝试找到完全匹配的选项
+    for (const group of filteredOptions) {
+      // 检查组标题是否匹配
+      if (group.label.toLowerCase() === searchQuery.toLowerCase()) {
+        return { id: group.id, label: group.label, isGroup: true };
+      }
+      
+      // 检查子项是否匹配
+      for (const item of group.items) {
+        if (item.label.toLowerCase() === searchQuery.toLowerCase()) {
+          return { id: item.id, label: item.label, isGroup: false, groupId: group.id };
+        }
+      }
+    }
+    
+    // 尝试找到包含搜索词的选项
+    for (const group of filteredOptions) {
+      // 检查组标题是否包含搜索词
+      if (group.label.toLowerCase().includes(searchQuery.toLowerCase())) {
+        return { id: group.id, label: group.label, isGroup: true };
+      }
+      
+      // 检查子项是否包含搜索词
+      for (const item of group.items) {
+        if (item.label.toLowerCase().includes(searchQuery.toLowerCase())) {
+          return { id: item.id, label: item.label, isGroup: false, groupId: group.id };
+        }
+      }
+    }
+    
+    return null;
+  }, [searchQuery, filteredOptions]);
 
   return (
     <div className="relative mt-2" ref={dropdownRef}>
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-blue-400 disabled:cursor-not-allowed disabled:opacity-50 transition-all"
+        onClick={() => projectType === "animal" ? null : setIsOpen(!isOpen)}
+        className={cn(
+          "flex items-center justify-between w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-blue-400 disabled:cursor-not-allowed disabled:opacity-50 transition-all",
+          projectType === "animal" && "cursor-not-allowed opacity-90",
+          !value && "text-gray-500"
+        )}
       >
         <span className={value ? "text-gray-900 font-medium" : "text-gray-500"}>
           {getSelectedLabel()}
         </span>
-        <ChevronDown className="h-4 w-4 opacity-50" />
+        {projectType !== "animal" && <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", isOpen && "transform rotate-180")} />}
       </button>
       
-      {isOpen && (
+      {isOpen && projectType !== "animal" && (
         <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg animate-in fade-in-0 zoom-in-95 duration-100">
           {/* 搜索框 */}
-          <div className="p-2 border-b border-gray-100">
+          <div className="p-2 border-b border-gray-100 bg-gray-50/70">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
               <input
@@ -299,9 +377,9 @@ const ReviewTypeSelect: React.FC<ReviewTypeSelectProps> = ({ value, onValueChang
                 onBlur={() => setSearchFocused(false)}
                 className={cn(
                   "w-full pl-9 pr-8 py-2 text-sm rounded-md transition-all duration-150",
-                  "border border-gray-200 outline-none",
+                  "border border-gray-200 outline-none bg-white",
                   searchFocused 
-                    ? "ring-1 ring-blue-400 border-blue-400" 
+                    ? "ring-2 ring-blue-400 border-blue-400" 
                     : "ring-0 hover:border-gray-300"
                 )}
               />
@@ -314,62 +392,112 @@ const ReviewTypeSelect: React.FC<ReviewTypeSelectProps> = ({ value, onValueChang
                 </button>
               )}
             </div>
+            
+            {/* 智能提示 */}
+            {searchQuery && topSuggestion && (
+              <div className="mt-1.5 text-xs text-gray-600 flex items-center justify-between px-1">
+                <div className="flex items-center gap-1">
+                  <span>按Enter选择:</span>
+                  <span className="font-medium text-blue-600">{topSuggestion.label}</span>
+                </div>
+                <button 
+                  className="text-blue-500 hover:text-blue-700 text-xs font-medium"
+                  onClick={() => handleSelect(topSuggestion.id)}
+                >
+                  选择
+                </button>
+              </div>
+            )}
           </div>
           
           {/* 选项列表 */}
           <div className="py-1 max-h-[280px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
             {filteredOptions.length === 0 ? (
-              <div className="px-3 py-2 text-sm text-gray-500 text-center">
-                未找到匹配的审查类型
+              <div className="px-3 py-6 text-sm text-gray-500 text-center flex flex-col items-center gap-2">
+                <Search className="h-5 w-5 text-gray-400" />
+                <span>未找到匹配的审查类型</span>
               </div>
             ) : (
               filteredOptions.map(group => (
-                <div key={group.id} className="mb-1">
+                <div key={group.id} className="mb-1 transition-all duration-200">
                   {group.items.length === 0 ? (
                     // 没有子项的选项直接显示
                     <div
                       className={cn(
-                        "px-3 py-2 text-sm cursor-pointer hover:bg-blue-50/60 transition-colors",
-                        value === group.id && "bg-blue-50 text-blue-600 font-medium"
+                        "px-3 py-2.5 text-sm cursor-pointer hover:bg-blue-50/60 transition-colors flex items-center gap-2",
+                        value === group.id ? "bg-blue-50 text-blue-600 font-medium" : "text-gray-700"
                       )}
                       onClick={() => handleSelect(group.id)}
                     >
-                      {group.label}
+                      <div className={cn(
+                        "w-2 h-2 rounded-full",
+                        value === group.id ? "bg-blue-500" : "bg-gray-300"
+                      )}></div>
+                      {searchQuery ? highlightMatch(group.label, searchQuery) : group.label}
                     </div>
                   ) : (
                     // 有子项的选项显示为可展开的组
                     <>
                       <div
                         className={cn(
-                          "px-3 py-2 text-sm cursor-pointer hover:bg-gray-50 flex items-center justify-between font-medium text-gray-700 transition-colors",
-                          searchQuery ? "text-blue-700" : ""
+                          "px-3 py-2.5 text-sm cursor-pointer hover:bg-gray-50 flex items-center justify-between font-medium transition-colors border-l-2",
+                          expandedGroups[group.id] ? "border-l-blue-500 bg-gray-50/80" : "border-l-transparent",
+                          searchQuery ? "text-blue-700" : "text-gray-700"
                         )}
                         onClick={(e) => toggleGroup(group.id, e)}
                       >
-                        <span>{group.label}</span>
+                        <div className="flex items-center gap-2">
+                          <div className={cn(
+                            "w-2 h-2 rounded-full",
+                            expandedGroups[group.id] ? "bg-blue-500" : "bg-gray-400"
+                          )}></div>
+                          <span>
+                            {searchQuery ? highlightMatch(group.label, searchQuery) : group.label}
+                          </span>
+                          {searchQuery && group.items.some(item => item.label.toLowerCase().includes(searchQuery.toLowerCase())) && (
+                            <Badge variant="outline" className="bg-blue-50 text-blue-600 text-xs border-blue-200 ml-2">
+                              {group.items.filter(item => item.label.toLowerCase().includes(searchQuery.toLowerCase())).length}
+                            </Badge>
+                          )}
+                        </div>
                         <ChevronDown
                           className={cn(
-                            "h-4 w-4 transition-transform duration-200",
+                            "h-4 w-4 transition-transform duration-200 text-gray-500",
                             expandedGroups[group.id] && "transform rotate-180"
                           )}
                         />
                       </div>
                       {(expandedGroups[group.id] || searchQuery) && group.items.length > 0 && (
-                        <div className="border-l-2 border-blue-100 ml-3 my-1">
+                        <motion.div 
+                          initial={searchQuery ? { opacity: 1, height: "auto" } : { opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="border-l-2 border-blue-100 ml-5 my-1"
+                        >
                           {group.items.map(item => (
                             <div
                               key={item.id}
                               className={cn(
-                                "pl-4 pr-3 py-1.5 text-sm cursor-pointer hover:bg-blue-50/60 flex items-center transition-colors",
-                                value === item.id && "bg-blue-50 text-blue-600 font-medium"
+                                "pl-4 pr-3 py-2 text-sm cursor-pointer hover:bg-blue-50/60 flex items-center gap-2 transition-colors",
+                                value === item.id ? "bg-blue-50 text-blue-600 font-medium" : "text-gray-600"
                               )}
                               onClick={() => handleSelect(item.id)}
                             >
-                              <div className="w-1.5 h-1.5 rounded-full bg-blue-200 mr-2"></div>
-                              {item.label}
+                              <div className={cn(
+                                "w-1.5 h-1.5 rounded-full", 
+                                value === item.id ? "bg-blue-500" : "bg-gray-300"
+                              )}></div>
+                              <span className={cn(
+                                searchQuery && item.label.toLowerCase().includes(searchQuery.toLowerCase()) 
+                                ? "decoration-blue-300 decoration-dotted underline-offset-4" 
+                                : ""
+                              )}>
+                                {searchQuery ? highlightMatch(item.label, searchQuery) : item.label}
+                              </span>
                             </div>
                           ))}
-                        </div>
+                        </motion.div>
                       )}
                     </>
                   )}
@@ -488,6 +616,16 @@ export default function EthicProjectCard({
     // 处理提交审查表单的逻辑
     console.log("提交审查表单");
     handleCloseReviewDialog();
+  };
+  
+  // 打开创建审查弹框
+  const openCreateReviewDialog = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // 如果是动物伦理项目，自动设置审查类型为"初始审查"
+    if (type === "animal") {
+      setReviewType("initial");
+    }
+    setIsCreateReviewOpen(true);
   };
   
   return (
@@ -616,10 +754,7 @@ export default function EthicProjectCard({
             variant="default" 
             size="sm" 
             className="text-sm h-8 bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm rounded-md"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsCreateReviewOpen(true);
-            }}
+            onClick={openCreateReviewDialog}
           >
             创建审查
             <ChevronRight className="h-3.5 w-3.5 ml-1" />
@@ -642,7 +777,13 @@ export default function EthicProjectCard({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="reviewType">审查类型</Label>
-                <ReviewTypeSelect value={reviewType} onValueChange={setReviewType} />
+                <ReviewTypeSelect value={reviewType} onValueChange={setReviewType} projectType={type} />
+                {type === "animal" && (
+                  <div className="mt-1.5 text-xs text-amber-600 flex items-center">
+                    <AlertTriangle className="h-3.5 w-3.5 mr-1" />
+                    <span>动物伦理项目仅支持初始审查</span>
+                  </div>
+                )}
               </div>
               
               <div>

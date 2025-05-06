@@ -2,15 +2,26 @@
 
 import React, { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Building2, BriefcaseMedical, Database, FileText, MousePointer2 } from "lucide-react"
+import { Building2, BriefcaseMedical, Database, FileText, MousePointer2, Eye, Edit, Trash2, ClipboardList } from "lucide-react"
 
 import DataList from "@/components/data-management/data-list"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import ClientOnly from "@/components/client-only"
-import CustomCardWrapper from "@/components/ethic-project-card"
-import { adaptedStatusColors } from "@/app/ethic-projects/config/status-colors"
+import CustomCardWrapper from "../components/custom-card-wrapper"
 import { useLoading } from "@/hooks/use-loading"
 import { useToast } from "@/components/ui/use-toast"
+
+// 重新定义伦理状态颜色适配
+const adaptedStatusColors: Record<string, "default" | "destructive" | "outline" | "secondary"> = {
+  "进行中": "default",
+  "规划中": "secondary", 
+  "已完成": "outline",
+  "已暂停": "outline",
+  "审核通过": "default",
+  "审核中": "secondary",
+  "待审核": "secondary",
+  "审核退回": "destructive"
+}
 
 // 动物伦理项目页面组件
 export default function AnimalEthicProjectsPage() {
@@ -29,87 +40,93 @@ export default function AnimalEthicProjectsPage() {
   const [projects, setProjects] = useState<any[]>([
     {
       id: "1",
-      name: "转基因小鼠模型对阿尔茨海默病的研究",
-      description: "利用转基因小鼠模型研究新型抗阿尔茨海默病脑部病理改变的临床疗效效果",
+      name: "实验大鼠药物代谢研究",
+      description: "研究药物在大鼠体内的代谢过程及其机制",
       status: "进行中",
-      progress: 65,
-      type: "动物伦理",
-      tasks: { completed: 2, total: 5 },
-      animalType: "小鼠",
-      animalCount: "120",
-      leader: "张教授",
-      department: "神经科学系",
-      createdAt: "2023-10-15"
+      animalType: "大鼠", 
+      animalCount: "85只",
+      ethicsCommittee: "医学院伦理审查委员会",
+      facilityUnit: "基础医学实验中心",
+      leader: "王教授",
+      createdAt: "2023-10-12",
+      progress: 35,
+      tasks: { completed: 3, total: 8 },
+      type: "动物伦理"
     },
     {
       id: "2",
-      name: "狗肾脏器官移植研究动物伦理评价",
-      description: "研究大型哺乳动物器官移植手术方案及术后护理标准，评估动物伦理合规性",
-      status: "进行中",
-      progress: 45,
-      type: "动物伦理",
-      tasks: { completed: 3, total: 8 },
-      animalType: "犬类",
-      animalCount: "15",
-      leader: "李主任",
-      department: "器官移植研究中心",
-      createdAt: "2023-09-20"
+      name: "小鼠造血干细胞分化实验",
+      description: "研究小鼠造血干细胞的分化过程与调控机制",
+      status: "规划中",
+      animalType: "小鼠",
+      animalCount: "120只",
+      ethicsCommittee: "医学院伦理审查委员会",
+      facilityUnit: "免疫学实验中心",
+      leader: "李研究员",
+      createdAt: "2023-11-05",
+      progress: 15,
+      tasks: { completed: 1, total: 7 },
+      type: "动物伦理"
     },
     {
       id: "3",
-      name: "猪心脏移植术后神经系统变化研究",
-      description: "研究猪心脏脏移植术后神经系统变化规律，分析相关生理发症机制",
-      status: "进行中",
-      progress: 30,
-      type: "动物伦理",
-      tasks: { completed: 1, total: 4 },
-      animalType: "猪",
-      animalCount: "8",
-      leader: "王研究员",
-      department: "心血管研究所",
-      createdAt: "2023-11-05"
+      name: "兔脊髓损伤修复研究",
+      description: "通过神经干细胞移植技术研究兔脊髓损伤的修复机制",
+      status: "已完成",
+      animalType: "兔子",
+      animalCount: "30只",
+      ethicsCommittee: "医学院伦理审查委员会",
+      facilityUnit: "神经科学实验中心",
+      leader: "张副教授",
+      createdAt: "2023-08-20",
+      progress: 100,
+      tasks: { completed: 6, total: 6 },
+      type: "动物伦理"
     },
     {
       id: "4",
-      name: "犬眼科药物治疗方案动物伦理评价",
-      description: "研究大型哺乳动物眼科新药治疗方案，制定动物伦理标准并制定保障措施",
-      status: "已完成",
-      progress: 100,
-      type: "动物伦理",
-      tasks: { completed: 5, total: 5 },
-      animalType: "犬类", 
-      animalCount: "25",
-      leader: "刘研究员",
-      department: "药理学教研室",
-      createdAt: "2023-08-10"
+      name: "微型猪心脏移植研究",
+      description: "探索猪心脏移植到人体的可行性与排斥反应机制研究",
+      status: "进行中",
+      animalType: "猪",
+      animalCount: "8只",
+      ethicsCommittee: "医学院伦理审查委员会",
+      facilityUnit: "器官移植研究中心",
+      leader: "赵教授",
+      createdAt: "2023-09-15",
+      progress: 45,
+      tasks: { completed: 4, total: 9 },
+      type: "动物伦理"
     },
     {
       id: "5",
-      name: "兔耳神经损伤修复实验方案伦理审查",
-      description: "研究兔耳神经损伤修复的实验方案，制定相关伦理标准并动物福利保障",
+      name: "犬类心脏病模型研究",
+      description: "建立和验证犬类心脏病动物模型，用于心脏疾病治疗新药筛选",
       status: "规划中",
+      animalType: "犬类",
+      animalCount: "15只",
+      ethicsCommittee: "医学院伦理审查委员会",
+      facilityUnit: "心血管研究中心",
+      leader: "钱研究员",
+      createdAt: "2023-12-03",
       progress: 10,
-      type: "动物伦理",
-      tasks: { completed: 0, total: 3 },
-      animalType: "兔子",
-      animalCount: "30",
-      leader: "孙博士",
-      department: "神经外科研究所",
-      createdAt: "2023-12-01"
+      tasks: { completed: 1, total: 10 },
+      type: "动物伦理"
     },
     {
       id: "6",
-      name: "啮齿类动物神经影像学实验标准制定",
-      description: "研究啮齿类动物神经影像学实验的标准流程，评估伦理风险与动物福利",
-      status: "已完成",
-      progress: 100,
-      type: "动物伦理",
-      tasks: { completed: 7, total: 7 },
-      animalType: "大鼠",
-      animalCount: "245",
-      leader: "陈教授",
-      department: "影像医学中心",
-      createdAt: "2023-07-15"
+      name: "猕猴脑功能区神经连接图谱研究",
+      description: "利用先进成像技术绘制猕猴脑功能区神经连接图谱，探索大脑工作机理",
+      status: "进行中",
+      animalType: "猴子",
+      animalCount: "12只",
+      ethicsCommittee: "医学院伦理审查委员会",
+      facilityUnit: "脑科学中心",
+      leader: "孙教授",
+      createdAt: "2023-07-28",
+      progress: 60,
+      tasks: { completed: 5, total: 8 },
+      type: "动物伦理"
     }
   ])
   
@@ -124,13 +141,20 @@ export default function AnimalEthicProjectsPage() {
   const [sortOption, setSortOption] = useState<string>("latest")
   
   // 视图模式
-  const [viewMode, setViewMode] = useState<"card" | "table">("card")
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   
-  // 表格列可见性
-  const [visibleColumns, setVisibleColumns] = useState<string[]>([
-    "name", "status", "animalType", "animalCount", "leader", "department", "createdAt"
-  ])
-  
+  // 表格列可见性 - 修改为符合DataList组件要求的格式
+  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
+    "name": true, 
+    "status": true, 
+    "animalType": true, 
+    "animalCount": true, 
+    "ethicsCommittee": true, 
+    "facilityUnit": true, 
+    "leader": true, 
+    "createdAt": true
+  })
+
   // 处理搜索
   const handleSearch = () => {
     console.log("搜索:", searchTerm)
@@ -172,44 +196,55 @@ export default function AnimalEthicProjectsPage() {
   // 分页项目数据
   const paginatedProjects = projects
   
+  // 添加调试日志
+  useEffect(() => {
+    console.log("当前分页项目数据:", paginatedProjects)
+    console.log("视图模式:", viewMode)
+    console.log("可见列:", visibleColumns)
+  }, [paginatedProjects, viewMode, visibleColumns])
+  
   // 快速筛选选项
   const quickFilters = [
     {
       id: "status",
       label: "全部项目状态",
+      value: "all",
+      category: "status",
       options: [
-        { label: "全部", value: "all" },
-        { label: "进行中", value: "进行中" },
-        { label: "规划中", value: "规划中" },
-        { label: "已完成", value: "已完成" },
-        { label: "已暂停", value: "已暂停" }
+        { id: "all", label: "全部", value: "all" },
+        { id: "inProgress", label: "进行中", value: "进行中" },
+        { id: "planning", label: "规划中", value: "规划中" },
+        { id: "completed", label: "已完成", value: "已完成" },
+        { id: "paused", label: "已暂停", value: "已暂停" }
       ]
     },
     {
       id: "animalType",
-      label: "全部动物种类",
+      label: "全部动物种系",
+      value: "all",
+      category: "animalType",
       options: [
-        { label: "全部", value: "all" },
-        { label: "小鼠", value: "小鼠" },
-        { label: "大鼠", value: "大鼠" },
-        { label: "兔子", value: "兔子" },
-        { label: "犬类", value: "犬类" },
-        { label: "猪", value: "猪" },
-        { label: "猴", value: "猴" }
+        { id: "all", label: "全部", value: "all" },
+        { id: "mouse", label: "小鼠", value: "小鼠" },
+        { id: "rat", label: "大鼠", value: "大鼠" },
+        { id: "rabbit", label: "兔子", value: "兔子" },
+        { id: "dog", label: "犬类", value: "犬类" },
+        { id: "pig", label: "猪", value: "猪" },
+        { id: "monkey", label: "猴", value: "猴" }
       ]
     }
   ]
-  
+
   // 排序选项
   const sortOptions = [
-    { label: "最新创建", value: "latest" },
-    { label: "最早创建", value: "oldest" },
-    { label: "名称 A-Z", value: "nameAsc" },
-    { label: "名称 Z-A", value: "nameDesc" },
-    { label: "进度最高", value: "progressDesc" },
-    { label: "进度最低", value: "progressAsc" }
+    { id: "latest", field: "createdAt", direction: "desc" as const, label: "最新创建" },
+    { id: "oldest", field: "createdAt", direction: "asc" as const, label: "最早创建" },
+    { id: "nameAsc", field: "name", direction: "asc" as const, label: "名称 A-Z" },
+    { id: "nameDesc", field: "name", direction: "desc" as const, label: "名称 Z-A" },
+    { id: "progressDesc", field: "progress", direction: "desc" as const, label: "进度最高" },
+    { id: "progressAsc", field: "progress", direction: "asc" as const, label: "进度最低" }
   ]
-  
+
   // 高级筛选分类
   const filterCategories = [
     {
@@ -219,17 +254,17 @@ export default function AnimalEthicProjectsPage() {
         {
           id: "name",
           label: "项目名称",
-          type: "text",
+          type: "text" as const,
         },
         {
           id: "projectNumber",
           label: "项目编号",
-          type: "text",
+          type: "text" as const,
         },
         {
           id: "source",
           label: "项目来源",
-          type: "select",
+          type: "select" as const,
           options: [
             { label: "全部", value: "all" },
             { label: "国家自然科学基金", value: "国家自然科学基金" },
@@ -247,7 +282,7 @@ export default function AnimalEthicProjectsPage() {
         {
           id: "status",
           label: "项目状态",
-          type: "select",
+          type: "select" as const,
           options: [
             { label: "全部", value: "all" },
             { label: "进行中", value: "进行中" },
@@ -258,7 +293,7 @@ export default function AnimalEthicProjectsPage() {
         {
           id: "auditStatus",
           label: "审核状态",
-          type: "select",
+          type: "select" as const,
           options: [
             { label: "全部", value: "all" },
             { label: "待审核", value: "待审核" },
@@ -275,13 +310,14 @@ export default function AnimalEthicProjectsPage() {
   const tableColumns = [
     {
       id: "name",
-      label: "项目名称",
-      renderCell: (item: any) => (
+      header: "项目名称",
+      accessorKey: "name" as const,
+      cell: (row: any) => (
         <div className="flex flex-col">
-          <span className="text-sm font-medium">{item.name}</span>
-          {item.description && (
+          <span className="text-sm font-medium">{row.name}</span>
+          {row.description && (
             <span className="text-xs text-muted-foreground truncate max-w-xs">
-              {item.description}
+              {row.description}
             </span>
           )}
         </div>
@@ -289,69 +325,92 @@ export default function AnimalEthicProjectsPage() {
     },
     {
       id: "status",
-      label: "状态",
-      renderCell: (item: any) => (
+      header: "状态",
+      accessorKey: "status" as const,
+      cell: (row: any) => (
         <div className={`px-2.5 py-0.5 rounded-full text-xs font-medium inline-block ${
-          adaptedStatusColors[item.status] || "bg-gray-100 text-gray-800"
+          adaptedStatusColors[row.status] || "bg-gray-100 text-gray-800"
         }`}>
-          {item.status}
+          {row.status}
         </div>
       ),
     },
     {
       id: "animalType",
-      label: "动物种类",
-      renderCell: (item: any) => (
+      header: "动物种系",
+      accessorKey: "animalType" as const,
+      cell: (row: any) => (
         <div className="flex items-center">
           <MousePointer2 className="h-4 w-4 text-blue-500 mr-2" />
-          <span>{item.animalType}</span>
+          <span>{row.animalType || row.动物种系 || "-"}</span>
         </div>
       ),
     },
     {
       id: "animalCount",
-      label: "动物数量",
-      renderCell: (item: any) => (
+      header: "动物数量",
+      accessorKey: "animalCount" as const,
+      cell: (row: any) => (
         <div className="flex items-center">
           <Database className="h-4 w-4 text-blue-500 mr-2" />
-          <span>{item.animalCount}只</span>
+          <span>{row.animalCount || row.动物数量 || "-"}</span>
+        </div>
+      ),
+    },
+    {
+      id: "ethicsCommittee",
+      header: "伦理委员会",
+      accessorKey: "ethicsCommittee" as const,
+      cell: (row: any) => (
+        <div className="flex items-center">
+          <Building2 className="h-4 w-4 text-blue-500 mr-2" />
+          <span>{row.ethicsCommittee || row.伦理委员会 || "医学院伦理审查委员会"}</span>
+        </div>
+      ),
+    },
+    {
+      id: "facilityUnit",
+      header: "动物实施设备单位",
+      accessorKey: "facilityUnit" as const,
+      cell: (row: any) => (
+        <div className="flex items-center">
+          <BriefcaseMedical className="h-4 w-4 text-blue-500 mr-2" />
+          <span>{row.facilityUnit || row.动物实施设备单位 || "基础医学实验中心"}</span>
         </div>
       ),
     },
     {
       id: "leader",
-      label: "负责人",
-      renderCell: (item: any) => item.leader,
-    },
-    {
-      id: "department",
-      label: "所属部门",
-      renderCell: (item: any) => (
-        <div className="flex items-center">
-          <Building2 className="h-4 w-4 text-blue-500 mr-2" />
-          <span>{item.department}</span>
-        </div>
-      ),
+      header: "负责人",
+      accessorKey: "leader" as const,
+      cell: (row: any) => row.leader || "-",
     },
     {
       id: "createdAt",
-      label: "创建时间",
-      renderCell: (item: any) => item.createdAt,
+      header: "创建时间",
+      accessorKey: "createdAt" as const,
+      cell: (row: any) => row.createdAt || "-",
     },
   ]
   
   // 表格行操作
   const customTableActions = [
     {
+      id: "view",
       label: "查看详情",
+      icon: <Eye className="h-4 w-4" />,
       onClick: (item: any) => router.push(`/ethic-projects/${item.id}`),
     },
     {
-      label: "创建审查",
-      onClick: (item: any) => router.push(`/ethic-projects/${item.id}/review/new`),
+      id: "edit",
+      label: "编辑项目",
+      icon: <Edit className="h-4 w-4" />,
+      onClick: (item: any) => router.push(`/ethic-projects/${item.id}/edit`),
     },
     {
-      label: "删除",
+      id: "delete",
+      label: "删除项目",
+      icon: <Trash2 className="h-4 w-4" />,
       onClick: (item: any) => handleDeleteProject(item.id),
       className: "text-red-600 hover:text-red-800",
     },
@@ -361,46 +420,77 @@ export default function AnimalEthicProjectsPage() {
   const cardFields = [
     {
       id: "animalType",
-      label: "动物种类",
-      icon: <MousePointer2 className="h-4 w-4 text-blue-500" />,
-      displayValue: (item: any) => item.animalType,
+      label: "动物种系",
+      value: (item: any) => (
+        <div className="flex items-center">
+          <MousePointer2 className="h-4 w-4 text-blue-500 mr-2" />
+          <span>{item.animalType || item.动物种系 || "-"}</span>
+        </div>
+      ),
+      className: "flex items-center gap-2",
     },
     {
       id: "animalCount",
       label: "动物数量",
-      icon: <FileText className="h-4 w-4 text-blue-500" />,
-      displayValue: (item: any) => `${item.animalCount}只`,
+      value: (item: any) => (
+        <div className="flex items-center">
+          <Database className="h-4 w-4 text-blue-500 mr-2" />
+          <span>{item.animalCount || item.动物数量 || "-"}</span>
+        </div>
+      ),
+      className: "flex items-center gap-2",
     },
     {
-      id: "department",
-      label: "所属部门",
-      icon: <Building2 className="h-4 w-4 text-blue-500" />,
-      displayValue: (item: any) => item.department,
+      id: "ethicsCommittee",
+      label: "伦理委员会",
+      value: (item: any) => (
+        <div className="flex items-center">
+          <Building2 className="h-4 w-4 text-blue-500 mr-2" />
+          <span>{item.ethicsCommittee || item.伦理委员会 || "医学院伦理审查委员会"}</span>
+        </div>
+      ),
+      className: "flex items-center gap-2",
     },
     {
       id: "facilityUnit",
-      label: "实施单位",
-      icon: <BriefcaseMedical className="h-4 w-4 text-blue-500" />,
-      displayValue: (item: any) => "基础医学实验中心",
+      label: "动物实施设备单位",
+      value: (item: any) => (
+        <div className="flex items-center">
+          <BriefcaseMedical className="h-4 w-4 text-blue-500 mr-2" />
+          <span>{item.facilityUnit || item.动物实施设备单位 || "基础医学实验中心"}</span>
+        </div>
+      ),
+      className: "flex items-center gap-2",
     },
   ]
   
   // 卡片操作
   const customCardActions = [
     {
+      id: "view",
       label: "查看详情",
+      icon: <Eye className="h-4 w-4" />,
       onClick: (item: any) => router.push(`/ethic-projects/${item.id}`),
     },
     {
-      label: "创建审查",
-      onClick: (item: any) => router.push(`/ethic-projects/${item.id}/review/new`),
+      id: "edit",
+      label: "编辑项目",
+      icon: <Edit className="h-4 w-4" />,
+      onClick: (item: any) => router.push(`/ethic-projects/${item.id}/edit`),
     },
     {
-      label: "删除",
+      id: "delete",
+      label: "删除项目",
+      icon: <Trash2 className="h-4 w-4" />,
       onClick: (item: any) => handleDeleteProject(item.id),
       className: "text-red-600 hover:text-red-800",
     },
   ]
+
+  // 处理视图模式变更
+  const handleViewModeChange = (mode: string) => {
+    setViewMode(mode as "grid" | "list");
+  }
 
   return (
     <div className="space-y-4">
@@ -414,74 +504,65 @@ export default function AnimalEthicProjectsPage() {
 
         <div>
           <ClientOnly>
-            {React.createElement(DataList as any, {
-              title: "动物伦理", 
-              data: paginatedProjects,
-              onAddNew: () => router.push("/ethic-projects/create/animal"),
-              addButtonLabel: "新建动物伦理",
-              onOpenSettings: () => setIsTemplatesDialogOpen(true),
-              settingsButtonLabel: "模板库",
-              onAIAssist: handleAIAssist,
-              searchValue: searchTerm,
-              onSearchChange: setSearchTerm,
-              onSearch: handleSearch,
-              quickFilters: quickFilters.map(filter => ({
-                ...filter,
-                options: filter.options || [] 
-              })),
-              quickFilterValues: filterValues,
-              onQuickFilterChange: (filterId: string, value: string) => {
+            <DataList 
+              title="动物伦理"
+              data={paginatedProjects}
+              onAddNew={() => router.push("/ethic-projects/create/animal")}
+              addButtonLabel="新建动物伦理"
+              onOpenSettings={() => setIsTemplatesDialogOpen(true)}
+              settingsButtonLabel="模板库"
+              onAIAssist={handleAIAssist}
+              searchValue={searchTerm}
+              onSearchChange={setSearchTerm}
+              onSearch={handleSearch}
+              quickFilters={quickFilters}
+              quickFilterValues={filterValues}
+              onQuickFilterChange={(filterId: string, value: string) => {
                 setFilterValues(prev => ({
                   ...prev,
                   [filterId]: value
                 }));
                 setCurrentPage(1);
-              },
-              sortOptions: sortOptions,
-              activeSortOption: sortOption,
-              onSortChange: setSortOption,
-              defaultViewMode: viewMode,
-              onViewModeChange: setViewMode,
-              tableColumns: tableColumns,
-              tableActions: customTableActions,
-              visibleColumns: visibleColumns,
-              onVisibleColumnsChange: setVisibleColumns,
-              cardFields: cardFields,
-              cardActions: customCardActions,
-              titleField: "name",
-              descriptionField: "description",
-              statusField: "status",
-              statusVariants: adaptedStatusColors,
-              progressField: "progress",
-              tasksField: { completed: "tasks.completed", total: "tasks.total" },
-              pagination: {
-                currentPage: currentPage,
-                pageSize: pageSize,
-                totalItems: totalItems,
-                onPageChange: setCurrentPage,
-                onPageSizeChange: setPageSize
-              },
-              advancedFilters: {
-                categories: filterCategories,
-                onApply: () => {
-                  console.log("应用高级筛选")
-                  setCurrentPage(1)
-                }
-              },
-              emptyState: {
-                title: "暂无动物伦理项目",
-                description: "您可以创建新的动物伦理项目或从模板库中选择",
-                icon: <FileText className="h-10 w-10 text-muted-foreground" />,
-              },
-              type: "animal",
-              customCardRenderer: (item, actions, isSelected, onToggleSelect) => {
+              }}
+              sortOptions={sortOptions}
+              activeSortOption={sortOption}
+              onSortChange={setSortOption}
+              defaultViewMode={viewMode}
+              onViewModeChange={handleViewModeChange}
+              tableColumns={tableColumns}
+              tableActions={customTableActions}
+              visibleColumns={visibleColumns}
+              onVisibleColumnsChange={setVisibleColumns}
+              cardFields={cardFields}
+              cardActions={customCardActions}
+              titleField="name"
+              descriptionField="description"
+              statusField="status"
+              statusVariants={adaptedStatusColors}
+              progressField="progress"
+              tasksField={{ completed: "tasks.completed", total: "tasks.total" }}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalItems={totalItems}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+              categories={filterCategories}
+              onAdvancedFilter={() => {
+                console.log("应用高级筛选")
+                setCurrentPage(1)
+              }}
+              noResultsText="暂无动物伦理项目，您可以点击新建动物伦理按钮创建新的项目，或从模板库中选择"
+              customCardRenderer={(item: any, actions: any, isSelected: boolean, onToggleSelect: any) => {
+                // 在控制台输出项目信息，确认数据是否正确
+                console.log("正在渲染项目:", item);
+                
                 // 创建包含动物种系、动物数量等数据的项目对象
                 const extendedItem = {
                   ...item,
                   动物种系: item.animalType || "大鼠",
-                  动物数量: item.animalCount || "245只",
-                  伦理委员会: "医学院伦理审查委员会",
-                  动物实施设备单位: "基础医学实验中心",
+                  动物数量: item.animalCount || "45只",
+                  伦理委员会: item.ethicsCommittee || "医学院伦理审查委员会",
+                  动物实施设备单位: item.facilityUnit || "基础医学实验中心",
                   进行中: "3",
                   已完成: "1",
                 };
@@ -497,16 +578,14 @@ export default function AnimalEthicProjectsPage() {
                     statusVariants={adaptedStatusColors}
                     progressField="progress"
                     tasksField={{ completed: "tasks.completed", total: "tasks.total" }}
-                    detailsUrl={`/ethic-projects/${item.id}`}
-                    className=""
+                    type="animal"
                     selected={isSelected}
                     onSelect={onToggleSelect}
                     onClick={() => router.push(`/ethic-projects/${item.id}`)}
-                    type="animal"
                   />
                 );
-              }
-            })}
+              }}
+            />
           </ClientOnly>
         </div>
       </div>

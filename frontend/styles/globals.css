@@ -93,3 +93,20 @@ body {
   }
 }
 
+/* 覆盖padding值 */
+@media (min-width: 1024px) {
+  .lg\:p-8 {
+    padding: 0.5rem !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .md\:p-6 {
+    padding: 0.5rem !important;
+  }
+}
+
+.p-4.md\:p-6.lg\:p-8 {
+  padding: 0.5rem !important;
+}
+

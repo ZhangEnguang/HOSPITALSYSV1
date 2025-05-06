@@ -113,6 +113,7 @@ interface DataListProps {
   }[]
   customTable?: () => React.ReactNode
   showColumnToggle?: boolean
+  showHeaderButtons?: boolean
   customCardRenderer?: (
     item: any, 
     actions: CardAction[], 
@@ -310,6 +311,7 @@ export default function DataList({
   categories = [],
   customTable,
   showColumnToggle,
+  showHeaderButtons = true,
   customCardRenderer,
 }: DataListProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">(defaultViewMode)
@@ -427,6 +429,7 @@ export default function DataList({
         settingsButtonLabel={settingsButtonLabel}
         customActions={customActions}
         addButtonDropdownItems={addButtonDropdownItems}
+        showButtons={showHeaderButtons}
       />
 
       <DataListToolbar

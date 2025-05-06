@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { usePathname, useSearchParams, useRouter } from "next/navigation"
-import { ArrowDownAZ, ArrowUpZA, ChevronDown, EyeOff, Filter, MoreHorizontal, Settings, X } from "lucide-react"
+import { ArrowDownAZ, ArrowUpZA, ChevronDown, EyeOff, Filter, MoreHorizontal, Settings, X, Plus, Braces } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -101,6 +101,16 @@ export interface DataListProps {
   onSort?: (columnId: string, direction: "asc" | "desc" | null) => void
   defaultViewMode?: "table" | "card"
   onItemClick?: (item: any) => void
+  onAddNew?: () => void
+  onOpenSettings?: () => void
+  onAIAssist?: () => void
+  categories?: string[]
+  idField?: string
+  addButtonDropdownItems?: { label: string; onClick: () => void; icon?: React.ReactNode }[]
+  showColumnToggle?: boolean
+  aiButtonLabel?: string
+  settingsButtonLabel?: string
+  addButtonLabel?: string
 }
 
 export default function DataList({
@@ -129,6 +139,16 @@ export default function DataList({
   onSort,
   defaultViewMode = "card", // 默认为卡片视图
   onItemClick,
+  onAddNew,
+  onOpenSettings,
+  onAIAssist,
+  categories = [],
+  idField = "id",
+  addButtonDropdownItems = [],
+  showColumnToggle = false,
+  aiButtonLabel = "AI智能填报",
+  settingsButtonLabel = "设置",
+  addButtonLabel,
 }: DataListProps) {
   const router = useRouter()
   const pathname = usePathname()
