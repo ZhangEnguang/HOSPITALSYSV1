@@ -160,7 +160,7 @@ export default function DataListTable<T extends { id: string }>({
                   <TableRow
                     key={item.id}
                     onClick={() => onItemClick && onItemClick(item)}
-                    className={onItemClick ? "cursor-pointer hover:bg-muted/50" : ""}
+                    className=""
                   >
                     {/* 选择列单元格 */}
                     <TableCell onClick={(e) => e.stopPropagation()} className="whitespace-nowrap">

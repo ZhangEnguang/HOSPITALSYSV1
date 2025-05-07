@@ -152,11 +152,10 @@ export default function DataListCard({
   return (
     <Card
       className={cn(
-        "group cursor-pointer transition-all duration-300 border border-[#E9ECF2] shadow-none hover:shadow-[0px_38px_45px_0px_rgba(198,210,241,0.25)] hover:border-primary/20",
+        "group transition-all duration-300 border border-[#E9ECF2] shadow-none hover:shadow-[0px_38px_45px_0px_rgba(198,210,241,0.25)] hover:border-primary/20",
         selected && "ring-2 ring-primary",
         className
       )}
-      onClick={handleClick}
     >
       <CardHeader className="p-6">
         <div className="flex items-start justify-between">

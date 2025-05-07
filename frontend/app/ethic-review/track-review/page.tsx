@@ -240,6 +240,30 @@ function TrackReviewContent() {
     setSelectedRows(selectedIds)
   }
 
+  // 批量操作按钮
+  const batchActions = [
+    {
+      label: "批量审核",
+      onClick: () => {
+        toast({
+          title: "批量审核",
+          description: `已选择 ${selectedRows.length} 个项目进行批量审核`,
+          duration: 3000,
+        })
+      },
+    },
+    {
+      label: "批量删除",
+      onClick: () => {
+        toast({
+          title: "批量删除",
+          description: `已选择 ${selectedRows.length} 个项目进行批量删除`,
+          duration: 3000,
+        })
+      },
+    },
+  ]
+
   // 处理视图模式变化
   const handleViewModeChange = (viewMode: string) => {
     if (viewMode === "grid" || viewMode === "list") {
@@ -343,6 +367,7 @@ function TrackReviewContent() {
           </Button>
         }
         showHeaderButtons={false}
+        batchActions={batchActions}
       />
     </div>
   )

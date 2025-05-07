@@ -1,7 +1,7 @@
 "use client"
 
-import { humanGeneticsReviewItems } from "./data/human-genetics-review-demo-data"
-import { useRouter, useSearchParams } from "next/navigation"
+import { quickReviewItems } from "./data/quick-review-demo-data"
+import { useRouter } from "next/navigation"
 import { Suspense, useState, useEffect } from "react"
 import DataList from "@/components/data-management/data-list"
 import { 
@@ -13,8 +13,15 @@ import {
   filterCategories,
   dataListStatusVariants,
   getStatusName
-} from "./config/human-genetics-review-config"
-import { useToast } from "@/components/ui/use-toast"
+} from "./config/quick-review-config"
+import { Brain, Eye, Users, ClipboardCheck, MoreVertical } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu"
 
 // 定义排序选项类型
 interface SortOption {
@@ -24,25 +31,30 @@ interface SortOption {
   label: string
 }
 
-function HumanGeneticsReviewContent() {
+// 定义列类型
+interface Column {
+  id: string
+  header: string
+  accessorKey?: string
+  cell: (item: any) => JSX.Element
+}
+
+function QuickReviewContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const { toast } = useToast()
   
   // 状态管理
-  const [data, setData] = useState(humanGeneticsReviewItems)
-  const [totalItems, setTotalItems] = useState(humanGeneticsReviewItems.length)
+  const [data, setData] = useState(quickReviewItems)
+  const [totalItems, setTotalItems] = useState(quickReviewItems.length)
   const [viewMode, setViewMode] = useState<"grid" | "list">("list")
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [searchValue, setSearchValue] = useState("")
   const [sortOption, setSortOption] = useState(sortOptions[0].id)
   const [filterValues, setFilterValues] = useState({
+    projectSubType: "全部类型",
     reviewType: "全部类型",
     status: "全部状态",
-    projectType: "全部类型",
-    ethicsCommittee: "全部委员会",
-    approvalType: "全部类型",
+    reviewResult: "全部结果",
   })
   const [seniorFilterValues, setSeniorFilterValues] = useState<Record<string, any>>({})
   const [visibleColumns, setVisibleColumns] = useState(
@@ -52,6 +64,8 @@ function HumanGeneticsReviewContent() {
   
   // 定义排序选项类型
   const typedSortOptions: SortOption[] = sortOptions as unknown as SortOption[]
+  // 定义表格列类型
+  const typedTableColumns: Column[] = tableColumns as Column[]
 
   // 处理视图模式切换
   const handleViewModeChange = (mode: string) => {
@@ -72,23 +86,30 @@ function HumanGeneticsReviewContent() {
   // 处理搜索执行
   const handleSearchExecute = () => {
     if (!searchValue.trim()) {
-      setData(humanGeneticsReviewItems)
-      setTotalItems(humanGeneticsReviewItems.length)
+      setData(quickReviewItems)
+      setTotalItems(quickReviewItems.length)
       return
     }
 
     const searchLower = searchValue.toLowerCase()
-    const filteredData = humanGeneticsReviewItems.filter(item => 
-      item.projectId.toLowerCase().includes(searchLower) ||
+    const filteredData = quickReviewItems.filter(item => 
+      item.projectId?.toLowerCase().includes(searchLower) ||
       item.name.toLowerCase().includes(searchLower) ||
       item.department?.toLowerCase().includes(searchLower) ||
       item.projectLeader?.name?.toLowerCase().includes(searchLower) ||
-      item.approvalType?.toLowerCase().includes(searchLower)
+      (item.mainReviewers && item.mainReviewers.some(reviewer => 
+        reviewer?.name?.toLowerCase().includes(searchLower)
+      ))
     )
     
     setData(filteredData)
     setTotalItems(filteredData.length)
     setCurrentPage(1)
+  }
+
+  // 处理搜索值变化
+  const handleSearchChange = (value: string) => {
+    setSearchValue(value)
   }
 
   // 处理排序变化
@@ -126,17 +147,17 @@ function HumanGeneticsReviewContent() {
   const handleQuickFilterChange = (filterId: string, value: string) => {
     setFilterValues(prev => ({ ...prev, [filterId]: value }))
     
-    let filtered = [...humanGeneticsReviewItems]
+    let filtered = [...quickReviewItems]
     
     // 应用所有筛选条件
     const newFilters = { ...filterValues, [filterId]: value }
     
-    // 审查类型筛选
-    if (newFilters.approvalType !== "全部类型") {
-      filtered = filtered.filter(item => item.approvalType === newFilters.approvalType)
+    // 项目类型筛选
+    if (newFilters.projectSubType !== "全部类型") {
+      filtered = filtered.filter(item => item.projectSubType === newFilters.projectSubType)
     }
     
-    // 研究类型筛选
+    // 审查类型筛选
     if (newFilters.reviewType !== "全部类型") {
       filtered = filtered.filter(item => item.reviewType === newFilters.reviewType)
     }
@@ -146,9 +167,9 @@ function HumanGeneticsReviewContent() {
       filtered = filtered.filter(item => item.status === newFilters.status)
     }
     
-    // 伦理委员会筛选
-    if (newFilters.ethicsCommittee !== "全部委员会") {
-      filtered = filtered.filter(item => item.ethicsCommittee === newFilters.ethicsCommittee)
+    // 审查结果筛选
+    if (newFilters.reviewResult !== "全部结果") {
+      filtered = filtered.filter(item => item.reviewResult === newFilters.reviewResult)
     }
     
     setData(filtered)
@@ -161,23 +182,28 @@ function HumanGeneticsReviewContent() {
     setSeniorFilterValues(filters)
     
     // 筛选逻辑
-    let filtered = [...humanGeneticsReviewItems]
+    let filtered = [...quickReviewItems]
     
     // 项目编号筛选
     if (filters.projectId) {
       filtered = filtered.filter(item => 
-        item.projectId.toLowerCase().includes(filters.projectId.toLowerCase())
+        item.projectId?.toLowerCase().includes(filters.projectId.toLowerCase())
       )
     }
     
     // 审查类型筛选
-    if (filters.approvalType) {
-      filtered = filtered.filter(item => item.approvalType === filters.approvalType)
-    }
-    
-    // 研究类型筛选
     if (filters.reviewType) {
       filtered = filtered.filter(item => item.reviewType === filters.reviewType)
+    }
+    
+    // 项目类型筛选
+    if (filters.projectSubType) {
+      filtered = filtered.filter(item => item.projectSubType === filters.projectSubType)
+    }
+    
+    // 项目类型筛选
+    if (filters.projectType) {
+      filtered = filtered.filter(item => item.projectType === filters.projectType)
     }
     
     // 项目名称筛选
@@ -187,16 +213,11 @@ function HumanGeneticsReviewContent() {
       )
     }
     
-    // 所属院系筛选
+    // 所属科室筛选
     if (filters.department) {
       filtered = filtered.filter(item => 
         item.department?.toLowerCase().includes(filters.department.toLowerCase())
       )
-    }
-    
-    // 伦理委员会筛选
-    if (filters.ethicsCommittee) {
-      filtered = filtered.filter(item => item.ethicsCommittee === filters.ethicsCommittee)
     }
     
     // 状态筛选
@@ -216,32 +237,22 @@ function HumanGeneticsReviewContent() {
       )
     }
 
-    // 遗传材料筛选
-    if (filters.geneticMaterial) {
+    // 主审委员筛选
+    if (filters.mainReviewer) {
       filtered = filtered.filter(item => 
-        item.geneticMaterial?.toLowerCase().includes(filters.geneticMaterial.toLowerCase())
+        item.mainReviewers && item.mainReviewers.some(reviewer => 
+          reviewer?.name?.toLowerCase().includes(filters.mainReviewer.toLowerCase())
+        )
       )
     }
 
-    // 测序方法筛选
-    if (filters.geneticTest) {
-      filtered = filtered.filter(item => 
-        item.geneticTest?.toLowerCase().includes(filters.geneticTest.toLowerCase())
-      )
-    }
-
-    // 数据保护措施筛选
-    if (filters.dataProtection) {
-      filtered = filtered.filter(item => 
-        item.dataProtection?.toLowerCase().includes(filters.dataProtection.toLowerCase())
-      )
-    }
-
-    // 样本数量筛选
-    if (filters.sampleSize) {
-      filtered = filtered.filter(item => 
-        item.sampleSize === parseInt(filters.sampleSize)
-      )
+    // 提交日期筛选
+    if (filters.submissionDate) {
+      const filterDate = new Date(filters.submissionDate)
+      filtered = filtered.filter(item => {
+        const itemDate = new Date(item.submissionDate)
+        return itemDate.toDateString() === filterDate.toDateString()
+      })
     }
     
     setData(filtered)
@@ -259,105 +270,88 @@ function HumanGeneticsReviewContent() {
     setSelectedRows(selected)
   }
 
-  // 批量操作按钮
-  const batchActions = [
-    {
-      label: "批量审核",
-      onClick: () => {
-        toast({
-          title: "批量审核",
-          description: `已选择 ${selectedRows.length} 个项目进行批量审核`,
-          duration: 3000,
-        })
-      },
-    },
-    {
-      label: "批量删除",
-      onClick: () => {
-        toast({
-          title: "批量删除",
-          description: `已选择 ${selectedRows.length} 个项目进行批量删除`,
-          duration: 3000,
-        })
-      },
-    },
-  ]
-
-  // 处理点击项目
+  // 处理项目点击 - 现在不需要了，但保留函数以免其他地方引用
   const handleItemClick = (item: any) => {
-    router.push(`/ethic-review/human-genetics-review/${item.id}`)
+    // 取消跳转功能
+    // router.push(`/ethic-review/quick-review/${item.id}`)
+    console.log("点击项目", item.id)
   }
 
-  // 处理新建人遗审查
+  // 处理添加新项目
   const handleAddNew = () => {
-    router.push("/ethic-review/human-genetics-review/new")
+    router.push("/ethic-review/quick-review/create")
   }
 
-  // AI智能填报处理
+  // 处理AI辅助
   const handleAIAssist = () => {
-    console.log("打开AI智能填报")
+    console.log("启动AI智能填报")
   }
-
+  
+  // 处理查看详情
+  const handleViewDetails = (item: any) => {
+    router.push(`/ethic-review/quick-review/${item.id}`)
+  }
+  
+  // 处理分配专家
+  const handleAssignExperts = (item: any) => {
+    router.push(`/ethic-review/quick-review/${item.id}/assign`)
+  }
+  
+  // 处理意见汇总
+  const handleSummaryOpinions = (item: any) => {
+    router.push(`/ethic-review/quick-review/${item.id}/summary`)
+  }
+  
   return (
-    <div className="flex flex-col gap-4" style={{ background: "#F5F7FA", minHeight: "100%" }}>
-      <div
-        className="absolute top-0 left-0 right-0 h-[300px] -z-10"
-        style={{
-          background: "linear-gradient(180deg, rgba(39, 112, 255, 0.10) 0%, rgba(244, 246, 255, 0.00) 100%)",
-        }}
-      ></div>
-
-      <DataList
-        title="人遗审查"
-        data={data}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        onSearch={handleSearchExecute}
-        searchPlaceholder="搜索受理号、名称、院系、审查类型或负责人..."
-        noResultsText="未找到符合条件的人遗审查项目"
-        quickFilters={quickFilters.map(filter => ({...filter, category: "基本"}))}
-        onQuickFilterChange={handleQuickFilterChange}
-        quickFilterValues={filterValues}
-        categories={filterCategories}
-        onAdvancedFilter={handleAdvancedFilter}
-        filterValues={seniorFilterValues}
-        sortOptions={typedSortOptions}
-        activeSortOption={sortOption}
-        onSortChange={handleSortChange}
-        defaultViewMode="list"
-        onViewModeChange={handleViewModeChange}
-        tableColumns={tableColumns}
-        tableActions={cardActions}
-        visibleColumns={visibleColumns}
-        onVisibleColumnsChange={handleVisibleColumnsChange}
-        cardFields={cardFields}
-        cardActions={cardActions}
-        titleField="name"
-        descriptionField="description"
-        statusField="status"
-        statusVariants={dataListStatusVariants}
-        getStatusName={getStatusName}
-        priorityField="priority"
-        pageSize={pageSize}
-        currentPage={currentPage}
-        totalItems={totalItems}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
-        selectedRows={selectedRows}
-        onSelectedRowsChange={handleSelectionChange}
-        onItemClick={handleItemClick}
-        detailsUrlPrefix="/ethic-review/human-genetics-review"
-        showHeaderButtons={false}
-        batchActions={batchActions}
-      />
-    </div>
+    <DataList
+      title="快速审查"
+      data={data}
+      addButtonLabel="新建"
+      onAddNew={handleAddNew}
+      searchValue={searchValue}
+      searchPlaceholder="搜索项目名称、院系或负责人..."
+      noResultsText="未找到符合条件的快速审查项目"
+      onSearchChange={handleSearchChange}
+      onSearch={handleSearchExecute}
+      quickFilters={quickFilters}
+      onQuickFilterChange={handleQuickFilterChange}
+      quickFilterValues={filterValues}
+      seniorFilterValues={seniorFilterValues}
+      onAdvancedFilter={handleAdvancedFilter}
+      categories={filterCategories}
+      sortOptions={sortOptions}
+      activeSortOption={sortOption}
+      onSortChange={handleSortChange}
+      defaultViewMode={viewMode}
+      onViewModeChange={handleViewModeChange}
+      tableColumns={typedTableColumns as any}
+      visibleColumns={visibleColumns}
+      onVisibleColumnsChange={handleVisibleColumnsChange}
+      cardFields={cardFields}
+      cardActions={cardActions}
+      titleField="name"
+      descriptionField="description"
+      statusField="status"
+      statusVariants={dataListStatusVariants}
+      getStatusName={getStatusName}
+      pageSize={pageSize}
+      currentPage={currentPage}
+      totalItems={totalItems}
+      onPageChange={handlePageChange}
+      onPageSizeChange={handlePageSizeChange}
+      selectedRows={selectedRows}
+      onSelectedRowsChange={handleSelectionChange}
+      idField="id"
+    />
   )
 }
 
-export default function HumanGeneticsReviewPage() {
+export default function QuickReviewPage() {
   return (
-    <Suspense fallback={<div>加载中...</div>}>
-      <HumanGeneticsReviewContent />
-    </Suspense>
+    <div className="flex flex-col min-h-[calc(100vh-4rem)]">
+      <Suspense fallback={<div>加载中...</div>}>
+        <QuickReviewContent />
+      </Suspense>
+    </div>
   )
 } 
