@@ -1,5 +1,52 @@
-// 导入共享的用户数据
-import { users } from "../../progress/config/progress-config"
+// 移除外部导入，使用本地用户数据
+// import { users } from "@/app/progress/config/progress-config"
+
+// 本地用户数据
+const localUsers = [
+  {
+    id: "u1",
+    name: "张三",
+    email: "zhangsan@example.com",
+    avatar: "/avatars/01.png",
+    department: "神经科学研究院",
+    title: "教授",
+  },
+  {
+    id: "u2",
+    name: "李四",
+    email: "lisi@example.com",
+    avatar: "/avatars/02.png",
+    department: "肿瘤医学中心",
+    title: "副教授",
+  },
+  {
+    id: "u3",
+    name: "王五",
+    email: "wangwu@example.com",
+    avatar: "/avatars/03.png",
+    department: "运动医学科学院",
+    title: "讲师",
+  },
+  {
+    id: "u4",
+    name: "赵六",
+    email: "zhaoliu@example.com",
+    avatar: "/avatars/04.png",
+    department: "药学院",
+    title: "研究员",
+  },
+  {
+    id: "u5",
+    name: "钱七",
+    email: "qianqi@example.com",
+    avatar: "/avatars/05.png",
+    department: "肿瘤医学中心",
+    title: "主任医师",
+  },
+]
+
+// 使用本地用户数据
+const activeUsers = localUsers
 
 // 审查类型选项
 export const REVIEW_TYPE_OPTIONS = [
@@ -20,7 +67,7 @@ export const initialReviewItems = [
     ethicsCommittee: "动物实验伦理委员会",
     status: "形审通过",
     priority: "高",
-    projectLeader: users[0],
+    projectLeader: activeUsers[0],
     completion: 100,
     dueDate: "2024-01-20",
     actualDate: "2024-01-15",
@@ -39,7 +86,7 @@ export const initialReviewItems = [
     ethicsCommittee: "医学伦理委员会",
     status: "已提交",
     priority: "高",
-    projectLeader: users[1],
+    projectLeader: activeUsers[1],
     completion: 40,
     dueDate: "2024-03-10",
     actualDate: null,
@@ -58,7 +105,7 @@ export const initialReviewItems = [
     ethicsCommittee: "医学伦理委员会",
     status: "已提交",
     priority: "中",
-    projectLeader: users[2],
+    projectLeader: activeUsers[2],
     completion: 60,
     dueDate: "2024-02-25",
     actualDate: null,
@@ -77,7 +124,7 @@ export const initialReviewItems = [
     ethicsCommittee: "动物实验伦理委员会",
     status: "形审退回",
     priority: "低",
-    projectLeader: users[3],
+    projectLeader: activeUsers[3],
     completion: 100,
     dueDate: "2024-01-30",
     actualDate: "2024-01-28",
@@ -96,7 +143,7 @@ export const initialReviewItems = [
     ethicsCommittee: "医学伦理委员会",
     status: "已提交",
     priority: "中",
-    projectLeader: users[4],
+    projectLeader: activeUsers[4],
     completion: 20,
     dueDate: "2024-04-15",
     actualDate: null,

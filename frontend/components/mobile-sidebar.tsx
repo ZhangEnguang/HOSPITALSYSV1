@@ -103,10 +103,16 @@ export default function MobileSidebar() {
                   {showEthicSubMenu && (
                     <div className="ml-8 mt-1">
                       <Link
-                        href="/initial-review"
+                        href="/ethic-review/initial-review"
                         className="flex items-center p-2 rounded-md text-[13px] text-gray-600 hover:bg-[#2156FF]/10 hover:text-[#2156FF]"
                       >
                         <span>初始审查</span>
+                      </Link>
+                      <Link
+                        href="/ethic-review/track-review"
+                        className="flex items-center p-2 rounded-md text-[13px] text-gray-600 hover:bg-[#2156FF]/10 hover:text-[#2156FF]"
+                      >
+                        <span>跟踪审查</span>
                       </Link>
                     </div>
                   )}

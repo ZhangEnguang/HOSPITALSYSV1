@@ -9,7 +9,7 @@ export default function CreateInitialReviewPage() {
   return (
     <div className="w-full py-6 min-h-screen">
       <div className="flex items-center px-8 mb-6">
-        <Link href="/initial-review" className="mr-4">
+        <Link href="/ethic-review/initial-review" className="mr-4">
           <Button variant="ghost" size="icon">
             <ArrowLeft className="h-5 w-5" />
           </Button>

@@ -112,9 +112,16 @@ export const getColumnVisibility = () => {
 export const tableColumns = [
   {
     id: "projectId",
-    header: "项目编号",
+    header: "受理号",
     accessorKey: "projectId",
-    cell: (item: any) => <div className="font-medium">{item.projectId || "-"}</div>,
+    cell: (item: any) => (
+      <div className="font-medium">
+        {item.status === "形审通过" ? 
+          (item.projectId || "-") : 
+          <span className="text-gray-400 text-sm">受理后自动生成</span>
+        }
+      </div>
+    ),
   },
   {
     id: "reviewType",
@@ -329,13 +336,13 @@ export const sortOptions = [
     id: "projectIdAsc",
     field: "projectId",
     direction: "asc",
-    label: "项目编号 (升序)"
+    label: "受理号 (升序)"
   },
   {
     id: "projectIdDesc",
     field: "projectId",
     direction: "desc",
-    label: "项目编号 (降序)"
+    label: "受理号 (降序)"
   },
   {
     id: "nameAsc",
@@ -431,9 +438,9 @@ export const filterCategories = [
     fields: [
       {
         id: "projectId",
-        label: "项目编号",
+        label: "受理号",
         type: "text",
-        placeholder: "请输入项目编号"
+        placeholder: "请输入受理号"
       },
       {
         id: "reviewType",

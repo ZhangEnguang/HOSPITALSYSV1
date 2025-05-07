@@ -139,10 +139,15 @@ export default function HorizontalMenu() {
       ]
     },
     { 
-      name: "初始审查", 
+      name: "伦理审查", 
       shortName: "审查",
       icon: <ClipboardCheck className="h-5 w-5" />, 
-      path: "/initial-review" 
+      path: "#",
+      subMenus: [
+        { name: "初始审查", path: "/ethic-review/initial-review" },
+        { name: "跟踪审查", path: "/ethic-review/track-review" },
+        { name: "人遗审查", path: "/ethic-review/human-genetics-review" },
+      ]
     },
     { 
       name: "进度管理", 

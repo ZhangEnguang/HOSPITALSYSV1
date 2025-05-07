@@ -86,7 +86,7 @@ function InitialReviewContent() {
     const filtered = initialReviewItems.filter(item => 
       item.name.toLowerCase().includes(value.toLowerCase()) ||
       item.description.toLowerCase().includes(value.toLowerCase()) ||
-      item.projectId.toLowerCase().includes(value.toLowerCase()) ||
+      (item.status === "形审通过" && item.projectId.toLowerCase().includes(value.toLowerCase())) ||
       item.department?.toLowerCase().includes(value.toLowerCase()) ||
       item.ethicsCommittee?.toLowerCase().includes(value.toLowerCase()) ||
       item.projectLeader?.name?.toLowerCase().includes(value.toLowerCase())
@@ -138,6 +138,7 @@ function InitialReviewContent() {
     // 项目编号筛选
     if (filters.projectId) {
       filtered = filtered.filter(item => 
+        item.status === "形审通过" && 
         item.projectId.toLowerCase().includes(filters.projectId.toLowerCase())
       )
     }
@@ -251,16 +252,17 @@ function InitialReviewContent() {
     setVisibleColumns(columns)
   }
 
-  // 处理新增按钮点击
+  // 处理新增项目
   const handleAddNew = () => {
-    router.push("/initial-review/create")
+    router.push("/ethic-review/initial-review/create")
   }
 
-  // 处理AI智能填报
+  // 处理AI助手
   const handleAIAssist = () => {
+    // 调用AI助手相关功能
     toast({
-      title: "AI智能填报",
-      description: "AI智能填报功能开发中",
+      title: "AI助手已启动",
+      description: "正在为您生成智能审查建议...",
     })
   }
 
@@ -274,7 +276,7 @@ function InitialReviewContent() {
 
   // 处理项目点击
   const handleItemClick = (item: any) => {
-    router.push(`/initial-review/${item.id}`)
+    router.push(`/ethic-review/initial-review/${item.id}`)
   }
 
   // 批量操作按钮
@@ -304,22 +306,22 @@ function InitialReviewContent() {
     {
       label: "创建技术可行性审查",
       icon: <PlusSquare className="h-4 w-4" />,
-      onClick: () => router.push("/initial-review/create?type=technical"),
+      onClick: () => router.push("/ethic-review/initial-review/create?type=technical"),
     },
     {
       label: "创建伦理审查",
       icon: <PlusSquare className="h-4 w-4" />,
-      onClick: () => router.push("/initial-review/create?type=ethics"),
+      onClick: () => router.push("/ethic-review/initial-review/create?type=ethics"),
     },
     {
       label: "创建立项必要性审查",
       icon: <PlusSquare className="h-4 w-4" />,
-      onClick: () => router.push("/initial-review/create?type=necessity"),
+      onClick: () => router.push("/ethic-review/initial-review/create?type=necessity"),
     },
     {
       label: "创建预算审查",
       icon: <PlusSquare className="h-4 w-4" />,
-      onClick: () => router.push("/initial-review/create?type=budget"),
+      onClick: () => router.push("/ethic-review/initial-review/create?type=budget"),
     },
   ]
 

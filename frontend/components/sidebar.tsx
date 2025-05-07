@@ -221,7 +221,9 @@ export default function Sidebar() {
       icon: <ClipboardCheck className="h-5 w-5" />, 
       path: "#",
       subMenus: [
-        { name: "初始审查", path: "/initial-review" },
+        { name: "初始审查", path: "/ethic-review/initial-review" },
+        { name: "跟踪审查", path: "/ethic-review/track-review" },
+        { name: "人遗审查", path: "/ethic-review/human-genetics-review" },
       ]
     },
     { 

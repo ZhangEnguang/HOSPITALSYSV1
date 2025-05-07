@@ -737,7 +737,7 @@ export default function EthicProjectCard({
             </div>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-end px-6 py-4 pt-2 gap-2 bg-gray-50/60">
+        <CardFooter className="flex justify-end px-6 py-2 pt-2 gap-2 bg-gray-50/60">
           <Button 
             variant="default" 
             size="sm" 
