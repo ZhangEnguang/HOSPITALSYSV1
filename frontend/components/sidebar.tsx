@@ -225,6 +225,7 @@ export default function Sidebar() {
         { name: "跟踪审查", path: "/ethic-review/track-review" },
         { name: "人遗审查", path: "/ethic-review/human-genetics-review" },
         { name: "快速审查", path: "/ethic-review/quick-review" },
+        { name: "会议审查", path: "/ethic-review/meeting-review" },
       ]
     },
     { 
