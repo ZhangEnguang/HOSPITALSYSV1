@@ -1,7 +1,7 @@
 "use client"
 
-import { AnimalInitialReviewForm } from "./components/animal-initial-review-form"
+import { AnimalInitialReview } from "./components/animal-initial-review"
 
 export default function AnimalInitialReviewPage() {
-  return <AnimalInitialReviewForm />
+  return <AnimalInitialReview />
 } 

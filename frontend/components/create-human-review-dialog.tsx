@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState } from "react";
 import { 
   Dialog,
@@ -20,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FileText, ChevronDown, Search, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface CreateHumanReviewDialogProps {
   isOpen: boolean;
@@ -299,6 +302,7 @@ export function CreateHumanReviewDialog({
   projectEthicsCommittee,
   onSubmit,
 }: CreateHumanReviewDialogProps) {
+  const router = useRouter();
   const [reviewType, setReviewType] = useState("");
   const [reviewMethod, setReviewMethod] = useState("");
   const [reviewDescription, setReviewDescription] = useState("");
@@ -321,10 +325,17 @@ export function CreateHumanReviewDialog({
   };
   
   const handleSubmit = () => {
-    // 处理提交审查表单的逻辑
-    console.log("提交人体伦理审查表单");
-    onSubmit();
-    handleClose();
+    // 如果选择了初始审查类型，导航到新增人体伦理初始审查页面
+    if (reviewType === "initial") {
+      console.log("导航到人体伦理初始审查页面");
+      router.push("/ethic-projects/review/human");
+      handleClose();
+    } else {
+      // 处理其他类型审查表单的逻辑
+      console.log("提交人体伦理审查表单");
+      onSubmit();
+      handleClose();
+    }
   };
 
   return (
