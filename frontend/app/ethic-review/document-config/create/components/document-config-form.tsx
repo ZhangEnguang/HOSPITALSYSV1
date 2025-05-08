@@ -865,18 +865,22 @@ export function DocumentConfigForm() {
         
         {/* 右侧智能推荐面板 */}
         <div className="w-[330px] shrink-0">
-          <Card className="sticky top-4">
-            <CardContent className="pt-6 px-5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2 text-primary">
+          <Card className="sticky top-4 overflow-hidden border-blue-100 dark:border-blue-900/50 shadow-md bg-gradient-to-br from-white to-blue-50/20 dark:from-gray-900 dark:to-blue-950/20">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500"></div>
+            <div className="absolute -top-12 -right-12 w-24 h-24 bg-blue-100/50 dark:bg-blue-900/20 rounded-full blur-xl"></div>
+            <div className="absolute -bottom-16 -left-16 w-40 h-40 bg-indigo-100/30 dark:bg-indigo-900/10 rounded-full blur-xl"></div>
+            
+            <CardContent className="pt-6 px-5 relative">
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-2 relative">
                   <Sparkles className="h-5 w-5 text-blue-500" />
-                  <h3 className="font-medium">智能推荐</h3>
+                  <h3 className="font-medium text-blue-700 dark:text-blue-300">智能推荐</h3>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowRecommendations(!showRecommendations)}
-                  className="text-xs"
+                  className="text-xs text-blue-500 hover:text-blue-600 hover:bg-blue-50/50 dark:hover:bg-blue-900/20"
                 >
                   {showRecommendations ? "隐藏" : "显示"}
                 </Button>
@@ -886,67 +890,97 @@ export function DocumentConfigForm() {
                 <div className="space-y-4">
                   {!formData.reviewType || !formData.projectType ? (
                     <div className="text-center py-8 text-gray-500 text-sm">
-                      <div className="bg-blue-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-3">
-                        <Lightbulb className="h-10 w-10 text-blue-500" />
+                      <div className="relative bg-gradient-to-b from-blue-50 to-indigo-50/50 dark:from-blue-900/30 dark:to-indigo-900/20 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-3 shadow-inner">
+                        <div className="absolute inset-0 rounded-full bg-blue-200/20 dark:bg-blue-500/10 animate-pulse"></div>
+                        <Lightbulb className="h-10 w-10 text-blue-500 relative z-10" />
                       </div>
-                      <p className="font-medium">请先选择审查类型和项目类型</p>
-                      <p className="mt-1 text-xs">以获取智能推荐文件清单</p>
+                      <p className="font-medium text-blue-700 dark:text-blue-300">请先选择审查类型和项目类型</p>
+                      <p className="mt-1 text-xs text-gray-500">以获取智能推荐文件清单</p>
                     </div>
                   ) : recommendations.length === 0 ? (
                     <div className="text-center py-8 text-gray-500 text-sm">
-                      <div className="bg-blue-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-3">
-                        <Lightbulb className="h-10 w-10 text-blue-500" />
+                      <div className="relative bg-gradient-to-b from-blue-50 to-indigo-50/50 dark:from-blue-900/30 dark:to-indigo-900/20 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-3 shadow-inner">
+                        <div className="absolute inset-0 rounded-full bg-blue-200/20 dark:bg-blue-500/10 animate-pulse"></div>
+                        <Lightbulb className="h-10 w-10 text-blue-500 relative z-10" />
                       </div>
-                      <p className="font-medium">当前所选类型暂无推荐文件</p>
-                      <p className="mt-1 text-xs">请尝试其他类型组合</p>
+                      <p className="font-medium text-blue-700 dark:text-blue-300">当前所选类型暂无推荐文件</p>
+                      <p className="mt-1 text-xs text-gray-500">请尝试其他类型组合</p>
                     </div>
                   ) : (
                     <>
-                      <div className="mb-3">
+                      <div className="mb-2">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={handleAddAllRecommendations}
-                          className="w-full text-sm bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 hover:text-blue-800 flex items-center justify-center gap-2"
+                          className="group w-full text-sm bg-white hover:bg-blue-50 dark:bg-gray-900 dark:hover:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800/50 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow transition-all duration-300 flex items-center justify-center gap-2"
                         >
-                          <Sparkles className="h-4 w-4" />
+                          <Sparkles className="h-4 w-4 animate-pulse text-blue-500" />
                           <span>一键添加全部推荐</span>
                         </Button>
                       </div>
                       
-                      <ScrollArea className="h-[400px] pr-3">
-                        <div className="space-y-3">
-                          {recommendations.map(rec => (
-                            <div key={rec.id} className="border border-blue-100 rounded-lg overflow-hidden bg-gradient-to-r from-blue-50/50 to-white">
-                              <div className="p-4">
-                                <div className="flex justify-between items-center mb-2">
-                                  <h4 className="font-medium text-blue-800">{rec.name}</h4>
+                      <ScrollArea className="h-[600px] pr-3">
+                        <div className="space-y-2">
+                          {recommendations.map((rec, index) => (
+                            <div 
+                              key={rec.id} 
+                              className="group border border-blue-200 dark:border-blue-900/40 rounded-lg overflow-hidden bg-white dark:bg-gray-900 shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300 hover:translate-y-[-2px]"
+                              style={{
+                                animationDelay: `${index * 100}ms`,
+                                animation: "fadeInUp 0.5s ease-out forwards",
+                                opacity: 0,
+                                transform: "translateY(5px)",
+                              }}
+                            >
+                              <style jsx global>{`
+                                @keyframes fadeInUp {
+                                  from {
+                                    opacity: 0;
+                                    transform: translateY(5px);
+                                  }
+                                  to {
+                                    opacity: 1;
+                                    transform: translateY(0);
+                                  }
+                                }
+                              `}</style>
+                              <div className="relative p-3">
+                                <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-blue-400 to-purple-500 opacity-80 rounded-tr-md rounded-br-md"></div>
+                                <div className="flex justify-between items-center mb-1.5">
+                                  <h4 className="font-medium text-blue-800 dark:text-blue-300 pl-2 transition-colors duration-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 text-sm">{rec.name}</h4>
                                   <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => handleAddRecommendation(rec)}
-                                    className="h-7 w-7 rounded-full bg-blue-100 hover:bg-blue-200 p-0 text-blue-700"
+                                    className="h-6 w-6 rounded-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-800/50 p-0 text-blue-700 dark:text-blue-300 transition-all duration-300 hover:scale-105 opacity-70 group-hover:opacity-100"
                                     title="添加到文件清单"
                                   >
-                                    <PlusIcon className="h-4 w-4" />
+                                    <PlusIcon className="h-3.5 w-3.5" />
                                   </Button>
                                 </div>
-                                <div className="flex flex-wrap gap-2 mb-2">
-                                  <Badge className="bg-blue-100 text-blue-700 border-0 text-xs px-2.5 py-0.5 rounded-md">
+                                <div className="flex flex-wrap gap-1.5 mb-1.5 pl-2">
+                                  <Badge className="bg-blue-100/80 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border-0 text-xs px-2 py-0.5 rounded-md transition-colors duration-300 group-hover:bg-blue-200 dark:group-hover:bg-blue-800/40">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1.5 inline-block"></span>
                                     {rec.type}
                                   </Badge>
                                   <Badge 
-                                    className={cn("text-xs px-2.5 py-0.5 rounded-md border-0", 
+                                    className={cn("text-xs px-2 py-0.5 rounded-md border-0 transition-colors duration-300",
                                       rec.requirementLevel === "必交" 
-                                        ? "bg-green-100 text-green-700" 
-                                        : "bg-amber-100 text-amber-700"
+                                        ? "bg-green-100/80 text-green-700 dark:bg-green-900/30 dark:text-green-400 group-hover:bg-green-200 dark:group-hover:bg-green-800/40" 
+                                        : "bg-amber-100/80 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 group-hover:bg-amber-200 dark:group-hover:bg-amber-800/40"
                                     )}
                                   >
+                                    <span className={cn("w-1.5 h-1.5 rounded-full mr-1.5 inline-block",
+                                      rec.requirementLevel === "必交" 
+                                        ? "bg-green-500 dark:bg-green-400" 
+                                        : "bg-amber-500 dark:bg-amber-400"
+                                    )}></span>
                                     {rec.requirementLevel}
                                   </Badge>
                                 </div>
                                 {rec.description && (
-                                  <p className="text-xs text-gray-600 mt-2 leading-relaxed">{rec.description}</p>
+                                  <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed pl-2 transition-colors duration-300 group-hover:text-gray-800 dark:group-hover:text-gray-300">{rec.description}</p>
                                 )}
                               </div>
                             </div>
