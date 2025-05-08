@@ -1,9 +1,0 @@
-/* 伦理项目详情页样式覆盖 */
-.ethic-project-detail-page {
-  width: 100%;
-}
-
-/* 覆盖详情页右侧空白区域的样式 */
-.ethic-project-detail-page > div > div {
-  padding-right: 0 !important;
-} 

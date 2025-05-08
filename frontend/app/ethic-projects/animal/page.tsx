@@ -399,13 +399,13 @@ export default function AnimalEthicProjectsPage() {
       id: "view",
       label: "查看详情",
       icon: <Eye className="h-4 w-4" />,
-      onClick: (item: any) => router.push(`/ethic-projects/${item.id}`),
+      onClick: (item: any) => router.push(`/ethic-projects/animal/${item.id}`),
     },
     {
       id: "edit",
       label: "编辑项目",
       icon: <Edit className="h-4 w-4" />,
-      onClick: (item: any) => router.push(`/ethic-projects/${item.id}/edit`),
+      onClick: (item: any) => router.push(`/ethic-projects/animal/edit/${item.id}`),
     },
     {
       id: "delete",
@@ -470,13 +470,13 @@ export default function AnimalEthicProjectsPage() {
       id: "view",
       label: "查看详情",
       icon: <Eye className="h-4 w-4" />,
-      onClick: (item: any) => router.push(`/ethic-projects/${item.id}`),
+      onClick: (item: any) => router.push(`/ethic-projects/animal/${item.id}`),
     },
     {
       id: "edit",
       label: "编辑项目",
       icon: <Edit className="h-4 w-4" />,
-      onClick: (item: any) => router.push(`/ethic-projects/${item.id}/edit`),
+      onClick: (item: any) => router.push(`/ethic-projects/animal/edit/${item.id}`),
     },
     {
       id: "delete",
@@ -547,6 +547,8 @@ export default function AnimalEthicProjectsPage() {
               onPageChange={setCurrentPage}
               onPageSizeChange={setPageSize}
               categories={filterCategories}
+              onItemClick={(item: any) => router.push(`/ethic-projects/animal/${item.id}`)}
+              detailsUrlPrefix="/ethic-projects/animal"
               onAdvancedFilter={() => {
                 console.log("应用高级筛选")
                 setCurrentPage(1)
@@ -581,7 +583,7 @@ export default function AnimalEthicProjectsPage() {
                     type="animal"
                     selected={isSelected}
                     onSelect={onToggleSelect}
-                    onClick={() => router.push(`/ethic-projects/${item.id}`)}
+                    onClick={() => router.push(`/ethic-projects/animal/${item.id}`)}
                   />
                 );
               }}

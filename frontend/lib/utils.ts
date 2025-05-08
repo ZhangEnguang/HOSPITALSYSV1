@@ -19,3 +19,12 @@ export function formatFileSize(bytes: number): string {
   
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
+
+/**
+ * 格式化日期为标准字符串格式
+ * @param date 日期对象
+ * @returns 格式化后的日期字符串（格式：YYYY-MM-DD）
+ */
+export function formatDateToString(date: Date): string {
+  return date.toISOString().split('T')[0];
+}

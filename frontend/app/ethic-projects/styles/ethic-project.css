@@ -1,0 +1,51 @@
+/* 伦理项目详情页样式覆盖 */
+.ethic-project-detail-page {
+  width: 100%;
+}
+
+/* 覆盖详情页右侧空白区域的样式 */
+.ethic-project-detail-page > div > div {
+  padding-right: 0 !important;
+} 
+
+/* 覆盖详情页右侧空白区域的样式 */
+.ethic-project-detail div[class*="overflow-auto"] {
+  padding-right: 0 !important;
+}
+
+/* 移除右侧占位区域 */
+.ethic-project-detail > div {
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+.ethic-project-detail > div > div {
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* 修复布局问题 */
+.detail-layout-wrapper {
+  max-width: none !important;
+  padding-right: 0 !important;
+}
+
+/* 移除不必要的右侧空白 */
+.detail-container {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* 增强对右侧审核信息区域的移除 */
+.ethic-project-detail [class*="grid-cols-"] {
+  grid-template-columns: 1fr !important;
+}
+
+.ethic-project-detail [data-sidebar="true"] {
+  display: none !important;
+}
+
+/* 确保内容区域占满整个页面宽度 */
+.ethic-project-detail [class*="col-span-"] {
+  grid-column: span 12 / span 12 !important;
+} 
