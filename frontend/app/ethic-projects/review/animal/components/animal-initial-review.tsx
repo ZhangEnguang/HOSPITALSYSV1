@@ -1,26 +1,55 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "@/components/ui/use-toast"
 
 import { ReviewFormBase } from "@/components/ethic-review/review-form-base"
 import { ProjectInfoCard, ProjectInfoField } from "@/components/ethic-review/project-info-card"
 import { ReviewFileList, ReviewFileItem } from "@/components/ethic-review/review-file-list"
 
+// 默认项目数据
+const DEFAULT_PROJECT_DATA = {
+  projectTitle: "实验性大鼠药代动力学研究",
+  animalType: "大鼠",
+  animalCount: "85",
+  facilityUnit: "基础医学实验中心",
+  leaderName: "张教授",
+  department: "基础医学院",
+  ethicsCommittee: "医学院伦理审查委员会"
+}
+
 // 动物伦理初始审查表单组件
 export function AnimalInitialReview({
-  projectData = {
-    projectTitle: "实验性鼠药物代谢研究",
-    animalType: "小鼠",
-    animalCount: "85",
-    facilityUnit: "基础医学实验中心",
-    leaderName: "张教授",
-    department: "基础医学院",
-    ethicsCommittee: "医学院伦理审查委员会"
-  }
+  projectData: initialProjectData = DEFAULT_PROJECT_DATA
 }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  
+  // 用于管理项目数据的状态
+  const [projectData, setProjectData] = useState(initialProjectData)
+  
+  // 从URL参数中获取项目ID和其他信息，并更新项目数据
+  useEffect(() => {
+    if (searchParams) {
+      const projectId = searchParams.get('projectId')
+      const animalType = searchParams.get('animalType')
+      const animalCount = searchParams.get('animalCount')
+      const facilityUnit = searchParams.get('facilityUnit')
+      
+      if (projectId) {
+        // 更新项目数据
+        setProjectData(prev => ({
+          ...prev,
+          projectTitle: decodeURIComponent(projectId),
+          // 如果有其他参数则更新，否则保持默认值
+          ...(animalType && { animalType: decodeURIComponent(animalType) }),
+          ...(animalCount && { animalCount: decodeURIComponent(animalCount) }),
+          ...(facilityUnit && { facilityUnit: decodeURIComponent(facilityUnit) }),
+        }))
+      }
+    }
+  }, [searchParams])
 
   // 项目信息字段定义
   const projectInfoFields: ProjectInfoField[] = [

@@ -1,26 +1,48 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "@/components/ui/use-toast"
 
 import { ReviewFormBase } from "@/components/ethic-review/review-form-base"
 import { ProjectInfoCard, ProjectInfoField } from "@/components/ethic-review/project-info-card"
 import { ReviewFileList, ReviewFileItem } from "@/components/ethic-review/review-file-list"
 
+// 默认项目数据
+const DEFAULT_PROJECT_DATA = {
+  projectTitle: "多人种样本基因测序与健康风险预测",
+  projectType: "心理学研究",
+  projectSource: "院内立项",
+  researchUnit: "外科学系",
+  leaderName: "刘教授",
+  department: "内分泌科",
+  ethicsCommittee: "北京医学伦理委员会"
+}
+
 // 人体伦理初始审查表单组件
 export function HumanInitialReview({
-  projectData = {
-    projectTitle: "新型糖尿病治疗药物临床研究",
-    projectType: "临床研究",
-    projectSource: "院内立项",
-    researchUnit: "内科学系",
-    leaderName: "刘教授",
-    department: "内分泌科",
-    ethicsCommittee: "医学院伦理审查委员会"
-  }
+  projectData: initialProjectData = DEFAULT_PROJECT_DATA
 }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  
+  // 用于管理项目数据的状态
+  const [projectData, setProjectData] = useState(initialProjectData)
+  
+  // 从URL参数中获取项目ID和其他信息，并更新项目数据
+  useEffect(() => {
+    if (searchParams) {
+      const projectId = searchParams.get('projectId')
+      if (projectId) {
+        // 实际应用中，这里应该是一个API调用来获取项目详细信息
+        // 简化起见，我们这里仅使用projectId作为项目标题
+        setProjectData({
+          ...projectData, 
+          projectTitle: decodeURIComponent(projectId)
+        })
+      }
+    }
+  }, [searchParams])
 
   // 项目信息字段定义
   const projectInfoFields: ProjectInfoField[] = [

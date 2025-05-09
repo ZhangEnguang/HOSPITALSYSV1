@@ -99,11 +99,14 @@ export function CreateAnimalReviewDialog({
     // 使用更直接的方式处理状态转换
     onOpenChange(false);
     
+    // 准备项目信息参数
+    const projectParams = `projectId=${encodeURIComponent(projectTitle)}`;
+    
     // 使用较长的延迟确保对话框完全关闭后再导航
     // 这样可以避免闪烁问题
     setTimeout(() => {
-      // 首先导航到目标页面
-      router.push("/ethic-projects/review/animal");
+      // 首先导航到目标页面，同时传递项目信息
+      router.push(`/ethic-projects/review/animal?${projectParams}`);
       
       // 然后执行onSubmit回调
       setTimeout(onSubmit, 100);

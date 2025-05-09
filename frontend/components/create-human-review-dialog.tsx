@@ -325,22 +325,25 @@ export function CreateHumanReviewDialog({
   };
   
   const handleSubmit = () => {
+    // 准备项目信息参数
+    const projectParams = `projectId=${encodeURIComponent(projectTitle)}`;
+    
     // 如果选择了初始审查类型，导航到新增人体伦理初始审查页面
     if (reviewType === "initial") {
       console.log("导航到人体伦理初始审查页面");
-      router.push("/ethic-projects/review/human");
+      router.push(`/ethic-projects/review/human?${projectParams}`);
       handleClose();
     } 
     // 如果选择了修正案审查，导航到新增人体伦理修正案审查页面
     else if (reviewType === "amendment") {
       console.log("导航到人体伦理修正案审查页面");
-      router.push("/ethic-projects/review/human/amendment");
+      router.push(`/ethic-projects/review/human/amendment?${projectParams}`);
       handleClose();
     }
     // 如果选择了年度/定期审查，导航到新增人体伦理年度/定期审查页面
     else if (reviewType === "annual") {
       console.log("导航到人体伦理年度/定期审查页面");
-      router.push("/ethic-projects/review/human/annual");
+      router.push(`/ethic-projects/review/human/annual?${projectParams}`);
       handleClose();
     }
     else {
