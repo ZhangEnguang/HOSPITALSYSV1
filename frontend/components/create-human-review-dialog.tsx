@@ -346,6 +346,12 @@ export function CreateHumanReviewDialog({
       router.push(`/ethic-projects/review/human/annual?${projectParams}`);
       handleClose();
     }
+    // 如果选择了安全性审查，导航到新增人体伦理安全性审查页面
+    else if (reviewType === "safety") {
+      console.log("导航到人体伦理安全性审查页面");
+      router.push(`/ethic-projects/review/human/safety?${projectParams}`);
+      handleClose();
+    }
     else {
       // 处理其他类型审查表单的逻辑
       console.log("提交人体伦理审查表单");
