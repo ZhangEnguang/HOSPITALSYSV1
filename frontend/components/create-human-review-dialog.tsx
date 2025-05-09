@@ -380,6 +380,30 @@ export function CreateHumanReviewDialog({
       router.push(`/ethic-projects/review/human/deviation?${fullParams}`);
       handleClose();
     }
+    // 添加暂停/终止研究审查的路由跳转
+    else if (reviewType === "suspension") {
+      console.log("导航到人体伦理暂停/终止研究审查页面");
+      
+      // 添加项目参数
+      const projectDetails = {
+        projectSource: "院内立项",
+        researchUnit: "医学研究院",
+        projectType: "临床研究",
+        leaderName: "王主任",
+        department: "医学研究院"
+      };
+      
+      // 构建完整的参数字符串
+      const fullParams = `${projectParams}${ethicsCommitteeParam}` + 
+        `&projectSource=${encodeURIComponent(projectDetails.projectSource)}` +
+        `&researchUnit=${encodeURIComponent(projectDetails.researchUnit)}` +
+        `&projectType=${encodeURIComponent(projectDetails.projectType)}` +
+        `&leaderName=${encodeURIComponent(projectDetails.leaderName)}` +
+        `&department=${encodeURIComponent(projectDetails.department)}`;
+      
+      router.push(`/ethic-projects/review/human/suspension?${fullParams}`);
+      handleClose();
+    }
     else {
       // 处理其他类型审查表单的逻辑
       console.log("提交人体伦理审查表单");
