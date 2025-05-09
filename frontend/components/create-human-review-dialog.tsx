@@ -328,28 +328,56 @@ export function CreateHumanReviewDialog({
     // 准备项目信息参数
     const projectParams = `projectId=${encodeURIComponent(projectTitle)}`;
     
+    // 如果有伦理委员会信息，添加到参数中
+    const ethicsCommitteeParam = ethicsCommittee ? `&ethicsCommittee=${encodeURIComponent(ethicsCommittee)}` : '';
+    
     // 如果选择了初始审查类型，导航到新增人体伦理初始审查页面
     if (reviewType === "initial") {
       console.log("导航到人体伦理初始审查页面");
-      router.push(`/ethic-projects/review/human?${projectParams}`);
+      router.push(`/ethic-projects/review/human?${projectParams}${ethicsCommitteeParam}`);
       handleClose();
     } 
     // 如果选择了修正案审查，导航到新增人体伦理修正案审查页面
     else if (reviewType === "amendment") {
       console.log("导航到人体伦理修正案审查页面");
-      router.push(`/ethic-projects/review/human/amendment?${projectParams}`);
+      router.push(`/ethic-projects/review/human/amendment?${projectParams}${ethicsCommitteeParam}`);
       handleClose();
     }
     // 如果选择了年度/定期审查，导航到新增人体伦理年度/定期审查页面
     else if (reviewType === "annual") {
       console.log("导航到人体伦理年度/定期审查页面");
-      router.push(`/ethic-projects/review/human/annual?${projectParams}`);
+      router.push(`/ethic-projects/review/human/annual?${projectParams}${ethicsCommitteeParam}`);
       handleClose();
     }
     // 如果选择了安全性审查，导航到新增人体伦理安全性审查页面
     else if (reviewType === "safety") {
       console.log("导航到人体伦理安全性审查页面");
-      router.push(`/ethic-projects/review/human/safety?${projectParams}`);
+      router.push(`/ethic-projects/review/human/safety?${projectParams}${ethicsCommitteeParam}`);
+      handleClose();
+    }
+    // 添加偏离方案审查的路由跳转
+    else if (reviewType === "deviation") {
+      console.log("导航到人体伦理偏离方案审查页面");
+      
+      // 添加更多可能的项目参数
+      // 注意：在实际应用中，这些参数可能需要从项目详情API中获取
+      const projectDetails = {
+        projectSource: "院内立项",
+        researchUnit: "医学研究院",
+        projectType: "临床研究",
+        leaderName: "王主任",
+        department: "医学研究院"
+      };
+      
+      // 构建完整的参数字符串
+      const fullParams = `${projectParams}${ethicsCommitteeParam}` + 
+        `&projectSource=${encodeURIComponent(projectDetails.projectSource)}` +
+        `&researchUnit=${encodeURIComponent(projectDetails.researchUnit)}` +
+        `&projectType=${encodeURIComponent(projectDetails.projectType)}` +
+        `&leaderName=${encodeURIComponent(projectDetails.leaderName)}` +
+        `&department=${encodeURIComponent(projectDetails.department)}`;
+      
+      router.push(`/ethic-projects/review/human/deviation?${fullParams}`);
       handleClose();
     }
     else {
