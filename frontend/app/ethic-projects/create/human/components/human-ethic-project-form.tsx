@@ -17,7 +17,9 @@ import {
   Info as InfoIcon, 
   User as UserIcon,
   FileText as FileTextIcon,
-  AlertCircle
+  AlertCircle,
+  PlusCircle,
+  Users
 } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -25,12 +27,36 @@ import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { useToast } from "@/hooks/use-toast"
 
+// 定义成员信息类型
+type MemberType = {
+  id: string;
+  name: string;
+  title: string;
+  department: string;
+  email: string;
+  phone: string;
+}
+
 export function HumanEthicProjectForm() {
   const router = useRouter()
   const { toast } = useToast()
   const [showCompletionDialog, setShowCompletionDialog] = useState(false)
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
   const [formTouched, setFormTouched] = useState<Record<string, boolean>>({})
+  
+  // 项目成员状态
+  const [members, setMembers] = useState<MemberType[]>([])
+  const [showMemberDialog, setShowMemberDialog] = useState(false)
+  const [currentMember, setCurrentMember] = useState<MemberType>({
+    id: "",
+    name: "",
+    title: "",
+    department: "",
+    email: "",
+    phone: ""
+  })
+  const [isEditingMember, setIsEditingMember] = useState(false)
+  const [memberErrors, setMemberErrors] = useState<Record<string, string>>({})
   
   // 表单数据
   const [formData, setFormData] = useState({
@@ -113,6 +139,136 @@ export function HumanEthicProjectForm() {
     return !errors[field]
   }
   
+  // 验证项目成员信息
+  const validateMember = () => {
+    const requiredFields = ["name", "department", "email"]
+    let isValid = true
+    const newErrors: Record<string, string> = {}
+    
+    // 验证必填字段
+    requiredFields.forEach(field => {
+      if (!currentMember[field as keyof typeof currentMember]) {
+        isValid = false
+        newErrors[field] = `${field === "name" ? "姓名" : 
+                             field === "department" ? "所属院系" : 
+                             field === "email" ? "电子邮箱" : ""} 不能为空`
+      }
+    })
+    
+    // 验证邮箱格式
+    if (currentMember.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(currentMember.email)) {
+        isValid = false
+        newErrors.email = "请输入有效的电子邮箱"
+      }
+      
+      // 检查邮箱是否重复（除了当前编辑的成员）
+      const duplicateEmail = members.find(m => 
+        m.email === currentMember.email && 
+        (!isEditingMember || m.id !== currentMember.id)
+      )
+      if (duplicateEmail) {
+        isValid = false
+        newErrors.email = `邮箱已存在，与成员 "${duplicateEmail.name}" 重复`
+      }
+    }
+    
+    setMemberErrors(newErrors)
+    return isValid
+  }
+
+  // 添加或更新成员
+  const handleAddOrUpdateMember = () => {
+    if (!validateMember()) return
+    
+    if (isEditingMember) {
+      // 更新成员
+      setMembers(prev => prev.map(member => 
+        member.id === currentMember.id ? currentMember : member
+      ))
+      toast({
+        title: "成员已更新",
+        description: `成员 ${currentMember.name} 的信息已更新`
+      })
+    } else {
+      // 添加新成员
+      const newMember = {
+        ...currentMember,
+        id: Date.now().toString()
+      }
+      setMembers(prev => [...prev, newMember])
+      toast({
+        title: "成员已添加",
+        description: `成员 ${newMember.name} 已添加到项目团队`
+      })
+    }
+    
+    // 重置表单并关闭对话框
+    setCurrentMember({
+      id: "",
+      name: "",
+      title: "",
+      department: "",
+      email: "",
+      phone: ""
+    })
+    setMemberErrors({})
+    setIsEditingMember(false)
+    setShowMemberDialog(false)
+  }
+
+  // 编辑成员
+  const handleEditMember = (member: MemberType) => {
+    setCurrentMember({...member})
+    setIsEditingMember(true)
+    setMemberErrors({})
+    setShowMemberDialog(true)
+  }
+
+  // 删除成员
+  const handleDeleteMember = (id: string) => {
+    const memberToDelete = members.find(m => m.id === id)
+    if (!memberToDelete) return
+    
+    setMembers(prev => prev.filter(member => member.id !== id))
+    toast({
+      title: "成员已删除",
+      description: `成员 "${memberToDelete.name}" 已从项目团队中移除`
+    })
+  }
+
+  // 打开新增成员对话框
+  const handleOpenAddMemberDialog = () => {
+    setCurrentMember({
+      id: "",
+      name: "",
+      title: "",
+      department: "",
+      email: "",
+      phone: ""
+    })
+    setMemberErrors({})
+    setIsEditingMember(false)
+    setShowMemberDialog(true)
+  }
+
+  // 更新当前成员信息
+  const updateMemberData = (field: string, value: any) => {
+    setCurrentMember(prev => ({
+      ...prev,
+      [field]: value
+    }))
+    // 清除对应字段的错误
+    if (memberErrors[field]) {
+      setMemberErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[field]
+        return newErrors
+      })
+    }
+  }
+  
   // 处理字段失焦事件
   const handleBlur = (field: string) => {
     // 标记字段为已触摸
@@ -164,6 +320,31 @@ export function HumanEthicProjectForm() {
       }
     }
     
+    // 检查项目成员是否为空
+    if (members.length === 0) {
+      toast({
+        title: "缺少项目成员",
+        description: "请至少添加一名项目成员",
+        variant: "destructive"
+      })
+      isValid = false;
+    }
+    
+    // 验证成员邮箱格式
+    members.forEach((member, index) => {
+      if (member.email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(member.email)) {
+          isValid = false
+          toast({
+            title: "成员信息有误",
+            description: `第${index + 1}个成员 ${member.name} 的邮箱格式不正确`,
+            variant: "destructive"
+          })
+        }
+      }
+    })
+    
     setFormErrors(newErrors)
     setFormTouched(prev => ({
       ...prev,
@@ -200,6 +381,7 @@ export function HumanEthicProjectForm() {
       
       // 这里添加提交表单的逻辑
       console.log("提交表单数据:", formData)
+      console.log("项目成员:", members)
       
       // 显示完成对话框
       setShowCompletionDialog(true)
@@ -243,6 +425,9 @@ export function HumanEthicProjectForm() {
       address: "",
       implementationUnit: "",
     })
+    
+    // 重置成员列表
+    setMembers([])
     
     // 重置错误和触摸状态
     setFormErrors({})
@@ -598,6 +783,110 @@ export function HumanEthicProjectForm() {
               className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
             />
           </div>
+          
+          {/* 项目成员信息 */}
+          <div className="pt-4">
+            <SectionTitle 
+              icon={<Users className="h-5 w-5" />} 
+              title="项目成员" 
+            />
+            
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <span className="text-sm text-gray-500">共 {members.length} 名成员</span>
+                {members.length > 0 && (
+                  <span className="ml-4 text-xs text-gray-400">
+                    提示：点击操作列中的按钮可编辑或删除成员
+                  </span>
+                )}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleOpenAddMemberDialog}
+                className="h-8 gap-1 text-xs bg-white border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300"
+              >
+                <PlusCircle className="h-3.5 w-3.5 mr-1" />
+                添加成员
+              </Button>
+            </div>
+            
+            {members.length > 0 ? (
+              <div className="border border-gray-200 rounded-md overflow-hidden shadow-sm">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-200">
+                      <th className="py-2.5 px-4 text-left font-medium text-gray-700 w-[15%]">姓名</th>
+                      <th className="py-2.5 px-4 text-left font-medium text-gray-700 w-[15%]">职称/职务</th>
+                      <th className="py-2.5 px-4 text-left font-medium text-gray-700 w-[20%]">所属院系</th>
+                      <th className="py-2.5 px-4 text-left font-medium text-gray-700 w-[25%]">电子邮箱</th>
+                      <th className="py-2.5 px-4 text-left font-medium text-gray-700 w-[15%]">联系电话</th>
+                      <th className="py-2.5 px-4 text-center font-medium text-gray-700 w-[10%]">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {members.map((member, index) => (
+                      <tr 
+                        key={member.id} 
+                        className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors`}
+                      >
+                        <td className="py-3 px-4 text-gray-900 font-medium">{member.name}</td>
+                        <td className="py-3 px-4 text-gray-700">{member.title || "-"}</td>
+                        <td className="py-3 px-4 text-gray-700">{member.department}</td>
+                        <td className="py-3 px-4 text-gray-700">{member.email}</td>
+                        <td className="py-3 px-4 text-gray-700">{member.phone || "-"}</td>
+                        <td className="py-2 px-2">
+                          <div className="flex justify-center space-x-3">
+                            <button
+                              type="button"
+                              onClick={() => handleEditMember(member)}
+                              className="text-blue-500 hover:text-blue-700 transition-colors"
+                              title="编辑"
+                            >
+                              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M16.862 4.487L18.549 2.799C18.9007 2.44733 19.3777 2.25005 19.875 2.25005C20.3723 2.25005 20.8493 2.44733 21.201 2.799C21.5527 3.15068 21.75 3.62766 21.75 4.125C21.75 4.62234 21.5527 5.09932 21.201 5.451L10.582 16.07C10.0533 16.5984 9.40137 16.9867 8.684 17.2L6 18L6.8 15.316C7.01328 14.5986 7.40163 13.9467 7.93 13.418L16.862 4.487ZM16.862 4.487L19.5 7.125" 
+                                  stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>  
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteMember(member.id)}
+                              className="text-red-500 hover:text-red-700 transition-colors"
+                              title="删除"
+                            >
+                              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14.74 9L14.394 18M9.606 18L9.26 9M19.228 5.79C19.57 5.842 19.91 5.897 20.25 5.956M19.228 5.79L18.16 19.673C18.1164 20.2383 17.8611 20.7662 17.445 21.1512C17.029 21.5363 16.4829 21.7502 15.916 21.75H8.084C7.5171 21.7502 6.97102 21.5363 6.55498 21.1512C6.13894 20.7662 5.88359 20.2383 5.84 19.673L4.772 5.79M19.228 5.79C18.0739 5.61552 16.9138 5.48769 15.75 5.407M4.772 5.79C4.43 5.842 4.09 5.897 3.75 5.956M4.772 5.79C5.92613 5.61552 7.08623 5.48769 8.25 5.407M15.75 5.407V4.477C15.75 3.297 14.84 2.313 13.66 2.276C12.5536 2.2406 11.4464 2.2406 10.34 2.276C9.16 2.313 8.25 3.297 8.25 4.477V5.407M15.75 5.407C13.2537 5.22095 10.7463 5.22095 8.25 5.407" 
+                                  stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="bg-white border border-dashed border-gray-300 rounded-md px-6 py-10 text-center">
+                <div className="mx-auto w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+                  <Users className="h-8 w-8 text-blue-500" />
+                </div>
+                <h3 className="text-base font-medium text-gray-900 mb-1">暂无项目成员</h3>
+                <p className="text-sm text-gray-500 mb-6 max-w-md mx-auto">
+                  您可以添加项目参与人员，系统将记录每位成员的基本信息和联系方式
+                </p>
+                <Button
+                  type="button"
+                  onClick={handleOpenAddMemberDialog}
+                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-md h-9 px-4 py-2 transition-colors focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+                >
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  添加项目成员
+                </Button>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
@@ -652,6 +941,116 @@ export function HumanEthicProjectForm() {
               className="bg-blue-600 hover:bg-blue-700 text-white rounded-md h-10 px-4 py-2 transition-colors focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
             >
               继续添加
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 项目成员对话框 */}
+      <Dialog open={showMemberDialog} onOpenChange={setShowMemberDialog}>
+        <DialogContent className="sm:max-w-[500px] rounded-lg border border-[#E9ECF2]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl font-semibold leading-none tracking-tight">
+              {isEditingMember ? "编辑成员信息" : "添加项目成员"}
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              {isEditingMember ? "更新此项目成员的信息。" : "填写项目成员的基本信息并添加到项目团队。"}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="member-name" className="text-muted-foreground">
+                  姓名 <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="member-name"
+                  value={currentMember.name}
+                  onChange={(e) => updateMemberData("name", e.target.value)}
+                  placeholder="请输入成员姓名"
+                  className={cn(
+                    "border-[#E9ECF2] rounded-md",
+                    memberErrors.name ? "border-red-500" : ""
+                  )}
+                />
+                <ErrorMessage message={memberErrors.name || ""} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="member-title" className="text-muted-foreground">职称/职务</Label>
+                <Input
+                  id="member-title"
+                  value={currentMember.title}
+                  onChange={(e) => updateMemberData("title", e.target.value)}
+                  placeholder="请输入职称或职务"
+                  className="border-[#E9ECF2] rounded-md"
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="member-department" className="text-muted-foreground">
+                  所属院系 <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="member-department"
+                  value={currentMember.department}
+                  onChange={(e) => updateMemberData("department", e.target.value)}
+                  placeholder="请输入所属院系"
+                  className={cn(
+                    "border-[#E9ECF2] rounded-md",
+                    memberErrors.department ? "border-red-500" : ""
+                  )}
+                />
+                <ErrorMessage message={memberErrors.department || ""} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="member-email" className="text-muted-foreground">
+                  电子邮箱 <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="member-email"
+                  type="email"
+                  value={currentMember.email}
+                  onChange={(e) => updateMemberData("email", e.target.value)}
+                  placeholder="请输入电子邮箱"
+                  className={cn(
+                    "border-[#E9ECF2] rounded-md",
+                    memberErrors.email ? "border-red-500" : ""
+                  )}
+                />
+                <ErrorMessage message={memberErrors.email || ""} />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="member-phone" className="text-muted-foreground">联系电话</Label>
+              <Input
+                id="member-phone"
+                value={currentMember.phone}
+                onChange={(e) => updateMemberData("phone", e.target.value)}
+                placeholder="请输入联系电话"
+                className="border-[#E9ECF2] rounded-md"
+              />
+            </div>
+          </div>
+          
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              className="border-[#E9ECF2] hover:bg-slate-50 rounded-md"
+              onClick={() => setShowMemberDialog(false)}
+            >
+              取消
+            </Button>
+            <Button
+              type="button"
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+              onClick={handleAddOrUpdateMember}
+            >
+              {isEditingMember ? "更新" : "添加"}
             </Button>
           </DialogFooter>
         </DialogContent>
