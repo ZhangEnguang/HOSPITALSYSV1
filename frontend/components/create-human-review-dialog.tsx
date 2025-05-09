@@ -330,7 +330,14 @@ export function CreateHumanReviewDialog({
       console.log("导航到人体伦理初始审查页面");
       router.push("/ethic-projects/review/human");
       handleClose();
-    } else {
+    } 
+    // 如果选择了修正案审查，导航到新增人体伦理修正案审查页面
+    else if (reviewType === "amendment") {
+      console.log("导航到人体伦理修正案审查页面");
+      router.push("/ethic-projects/review/human/amendment");
+      handleClose();
+    }
+    else {
       // 处理其他类型审查表单的逻辑
       console.log("提交人体伦理审查表单");
       onSubmit();
