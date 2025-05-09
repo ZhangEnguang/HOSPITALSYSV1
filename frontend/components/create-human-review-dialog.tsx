@@ -337,6 +337,12 @@ export function CreateHumanReviewDialog({
       router.push("/ethic-projects/review/human/amendment");
       handleClose();
     }
+    // 如果选择了年度/定期审查，导航到新增人体伦理年度/定期审查页面
+    else if (reviewType === "annual") {
+      console.log("导航到人体伦理年度/定期审查页面");
+      router.push("/ethic-projects/review/human/annual");
+      handleClose();
+    }
     else {
       // 处理其他类型审查表单的逻辑
       console.log("提交人体伦理审查表单");
