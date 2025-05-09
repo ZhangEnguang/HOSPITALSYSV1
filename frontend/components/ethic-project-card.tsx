@@ -24,7 +24,9 @@ import {
   ChevronDown,
   Search,
   X,
-  Eye
+  Eye,
+  CheckCircle2,
+  Clock
 } from "lucide-react";
 import { RatIcon, MouseIcon, RabbitIcon, MonkeyIcon, PigIcon, DogIcon } from "./animal-icons";
 import { cn } from "@/lib/utils";
@@ -90,24 +92,9 @@ interface EthicProjectCardProps {
 
 // 动物种类图标渲染函数
 const getAnimalIcon = (animalType: string) => {
-  const iconClass = "h-4 w-4 text-blue-500 flex-shrink-0";
-  
-  switch (animalType.toLowerCase()) {
-    case "大鼠":
-      return <RatIcon className={iconClass} />;
-    case "小鼠":
-      return <MouseIcon className={iconClass} />;
-    case "兔子":
-      return <RabbitIcon className={iconClass} />;
-    case "猴子":
-      return <MonkeyIcon className={iconClass} />;
-    case "猪":
-      return <PigIcon className={iconClass} />;
-    case "犬类":
-      return <DogIcon className={iconClass} />;
-    default:
-      return <PawPrint className={iconClass} />;
-  }
+  const iconClass = "h-4 w-4 text-gray-400 flex-shrink-0";
+  // 统一使用PawPrint图标
+  return <PawPrint className={iconClass} />;
 };
 
 // 修改Dialog组件的样式，使遮罩层更透明
@@ -664,66 +651,102 @@ export default function EthicProjectCard({
           </div>
         </CardHeader>
         <CardContent className="px-6 py-3 pt-0">
-          <div className="grid gap-3">
+          <div className="flex flex-col gap-4">
+            {/* 项目信息区 */}
             <div className="grid grid-cols-1 gap-2">
               {type === "animal" ? (
                 // 动物伦理卡片字段
                 <>
-                  <div className="flex items-center gap-2 text-sm whitespace-nowrap">
-                    {getAnimalIcon(animalType)}
-                    <span className="text-gray-600 flex-shrink-0">动物种系:</span>
+                  <div className="flex items-center justify-between text-sm whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      {getAnimalIcon(animalType)}
+                      <span className="text-gray-600 flex-shrink-0">动物种系:</span>
+                    </div>
                     <span className="font-medium truncate">{animalType}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm whitespace-nowrap">
-                    <FileText className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                    <span className="text-gray-600 flex-shrink-0">动物数量:</span>
+                  <div className="flex items-center justify-between text-sm whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <span className="text-gray-600 flex-shrink-0">动物数量:</span>
+                    </div>
                     <span className="font-medium truncate">{animalCount}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm whitespace-nowrap">
-                    <Building2 className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                    <span className="text-gray-600 flex-shrink-0">伦理委员会:</span>
+                  <div className="flex items-center justify-between text-sm whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <span className="text-gray-600 flex-shrink-0">伦理委员会:</span>
+                    </div>
                     <span className="font-medium truncate">{ethicsCommittee}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm whitespace-nowrap">
-                    <BriefcaseMedical className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                    <span className="text-gray-600 flex-shrink-0">动物实施设备单位:</span>
+                  <div className="flex items-center justify-between text-sm whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <BriefcaseMedical className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <span className="text-gray-600 flex-shrink-0">动物实施设备单位:</span>
+                    </div>
                     <span className="font-medium truncate">{facilityUnit}</span>
                   </div>
                 </>
               ) : (
                 // 人体伦理卡片字段
                 <>
-                  <div className="flex items-center gap-2 text-sm whitespace-nowrap">
-                    <Tag className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                    <span className="text-gray-600 flex-shrink-0">项目类型:</span>
+                  <div className="flex items-center justify-between text-sm whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <Tag className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <span className="text-gray-600 flex-shrink-0">项目类型:</span>
+                    </div>
                     <span className="font-medium truncate">{projectType}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm whitespace-nowrap">
-                    <Bookmark className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                    <span className="text-gray-600 flex-shrink-0">项目来源:</span>
+                  <div className="flex items-center justify-between text-sm whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <Bookmark className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <span className="text-gray-600 flex-shrink-0">项目来源:</span>
+                    </div>
                     <span className="font-medium truncate">{projectSource}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm whitespace-nowrap">
-                    <Building2 className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                    <span className="text-gray-600 flex-shrink-0">伦理委员会:</span>
+                  <div className="flex items-center justify-between text-sm whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <span className="text-gray-600 flex-shrink-0">伦理委员会:</span>
+                    </div>
                     <span className="font-medium truncate">{ethicsCommittee}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm whitespace-nowrap">
-                    <BriefcaseMedical className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                    <span className="text-gray-600 flex-shrink-0">研究单位:</span>
+                  <div className="flex items-center justify-between text-sm whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <BriefcaseMedical className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <span className="text-gray-600 flex-shrink-0">研究单位:</span>
+                    </div>
                     <span className="font-medium truncate">{humanFacilityUnit}</span>
                   </div>
                 </>
               )}
             </div>
+            
+            {/* 审查状态 - 胶囊标签版 */}
+            <div className="flex items-center justify-between text-sm whitespace-nowrap">
+              <div className="flex items-center gap-2">
+                <ClipboardList className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                <span className="text-gray-600 flex-shrink-0">审查进度:</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center px-2 py-0.5 bg-green-50 rounded-full border border-green-100">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-green-500 mr-1" />
+                  <span className="text-xs text-green-700 font-medium">{completedCount} 已批准</span>
+                </div>
+                <div className="flex items-center px-2 py-0.5 bg-amber-50 rounded-full border border-amber-100">
+                  <Clock className="h-3.5 w-3.5 text-amber-500 mr-1" />
+                  <span className="text-xs text-amber-700 font-medium">{inProgressCount} 审批中</span>
+                </div>
+              </div>
+            </div>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-end px-6 py-2 pt-2 gap-2 bg-gray-50/60">
-          <div className="flex space-x-2">
+        <CardFooter className="flex justify-end items-center px-6 py-3 border-t border-gray-100 bg-gradient-to-r from-gray-50/80 to-gray-50/40">
+          <div>
             {/* 创建审查按钮 */}
             <Button
               size="sm"
-              className="flex items-center gap-1"
+              variant="outline"
+              className="flex items-center gap-1.5 h-8 border-blue-200 bg-blue-50/50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm"
               onClick={openCreateReviewDialog}
             >
               <FileText className="h-3.5 w-3.5" />
