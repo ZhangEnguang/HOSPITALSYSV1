@@ -124,16 +124,17 @@ export default function TabsNavigation() {
           title = id ? `${baseTitle} ${id}` : baseTitle;
       }
 
-      // 创建新标签
+      // 创建新标签 - 添加时间戳确保ID唯一
+      const tabId = `${fullPath}-${Date.now()}`;
       const newTab: TabItem = {
-        id: fullPath,
+        id: tabId,
         title,
         icon: baseIcon,
         closable: true,
         path: fullPath,
       };
       setTabs((prev) => [...prev, newTab]);
-      setActiveTab(fullPath);
+      setActiveTab(tabId);
     } else if (baseTabInfo) {
       // 处理一级路由
       const newTab: TabItem = {

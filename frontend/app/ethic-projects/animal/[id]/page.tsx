@@ -13,8 +13,15 @@ import {
   ClipboardList,
   PenSquare,
   Trash2,
+  User,
+  PawPrint,
+  FileText,
+  Building2,
+  FileCheck,
 } from "lucide-react"
 import EthicProjectOverviewTab from "../components/overview-tab"
+import ReviewProgressTab from "../../components/tabs/review-progress-tab"
+import ReviewFilesTab from "../../components/tabs/review-files-tab"
 import "../../styles/ethic-project.css"
 
 // 添加全局样式覆盖
@@ -229,11 +236,20 @@ export default function AnimalEthicProjectDetailPage({ params }: { params: { id:
 
   // 获取项目详情
   const getProjectDetail = () => {
-    const project = animalEthicProjects.find((p) => p.id === params.id);
-    if (!project) return null;
+    // 确保使用正确的ID查找项目
+    const projectId = params.id;
+    console.log("正在查找动物伦理项目ID:", projectId);
+    
+    const project = animalEthicProjects.find((p) => p.id === projectId);
+    if (!project) {
+      console.error("未找到动物伦理项目:", projectId);
+      return null;
+    }
+    
+    console.log("找到动物伦理项目:", project.name);
 
     // 添加AI摘要数据
-    const aiSummary = projectAISummaries[params.id];
+    const aiSummary = projectAISummaries[projectId];
     if (aiSummary) {
       return {
         ...project,
@@ -305,6 +321,32 @@ export default function AnimalEthicProjectDetailPage({ params }: { params: { id:
       onTitleEdit={handleTitleEdit}
       onBack={handleBackToList}
       showReviewSidebar={false}
+      fields={[
+        {
+          id: "leader",
+          label: "负责人",
+          value: currentProject.leader?.name || "未指定",
+          icon: <User className="h-4 w-4 text-gray-400" />,
+        },
+        {
+          id: "animalType",
+          label: "动物种系",
+          value: currentProject.animalType,
+          icon: <PawPrint className="h-4 w-4 text-gray-400" />,
+        },
+        {
+          id: "animalCount",
+          label: "动物数量",
+          value: currentProject.animalCount,
+          icon: <FileText className="h-4 w-4 text-gray-400" />,
+        },
+        {
+          id: "ethicsCommittee",
+          label: "伦理委员会",
+          value: currentProject.ethicsCommittee,
+          icon: <Building2 className="h-4 w-4 text-gray-400" />,
+        }
+      ]}
       actions={[
         {
           id: "edit",
@@ -328,22 +370,16 @@ export default function AnimalEthicProjectDetailPage({ params }: { params: { id:
           component: <EthicProjectOverviewTab todo={currentProject} getPriorityColor={getPriorityColor} />,
         },
         {
-          id: "execution",
-          label: "执行过程",
-          icon: <GitBranch className="h-4 w-4" />,
-          component: <div className="p-6">项目执行过程内容（正在开发中）</div>,
+          id: "reviewProgress",
+          label: "审查进度",
+          icon: <FileCheck className="h-4 w-4" />,
+          component: <ReviewProgressTab />,
         },
         {
-          id: "risks",
-          label: "风险与问题",
-          icon: <AlertTriangle className="h-4 w-4" />,
-          component: <div className="p-6">项目风险与问题内容（正在开发中）</div>,
-        },
-        {
-          id: "reports",
-          label: "项目报告",
-          icon: <ClipboardList className="h-4 w-4" />,
-          component: <div className="p-6">项目报告内容（正在开发中）</div>,
+          id: "reviewFiles",
+          label: "送审文件",
+          icon: <FileText className="h-4 w-4" />,
+          component: <ReviewFilesTab />,
         },
       ]}
     />

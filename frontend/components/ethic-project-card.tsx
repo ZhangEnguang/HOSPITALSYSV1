@@ -650,6 +650,10 @@ export default function EthicProjectCard({
             </div>
           </div>
         </CardHeader>
+        {/* 标题与内容之间的高端分割线 */}
+        <div className="mx-6 mb-2">
+          <div className="h-[1px] bg-gradient-to-r from-blue-50 via-blue-200/40 to-blue-50"></div>
+        </div>
         <CardContent className="px-6 py-3 pt-0">
           <div className="flex flex-col gap-4">
             {/* 项目信息区 */}
@@ -720,27 +724,19 @@ export default function EthicProjectCard({
                 </>
               )}
             </div>
-            
-            {/* 审查状态 - 胶囊标签版 */}
-            <div className="flex items-center justify-between text-sm whitespace-nowrap">
-              <div className="flex items-center gap-2">
-                <ClipboardList className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                <span className="text-gray-600 flex-shrink-0">审查进度:</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="flex items-center px-2 py-0.5 bg-green-50 rounded-full border border-green-100">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-green-500 mr-1" />
-                  <span className="text-xs text-green-700 font-medium">{completedCount} 已批准</span>
-                </div>
-                <div className="flex items-center px-2 py-0.5 bg-amber-50 rounded-full border border-amber-100">
-                  <Clock className="h-3.5 w-3.5 text-amber-500 mr-1" />
-                  <span className="text-xs text-amber-700 font-medium">{inProgressCount} 审批中</span>
-                </div>
-              </div>
-            </div>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-end items-center px-6 py-3 border-t border-gray-100 bg-gradient-to-r from-gray-50/80 to-gray-50/40">
+        <CardFooter className="flex justify-between items-center px-6 py-3 border-t border-gray-100 bg-gradient-to-r from-gray-50/80 to-gray-50/40">
+          <div className="flex items-center gap-1">
+            <div className="flex items-center px-2 py-0.5 bg-green-50 rounded-full border border-green-100">
+              <CheckCircle2 className="h-3.5 w-3.5 text-green-500 mr-1" />
+              <span className="text-xs text-green-700 font-medium">{completedCount} 已批准</span>
+            </div>
+            <div className="flex items-center px-2 py-0.5 bg-amber-50 rounded-full border border-amber-100">
+              <Clock className="h-3.5 w-3.5 text-amber-500 mr-1" />
+              <span className="text-xs text-amber-700 font-medium">{inProgressCount} 审批中</span>
+            </div>
+          </div>
           <div>
             {/* 创建审查按钮 */}
             <Button
