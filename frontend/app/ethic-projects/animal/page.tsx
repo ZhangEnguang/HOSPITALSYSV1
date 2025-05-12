@@ -477,11 +477,7 @@ export default function AnimalEthicProjectsPage() {
       label: "上传实验数据",
       icon: <Upload className="h-4 w-4" />,
       onClick: (item: any) => {
-        toast({
-          title: "功能开发中",
-          description: `准备上传数据到项目：${item.name}`,
-          duration: 3000,
-        });
+        router.push(`/ethic-projects/animal/upload/${item.id}`);
       },
     },
     {
