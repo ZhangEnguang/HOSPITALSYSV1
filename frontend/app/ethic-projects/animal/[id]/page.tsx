@@ -28,6 +28,7 @@ import EthicProjectOverviewTab from "../components/overview-tab"
 import ReviewProgressTab from "../../components/tabs/review-progress-tab"
 import ReviewFilesTab from "../../components/tabs/review-files-tab"
 import ExperimentProgressTab from "../components/experiment-progress-tab"
+import RiskAnalysisTab from "../components/risk-analysis-tab"
 import ProjectTeamTab from "../../components/tabs/project-team-tab"
 import "../../styles/ethic-project.css"
 
@@ -183,13 +184,12 @@ const animalEthicProjects = [
 // 项目AI摘要内容
 const projectAISummaries: { [key: string]: AISummary } = {
   "1": {
-    content: "本项目严格遵循《实验动物管理条例》和国际实验动物3R福利准则。\n\n【伦理规范执行情况】\n• 已获得IACUC伦理委员会批准（批准号：IACUC-2023-05-15）\n• 符合《实验动物管理条例》所有要求\n• 通过实验动物福利认证，评分92/100（优秀）\n\n【3R原则实施情况】\n• 替代(Replacement)：建立体外细胞模型预筛选，减少20%动物用量\n• 减少(Reduction)：优化实验设计，使用功能性标志物减少取样频次\n• 优化(Refinement)：采用无创检测技术和精确麻醉方案，降低动物痛苦\n\n【动物福利保障措施】\n• 环境丰容化设施，自动温湿度控制系统\n• 专业兽医24小时值班监护\n• 详细疼痛管理方案，细化人道终点标准\n\n动物福利委员会每周监督评估，确保实验过程严格遵守伦理规范。",
+    content: "【伦理规范执行情况】\n• 已获得IACUC批准（批准号：IACUC-2023-05-15）\n• 动物福利认证评分92/100（优秀）\n\n【3R原则实施情况】\n• 替代：体外细胞模型减少20%动物用量\n• 减少：优化设计减少取样频次\n• 优化：无创检测技术减轻动物痛苦\n\n【动物福利保障措施】\n• 环境丰容设施，温湿度控制\n• 专业兽医监护\n• 人道终点标准",
     aiModel: "GPT-Scientific 2023",
     version: "v2.4.1",
     recommendations: [
-      "加强实验动物行为状态监测，完善环境丰容措施",
-      "优化麻醉和镇痛方案，进一步减轻动物实验痛苦",
-      "探索更多细胞模型替代方案，减少动物使用数量"
+      "加强实验动物行为状态监测",
+      "优化麻醉和镇痛方案"
     ],
     confidenceScore: 95,
     analysisTime: "2024-03-15 10:32",
@@ -200,13 +200,12 @@ const projectAISummaries: { [key: string]: AISummary } = {
     }
   },
   "2": {
-    content: "本项目严格执行《实验动物管理条例》和国际动物实验伦理标准。\n\n【伦理规范执行情况】\n• 已获得机构伦理委员会批准（批准号：IACUC-2023-08-22）\n• 所有实验人员均持有实验动物操作资质证书\n• 伦理合规评分88/100（良好）\n\n【3R原则实施情况】\n• 替代(Replacement)：使用计算机模拟预测药效，减少预实验动物使用\n• 减少(Reduction)：统计学优化样本量，精确计算最小必要动物数量\n• 优化(Refinement)：使用微创技术与自动化行为监测系统减轻痛苦\n\n项目进度符合启动阶段计划。实验设施与环境已完全准备，初步分化实验已完成。项目当前面临的主要挑战是干细胞纯度控制和分化方向调控，研究团队正在优化实验条件提高分化效率。",
+    content: "【伦理规范执行情况】\n• 已获批准（批准号：IACUC-2023-08-22）\n• 伦理合规评分88/100（良好）\n\n【3R原则实施情况】\n• 替代：计算机模拟预测减少预实验\n• 减少：统计学优化样本量\n• 优化：微创技术减轻痛苦\n\n项目进度符合启动阶段计划，主要挑战是干细胞纯度控制和分化方向调控。",
     aiModel: "GPT-Scientific 2023",
     version: "v2.4.1",
     recommendations: [
-      "加强实验条件精确控制，提高干细胞分化效率",
-      "建立更完善的质量控制体系",
-      "考虑引入先进的单细胞测序技术"
+      "加强实验条件精确控制",
+      "建立质量控制体系"
     ],
     confidenceScore: 92,
     analysisTime: "2024-03-12 15:47",
@@ -217,13 +216,12 @@ const projectAISummaries: { [key: string]: AISummary } = {
     }
   },
   "3": {
-    content: "本项目已顺利完成全部实验内容，严格遵守动物福利与伦理规范。\n\n【伦理规范执行情况】\n• 获得伦理委员会全程监督认可（批准号：IACUC-2022-11-05）\n• 伦理合规评分96/100（优秀）\n• 荣获机构年度动物福利示范项目称号\n\n【3R原则实施情况】\n• 替代(Replacement)：成功应用体外组织培养技术替代30%动物实验\n• 减少(Reduction)：通过优化实验设计，比计划减少15%动物使用量\n• 优化(Refinement)：使用先进镇痛技术与环境丰容化措施，显著提升动物福利\n\n项目产出了5篇高水平论文，其中2篇发表在本领域顶级期刊。实验发现的神经干细胞促进脊髓损伤修复新机制具有显著临床转化价值，下一步计划开展临床前研究。项目资金使用效率高，实现了预期全部研究目标。",
+    content: "【伦理规范执行情况】\n• 伦理委员会批准（批准号：IACUC-2022-11-05）\n• 伦理合规评分96/100（优秀）\n\n【3R原则实施情况】\n• 替代：体外培养替代30%动物实验\n• 减少：比计划减少15%动物用量\n• 优化：先进镇痛与环境丰容提升福利\n\n项目产出5篇高水平论文，发现的神经干细胞促进脊髓损伤修复新机制具有临床转化价值。",
     aiModel: "GPT-Scientific 2023",
     version: "v2.4.1",
     recommendations: [
-      "整理完善研究数据，形成完整的技术报告",
-      "推进研究成果申请专利保护",
-      "探索与医疗机构合作，开展临床前研究"
+      "整理研究数据，形成技术报告",
+      "推进成果申请专利保护"
     ],
     confidenceScore: 98,
     analysisTime: "2024-02-28 09:15",
@@ -403,6 +401,12 @@ export default function AnimalEthicProjectDetailPage({ params }: { params: { id:
           label: "实验进度与结果",
           icon: <BarChart3 className="h-4 w-4" />,
           component: <ExperimentProgressTab />,
+        },
+        {
+          id: "riskAnalysis",
+          label: "风险与分析",
+          icon: <AlertTriangle className="h-4 w-4" />,
+          component: <RiskAnalysisTab todo={currentProject} />,
         },
         {
           id: "reviewFiles",

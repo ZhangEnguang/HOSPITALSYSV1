@@ -54,23 +54,23 @@ const FileStatusBadge = ({ status }: { status: string }) => {
   switch (status) {
     case "已通过":
     case "已审核":
-      color = "bg-green-100 text-green-700 border-green-300 shadow-sm"
+      color = "text-green-700 border-green-200"
       icon = <CheckCircle className="h-3.5 w-3.5 mr-1" />
       break
     case "审核中":
-      color = "bg-blue-100 text-blue-700 border-blue-300 shadow-sm"
+      color = "text-blue-700 border-blue-200"
       icon = <Clock className="h-3.5 w-3.5 mr-1" />
       break
     case "已驳回":
-      color = "bg-red-100 text-red-700 border-red-300 shadow-sm"
+      color = "text-red-700 border-red-200"
       icon = <AlertCircle className="h-3.5 w-3.5 mr-1" />
       break
     default:
-      color = "bg-gray-100 text-gray-700 border-gray-300 shadow-sm"
+      color = "text-gray-700 border-gray-200"
   }
   
   return (
-    <span className={`ml-3 px-2.5 py-1 text-xs font-medium rounded-md inline-flex items-center border ${color}`}>
+    <span className={`ml-3 px-2 py-0.5 text-xs font-medium rounded-md inline-flex items-center border ${color}`}>
       {icon}
       {status}
     </span>
@@ -163,34 +163,30 @@ export default function ReviewFilesTab() {
     };
     
     return (
-      <Card className="mb-4 overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+      <Card className="mb-4 border border-slate-200 rounded-lg shadow-none">
         <CardHeader 
-          className="py-3 px-4 bg-gradient-to-r from-blue-50 to-blue-50/30 border-b flex flex-row justify-between items-center cursor-pointer"
+          className="py-3 px-4 bg-white border-b border-slate-200 flex flex-row justify-between items-center cursor-pointer rounded-t-lg"
           onClick={() => setExpanded(!expanded)}
         >
           <CardTitle className="text-base font-medium flex items-center">
-            <div className="bg-blue-100 p-1.5 rounded-full mr-2.5">
-              <Calendar className="h-4 w-4 text-blue-600" />
-            </div>
-            <span className="text-blue-800 font-semibold">{title}</span>
+            <Calendar className="h-4 w-4 text-slate-500 mr-2" />
+            <span className="text-slate-800">{title}</span>
             <span className="ml-2 text-xs text-slate-500 font-normal border-l border-slate-200 pl-2">
               {date}
             </span>
             
             {/* 状态统计 */}
             <div className="ml-4 flex flex-wrap gap-1.5">
-              <Badge variant="outline" className="text-xs font-normal bg-white/80 text-slate-600 border-slate-200">
+              <Badge variant="outline" className="text-xs font-normal bg-white text-slate-600 border-slate-200 rounded-md">
                 共 {files.length} 项
               </Badge>
               {statusCounts.reviewed > 0 && (
-                <Badge variant="outline" className="text-xs font-normal bg-green-50/70 text-green-700 border-green-200 flex items-center">
-                  <CheckCircle className="h-3 w-3 mr-1" />
+                <Badge variant="outline" className="text-xs font-normal text-green-700 border-green-200 rounded-md">
                   已审核: {statusCounts.reviewed}
                 </Badge>
               )}
               {statusCounts.inProgress > 0 && (
-                <Badge variant="outline" className="text-xs font-normal bg-blue-50/70 text-blue-700 border-blue-200 flex items-center">
-                  <Clock className="h-3 w-3 mr-1" />
+                <Badge variant="outline" className="text-xs font-normal text-blue-700 border-blue-200 rounded-md">
                   审核中: {statusCounts.inProgress}
                 </Badge>
               )}
@@ -200,7 +196,7 @@ export default function ReviewFilesTab() {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-8 w-8 rounded-full hover:bg-blue-100/70 text-blue-600" 
+            className="h-8 w-8 rounded-full text-slate-500" 
             onClick={(e) => {
               e.stopPropagation();
               setExpanded(!expanded);
@@ -214,7 +210,7 @@ export default function ReviewFilesTab() {
         </CardHeader>
         
         <div className={`transition-all duration-300 ease-in-out ${expanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}`}>
-          <CardContent className="p-0">
+          <CardContent className="p-0 rounded-b-lg overflow-hidden">
             <div className="divide-y divide-slate-100">
               {files.map((file, index) => (
                 <div 
@@ -222,10 +218,10 @@ export default function ReviewFilesTab() {
                   className="flex items-center justify-between py-3.5 px-4 hover:bg-slate-50 transition-colors"
                 >
                   <div className="flex items-center">
-                    <div className="p-2.5 rounded-lg bg-slate-100 mr-3 border border-slate-200 shadow-sm">
+                    <div className="mr-3">
                       {getFileIcon(file.fileType)}
                     </div>
-                    <div className="ml-1">
+                    <div>
                       <div className="flex items-center">
                         <h3 className="text-sm font-medium text-slate-800">
                           {file.fileName}
@@ -233,10 +229,9 @@ export default function ReviewFilesTab() {
                         <FileStatusBadge status={file.status} />
                       </div>
                       <div className="flex items-center text-xs text-slate-500 mt-1.5">
-                        <span className="bg-slate-100 px-2 py-0.5 rounded-sm">{file.fileSize}</span>
+                        <span>{file.fileSize}</span>
                         <span className="mx-2 text-slate-300">•</span>
-                        <span className="flex items-center">
-                          <Calendar className="h-3 w-3 mr-1 text-slate-400" />
+                        <span>
                           {file.uploadDate}
                         </span>
                       </div>
@@ -246,7 +241,7 @@ export default function ReviewFilesTab() {
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-slate-500 hover:text-blue-600 hover:bg-blue-50">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-50">
                             <Eye className="h-4 w-4" />
                           </Button>
                         </TooltipTrigger>
@@ -259,7 +254,7 @@ export default function ReviewFilesTab() {
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-slate-500 hover:text-blue-600 hover:bg-blue-50">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-50">
                             <Download className="h-4 w-4" />
                           </Button>
                         </TooltipTrigger>

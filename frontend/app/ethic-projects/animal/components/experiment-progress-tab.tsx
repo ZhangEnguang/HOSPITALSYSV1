@@ -214,24 +214,7 @@ export default function ExperimentProgressTab({ todo }: { todo?: any }) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-slate-700">完成度</span>
-            <Badge variant="outline" className={`px-2 py-0.5 text-xs ${getStatusColor(calculateOverallProgress() === 100 ? "已完成" : "进行中")}`}>
-              {getStatusIcon(calculateOverallProgress() === 100 ? "已完成" : "进行中")}
-              {calculateOverallProgress()}%
-            </Badge>
-          </div>
-          <EnhancedProgress 
-            value={calculateOverallProgress()} 
-            size="lg"
-            showSegmentMarkers={true}
-            showSegmentLabels={true}
-            variant={calculateOverallProgress() === 100 ? "success" : "default"}
-            showAnimation={true}
-            className="mb-1"
-          />
-          
-          <div className="mt-6 space-y-1">
+          <div className="mt-0 space-y-1">
             {experimentStages.map((stage) => (
               <div key={stage.id} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
                 <div className="flex items-center gap-2">

@@ -233,15 +233,11 @@ export default function OverviewTab({
                         <span className="font-medium">最新分析已更新 - 检测到项目进度变更</span>
                       </div>
                       <p>
-                        该科研项目当前进度为<strong className="text-primary font-medium">45%</strong>，
-                        预计完成时间符合计划进度。项目经费使用率为
-                        <strong className="text-primary font-medium">33.3%</strong>（
-                        <span className="text-green-600">↓6.7%</span>），低于计划使用进度
-                        <strong className="text-slate-600 font-medium">10个百分点</strong>，
-                        建议加快设备采购和实验材料准备。项目已产出
-                        <strong className="text-primary font-medium">7项</strong>科研成果，
-                        其中高水平论文2篇，专利申请3项，技术转让2项，成果转化率达
-                        <strong className="text-primary font-medium">78%</strong>。
+                        项目进度<strong className="text-primary font-medium">45%</strong>，
+                        经费使用率<strong className="text-primary font-medium">33.3%</strong>
+                        （<span className="text-green-600">↓6.7%</span>），低于计划使用进度。
+                        已产出<strong className="text-primary font-medium">7项</strong>科研成果，
+                        成果转化率达<strong className="text-primary font-medium">78%</strong>。
                       </p>
                       <div className="flex items-start gap-4 my-3 py-2">
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
@@ -272,30 +268,22 @@ export default function OverviewTab({
                         <span className="font-medium text-primary">AI建议：</span>
                         <span className="inline-flex items-center gap-1.5 mt-1">
                           <ChevronRight className="h-3.5 w-3.5 text-primary" />
-                          <span>加快经费使用进度，特别是设备采购和实验材料准备，避免后期经费使用压力</span>
+                          <span>加快经费使用进度，特别是设备采购和实验材料准备</span>
                         </span>
                         <br />
                         <span className="inline-flex items-center gap-1.5 mt-1">
                           <ChevronRight className="h-3.5 w-3.5 text-primary" />
-                          <span>建议在下一季度安排2篇高水平论文投稿，提升项目学术影响力</span>
-                        </span>
-                        <br />
-                        <span className="inline-flex items-center gap-1.5 mt-1">
-                          <ChevronRight className="h-3.5 w-3.5 text-primary" />
-                          <span>优先推进"区块链经费管理系统"专利的企业合作，预计可增加180万转化收益</span>
+                          <span>优先推进"区块链经费管理系统"专利企业合作</span>
                         </span>
                       </p>
                     </>
                   ) : (
                     <>
                       <p>
-                        该科研项目当前进度为<strong className="text-primary font-medium">45%</strong>，
-                        符合预期计划。项目经费使用率为
-                        <strong className="text-primary font-medium">33.3%</strong>， 略低于计划进度。项目已产出
-                        <strong className="text-primary font-medium">5项</strong>科研成果，
-                        包括高水平论文、专利和技术转让。成果转化进展良好，专利转化率
-                        <strong className="text-primary font-medium">72%</strong>， 高于同类项目平均水平
-                        <strong className="text-slate-600 font-medium">53%</strong>。
+                        项目进度<strong className="text-primary font-medium">45%</strong>，
+                        经费使用率<strong className="text-primary font-medium">33.3%</strong>，
+                        已产出<strong className="text-primary font-medium">5项</strong>科研成果，
+                        专利转化率<strong className="text-primary font-medium">72%</strong>。
                       </p>
                       <div className="flex items-start gap-4 my-3 py-2">
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
@@ -330,11 +318,6 @@ export default function OverviewTab({
                         <span className="inline-flex items-center gap-1.5 mt-1">
                           <ChevronRight className="h-3.5 w-3.5 text-primary" />
                           <span>重点关注技术转让合同执行情况，确保按期交付</span>
-                        </span>
-                        <br />
-                        <span className="inline-flex items-center gap-1.5 mt-1">
-                          <ChevronRight className="h-3.5 w-3.5 text-primary" />
-                          <span>加强与高校和研究机构合作，提高成果影响力</span>
                         </span>
                       </p>
                     </>
