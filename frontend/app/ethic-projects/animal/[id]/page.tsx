@@ -19,11 +19,16 @@ import {
   Building2,
   FileCheck,
   BarChart3,
+  Users,
+  Mail,
+  Phone,
+  ExternalLink,
 } from "lucide-react"
 import EthicProjectOverviewTab from "../components/overview-tab"
 import ReviewProgressTab from "../../components/tabs/review-progress-tab"
 import ReviewFilesTab from "../../components/tabs/review-files-tab"
-import ExperimentProgressTab from "../../components/tabs/experiment-progress-tab"
+import ExperimentProgressTab from "../components/experiment-progress-tab"
+import ProjectTeamTab from "../../components/tabs/project-team-tab"
 import "../../styles/ethic-project.css"
 
 // 添加全局样式覆盖

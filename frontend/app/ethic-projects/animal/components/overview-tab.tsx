@@ -13,6 +13,10 @@ import {
   LineChart,
   LayoutGrid,
   StarIcon,
+  Building,
+  Mail,
+  Phone,
+  Users,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -650,6 +654,67 @@ export default function EthicProjectOverviewTab({
           </div>
         </CardContent>
       </Card>
+
+      {/* 项目团队成员卡片 */}
+      {todo.members && todo.members.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center">
+              项目团队成员
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-5">
+              {todo.members.map((member: any, index: number) => (
+                <div key={index} className={index > 0 ? "pt-5 border-t border-slate-100" : ""}>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="flex-shrink-0">
+                      <div className="h-9 w-9 rounded-full bg-slate-100 text-slate-700 font-medium flex items-center justify-center">
+                        {member.name.charAt(0)}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="font-medium text-slate-800">{member.name}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-500">{member.title}</span>
+                        {member.role && (
+                          <>
+                            <span className="text-xs text-slate-300">|</span>
+                            <span className="text-xs text-slate-500">{member.role}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-2 pl-12">
+                    <div>
+                      <div className="text-sm text-muted-foreground">所属院系</div>
+                      <div className="font-medium">{member.department}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">
+                        {member.contact.includes('@') ? '电子邮箱' : '联系电话'}
+                      </div>
+                      <div className="font-medium">
+                        {member.contact.includes('@') ? (
+                          <a href={`mailto:${member.contact}`} className="text-blue-600 hover:underline">
+                            {member.contact}
+                          </a>
+                        ) : (
+                          <a href={`tel:${member.contact}`} className="text-blue-600 hover:underline">
+                            {member.contact}
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 } 

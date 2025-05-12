@@ -136,7 +136,7 @@ const ReviewTypeSelect: React.FC<ReviewTypeSelectProps> = ({ value, onValueChang
     },
     {
       id: "tracking",
-      label: "跟踪报告",
+      label: "跟踪审查",
       items: [
         { id: "amendment", label: "修正案审查" },
         { id: "annual", label: "年度/定期审查" },
@@ -148,7 +148,7 @@ const ReviewTypeSelect: React.FC<ReviewTypeSelectProps> = ({ value, onValueChang
     },
     {
       id: "human_genetic",
-      label: "人遗资源",
+      label: "人遗审查",
       items: [
         { id: "collection", label: "人遗采集审批" },
         { id: "preservation", label: "人遗保藏审批" },

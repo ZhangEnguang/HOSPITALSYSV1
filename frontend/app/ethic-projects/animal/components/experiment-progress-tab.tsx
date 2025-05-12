@@ -19,14 +19,20 @@ import {
   ArrowRight,
   CheckCircle,
   AlertCircle,
-  Flask,
+  FlaskConical as Flask,
   Microscope,
   Beaker,
   BarChartHorizontal
 } from "lucide-react"
+import { SerumConcentrationChart } from "./charts/serum-concentration-chart"
+import { BasicSerumChart } from "./charts/basic-serum-chart"
+import { SimpleSerumChart } from "./charts/simple-serum-chart"
+import { LiverFunctionChart } from "./charts/liver-function-chart"
+import { MetaboliteDistributionChart } from "./charts/metabolite-distribution-chart"
+import { EnhancedProgress } from "./enhanced-progress"
 
 // 实验进度与结果标签页组件
-export default function ExperimentProgressTab({ todo }: { todo: any }) {
+export default function ExperimentProgressTab({ todo }: { todo?: any }) {
   const [activeTab, setActiveTab] = useState("progress")
   
   // 模拟实验阶段数据
@@ -215,7 +221,15 @@ export default function ExperimentProgressTab({ todo }: { todo: any }) {
               {calculateOverallProgress()}%
             </Badge>
           </div>
-          <Progress value={calculateOverallProgress()} className="h-2.5" />
+          <EnhancedProgress 
+            value={calculateOverallProgress()} 
+            size="lg"
+            showSegmentMarkers={true}
+            showSegmentLabels={true}
+            variant={calculateOverallProgress() === 100 ? "success" : "default"}
+            showAnimation={true}
+            className="mb-1"
+          />
           
           <div className="mt-6 space-y-1">
             {experimentStages.map((stage) => (
@@ -232,7 +246,19 @@ export default function ExperimentProgressTab({ todo }: { todo: any }) {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-20">
-                    <Progress value={stage.progress} className="h-1.5" />
+                    <EnhancedProgress 
+                      value={stage.progress} 
+                      size="sm"
+                      showSegmentMarkers={false}
+                      variant={
+                        stage.status === "已完成" 
+                          ? "success" 
+                          : stage.status === "进行中" 
+                            ? "default" 
+                            : "default"
+                      }
+                      showAnimation={stage.status === "进行中"}
+                    />
                   </div>
                   <Badge variant="outline" className={`px-2 py-0.5 text-xs ${getStatusColor(stage.status)}`}>
                     {getStatusIcon(stage.status)}
@@ -382,14 +408,23 @@ export default function ExperimentProgressTab({ todo }: { todo: any }) {
                     ))}
                   </div>
 
-                  {/* 图表占位区 - 实际项目中替换为真实的图表组件 */}
-                  <div className="mt-4 h-64 rounded-md bg-slate-50 border border-slate-100 flex items-center justify-center">
-                    <div className="flex flex-col items-center gap-2 text-slate-400">
-                      {result.type === "line-chart" && <LineChart className="h-10 w-10" />}
-                      {result.type === "bar-chart" && <BarChart className="h-10 w-10" />}
-                      {result.type === "pie-chart" && <PieChart className="h-10 w-10" />}
-                      <span className="text-sm">图表数据展示区域</span>
-                    </div>
+                  {/* 图表区 */}
+                  <div className="mt-4">
+                    {result.id === 1 && result.type === "line-chart" ? (
+                      <SimpleSerumChart />
+                    ) : result.id === 2 && result.type === "bar-chart" ? (
+                      <LiverFunctionChart />
+                    ) : result.id === 3 && result.type === "pie-chart" ? (
+                      <MetaboliteDistributionChart />
+                    ) : (
+                      <div className="h-64 rounded-md bg-slate-50 border border-slate-100 flex items-center justify-center">
+                        <div className="flex flex-col items-center gap-2 text-slate-400">
+                          {result.type === "bar-chart" && <BarChart className="h-10 w-10" />}
+                          {result.type === "pie-chart" && <PieChart className="h-10 w-10" />}
+                          <span className="text-sm">图表数据展示区域</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

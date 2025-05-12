@@ -281,15 +281,7 @@ export default function ReviewFilesTab() {
   return (
     <div className="space-y-6">
       {/* 页面标题部分 */}
-      <div className="border-b pb-4 mb-2">
-        <h2 className="text-xl font-semibold text-slate-800 flex items-center">
-          <FileText className="h-5 w-5 mr-2 text-blue-600" />
-          送审文件
-        </h2>
-        <p className="text-sm text-slate-500 mt-1">
-          项目的所有送审文件，按审查阶段分类展示
-        </p>
-      </div>
+
       
       {/* 文件组展示区域 */}
       <div className="space-y-5">
