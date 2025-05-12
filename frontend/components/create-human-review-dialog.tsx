@@ -461,6 +461,34 @@ export function CreateHumanReviewDialog({
       router.push(`/ethic-projects/review/human/genetic/international-clinical?${clinicalParams}`);
       handleClose();
     }
+    // 添加对外提供或开放使用备案的路由跳转
+    else if (reviewType === "external_use") {
+      console.log("导航到人体伦理对外提供或开放使用备案页面");
+      // 为对外提供或开放使用备案定制项目类型
+      const externalUseParams = `${projectParams}${ethicsCommitteeParam}` + 
+        `&projectSource=${encodeURIComponent("院内立项")}` +
+        `&researchUnit=${encodeURIComponent("生物医学研究中心")}` +
+        `&projectType=${encodeURIComponent("人类遗传资源对外提供或开放使用")}` +
+        `&leaderName=${encodeURIComponent(projectDetails.leaderName)}` +
+        `&department=${encodeURIComponent("基础医学院")}`;
+      
+      router.push(`/ethic-projects/review/human/genetic/external-use?${externalUseParams}`);
+      handleClose();
+    }
+    // 添加重要遗传家系和特定地区人遗资源的路由跳转
+    else if (reviewType === "important_resource") {
+      console.log("导航到人体伦理重要遗传家系和特定地区人遗资源页面");
+      // 为重要遗传家系和特定地区人遗资源定制项目类型
+      const importantResourceParams = `${projectParams}${ethicsCommitteeParam}` + 
+        `&projectSource=${encodeURIComponent("科研项目")}` +
+        `&researchUnit=${encodeURIComponent("遗传学研究中心")}` +
+        `&projectType=${encodeURIComponent("重要遗传家系和特定地区人遗资源")}` +
+        `&leaderName=${encodeURIComponent(projectDetails.leaderName)}` +
+        `&department=${encodeURIComponent("遗传学研究所")}`;
+      
+      router.push(`/ethic-projects/review/human/genetic/important-resource?${importantResourceParams}`);
+      handleClose();
+    }
     else {
       // 处理其他类型审查表单的逻辑
       console.log("提交人体伦理审查表单");
