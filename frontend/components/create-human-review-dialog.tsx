@@ -331,6 +331,24 @@ export function CreateHumanReviewDialog({
     // 如果有伦理委员会信息，添加到参数中
     const ethicsCommitteeParam = ethicsCommittee ? `&ethicsCommittee=${encodeURIComponent(ethicsCommittee)}` : '';
     
+    // 添加更多可能的项目参数
+    // 注意：在实际应用中，这些参数可能需要从项目详情API中获取
+    const projectDetails = {
+      projectSource: "院内立项",
+      researchUnit: "医学研究院",
+      projectType: "临床研究",
+      leaderName: "李教授",
+      department: "医学研究院"
+    };
+    
+    // 构建完整的参数字符串
+    const fullParams = `${projectParams}${ethicsCommitteeParam}` + 
+      `&projectSource=${encodeURIComponent(projectDetails.projectSource)}` +
+      `&researchUnit=${encodeURIComponent(projectDetails.researchUnit)}` +
+      `&projectType=${encodeURIComponent(projectDetails.projectType)}` +
+      `&leaderName=${encodeURIComponent(projectDetails.leaderName)}` +
+      `&department=${encodeURIComponent(projectDetails.department)}`;
+    
     // 如果选择了初始审查类型，导航到新增人体伦理初始审查页面
     if (reviewType === "initial") {
       console.log("导航到人体伦理初始审查页面");
@@ -358,74 +376,75 @@ export function CreateHumanReviewDialog({
     // 添加偏离方案审查的路由跳转
     else if (reviewType === "deviation") {
       console.log("导航到人体伦理偏离方案审查页面");
-      
-      // 添加更多可能的项目参数
-      // 注意：在实际应用中，这些参数可能需要从项目详情API中获取
-      const projectDetails = {
-        projectSource: "院内立项",
-        researchUnit: "医学研究院",
-        projectType: "临床研究",
-        leaderName: "王主任",
-        department: "医学研究院"
-      };
-      
-      // 构建完整的参数字符串
-      const fullParams = `${projectParams}${ethicsCommitteeParam}` + 
-        `&projectSource=${encodeURIComponent(projectDetails.projectSource)}` +
-        `&researchUnit=${encodeURIComponent(projectDetails.researchUnit)}` +
-        `&projectType=${encodeURIComponent(projectDetails.projectType)}` +
-        `&leaderName=${encodeURIComponent(projectDetails.leaderName)}` +
-        `&department=${encodeURIComponent(projectDetails.department)}`;
-      
       router.push(`/ethic-projects/review/human/deviation?${fullParams}`);
       handleClose();
     }
     // 添加暂停/终止研究审查的路由跳转
     else if (reviewType === "suspension") {
       console.log("导航到人体伦理暂停/终止研究审查页面");
-      
-      // 添加项目参数
-      const projectDetails = {
-        projectSource: "院内立项",
-        researchUnit: "医学研究院",
-        projectType: "临床研究",
-        leaderName: "王主任",
-        department: "医学研究院"
-      };
-      
-      // 构建完整的参数字符串
-      const fullParams = `${projectParams}${ethicsCommitteeParam}` + 
-        `&projectSource=${encodeURIComponent(projectDetails.projectSource)}` +
-        `&researchUnit=${encodeURIComponent(projectDetails.researchUnit)}` +
-        `&projectType=${encodeURIComponent(projectDetails.projectType)}` +
-        `&leaderName=${encodeURIComponent(projectDetails.leaderName)}` +
-        `&department=${encodeURIComponent(projectDetails.department)}`;
-      
       router.push(`/ethic-projects/review/human/suspension?${fullParams}`);
       handleClose();
     }
     // 添加研究完成审查的路由跳转
     else if (reviewType === "completion") {
       console.log("导航到人体伦理研究完成审查页面");
-      
-      // 添加项目参数
-      const projectDetails = {
-        projectSource: "院内立项",
-        researchUnit: "医学研究院",
-        projectType: "临床研究",
-        leaderName: "王主任",
-        department: "医学研究院"
-      };
-      
-      // 构建完整的参数字符串
-      const fullParams = `${projectParams}${ethicsCommitteeParam}` + 
+      router.push(`/ethic-projects/review/human/completion?${fullParams}`);
+      handleClose();
+    }
+    // 添加人遗采集审批的路由跳转
+    else if (reviewType === "collection") {
+      console.log("导航到人体伦理人遗采集审批页面");
+      // 为人遗采集审批定制项目类型
+      const geneticParams = `${projectParams}${ethicsCommitteeParam}` + 
         `&projectSource=${encodeURIComponent(projectDetails.projectSource)}` +
         `&researchUnit=${encodeURIComponent(projectDetails.researchUnit)}` +
-        `&projectType=${encodeURIComponent(projectDetails.projectType)}` +
+        `&projectType=${encodeURIComponent("人类遗传资源采集研究")}` +
         `&leaderName=${encodeURIComponent(projectDetails.leaderName)}` +
-        `&department=${encodeURIComponent(projectDetails.department)}`;
+        `&department=${encodeURIComponent("遗传学研究所")}`;
       
-      router.push(`/ethic-projects/review/human/completion?${fullParams}`);
+      router.push(`/ethic-projects/review/human/genetic/collection?${geneticParams}`);
+      handleClose();
+    }
+    // 添加人遗保藏审批的路由跳转
+    else if (reviewType === "preservation") {
+      console.log("导航到人体伦理人遗保藏审批页面");
+      // 为人遗保藏审批定制项目类型
+      const geneticParams = `${projectParams}${ethicsCommitteeParam}` + 
+        `&projectSource=${encodeURIComponent(projectDetails.projectSource)}` +
+        `&researchUnit=${encodeURIComponent(projectDetails.researchUnit)}` +
+        `&projectType=${encodeURIComponent("人类遗传资源保藏研究")}` +
+        `&leaderName=${encodeURIComponent(projectDetails.leaderName)}` +
+        `&department=${encodeURIComponent("遗传学研究所")}`;
+      
+      router.push(`/ethic-projects/review/human/genetic/preservation?${geneticParams}`);
+      handleClose();
+    }
+    // 添加国际合作科学研究审批的路由跳转
+    else if (reviewType === "international_research") {
+      console.log("导航到人体伦理国际合作科学研究审批页面");
+      // 为国际合作科学研究审批定制项目类型
+      const geneticParams = `${projectParams}${ethicsCommitteeParam}` + 
+        `&projectSource=${encodeURIComponent(projectDetails.projectSource)}` +
+        `&researchUnit=${encodeURIComponent(projectDetails.researchUnit)}` +
+        `&projectType=${encodeURIComponent("人类遗传资源国际合作科学研究")}` +
+        `&leaderName=${encodeURIComponent(projectDetails.leaderName)}` +
+        `&department=${encodeURIComponent("遗传学研究所")}`;
+      
+      router.push(`/ethic-projects/review/human/genetic/international-research?${geneticParams}`);
+      handleClose();
+    }
+    // 添加材料出境审批的路由跳转
+    else if (reviewType === "export") {
+      console.log("导航到人体伦理材料出境审批页面");
+      // 为材料出境审批定制项目类型
+      const geneticParams = `${projectParams}${ethicsCommitteeParam}` + 
+        `&projectSource=${encodeURIComponent(projectDetails.projectSource)}` +
+        `&researchUnit=${encodeURIComponent(projectDetails.researchUnit)}` +
+        `&projectType=${encodeURIComponent("人类遗传资源材料出境研究")}` +
+        `&leaderName=${encodeURIComponent(projectDetails.leaderName)}` +
+        `&department=${encodeURIComponent("遗传学研究所")}`;
+      
+      router.push(`/ethic-projects/review/human/genetic/export?${geneticParams}`);
       handleClose();
     }
     else {

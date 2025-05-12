@@ -1,6 +1,6 @@
 "use client"
 
-import { HumanSuspensionReview } from "./components/human-suspension-review"
+import { HumanSuspensionReview } from "@/app/ethic-projects/review/human/components/human-suspension-review"
 
 export default function HumanSuspensionReviewPage() {
   return (
