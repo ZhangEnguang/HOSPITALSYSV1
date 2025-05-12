@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { 
   AlertCircle, 
@@ -35,8 +35,8 @@ type MemberType = {
   phone: string;
 }
 
-// 动物伦理项目表单组件
-export function AnimalEthicProjectForm() {
+// 动物伦理项目编辑表单组件
+export function AnimalEthicProjectEditForm({ projectData }: { projectData: any }) {
   const router = useRouter()
 
   // 表单数据状态
@@ -87,6 +87,39 @@ export function AnimalEthicProjectForm() {
   
   // 完成对话框显示状态
   const [showCompletionDialog, setShowCompletionDialog] = useState(false)
+
+  // 加载项目数据
+  useEffect(() => {
+    if (projectData) {
+      // 更新表单数据
+      setFormData({
+        name: projectData.name || "",
+        projectNumber: projectData.projectNumber || "",
+        animalType: projectData.animalType || "",
+        animalCount: projectData.animalCount || "",
+        ethicsCommittee: projectData.ethicsCommittee || "",
+        facilityUnit: projectData.facilityUnit || "",
+        startDate: projectData.startDate ? new Date(projectData.startDate) : new Date(),
+        endDate: projectData.endDate ? new Date(projectData.endDate) : new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+        budget: projectData.budget || "",
+        
+        leader: projectData.leader || "",
+        department: projectData.department || "",
+        title: projectData.title || "",
+        phone: projectData.phone || "",
+        email: projectData.email || "",
+        address: projectData.address || "",
+        
+        researchPurpose: projectData.researchPurpose || "",
+        researchMethod: projectData.researchMethod || "",
+      })
+
+      // 更新成员列表
+      if (Array.isArray(projectData.members)) {
+        setMembers(projectData.members)
+      }
+    }
+  }, [projectData])
 
   // 更新表单数据
   const updateFormData = (field: string, value: any) => {
@@ -342,49 +375,6 @@ export function AnimalEthicProjectForm() {
     }
   }
 
-  // 继续添加
-  const handleContinueAdding = () => {
-    setShowCompletionDialog(false)
-    
-    // 重置表单
-    setFormData({
-      // 基本信息
-      name: "",
-      projectNumber: "",
-      animalType: "",
-      animalCount: "",
-      ethicsCommittee: "",
-      facilityUnit: "",
-      startDate: new Date(),
-      endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
-      budget: "",
-      
-      // 主要研究者信息
-      leader: "",
-      department: "",
-      title: "",
-      phone: "",
-      email: "",
-      address: "",
-      
-      // 研究信息
-      researchPurpose: "",
-      researchMethod: "",
-    })
-    
-    // 重置成员列表
-    setMembers([])
-    
-    // 重置错误和触摸状态
-    setFormErrors({})
-    setFormTouched({})
-    
-    toast({
-      title: "已清空表单",
-      description: "可以继续添加新项目"
-    })
-  }
-
   // 返回列表
   const handleReturnToList = () => {
     router.push("/ethic-projects/animal")
@@ -425,7 +415,7 @@ export function AnimalEthicProjectForm() {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold">新增动物伦理项目</h1>
+          <h1 className="text-2xl font-bold">编辑动物伦理项目</h1>
         </div>
       </div>
 
@@ -587,8 +577,12 @@ export function AnimalEthicProjectForm() {
               className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
             />
           </div>
+        </CardContent>
+      </Card>
 
-          {/* 研究信息 */}
+      {/* 研究信息 */}
+      <Card className="border-[#E9ECF2] shadow-sm">
+        <CardContent className="p-6 space-y-6">
           <SectionTitle 
             icon={<FileTextIcon className="h-5 w-5" />} 
             title="研究信息" 
@@ -617,8 +611,12 @@ export function AnimalEthicProjectForm() {
               rows={3}
             />
           </div>
+        </CardContent>
+      </Card>
 
-          {/* 主要研究者信息标题 */}
+      {/* 主要研究者信息 */}
+      <Card className="border-[#E9ECF2] shadow-sm">
+        <CardContent className="p-6 space-y-6">
           <SectionTitle 
             icon={<UserIcon className="h-5 w-5" />} 
             title="主要研究者信息" 
@@ -720,110 +718,112 @@ export function AnimalEthicProjectForm() {
               />
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* 项目成员信息 */}
+      <Card className="border-[#E9ECF2] shadow-sm">
+        <CardContent className="p-6 space-y-6">
+          <SectionTitle 
+            icon={<Users className="h-5 w-5" />} 
+            title="项目成员" 
+          />
           
-          {/* 项目成员信息 */}
-          <div className="pt-4">
-            <SectionTitle 
-              icon={<Users className="h-5 w-5" />} 
-              title="项目成员" 
-            />
-            
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
-                <span className="text-sm text-gray-500">共 {members.length} 名成员</span>
-                {members.length > 0 && (
-                  <span className="ml-4 text-xs text-gray-400">
-                    提示：点击操作列中的按钮可编辑或删除成员
-                  </span>
-                )}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <span className="text-sm text-gray-500">共 {members.length} 名成员</span>
+              {members.length > 0 && (
+                <span className="ml-4 text-xs text-gray-400">
+                  提示：点击操作列中的按钮可编辑或删除成员
+                </span>
+              )}
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleOpenAddMemberDialog}
+              className="h-8 gap-1 text-xs bg-white border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300"
+            >
+              <PlusCircle className="h-3.5 w-3.5 mr-1" />
+              添加成员
+            </Button>
+          </div>
+          
+          {members.length > 0 ? (
+            <div className="border border-gray-200 rounded-md overflow-hidden shadow-sm">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="py-2.5 px-4 text-left font-medium text-gray-700 w-[15%]">姓名</th>
+                    <th className="py-2.5 px-4 text-left font-medium text-gray-700 w-[15%]">职称/职务</th>
+                    <th className="py-2.5 px-4 text-left font-medium text-gray-700 w-[20%]">所属院系</th>
+                    <th className="py-2.5 px-4 text-left font-medium text-gray-700 w-[25%]">电子邮箱</th>
+                    <th className="py-2.5 px-4 text-left font-medium text-gray-700 w-[15%]">联系电话</th>
+                    <th className="py-2.5 px-4 text-center font-medium text-gray-700 w-[10%]">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {members.map((member, index) => (
+                    <tr 
+                      key={member.id} 
+                      className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors`}
+                    >
+                      <td className="py-3 px-4 text-gray-900 font-medium">{member.name}</td>
+                      <td className="py-3 px-4 text-gray-700">{member.title || "-"}</td>
+                      <td className="py-3 px-4 text-gray-700">{member.department}</td>
+                      <td className="py-3 px-4 text-gray-700">{member.email}</td>
+                      <td className="py-3 px-4 text-gray-700">{member.phone || "-"}</td>
+                      <td className="py-2 px-2">
+                        <div className="flex justify-center space-x-3">
+                          <button
+                            type="button"
+                            onClick={() => handleEditMember(member)}
+                            className="text-blue-500 hover:text-blue-700 transition-colors"
+                            title="编辑"
+                          >
+                            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M16.862 4.487L18.549 2.799C18.9007 2.44733 19.3777 2.25005 19.875 2.25005C20.3723 2.25005 20.8493 2.44733 21.201 2.799C21.5527 3.15068 21.75 3.62766 21.75 4.125C21.75 4.62234 21.5527 5.09932 21.201 5.451L10.582 16.07C10.0533 16.5984 9.40137 16.9867 8.684 17.2L6 18L6.8 15.316C7.01328 14.5986 7.40163 13.9467 7.93 13.418L16.862 4.487ZM16.862 4.487L19.5 7.125" 
+                                stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>  
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteMember(member.id)}
+                            className="text-red-500 hover:text-red-700 transition-colors"
+                            title="删除"
+                          >
+                            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M14.74 9L14.394 18M9.606 18L9.26 9M19.228 5.79C19.57 5.842 19.91 5.897 20.25 5.956M19.228 5.79L18.16 19.673C18.1164 20.2383 17.8611 20.7662 17.445 21.1512C17.029 21.5363 16.4829 21.7502 15.916 21.75H8.084C7.5171 21.7502 6.97102 21.5363 6.55498 21.1512C6.13894 20.7662 5.88359 20.2383 5.84 19.673L4.772 5.79M19.228 5.79C18.0739 5.61552 16.9138 5.48769 15.75 5.407M4.772 5.79C4.43 5.842 4.09 5.897 3.75 5.956M4.772 5.79C5.92613 5.61552 7.08623 5.48769 8.25 5.407M15.75 5.407V4.477C15.75 3.297 14.84 2.313 13.66 2.276C12.5536 2.2406 11.4464 2.2406 10.34 2.276C9.16 2.313 8.25 3.297 8.25 4.477V5.407M15.75 5.407C13.2537 5.22095 10.7463 5.22095 8.25 5.407" 
+                                stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="bg-white border border-dashed border-gray-300 rounded-md px-6 py-10 text-center">
+              <div className="mx-auto w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+                <Users className="h-8 w-8 text-blue-500" />
               </div>
+              <h3 className="text-base font-medium text-gray-900 mb-1">暂无项目成员</h3>
+              <p className="text-sm text-gray-500 mb-6 max-w-md mx-auto">
+                您可以添加项目参与人员，系统将记录每位成员的基本信息和联系方式
+              </p>
               <Button
                 type="button"
-                variant="outline"
-                size="sm"
                 onClick={handleOpenAddMemberDialog}
-                className="h-8 gap-1 text-xs bg-white border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300"
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-md h-9 px-4 py-2 transition-colors focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
               >
-                <PlusCircle className="h-3.5 w-3.5 mr-1" />
-                添加成员
+                <PlusCircle className="h-4 w-4 mr-2" />
+                添加项目成员
               </Button>
             </div>
-            
-            {members.length > 0 ? (
-              <div className="border border-gray-200 rounded-md overflow-hidden shadow-sm">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-gray-50 border-b border-gray-200">
-                      <th className="py-2.5 px-4 text-left font-medium text-gray-700 w-[15%]">姓名</th>
-                      <th className="py-2.5 px-4 text-left font-medium text-gray-700 w-[15%]">职称/职务</th>
-                      <th className="py-2.5 px-4 text-left font-medium text-gray-700 w-[20%]">所属院系</th>
-                      <th className="py-2.5 px-4 text-left font-medium text-gray-700 w-[25%]">电子邮箱</th>
-                      <th className="py-2.5 px-4 text-left font-medium text-gray-700 w-[15%]">联系电话</th>
-                      <th className="py-2.5 px-4 text-center font-medium text-gray-700 w-[10%]">操作</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {members.map((member, index) => (
-                      <tr 
-                        key={member.id} 
-                        className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors`}
-                      >
-                        <td className="py-3 px-4 text-gray-900 font-medium">{member.name}</td>
-                        <td className="py-3 px-4 text-gray-700">{member.title || "-"}</td>
-                        <td className="py-3 px-4 text-gray-700">{member.department}</td>
-                        <td className="py-3 px-4 text-gray-700">{member.email}</td>
-                        <td className="py-3 px-4 text-gray-700">{member.phone || "-"}</td>
-                        <td className="py-2 px-2">
-                          <div className="flex justify-center space-x-3">
-                            <button
-                              type="button"
-                              onClick={() => handleEditMember(member)}
-                              className="text-blue-500 hover:text-blue-700 transition-colors"
-                              title="编辑"
-                            >
-                              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M16.862 4.487L18.549 2.799C18.9007 2.44733 19.3777 2.25005 19.875 2.25005C20.3723 2.25005 20.8493 2.44733 21.201 2.799C21.5527 3.15068 21.75 3.62766 21.75 4.125C21.75 4.62234 21.5527 5.09932 21.201 5.451L10.582 16.07C10.0533 16.5984 9.40137 16.9867 8.684 17.2L6 18L6.8 15.316C7.01328 14.5986 7.40163 13.9467 7.93 13.418L16.862 4.487ZM16.862 4.487L19.5 7.125" 
-                                  stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>  
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteMember(member.id)}
-                              className="text-red-500 hover:text-red-700 transition-colors"
-                              title="删除"
-                            >
-                              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M14.74 9L14.394 18M9.606 18L9.26 9M19.228 5.79C19.57 5.842 19.91 5.897 20.25 5.956M19.228 5.79L18.16 19.673C18.1164 20.2383 17.8611 20.7662 17.445 21.1512C17.029 21.5363 16.4829 21.7502 15.916 21.75H8.084C7.5171 21.7502 6.97102 21.5363 6.55498 21.1512C6.13894 20.7662 5.88359 20.2383 5.84 19.673L4.772 5.79M19.228 5.79C18.0739 5.61552 16.9138 5.48769 15.75 5.407M4.772 5.79C4.43 5.842 4.09 5.897 3.75 5.956M4.772 5.79C5.92613 5.61552 7.08623 5.48769 8.25 5.407M15.75 5.407V4.477C15.75 3.297 14.84 2.313 13.66 2.276C12.5536 2.2406 11.4464 2.2406 10.34 2.276C9.16 2.313 8.25 3.297 8.25 4.477V5.407M15.75 5.407C13.2537 5.22095 10.7463 5.22095 8.25 5.407" 
-                                  stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="bg-white border border-dashed border-gray-300 rounded-md px-6 py-10 text-center">
-                <div className="mx-auto w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                  <Users className="h-8 w-8 text-blue-500" />
-                </div>
-                <h3 className="text-base font-medium text-gray-900 mb-1">暂无项目成员</h3>
-                <p className="text-sm text-gray-500 mb-6 max-w-md mx-auto">
-                  您可以添加项目参与人员，系统将记录每位成员的基本信息和联系方式
-                </p>
-                <Button
-                  type="button"
-                  onClick={handleOpenAddMemberDialog}
-                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-md h-9 px-4 py-2 transition-colors focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
-                >
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  添加项目成员
-                </Button>
-              </div>
-            )}
-          </div>
+          )}
         </CardContent>
       </Card>
 
@@ -862,10 +862,10 @@ export function AnimalEthicProjectForm() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-2xl font-semibold leading-none tracking-tight">
               <CheckCircle2 className="h-5 w-5 text-green-500" />
-              项目创建成功
+              项目更新成功
             </DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
-              动物伦理项目已成功创建并提交审核。您可以继续添加新项目或返回项目列表。
+              动物伦理项目已成功更新。您可以继续编辑或返回项目列表。
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
@@ -879,10 +879,10 @@ export function AnimalEthicProjectForm() {
             </Button>
             <Button 
               type="button"
-              onClick={handleContinueAdding}
+              onClick={() => setShowCompletionDialog(false)}
               className="bg-blue-600 hover:bg-blue-700 text-white rounded-md h-10 px-4 py-2 transition-colors focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
             >
-              继续添加
+              继续编辑
             </Button>
           </DialogFooter>
         </DialogContent>

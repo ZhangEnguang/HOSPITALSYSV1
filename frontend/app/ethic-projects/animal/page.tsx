@@ -2,10 +2,11 @@
 
 import React, { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Building2, BriefcaseMedical, Database, FileText, MousePointer2, Eye, Edit, Trash2, ClipboardList, Upload } from "lucide-react"
+import { Building2, BriefcaseMedical, Database, FileText, MousePointer2, Eye, Edit, Trash2, ClipboardList, Upload, Loader2 } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 
 import DataList from "@/components/data-management/data-list"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
 import ClientOnly from "@/components/client-only"
 import CustomCardWrapper from "../components/custom-card-wrapper"
 import { useLoading } from "@/hooks/use-loading"
@@ -603,27 +604,27 @@ export default function AnimalEthicProjectsPage() {
       {/* 删除确认对话框 */}
       <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <DialogContent className="sm:max-w-[425px]">
-          <div className="p-6 space-y-6">
-            <h3 className="text-lg font-medium">确认删除</h3>
-            <p className="text-sm text-gray-500">
-              您确定要删除此动物伦理项目吗？此操作无法撤销。
-            </p>
-            <div className="flex justify-end space-x-2">
-              <button
-                className="px-4 py-2 border rounded-md"
-                onClick={() => setDeleteConfirmOpen(false)}
-              >
-                取消
-              </button>
-              <button
-                className="px-4 py-2 bg-red-600 text-white rounded-md"
-                onClick={confirmDelete}
-                disabled={isLoading}
-              >
-                {isLoading ? "删除中..." : "确认删除"}
-              </button>
-            </div>
-          </div>
+          <DialogHeader>
+            <DialogTitle>确认删除</DialogTitle>
+            <DialogDescription>
+              您确定要删除"{currentDeleteId ? projects.find(p => p.id === currentDeleteId)?.name : ''}"吗？此操作无法撤销。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteConfirmOpen(false)}>
+              取消
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete} disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  删除中...
+                </>
+              ) : (
+                "删除"
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

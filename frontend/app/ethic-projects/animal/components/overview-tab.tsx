@@ -567,7 +567,7 @@ export default function EthicProjectOverviewTab({
               <div className="font-medium">{todo.projectNumber || "系统自动生成或手动输入"}</div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">动物种类</div>
+              <div className="text-sm text-muted-foreground">动物种系</div>
               <div className="font-medium">{todo.animalType}</div>
             </div>
             <div>

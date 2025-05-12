@@ -181,46 +181,47 @@ export default function RiskAnalysisTab({ todo }: { todo?: any }) {
                 <PieChart className="h-5 w-5 text-blue-500" />
                 <h3 className="font-medium text-slate-800">分项风险评分</h3>
               </div>
-              <div className="space-y-2">
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-slate-600 flex items-center gap-1">
-                      <Rat className="h-3.5 w-3.5" />
-                      动物福利
-                    </span>
-                    <span className="font-medium text-green-600">{safetyScores.animalWelfare}%</span>
+              
+              {/* 优化后的分项风险评分展示 */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col items-center justify-center p-2 border border-slate-200 rounded-md bg-white">
+                  <div className="flex items-center gap-1 mb-1 text-xs text-slate-600">
+                    <Rat className="h-3.5 w-3.5" />
+                    <span>动物福利</span>
                   </div>
-                  <Progress value={safetyScores.animalWelfare} className="h-1.5" />
+                  <div className="text-lg font-bold text-green-600">
+                    {safetyScores.animalWelfare}%
+                  </div>
                 </div>
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-slate-600 flex items-center gap-1">
-                      <Syringe className="h-3.5 w-3.5" />
-                      操作风险
-                    </span>
-                    <span className="font-medium text-amber-600">{safetyScores.procedureRisk}%</span>
+                
+                <div className="flex flex-col items-center justify-center p-2 border border-slate-200 rounded-md bg-white">
+                  <div className="flex items-center gap-1 mb-1 text-xs text-slate-600">
+                    <Syringe className="h-3.5 w-3.5" />
+                    <span>操作风险</span>
                   </div>
-                  <Progress value={safetyScores.procedureRisk} className="h-1.5" />
+                  <div className="text-lg font-bold text-amber-600">
+                    {safetyScores.procedureRisk}%
+                  </div>
                 </div>
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-slate-600 flex items-center gap-1">
-                      <FileCheck className="h-3.5 w-3.5" />
-                      伦理合规
-                    </span>
-                    <span className="font-medium text-green-600">{safetyScores.ethicalCompliance}%</span>
+                
+                <div className="flex flex-col items-center justify-center p-2 border border-slate-200 rounded-md bg-white">
+                  <div className="flex items-center gap-1 mb-1 text-xs text-slate-600">
+                    <FileCheck className="h-3.5 w-3.5" />
+                    <span>伦理合规</span>
                   </div>
-                  <Progress value={safetyScores.ethicalCompliance} className="h-1.5" />
+                  <div className="text-lg font-bold text-green-600">
+                    {safetyScores.ethicalCompliance}%
+                  </div>
                 </div>
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-slate-600 flex items-center gap-1">
-                      <Brain className="h-3.5 w-3.5" />
-                      科学质量
-                    </span>
-                    <span className="font-medium text-blue-600">{safetyScores.scientificQuality}%</span>
+                
+                <div className="flex flex-col items-center justify-center p-2 border border-slate-200 rounded-md bg-white">
+                  <div className="flex items-center gap-1 mb-1 text-xs text-slate-600">
+                    <Brain className="h-3.5 w-3.5" />
+                    <span>科学质量</span>
                   </div>
-                  <Progress value={safetyScores.scientificQuality} className="h-1.5" />
+                  <div className="text-lg font-bold text-blue-600">
+                    {safetyScores.scientificQuality}%
+                  </div>
                 </div>
               </div>
             </div>
