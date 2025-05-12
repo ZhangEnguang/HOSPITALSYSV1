@@ -70,8 +70,9 @@ export const tableColumns = [
   {
     id: "actions",
     header: "操作",
+    className: "text-right pr-4",
     cell: (row: any) => (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-end">
         <ProjectReviewButton projectId={row.id} type="review" variant="outline" />
         <ProjectReviewButton projectId={row.id} type="assign" variant="outline" />
       </div>
@@ -134,13 +135,13 @@ export const tableActions = [
     id: "assign",
     label: "分派专家",
     icon: "Users",
-    onClick: (item) => console.log("分派专家", item),
+    onClick: (item: any) => console.log("分派专家", item),
   },
   {
     id: "delete",
     label: "删除",
     icon: "Trash2",
-    onClick: (item) => console.log("删除", item),
+    onClick: (item: any) => console.log("删除", item),
     variant: "destructive",
   },
 ]

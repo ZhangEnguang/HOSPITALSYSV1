@@ -288,7 +288,7 @@ function HumanGeneticsReviewContent() {
     router.push(`/ethic-review/human-genetics-review/${item.id}`)
   }
 
-  // 处理新建人遗审查
+  // 处理新建人遗资源
   const handleAddNew = () => {
     router.push("/ethic-review/human-genetics-review/new")
   }
@@ -308,13 +308,13 @@ function HumanGeneticsReviewContent() {
       ></div>
 
       <DataList
-        title="人遗审查"
+        title="人遗资源"
         data={data}
         searchValue={searchValue}
         onSearchChange={setSearchValue}
         onSearch={handleSearchExecute}
         searchPlaceholder="搜索受理号、名称、院系、审查类型或负责人..."
-        noResultsText="未找到符合条件的人遗审查项目"
+        noResultsText="未找到符合条件的人遗资源项目"
         quickFilters={quickFilters.map(filter => ({...filter, category: "基本"}))}
         onQuickFilterChange={handleQuickFilterChange}
         quickFilterValues={filterValues}

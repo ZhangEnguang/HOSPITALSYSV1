@@ -190,9 +190,9 @@ export const tableColumns = [
   {
     id: "actions",
     header: "操作",
-    className: "w-[120px]",
+    className: "w-[120px] text-right pr-4",
     cell: (item: any) => (
-      <div className="flex items-center justify-end gap-2">
+      <div className="flex items-center justify-end">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">

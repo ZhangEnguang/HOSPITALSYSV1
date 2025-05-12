@@ -112,7 +112,7 @@ export default function MobileSidebar() {
                         href="/ethic-review/track-review"
                         className="flex items-center p-2 rounded-md text-[13px] text-gray-600 hover:bg-[#2156FF]/10 hover:text-[#2156FF]"
                       >
-                        <span>跟踪审查</span>
+                        <span>跟踪报告</span>
                       </Link>
                     </div>
                   )}

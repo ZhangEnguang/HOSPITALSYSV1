@@ -90,7 +90,7 @@ export const APPROVAL_TYPE_OPTIONS = [
   { value: "family", label: "重要家系资源备案" },
 ]
 
-// 创建人遗审查数据
+// 创建人遗资源数据
 export const humanGeneticsReviewItems = [
   {
     id: "ETH-HG-2024-001",

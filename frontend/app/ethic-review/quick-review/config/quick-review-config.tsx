@@ -238,7 +238,7 @@ export const tableColumns = [
   {
     id: "actions",
     header: "操作",
-    className: "w-[60px]",
+    className: "w-[60px] text-right pr-4",
     cell: (item: any) => {
       return (
         <div className="flex items-center justify-end">

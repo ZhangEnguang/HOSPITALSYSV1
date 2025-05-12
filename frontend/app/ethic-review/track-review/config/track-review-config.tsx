@@ -177,8 +177,9 @@ export const tableColumns = [
     id: "actions",
     header: "操作",
     accessorKey: "actions",
+    className: "text-right pr-4",
     cell: (item: any) => (
-      <div className="flex justify-center">
+      <div className="flex justify-end">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">

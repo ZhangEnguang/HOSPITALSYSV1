@@ -124,7 +124,7 @@ export default function DataListTable<T extends { id: string }>({
 
               {/* 操作列 - 固定在右侧 */}
               {actions && actions.length > 0 && (
-                <TableHead className="text-right whitespace-nowrap sticky right-0 bg-background">
+                <TableHead className="text-right whitespace-nowrap sticky right-0 bg-background pr-4">
                   操作
                 </TableHead>
               )}
@@ -187,34 +187,36 @@ export default function DataListTable<T extends { id: string }>({
                     {/* 操作列单元格 - 固定在右侧 */}
                     {actions && actions.length > 0 && (
                       <TableCell 
-                        className="text-right whitespace-nowrap sticky right-0 bg-background" 
+                        className="text-right whitespace-nowrap sticky right-0 bg-background pr-4" 
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            {actions
-                              .filter((action) => !action.hidden || !action.hidden(item))
-                              .map((action) => (
-                                <DropdownMenuItem
-                                  key={action.id}
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    action.onClick(item)
-                                  }}
-                                  disabled={action.disabled ? action.disabled(item) : false}
-                                  className={action.id === "delete" ? "text-destructive" : ""}
-                                >
-                                  {action.icon && <span className="mr-2">{action.icon}</span>}
-                                  {action.label}
-                                </DropdownMenuItem>
-                              ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <div className="flex justify-end">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {actions
+                                .filter((action) => !action.hidden || !action.hidden(item))
+                                .map((action) => (
+                                  <DropdownMenuItem
+                                    key={action.id}
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      action.onClick(item)
+                                    }}
+                                    disabled={action.disabled ? action.disabled(item) : false}
+                                    className={action.id === "delete" ? "text-destructive" : ""}
+                                  >
+                                    {action.icon && <span className="mr-2">{action.icon}</span>}
+                                    {action.label}
+                                  </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </TableCell>
                     )}
                   </TableRow>

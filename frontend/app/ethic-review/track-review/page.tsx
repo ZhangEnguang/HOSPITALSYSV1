@@ -314,13 +314,13 @@ function TrackReviewContent() {
       ></div>
 
       <DataList
-        title="跟踪审查"
+        title="跟踪报告"
         data={data}
         searchValue={searchValue}
         onSearchChange={setSearchValue}
         onSearch={handleSearchExecute}
         searchPlaceholder="搜索项目编号、名称、院系或负责人..."
-        noResultsText="未找到符合条件的跟踪审查项目"
+        noResultsText="未找到符合条件的跟踪报告项目"
         quickFilters={quickFilters.map(filter => ({...filter, category: "基本"}))}
         onQuickFilterChange={handleQuickFilterChange}
         quickFilterValues={filterValues}
@@ -351,7 +351,7 @@ function TrackReviewContent() {
         onItemClick={handleItemClick}
         detailsUrlPrefix="/ethic-review/track-review"
         onAddNew={handleAddNew}
-        addButtonLabel="新建跟踪审查"
+        addButtonLabel="新建跟踪报告"
         onOpenSettings={handleOpenSettings}
         settingsButtonLabel="设置"
         categories={filterCategories}

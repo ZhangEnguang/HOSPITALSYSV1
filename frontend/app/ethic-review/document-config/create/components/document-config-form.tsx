@@ -102,6 +102,15 @@ export function DocumentConfigForm() {
   // 添加智能推荐状态
   const [showRecommendations, setShowRecommendations] = useState(true)
   const [recommendations, setRecommendations] = useState<DocumentItem[]>([])
+  // 添加文件添加状态
+  const [isAddingRecommendations, setIsAddingRecommendations] = useState(false)
+  const [currentAddingIndex, setCurrentAddingIndex] = useState(-1)
+  
+  // 添加以下状态来跟踪新添加的文档ID
+  const [newlyAddedDocs, setNewlyAddedDocs] = useState<string[]>([]);
+  
+  // 添加一个新状态，用于跟踪已经添加完成的推荐项
+  const [completedRecommendations, setCompletedRecommendations] = useState<string[]>([]);
   
   // 获取参考配置列表
   const configOptions = documentConfigItems.map(item => ({
@@ -190,16 +199,50 @@ export function DocumentConfigForm() {
 
   // 添加处理一键添加单个推荐文件的函数
   const handleAddRecommendation = (recommendation: DocumentItem) => {
-    setFormData(prev => ({
-      ...prev,
-      documents: [
-        ...prev.documents,
-        {
+    const newDocId = `doc-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    
+    setFormData(prev => {
+      // 检查第一个文档是否为空
+      const isFirstDocEmpty = prev.documents.length === 1 && 
+                           prev.documents[0].name === "" && 
+                           prev.documents[0].type === "";
+      
+      if (isFirstDocEmpty) {
+        // 如果首行为空，则替换首行而不是添加新行
+        const updatedDocuments = [...prev.documents];
+        updatedDocuments[0] = {
           ...recommendation,
-          id: `doc-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
-        }
-      ]
-    }));
+          id: newDocId
+        };
+        return {
+          ...prev,
+          documents: updatedDocuments
+        };
+      } else {
+        // 否则添加到文档列表末尾
+        return {
+          ...prev,
+          documents: [
+            ...prev.documents,
+            {
+              ...recommendation,
+              id: newDocId
+            }
+          ]
+        };
+      }
+    });
+    
+    // 标记为新添加的文档
+    setNewlyAddedDocs(prev => [...prev, newDocId]);
+    
+    // 标记此推荐项为已添加
+    setCompletedRecommendations(prev => [...prev, recommendation.id]);
+    
+    // 3秒后移除新添加标记
+    setTimeout(() => {
+      setNewlyAddedDocs(prev => prev.filter(id => id !== newDocId));
+    }, 3000);
     
     toast({
       title: "已添加推荐文件",
@@ -217,20 +260,101 @@ export function DocumentConfigForm() {
       return;
     }
     
-    setFormData(prev => ({
-      ...prev,
-      documents: [
-        ...prev.documents,
-        ...recommendations.map(rec => ({
-          ...rec,
-          id: `doc-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
-        }))
-      ]
-    }));
+    // 设置添加状态为进行中
+    setIsAddingRecommendations(true);
+    setCurrentAddingIndex(0);
     
+    // 逐个添加文件
+    const addRecommendationWithDelay = (index: number) => {
+      if (index >= recommendations.length) {
+        // 所有文件都添加完成
+        // 不再重置添加状态，而是保留完成状态
+        setIsAddingRecommendations(false);
+        
+        // 记录所有推荐项为已完成
+        const allRecIds = recommendations.map(rec => rec.id);
+        setCompletedRecommendations(allRecIds);
+        
+        toast({
+          title: "文件添加完成",
+          description: `已添加全部 ${recommendations.length} 个推荐文件到清单`
+        });
+        return;
+      }
+      
+      // 添加当前文件
+      const rec = recommendations[index];
+      const newDocId = `doc-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      
+      setFormData(prev => {
+        // 检查第一个文档是否为空
+        const isFirstDocEmpty = prev.documents.length === 1 && 
+                             prev.documents[0].name === "" && 
+                             prev.documents[0].type === "";
+        
+        if (index === 0 && isFirstDocEmpty) {
+          // 如果是第一个推荐项且首行为空，则替换首行而不是添加新行
+          const updatedDocuments = [...prev.documents];
+          updatedDocuments[0] = {
+            ...rec,
+            id: newDocId
+          };
+          return {
+            ...prev,
+            documents: updatedDocuments
+          };
+        } else {
+          // 否则添加到文档列表末尾
+          return {
+            ...prev,
+            documents: [
+              ...prev.documents,
+              {
+                ...rec,
+                id: newDocId
+              }
+            ]
+          };
+        }
+      });
+      
+      // 标记为新添加的文档
+      setNewlyAddedDocs(prev => [...prev, newDocId]);
+      
+      // 将当前项标记为已完成
+      setCompletedRecommendations(prev => [...prev, rec.id]);
+      
+      // 4秒后移除新添加标记
+      setTimeout(() => {
+        setNewlyAddedDocs(prev => prev.filter(id => id !== newDocId));
+      }, 4000);
+      
+      // 显示添加通知
+      toast({
+        title: "添加文件",
+        description: `已添加 "${rec.name}" 到文件清单`,
+        duration: 1500,
+      });
+      
+      // 更新当前添加的索引
+      setCurrentAddingIndex(index + 1);
+      
+      // 延迟添加下一个文件
+      setTimeout(() => {
+        addRecommendationWithDelay(index + 1);
+      }, 800); // 每个文件添加间隔800毫秒
+    };
+    
+    // 开始添加第一个文件
+    addRecommendationWithDelay(0);
+  };
+
+  // 添加重置推荐状态的函数
+  const handleResetRecommendations = () => {
+    setCompletedRecommendations([]);
     toast({
-      title: "已添加全部推荐文件",
-      description: `已添加 ${recommendations.length} 个推荐文件到清单`
+      title: "已重置推荐状态",
+      description: "您可以重新添加推荐文件"
     });
   };
 
@@ -675,157 +799,246 @@ export function DocumentConfigForm() {
                 </div>
               )}
 
-              <ScrollArea className="max-h-[600px]">
-                <Table className="w-full table-fixed">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[160px] whitespace-nowrap">文件名称 <span className="text-red-500">*</span></TableHead>
-                      <TableHead className="w-[110px] whitespace-nowrap">文件类型 <span className="text-red-500">*</span></TableHead>
-                      <TableHead className="w-[90px] whitespace-nowrap">要求级别</TableHead>
-                      <TableHead className="w-[80px] whitespace-nowrap">提供模板</TableHead>
-                      <TableHead className="w-[140px] whitespace-nowrap">模板文件</TableHead>
-                      <TableHead className="whitespace-nowrap">文件描述</TableHead>
-                      <TableHead className="w-[70px] whitespace-nowrap text-right">操作</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {formData.documents.map((document, index) => (
-                      <TableRow key={document.id}>
-                        <TableCell>
-                          <Input
-                            value={document.name}
-                            onChange={(e) => updateDocumentData(index, "name", e.target.value)}
-                            placeholder="请输入文件名称"
-                            className={cn(
-                              formErrors[`document-${index}-name`] ? "border-red-500" : ""
-                            )}
-                          />
-                          {formErrors[`document-${index}-name`] && (
-                            <ErrorMessage message={formErrors[`document-${index}-name`] || ""} />
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            value={document.type}
-                            onValueChange={(value) => updateDocumentData(index, "type", value)}
-                          >
-                            <SelectTrigger 
-                              className={cn(
-                                "w-full",
-                                formErrors[`document-${index}-type`] ? "border-red-500" : ""
-                              )}
-                            >
-                              <SelectValue placeholder="选择类型" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {DOCUMENT_TYPE_OPTIONS.map((type) => (
-                                <SelectItem key={type} value={type}>
-                                  {type}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          {formErrors[`document-${index}-type`] && (
-                            <ErrorMessage message={formErrors[`document-${index}-type`] || ""} />
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            value={document.requirementLevel}
-                            onValueChange={(value) => updateDocumentData(index, "requirementLevel", value)}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="选择级别" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {REQUIREMENT_LEVEL_OPTIONS.map((level) => (
-                                <SelectItem key={level} value={level}>
-                                  {level}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <div className="flex justify-center">
-                            <Checkbox
-                              checked={document.template}
-                              onCheckedChange={(checked) => 
-                                updateDocumentData(index, "template", checked === true)
-                              }
-                            />
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {document.templateFile ? (
-                              <>
-                                <div className="relative flex-1 group">
-                                  <div className="flex items-center p-1.5 pr-2 bg-blue-50 border border-blue-200 rounded-md text-blue-700 text-xs">
-                                    <FileTextIcon className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
-                                    <span className="truncate max-w-[90px]">{document.templateFile.name}</span>
-                                  </div>
-                                  <div className="absolute inset-0 bg-blue-100/80 rounded-md opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
-                                    <Label 
-                                      htmlFor={`template-file-${index}`} 
-                                      className="cursor-pointer h-6 w-6 rounded-full bg-white flex items-center justify-center text-blue-700 hover:bg-blue-50"
-                                      title="更换模板"
-                                    >
-                                      <FileUp className="h-3 w-3" />
-                                    </Label>
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-6 w-6 p-0 rounded-full bg-white flex items-center justify-center text-blue-700 hover:bg-blue-50"
-                                      onClick={() => handlePreviewTemplate(index)}
-                                      title="预览模板"
-                                    >
-                                      <Eye className="h-3 w-3" />
-                                    </Button>
-                                  </div>
-                                </div>
-                              </>
-                            ) : (
-                              <Label 
-                                htmlFor={`template-file-${index}`} 
-                                className="flex items-center p-1.5 pr-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-md cursor-pointer text-gray-600 text-xs transition-colors"
-                              >
-                                <FileUp className="h-3.5 w-3.5 mr-1.5" />
-                                <span>上传模板</span>
-                              </Label>
-                            )}
-                            <Input
-                              id={`template-file-${index}`}
-                              type="file"
-                              className="hidden"
-                              onChange={(e) => handleTemplateUpload(index, e)}
-                            />
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            value={document.description}
-                            onChange={(e) => updateDocumentData(index, "description", e.target.value)}
-                            placeholder="请输入文件描述"
-                          />
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeDocument(index)}
-                            disabled={formData.documents.length <= 1}
-                          >
-                            <Trash2 className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </TableCell>
+              <div className="relative overflow-x-auto max-h-[600px] overflow-y-auto border rounded-md">
+                <style jsx global>{`
+                  /* 自定义滚动条样式 */
+                  .relative.overflow-x-auto::-webkit-scrollbar {
+                    height: 8px;
+                    width: 8px;
+                  }
+                  
+                  .relative.overflow-x-auto::-webkit-scrollbar-track {
+                    background-color: #f1f1f1;
+                    border-radius: 4px;
+                  }
+                  
+                  .relative.overflow-x-auto::-webkit-scrollbar-thumb {
+                    background-color: #c1c1c1;
+                    border-radius: 4px;
+                  }
+                  
+                  .relative.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+                    background-color: #a8a8a8;
+                  }
+                  
+                  /* 动画相关样式 */
+                  @keyframes fade-in {
+                    0% { background-color: rgba(239, 246, 255, 0.9); }
+                    70% { background-color: rgba(239, 246, 255, 0.7); }
+                    100% { background-color: transparent; }
+                  }
+                  .animate-fade-in {
+                    animation: fade-in 3s ease-out forwards;
+                  }
+                  
+                  /* 修复下拉选择框宽度和文本截断问题 */
+                  .document-type-select {
+                    min-width: 120px !important;
+                    margin-right: 12px !important;
+                    border-right: 1px solid #f0f0f0;
+                  }
+                  .document-type-select .select-value-text {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    max-width: 110px;
+                  }
+                  .document-type-content {
+                    min-width: 150px !important;
+                    width: auto !important;
+                  }
+                  .document-level-select {
+                    min-width: 100px !important;
+                    margin-left: 12px !important;
+                    border-left: 1px solid #f0f0f0;
+                  }
+                  .document-level-select .select-value-text {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    max-width: 90px;
+                  }
+                  .document-level-content {
+                    min-width: 100px !important;
+                    width: auto !important;
+                  }
+                  
+                  /* 修复文件描述文本框宽度 */
+                  .file-description-input {
+                    width: 100%;
+                    min-width: 380px;
+                  }
+                  
+                  /* 美化表格行样式 */
+                  tr.table-row-hover:hover td {
+                    background-color: rgba(239, 246, 255, 0.3);
+                  }
+                  
+                  /* 美化表格边框 */
+                  .table-border-styles th,
+                  .table-border-styles td {
+                    border-color: rgba(0, 0, 0, 0.05);
+                  }
+                `}</style>
+                <div className="min-w-[1300px]">
+                  <Table className="w-full table-fixed table-border-styles">
+                    <TableHeader>
+                      <TableRow className="border-b">
+                        <TableHead className="w-[150px] whitespace-nowrap">文件名称 <span className="text-red-500">*</span></TableHead>
+                        <TableHead className="w-[120px] whitespace-nowrap pr-3 border-r-0">文件类型 <span className="text-red-500">*</span></TableHead>
+                        <TableHead className="w-[100px] whitespace-nowrap pl-3 border-l-2 border-l-gray-200">要求级别</TableHead>
+                        <TableHead className="w-[80px] whitespace-nowrap text-center">提供模板</TableHead>
+                        <TableHead className="w-[130px] whitespace-nowrap">模板文件</TableHead>
+                        <TableHead className="w-[400px] whitespace-nowrap">文件描述</TableHead>
+                        <TableHead className="w-[60px] whitespace-nowrap text-right">操作</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
+                    </TableHeader>
+                    <TableBody>
+                      {formData.documents.map((document, index) => (
+                        <TableRow 
+                          key={document.id} 
+                          className={cn(
+                            "transition-all duration-500 table-row-hover",
+                            newlyAddedDocs.includes(document.id) && "bg-blue-50/70 animate-fade-in"
+                          )}
+                        >
+                          <TableCell>
+                            <Input
+                              value={document.name}
+                              onChange={(e) => updateDocumentData(index, "name", e.target.value)}
+                              placeholder="请输入文件名称"
+                              className={cn(
+                                formErrors[`document-${index}-name`] ? "border-red-500" : ""
+                              )}
+                            />
+                            {formErrors[`document-${index}-name`] && (
+                              <ErrorMessage message={formErrors[`document-${index}-name`] || ""} />
+                            )}
+                          </TableCell>
+                          <TableCell className="pr-3 border-r-0">
+                            <Select
+                              value={document.type}
+                              onValueChange={(value) => updateDocumentData(index, "type", value)}
+                            >
+                              <SelectTrigger 
+                                className={cn(
+                                  "w-full document-type-select",
+                                  formErrors[`document-${index}-type`] ? "border-red-500" : ""
+                                )}
+                              >
+                                <SelectValue className="select-value-text" placeholder="选择类型" />
+                              </SelectTrigger>
+                              <SelectContent className="document-type-content min-w-[150px]">
+                                {DOCUMENT_TYPE_OPTIONS.map((type) => (
+                                  <SelectItem key={type} value={type}>
+                                    {type}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            {formErrors[`document-${index}-type`] && (
+                              <ErrorMessage message={formErrors[`document-${index}-type`] || ""} />
+                            )}
+                          </TableCell>
+                          <TableCell className="pl-3 border-l-2 border-l-gray-200">
+                            <Select
+                              value={document.requirementLevel}
+                              onValueChange={(value) => updateDocumentData(index, "requirementLevel", value)}
+                            >
+                              <SelectTrigger className="w-full document-level-select">
+                                <SelectValue className="select-value-text" placeholder="选择级别" />
+                              </SelectTrigger>
+                              <SelectContent className="document-level-content min-w-[100px]">
+                                {REQUIREMENT_LEVEL_OPTIONS.map((level) => (
+                                  <SelectItem key={level} value={level}>
+                                    {level}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <div className="flex justify-center">
+                              <Checkbox
+                                checked={document.template}
+                                onCheckedChange={(checked) => 
+                                  updateDocumentData(index, "template", checked === true)
+                                }
+                              />
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {document.templateFile ? (
+                                <>
+                                  <div className="relative flex-1 group">
+                                    <div className="flex items-center p-1.5 pr-2 bg-blue-50 border border-blue-200 rounded-md text-blue-700 text-xs">
+                                      <FileTextIcon className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
+                                      <span className="truncate max-w-[90px]">{document.templateFile.name}</span>
+                                    </div>
+                                    <div className="absolute inset-0 bg-blue-100/80 rounded-md opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                                      <Label 
+                                        htmlFor={`template-file-${index}`} 
+                                        className="cursor-pointer h-6 w-6 rounded-full bg-white flex items-center justify-center text-blue-700 hover:bg-blue-50"
+                                        title="更换模板"
+                                      >
+                                        <FileUp className="h-3 w-3" />
+                                      </Label>
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-6 w-6 p-0 rounded-full bg-white flex items-center justify-center text-blue-700 hover:bg-blue-50"
+                                        onClick={() => handlePreviewTemplate(index)}
+                                        title="预览模板"
+                                      >
+                                        <Eye className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </>
+                              ) : (
+                                <Label 
+                                  htmlFor={`template-file-${index}`} 
+                                  className="flex items-center p-1.5 pr-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-md cursor-pointer text-gray-600 text-xs transition-colors"
+                                >
+                                  <FileUp className="h-3.5 w-3.5 mr-1.5" />
+                                  <span>上传模板</span>
+                                </Label>
+                              )}
+                              <Input
+                                id={`template-file-${index}`}
+                                type="file"
+                                className="hidden"
+                                onChange={(e) => handleTemplateUpload(index, e)}
+                              />
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              value={document.description}
+                              onChange={(e) => updateDocumentData(index, "description", e.target.value)}
+                              placeholder="请输入文件描述"
+                              className="file-description-input"
+                            />
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeDocument(index)}
+                              disabled={formData.documents.length <= 1}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
 
               <div className="mt-4">
                 <Button
@@ -909,79 +1122,117 @@ export function DocumentConfigForm() {
                   ) : (
                     <>
                       <div className="mb-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleAddAllRecommendations}
-                          className="group w-full text-sm bg-white hover:bg-blue-50 dark:bg-gray-900 dark:hover:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800/50 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow transition-all duration-300 flex items-center justify-center gap-2"
-                        >
-                          <Sparkles className="h-4 w-4 animate-pulse text-blue-500" />
-                          <span>一键添加全部推荐</span>
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleAddAllRecommendations}
+                            disabled={isAddingRecommendations || recommendations.length === 0 || recommendations.every(rec => completedRecommendations.includes(rec.id))}
+                            className={cn(
+                              "group flex-1 text-sm bg-white hover:bg-blue-50 dark:bg-gray-900 dark:hover:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800/50 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow transition-all duration-300 flex items-center justify-center gap-2",
+                              isAddingRecommendations && "bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700",
+                              recommendations.every(rec => completedRecommendations.includes(rec.id)) && "bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300"
+                            )}
+                          >
+                            {isAddingRecommendations ? (
+                              <>
+                                <div className="flex items-center gap-2">
+                                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                  </svg>
+                                  <span>正在添加... {currentAddingIndex}/{recommendations.length}</span>
+                                </div>
+                              </>
+                            ) : recommendations.every(rec => completedRecommendations.includes(rec.id)) ? (
+                              <>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-600" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                                <span>已全部添加</span>
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="h-4 w-4 animate-pulse text-blue-500" />
+                                <span>一键添加全部推荐</span>
+                              </>
+                            )}
+                          </Button>
+                          
+                          {completedRecommendations.length > 0 && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={handleResetRecommendations}
+                              className="w-9 flex items-center justify-center p-0 border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600"
+                              title="重置添加状态"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                              </svg>
+                            </Button>
+                          )}
+                        </div>
                       </div>
                       
                       <ScrollArea className="h-[600px] pr-3">
                         <div className="space-y-2">
                           {recommendations.map((rec, index) => (
                             <div 
-                              key={rec.id} 
-                              className="group border border-blue-200 dark:border-blue-900/40 rounded-lg overflow-hidden bg-white dark:bg-gray-900 shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300 hover:translate-y-[-2px]"
-                              style={{
-                                animationDelay: `${index * 100}ms`,
-                                animation: "fadeInUp 0.5s ease-out forwards",
-                                opacity: 0,
-                                transform: "translateY(5px)",
-                              }}
+                              key={rec.id}
+                              className={cn(
+                                "group relative rounded-md border transition-all duration-300",
+                                isAddingRecommendations && currentAddingIndex > index 
+                                  ? "border-green-200 bg-green-50/40 dark:border-green-800/50 dark:bg-green-900/10" 
+                                  : isAddingRecommendations && currentAddingIndex === index
+                                  ? "border-blue-300 bg-blue-50/60 dark:border-blue-700 dark:bg-blue-900/20 animate-pulse"
+                                  : completedRecommendations.includes(rec.id)
+                                  ? "border-green-100 bg-green-50/30 dark:border-green-800/30 dark:bg-green-900/5"
+                                  : "border-blue-100 bg-white dark:border-blue-800/30 dark:bg-gray-800/50 hover:bg-blue-50/30 hover:border-blue-200 dark:hover:border-blue-700"
+                              )}
                             >
-                              <style jsx global>{`
-                                @keyframes fadeInUp {
-                                  from {
-                                    opacity: 0;
-                                    transform: translateY(5px);
-                                  }
-                                  to {
-                                    opacity: 1;
-                                    transform: translateY(0);
-                                  }
-                                }
-                              `}</style>
                               <div className="relative p-3">
-                                <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-blue-400 to-purple-500 opacity-80 rounded-tr-md rounded-br-md"></div>
+                                <div className={cn(
+                                  "absolute left-0 top-0 h-full w-1 rounded-tr-md rounded-br-md",
+                                  isAddingRecommendations && currentAddingIndex > index || completedRecommendations.includes(rec.id)
+                                    ? "bg-green-500 opacity-70"
+                                    : "bg-blue-400 opacity-70"
+                                )}></div>
                                 <div className="flex justify-between items-center mb-1.5">
-                                  <h4 className="font-medium text-blue-800 dark:text-blue-300 pl-2 transition-colors duration-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 text-sm">{rec.name}</h4>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleAddRecommendation(rec)}
-                                    className="h-6 w-6 rounded-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-800/50 p-0 text-blue-700 dark:text-blue-300 transition-all duration-300 hover:scale-105 opacity-70 group-hover:opacity-100"
-                                    title="添加到文件清单"
-                                  >
-                                    <PlusIcon className="h-3.5 w-3.5" />
-                                  </Button>
+                                  <h4 className="font-medium pl-2 transition-colors duration-300 text-sm text-blue-800 dark:text-blue-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">{rec.name}</h4>
+                                  
+                                  {isAddingRecommendations && currentAddingIndex > index || completedRecommendations.includes(rec.id) ? (
+                                    <div className="h-6 w-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                      </svg>
+                                    </div>
+                                  ) : (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleAddRecommendation(rec)}
+                                      disabled={isAddingRecommendations || completedRecommendations.includes(rec.id)}
+                                      className="h-6 w-6 rounded-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-800/50 p-0 text-blue-700 dark:text-blue-300 transition-all duration-300 hover:scale-105 opacity-70 group-hover:opacity-100"
+                                      title="添加到文件清单"
+                                    >
+                                      <PlusIcon className="h-3.5 w-3.5" />
+                                    </Button>
+                                  )}
                                 </div>
-                                <div className="flex flex-wrap gap-1.5 mb-1.5 pl-2">
-                                  <Badge className="bg-blue-100/80 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border-0 text-xs px-2 py-0.5 rounded-md transition-colors duration-300 group-hover:bg-blue-200 dark:group-hover:bg-blue-800/40">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1.5 inline-block"></span>
-                                    {rec.type}
-                                  </Badge>
-                                  <Badge 
-                                    className={cn("text-xs px-2 py-0.5 rounded-md border-0 transition-colors duration-300",
-                                      rec.requirementLevel === "必交" 
-                                        ? "bg-green-100/80 text-green-700 dark:bg-green-900/30 dark:text-green-400 group-hover:bg-green-200 dark:group-hover:bg-green-800/40" 
-                                        : "bg-amber-100/80 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 group-hover:bg-amber-200 dark:group-hover:bg-amber-800/40"
-                                    )}
-                                  >
-                                    <span className={cn("w-1.5 h-1.5 rounded-full mr-1.5 inline-block",
-                                      rec.requirementLevel === "必交" 
-                                        ? "bg-green-500 dark:bg-green-400" 
-                                        : "bg-amber-500 dark:bg-amber-400"
-                                    )}></span>
+                                
+                                <div className="flex flex-wrap gap-2 pl-2">
+                                  <Badge variant="outline" className="text-xs bg-blue-50/50 dark:bg-blue-900/10 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800/60">{rec.type}</Badge>
+                                  <Badge variant="outline" className={cn(
+                                    "text-xs",
+                                    rec.requirementLevel === "必交" 
+                                      ? "bg-red-50/50 dark:bg-red-900/10 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800/60" 
+                                      : "bg-gray-50/50 dark:bg-gray-900/10 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-800/60"
+                                  )}>
                                     {rec.requirementLevel}
                                   </Badge>
                                 </div>
-                                {rec.description && (
-                                  <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed pl-2 transition-colors duration-300 group-hover:text-gray-800 dark:group-hover:text-gray-300">{rec.description}</p>
-                                )}
+                                <p className="text-xs mt-1.5 pl-2 text-gray-600 dark:text-gray-400">{rec.description}</p>
                               </div>
                             </div>
                           ))}

@@ -222,8 +222,8 @@ export default function Sidebar() {
       path: "#",
       subMenus: [
         { name: "初始审查", path: "/ethic-review/initial-review" },
-        { name: "跟踪审查", path: "/ethic-review/track-review" },
-        { name: "人遗审查", path: "/ethic-review/human-genetics-review" },
+        { name: "跟踪报告", path: "/ethic-review/track-review" },
+        { name: "人遗资源", path: "/ethic-review/human-genetics-review" },
         { name: "快速审查", path: "/ethic-review/quick-review" },
         { name: "会议审查", path: "/ethic-review/meeting-review" },
         { name: "送审文件配置", path: "/ethic-review/document-config" },
