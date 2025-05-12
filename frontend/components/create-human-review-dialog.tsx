@@ -447,6 +447,20 @@ export function CreateHumanReviewDialog({
       router.push(`/ethic-projects/review/human/genetic/export?${geneticParams}`);
       handleClose();
     }
+    // 添加国际合作临床试验备案的路由跳转
+    else if (reviewType === "international_clinical") {
+      console.log("导航到人体伦理国际合作临床试验备案页面");
+      // 为国际合作临床试验备案定制项目类型
+      const clinicalParams = `${projectParams}${ethicsCommitteeParam}` + 
+        `&projectSource=${encodeURIComponent("国际合作项目")}` +
+        `&researchUnit=${encodeURIComponent("临床医学研究中心")}` +
+        `&projectType=${encodeURIComponent("人体国际合作临床试验")}` +
+        `&leaderName=${encodeURIComponent(projectDetails.leaderName)}` +
+        `&department=${encodeURIComponent("临床医学院")}`;
+      
+      router.push(`/ethic-projects/review/human/genetic/international-clinical?${clinicalParams}`);
+      handleClose();
+    }
     else {
       // 处理其他类型审查表单的逻辑
       console.log("提交人体伦理审查表单");
