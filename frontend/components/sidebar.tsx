@@ -24,6 +24,7 @@ import {
   BarChart2,
   Microscope,
   ClipboardCheck,
+  FlaskConical,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
@@ -228,6 +229,11 @@ export default function Sidebar() {
         { name: "会议审查", path: "/ethic-review/meeting-review" },
         { name: "送审文件配置", path: "/ethic-review/document-config" },
       ]
+    },
+    { 
+      name: "实验室", 
+      icon: <FlaskConical className="h-5 w-5" />, 
+      path: "/laboratory",
     },
     { 
       name: "进度管理", 

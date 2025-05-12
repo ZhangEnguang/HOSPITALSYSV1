@@ -58,16 +58,18 @@ type ReviewCardProps = {
   review: Review;
   type: "progress" | "completed"; 
   getDocumentStatusColor: (status: string) => string;
+  index?: number;
 }
 
 // 审查流程卡片组件
 export const ReviewTimelineCard = ({ 
   review, 
   type = "progress",
-  getDocumentStatusColor 
+  getDocumentStatusColor,
+  index = -1
 }: ReviewCardProps) => {
-  // 默认收起状态
-  const [expanded, setExpanded] = useState(false);
+  // 默认收起状态，但如果是第一个卡片则默认展开
+  const [expanded, setExpanded] = useState(index === 0);
   // 督办提醒状态
   const [hasReminder, setHasReminder] = useState(false);
   // 催办对话框状态

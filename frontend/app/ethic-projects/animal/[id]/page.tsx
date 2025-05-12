@@ -18,10 +18,12 @@ import {
   FileText,
   Building2,
   FileCheck,
+  BarChart3,
 } from "lucide-react"
 import EthicProjectOverviewTab from "../components/overview-tab"
 import ReviewProgressTab from "../../components/tabs/review-progress-tab"
 import ReviewFilesTab from "../../components/tabs/review-files-tab"
+import ExperimentProgressTab from "../../components/tabs/experiment-progress-tab"
 import "../../styles/ethic-project.css"
 
 // 添加全局样式覆盖
@@ -107,7 +109,13 @@ const animalEthicProjects = [
     auditStatus: "审核通过",
     priority: "高",
     projectNumber: "动伦2025001",
-    department: "基础医学院"
+    department: "基础医学院",
+    members: [
+      { name: "李助理", title: "研究助理", department: "基础医学院", role: "实验操作", contact: "li@example.com" },
+      { name: "张技术员", title: "高级技术员", department: "基础医学院", role: "数据分析", contact: "zhang@example.com" },
+      { name: "刘研究员", title: "副研究员", department: "药理学系", role: "实验设计", contact: "13800000003" },
+      { name: "赵博士", title: "博士后", department: "基础医学院", role: "实验监督", contact: "zhao@example.com" }
+    ]
   },
   {
     id: "2",
@@ -130,7 +138,12 @@ const animalEthicProjects = [
     auditStatus: "待审核",
     priority: "中",
     projectNumber: "动伦2025002",
-    department: "临床医学院"
+    department: "临床医学院",
+    members: [
+      { name: "陈博士", title: "博士后", department: "临床医学院", role: "项目协调", contact: "chen@example.com" },
+      { name: "吴老师", title: "讲师", department: "临床医学院", role: "实验设计", contact: "wu@example.com" },
+      { name: "周技术员", title: "技术员", department: "免疫学实验中心", role: "实验操作", contact: "13800000005" }
+    ]
   },
   {
     id: "3",
@@ -153,20 +166,25 @@ const animalEthicProjects = [
     auditStatus: "审核通过",
     priority: "高",
     projectNumber: "动伦2025003",
-    department: "神经科学学院"
+    department: "神经科学学院",
+    members: [
+      { name: "孙医生", title: "主治医师", department: "附属医院", role: "临床指导", contact: "sun@example.com" },
+      { name: "钱技术员", title: "高级技术员", department: "神经科学实验中心", role: "实验操作", contact: "13800000007" },
+      { name: "郑博士", title: "博士研究生", department: "神经科学学院", role: "数据分析", contact: "zheng@example.com" }
+    ]
   }
 ];
 
 // 项目AI摘要内容
 const projectAISummaries: { [key: string]: AISummary } = {
   "1": {
-    content: "该科研项目当前进度为35%，符合预期计划。项目经费使用率为28.5%，整体于计划进度内。项目已产出3篇研究论文，包括实验设计方案、动物伦理规范与代谢机制初步分析。成果转化进展良好，已有2家制药企业表达合作意向，高于同类项目平均水平25%。",
+    content: "本项目严格遵循《实验动物管理条例》和国际实验动物3R福利准则。\n\n【伦理规范执行情况】\n• 已获得IACUC伦理委员会批准（批准号：IACUC-2023-05-15）\n• 符合《实验动物管理条例》所有要求\n• 通过实验动物福利认证，评分92/100（优秀）\n\n【3R原则实施情况】\n• 替代(Replacement)：建立体外细胞模型预筛选，减少20%动物用量\n• 减少(Reduction)：优化实验设计，使用功能性标志物减少取样频次\n• 优化(Refinement)：采用无创检测技术和精确麻醉方案，降低动物痛苦\n\n【动物福利保障措施】\n• 环境丰容化设施，自动温湿度控制系统\n• 专业兽医24小时值班监护\n• 详细疼痛管理方案，细化人道终点标准\n\n动物福利委员会每周监督评估，确保实验过程严格遵守伦理规范。",
     aiModel: "GPT-Scientific 2023",
     version: "v2.4.1",
     recommendations: [
-      "加快经费使用进度，特别是设备采购和试验材料准备",
-      "重点关注代谢途径与肝毒性关联研究",
-      "加强与高校和研究机构合作，提高成果影响力"
+      "加强实验动物行为状态监测，完善环境丰容措施",
+      "优化麻醉和镇痛方案，进一步减轻动物实验痛苦",
+      "探索更多细胞模型替代方案，减少动物使用数量"
     ],
     confidenceScore: 95,
     analysisTime: "2024-03-15 10:32",
@@ -177,7 +195,7 @@ const projectAISummaries: { [key: string]: AISummary } = {
     }
   },
   "2": {
-    content: "该科研项目当前进度为15%，符合启动阶段计划。项目经费使用率为12.3%，进度略滞后。项目已完成实验动物饲养环境准备和初步分化实验，尚未产出正式研究成果。项目面临的主要挑战是干细胞纯度控制和分化方向调控。",
+    content: "本项目严格执行《实验动物管理条例》和国际动物实验伦理标准。\n\n【伦理规范执行情况】\n• 已获得机构伦理委员会批准（批准号：IACUC-2023-08-22）\n• 所有实验人员均持有实验动物操作资质证书\n• 伦理合规评分88/100（良好）\n\n【3R原则实施情况】\n• 替代(Replacement)：使用计算机模拟预测药效，减少预实验动物使用\n• 减少(Reduction)：统计学优化样本量，精确计算最小必要动物数量\n• 优化(Refinement)：使用微创技术与自动化行为监测系统减轻痛苦\n\n项目进度符合启动阶段计划。实验设施与环境已完全准备，初步分化实验已完成。项目当前面临的主要挑战是干细胞纯度控制和分化方向调控，研究团队正在优化实验条件提高分化效率。",
     aiModel: "GPT-Scientific 2023",
     version: "v2.4.1",
     recommendations: [
@@ -194,7 +212,7 @@ const projectAISummaries: { [key: string]: AISummary } = {
     }
   },
   "3": {
-    content: "该科研项目已顺利完成，进度达100%。项目经费使用率为97.8%，实现了预期全部研究目标。项目产出了5篇高水平论文，其中2篇发表在本领域顶级期刊。研究发现了神经干细胞促进脊髓损伤修复的新机制，具有显著的临床转化价值。",
+    content: "本项目已顺利完成全部实验内容，严格遵守动物福利与伦理规范。\n\n【伦理规范执行情况】\n• 获得伦理委员会全程监督认可（批准号：IACUC-2022-11-05）\n• 伦理合规评分96/100（优秀）\n• 荣获机构年度动物福利示范项目称号\n\n【3R原则实施情况】\n• 替代(Replacement)：成功应用体外组织培养技术替代30%动物实验\n• 减少(Reduction)：通过优化实验设计，比计划减少15%动物使用量\n• 优化(Refinement)：使用先进镇痛技术与环境丰容化措施，显著提升动物福利\n\n项目产出了5篇高水平论文，其中2篇发表在本领域顶级期刊。实验发现的神经干细胞促进脊髓损伤修复新机制具有显著临床转化价值，下一步计划开展临床前研究。项目资金使用效率高，实现了预期全部研究目标。",
     aiModel: "GPT-Scientific 2023",
     version: "v2.4.1",
     recommendations: [
@@ -374,6 +392,12 @@ export default function AnimalEthicProjectDetailPage({ params }: { params: { id:
           label: "审查进度",
           icon: <FileCheck className="h-4 w-4" />,
           component: <ReviewProgressTab />,
+        },
+        {
+          id: "experimentProgress",
+          label: "实验进度与结果",
+          icon: <BarChart3 className="h-4 w-4" />,
+          component: <ExperimentProgressTab />,
         },
         {
           id: "reviewFiles",

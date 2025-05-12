@@ -1,4 +1,16 @@
-// ... existing code ...
+"use client"
+
+import { useState } from "react"
+import { toast } from "@/components/ui/use-toast"
+import DataList from "@/components/data-list"
+
+export default function EthicFollowerReviewPage() {
+  const [selectedRows, setSelectedRows] = useState<string[]>([])
+
+  // 处理选择行变化
+  const handleSelectionChange = (rows: string[]) => {
+    setSelectedRows(rows)
+  }
 
   // 批量操作按钮
   const batchActions = [
@@ -22,15 +34,11 @@
     },
   ]
 
-  // ... existing code ...
-
   return (
     <DataList
-      // ... existing props ...
       selectedRows={selectedRows}
       onSelectedRowsChange={handleSelectionChange}
       batchActions={batchActions}
-      // ... existing props ...
     />
   )
 } 

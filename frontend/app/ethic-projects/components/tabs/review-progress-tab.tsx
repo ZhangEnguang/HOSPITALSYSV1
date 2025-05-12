@@ -27,14 +27,16 @@ import { ReviewTimelineCard as ReviewCard, AnimationStyles } from "./review-prog
 const ReviewTimelineCard = ({ 
   review, 
   type = "progress",
-  getDocumentStatusColor 
+  getDocumentStatusColor,
+  index = 0
 }: { 
   review: any, 
   type?: "progress" | "completed",
-  getDocumentStatusColor: (status: string) => string 
+  getDocumentStatusColor: (status: string) => string,
+  index?: number
 }) => {
-  // 默认收起状态
-  const [expanded, setExpanded] = useState(false);
+  // 默认收起状态，但如果是第一个卡片则默认展开
+  const [expanded, setExpanded] = useState(index === 0);
   // 督办提醒状态
   const [hasReminder, setHasReminder] = useState(false);
   // 催办对话框状态
@@ -711,12 +713,13 @@ export default function ReviewProgressTab() {
         <TabsContent value="inProgress" className="mt-0">
           <div>
             {reviewData.inProgress.length > 0 ? (
-              reviewData.inProgress.map((review) => (
+              reviewData.inProgress.map((review, index) => (
                 <ReviewCard 
                   key={review.id} 
                   review={review} 
                   type="progress" 
                   getDocumentStatusColor={getDocumentStatusColor}
+                  index={index}
                 />
                 ))
               ) : (
@@ -732,21 +735,22 @@ export default function ReviewProgressTab() {
         <TabsContent value="completed" className="mt-0">
           <div>
               {reviewData.completed.length > 0 ? (
-                reviewData.completed.map((review) => (
+                reviewData.completed.map((review, index) => (
                 <ReviewCard 
                   key={review.id} 
                   review={review} 
                   type="completed" 
                   getDocumentStatusColor={getDocumentStatusColor}
+                  index={index}
                 />
               ))
             ) : (
               <div className="text-center py-12 bg-white border rounded-lg flex flex-col items-center">
                 <AlertTriangle className="h-8 w-8 text-amber-400 mb-2" />
                 <p className="text-gray-600">暂无已完成的审查</p>
-                      </div>
-                    )}
-                  </div>
+              </div>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
     </div>

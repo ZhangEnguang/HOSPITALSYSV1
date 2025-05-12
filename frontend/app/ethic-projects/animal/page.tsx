@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Building2, BriefcaseMedical, Database, FileText, MousePointer2, Eye, Edit, Trash2, ClipboardList } from "lucide-react"
+import { Building2, BriefcaseMedical, Database, FileText, MousePointer2, Eye, Edit, Trash2, ClipboardList, Upload } from "lucide-react"
 
 import DataList from "@/components/data-management/data-list"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
@@ -471,6 +471,18 @@ export default function AnimalEthicProjectsPage() {
       label: "查看详情",
       icon: <Eye className="h-4 w-4" />,
       onClick: (item: any) => router.push(`/ethic-projects/animal/${item.id}`),
+    },
+    {
+      id: "upload",
+      label: "上传实验数据",
+      icon: <Upload className="h-4 w-4" />,
+      onClick: (item: any) => {
+        toast({
+          title: "功能开发中",
+          description: `准备上传数据到项目：${item.name}`,
+          duration: 3000,
+        });
+      },
     },
     {
       id: "edit",

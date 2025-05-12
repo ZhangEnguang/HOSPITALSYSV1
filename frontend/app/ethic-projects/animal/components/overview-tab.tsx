@@ -268,15 +268,77 @@ export default function EthicProjectOverviewTab({
                         <LayoutGrid className="h-4 w-4" />
                         <span className="font-medium">最新分析已更新 - 检测到项目进度变更</span>
                       </div>
-                      <p>
-                        该科研项目当前进度为<strong className="text-primary font-medium">35%</strong>，
-                        符合预期计划。项目经费使用率为
-                        <strong className="text-primary font-medium">31.2%</strong>（
-                        <span className="text-green-600">↑2.7%</span>），整体于计划进度内。项目已产出
-                        <strong className="text-primary font-medium">3篇</strong>研究论文，
-                        包括实验设计方案、动物伦理规范与代谢机制初步分析。成果转化进展良好，已有
-                        <strong className="text-primary font-medium">2家</strong>制药企业表达合作意向，
-                        高于同类项目平均水平<strong className="text-primary font-medium">25%</strong>。
+                      <p className="whitespace-pre-line">
+                        {aiSummaryContent.split('\n\n').map((paragraph: string, idx: number) => {
+                          // 检查段落是否包含【】标题
+                          if (paragraph.includes('【') && paragraph.includes('】')) {
+                            const titleMatch = paragraph.match(/【(.+?)】/);
+                            const title = titleMatch ? titleMatch[1] : '';
+                            const content = paragraph.replace(/【(.+?)】/, '');
+                            
+                            // 检查内容是否包含列表项（以"•"开头的行）
+                            const hasListItems = content.includes('\n•');
+                            
+                            if (hasListItems) {
+                              // 处理包含列表项的内容
+                              const listItems = content.split('\n').filter((line: string) => line.trim().length > 0);
+                              
+                              return (
+                                <div key={idx} className="mb-4">
+                                  <h4 className="text-sm font-semibold text-blue-700 bg-blue-50 py-1 px-2 rounded mb-2">
+                                    {title}
+                                  </h4>
+                                  <ul className="pl-1 space-y-1">
+                                    {listItems.map((item: string, itemIdx: number) => (
+                                      <li key={itemIdx} className={`pl-5 relative ${item.startsWith('•') ? 'text-slate-700' : 'text-slate-600'}`}>
+                                        {item.startsWith('•') ? (
+                                          <>
+                                            <span className="absolute left-0 text-blue-500">•</span>
+                                            {item.substring(1).trim()}
+                                          </>
+                                        ) : item}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <div key={idx} className="mb-3">
+                                  <h4 className="text-sm font-semibold text-blue-700 bg-blue-50 py-1 px-2 rounded mb-1.5">
+                                    {title}
+                                  </h4>
+                                  <div className="pl-2">{content}</div>
+                                </div>
+                              );
+                            }
+                          } else if (paragraph.includes('\n•')) {
+                            // 处理不包含标题但包含列表项的段落
+                            const lines = paragraph.split('\n').filter((line: string) => line.trim().length > 0);
+                            return (
+                              <div key={idx} className="mb-3">
+                                <ul className="pl-1 space-y-1">
+                                  {lines.map((line: string, lineIdx: number) => (
+                                    <li key={lineIdx} className={`pl-5 relative ${line.startsWith('•') ? 'text-slate-700' : 'text-slate-600'}`}>
+                                      {line.startsWith('•') ? (
+                                        <>
+                                          <span className="absolute left-0 text-blue-500">•</span>
+                                          {line.substring(1).trim()}
+                                        </>
+                                      ) : line}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            );
+                          } else {
+                            return (
+                              <p key={idx} className="mb-3">
+                                {paragraph}
+                              </p>
+                            );
+                          }
+                        })}
                       </p>
                       <div className="flex items-start gap-4 my-3 py-2">
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
@@ -316,7 +378,78 @@ export default function EthicProjectOverviewTab({
                     </>
                   ) : (
                     <>
-                      <p>{aiSummaryContent}</p>
+                      <p className="whitespace-pre-line">
+                        {aiSummaryContent.split('\n\n').map((paragraph: string, idx: number) => {
+                          // 检查段落是否包含【】标题
+                          if (paragraph.includes('【') && paragraph.includes('】')) {
+                            const titleMatch = paragraph.match(/【(.+?)】/);
+                            const title = titleMatch ? titleMatch[1] : '';
+                            const content = paragraph.replace(/【(.+?)】/, '');
+                            
+                            // 检查内容是否包含列表项（以"•"开头的行）
+                            const hasListItems = content.includes('\n•');
+                            
+                            if (hasListItems) {
+                              // 处理包含列表项的内容
+                              const listItems = content.split('\n').filter((line: string) => line.trim().length > 0);
+                              
+                              return (
+                                <div key={idx} className="mb-4">
+                                  <h4 className="text-sm font-semibold text-blue-700 bg-blue-50 py-1 px-2 rounded mb-2">
+                                    {title}
+                                  </h4>
+                                  <ul className="pl-1 space-y-1">
+                                    {listItems.map((item: string, itemIdx: number) => (
+                                      <li key={itemIdx} className={`pl-5 relative ${item.startsWith('•') ? 'text-slate-700' : 'text-slate-600'}`}>
+                                        {item.startsWith('•') ? (
+                                          <>
+                                            <span className="absolute left-0 text-blue-500">•</span>
+                                            {item.substring(1).trim()}
+                                          </>
+                                        ) : item}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <div key={idx} className="mb-3">
+                                  <h4 className="text-sm font-semibold text-blue-700 bg-blue-50 py-1 px-2 rounded mb-1.5">
+                                    {title}
+                                  </h4>
+                                  <div className="pl-2">{content}</div>
+                                </div>
+                              );
+                            }
+                          } else if (paragraph.includes('\n•')) {
+                            // 处理不包含标题但包含列表项的段落
+                            const lines = paragraph.split('\n').filter((line: string) => line.trim().length > 0);
+                            return (
+                              <div key={idx} className="mb-3">
+                                <ul className="pl-1 space-y-1">
+                                  {lines.map((line: string, lineIdx: number) => (
+                                    <li key={lineIdx} className={`pl-5 relative ${line.startsWith('•') ? 'text-slate-700' : 'text-slate-600'}`}>
+                                      {line.startsWith('•') ? (
+                                        <>
+                                          <span className="absolute left-0 text-blue-500">•</span>
+                                          {line.substring(1).trim()}
+                                        </>
+                                      ) : line}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            );
+                          } else {
+                            return (
+                              <p key={idx} className="mb-3">
+                                {paragraph}
+                              </p>
+                            );
+                          }
+                        })}
+                      </p>
                       <div className="flex items-start gap-4 my-3 py-2">
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                           <BarChart3 className="h-4 w-4 text-blue-600" />
