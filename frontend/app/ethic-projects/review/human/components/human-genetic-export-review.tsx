@@ -203,7 +203,7 @@ export function HumanGeneticExportReview({
 
   return (
     <ReviewFormBase
-      title="新建人体伦理材料出境审批"
+      title="新建材料出境审批"
       returnPath="/ethic-projects/human"
       projectInfo={projectData}
       fileList={reviewFiles}

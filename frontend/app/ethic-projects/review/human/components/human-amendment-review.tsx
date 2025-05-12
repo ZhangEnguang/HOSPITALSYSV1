@@ -164,7 +164,7 @@ export function HumanAmendmentReview({
 
   return (
     <ReviewFormBase
-      title="新增人体伦理修正案审查"
+      title="新建修正案审查"
       returnPath="/ethic-projects/human"
       projectInfo={projectData}
       fileList={reviewFiles}

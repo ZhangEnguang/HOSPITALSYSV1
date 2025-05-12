@@ -164,7 +164,7 @@ export function HumanCompletionReview({
 
   return (
     <ReviewFormBase
-      title="新建人体伦理研究完成审查"
+      title="新建研究完成审查"
       returnPath="/ethic-projects/human"
       projectInfo={projectData}
       fileList={reviewFiles}

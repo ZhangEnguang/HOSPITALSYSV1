@@ -151,7 +151,7 @@ export function HumanSuspensionReview({
 
   return (
     <ReviewFormBase
-      title="新建人体伦理暂停/终止研究审查"
+      title="新建暂停/终止研究审查"
       returnPath="/ethic-projects/human"
       projectInfo={projectData}
       fileList={reviewFiles}

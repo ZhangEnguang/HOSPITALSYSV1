@@ -203,7 +203,7 @@ export function HumanGeneticInternationalClinicalReview({
 
   return (
     <ReviewFormBase
-      title="新建人体伦理国际合作临床试验备案"
+      title="新建国际合作临床试验备案"
       returnPath="/ethic-projects/human"
       projectInfo={projectData}
       fileList={reviewFiles}

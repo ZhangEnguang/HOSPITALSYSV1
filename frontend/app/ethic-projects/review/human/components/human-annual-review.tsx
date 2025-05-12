@@ -177,7 +177,7 @@ export function HumanAnnualReview({
 
   return (
     <ReviewFormBase
-      title="新增人体伦理年度/定期审查"
+      title="新建年度/定期审查"
       returnPath="/ethic-projects/human"
       projectInfo={projectData}
       fileList={reviewFiles}

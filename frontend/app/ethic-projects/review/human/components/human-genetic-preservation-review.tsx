@@ -177,7 +177,7 @@ export function HumanGeneticPreservationReview({
 
   return (
     <ReviewFormBase
-      title="新建人体伦理人遗保藏审批"
+      title="新建人遗保藏审批"
       returnPath="/ethic-projects/human"
       projectInfo={projectData}
       fileList={reviewFiles}

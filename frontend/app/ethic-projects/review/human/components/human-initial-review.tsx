@@ -177,7 +177,7 @@ export function HumanInitialReview({
 
   return (
     <ReviewFormBase
-      title="新增人体伦理初始审查"
+      title="新建初始审查"
       returnPath="/ethic-projects/human"
       projectInfo={projectData}
       fileList={reviewFiles}

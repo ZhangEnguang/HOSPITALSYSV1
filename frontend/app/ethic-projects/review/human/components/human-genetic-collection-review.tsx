@@ -164,7 +164,7 @@ export function HumanGeneticCollectionReview({
 
   return (
     <ReviewFormBase
-      title="新建人体伦理人遗采集审批"
+      title="新建人遗采集审批"
       returnPath="/ethic-projects/human"
       projectInfo={projectData}
       fileList={reviewFiles}

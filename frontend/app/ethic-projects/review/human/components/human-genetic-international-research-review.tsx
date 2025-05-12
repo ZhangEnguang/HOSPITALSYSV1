@@ -190,7 +190,7 @@ export function HumanGeneticInternationalResearchReview({
 
   return (
     <ReviewFormBase
-      title="新建人体伦理国际合作科学研究审批"
+      title="新建国际合作科学研究审批"
       returnPath="/ethic-projects/human"
       projectInfo={projectData}
       fileList={reviewFiles}

@@ -187,7 +187,7 @@ export function HumanDeviationReview({
 
   return (
     <ReviewFormBase
-      title="新增人体伦理偏离方案审查"
+      title="新建偏离方案审查"
       returnPath="/ethic-projects/human"
       projectInfo={projectData}
       fileList={reviewFiles}

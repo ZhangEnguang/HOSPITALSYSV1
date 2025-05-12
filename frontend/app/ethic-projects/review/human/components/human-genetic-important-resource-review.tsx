@@ -203,7 +203,7 @@ export function HumanGeneticImportantResourceReview({
 
   return (
     <ReviewFormBase
-      title="新建人体伦理重要遗传家系和特定地区人遗资源"
+      title="新建重要遗传家系和特定地区人遗资源"
       returnPath="/ethic-projects/human"
       projectInfo={projectData}
       fileList={reviewFiles}

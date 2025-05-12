@@ -177,7 +177,7 @@ export function HumanSafetyReview({
 
   return (
     <ReviewFormBase
-      title="新增人体伦理安全性审查"
+      title="新建安全性审查"
       returnPath="/ethic-projects/human"
       projectInfo={projectData}
       fileList={reviewFiles}
