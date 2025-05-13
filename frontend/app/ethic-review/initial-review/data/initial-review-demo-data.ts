@@ -57,7 +57,7 @@ export const REVIEW_TYPE_OPTIONS = [
 // 创建初始审查数据
 export const initialReviewItems = [
   {
-    id: "ETH-A-2024-001",
+    id: "1",
     projectId: "ETH-A-2024-001",
     reviewType: "初始审查",
     name: "转基因小鼠模型在神经退行性疾病中的应用",
@@ -76,7 +76,7 @@ export const initialReviewItems = [
     approvalStatus: "已通过",
   },
   {
-    id: "ETH-H-2024-008",
+    id: "2",
     projectId: "ETH-H-2024-008",
     reviewType: "复审",
     name: "新型靶向生物药物在晚期肿瘤患者中的临床试验",
@@ -95,7 +95,7 @@ export const initialReviewItems = [
     approvalStatus: "待审核",
   },
   {
-    id: "ETH-H-2024-012",
+    id: "3",
     projectId: "ETH-H-2024-012",
     reviewType: "初始审查",
     name: "高血压患者运动干预效果及安全性评估",
@@ -114,7 +114,7 @@ export const initialReviewItems = [
     approvalStatus: "进行中",
   },
   {
-    id: "ETH-A-2024-003",
+    id: "4",
     projectId: "ETH-A-2024-003",
     reviewType: "复审",
     name: "啮齿类动物模型在药物代谢研究中的应用",
@@ -133,7 +133,7 @@ export const initialReviewItems = [
     approvalStatus: "已驳回",
   },
   {
-    id: "ETH-H-2024-015",
+    id: "5",
     projectId: "ETH-H-2024-015",
     reviewType: "初始审查",
     name: "免疫治疗对不同年龄段肿瘤患者生活质量影响",
@@ -152,7 +152,7 @@ export const initialReviewItems = [
     approvalStatus: "待提交",
   },
   {
-    id: "ETH-A-2024-006",
+    id: "6",
     projectId: "ETH-A-2024-006",
     reviewType: "初始审查",
     name: "非人灵长类动物在神经递质调控研究中的应用",
@@ -178,7 +178,7 @@ export const initialReviewItems = [
     approvalStatus: "已通过",
   },
   {
-    id: "ETH-H-2024-019",
+    id: "7",
     projectId: "ETH-H-2024-019",
     reviewType: "复审",
     name: "针对重度抑郁症患者的认知行为疗法有效性研究",
@@ -204,7 +204,7 @@ export const initialReviewItems = [
     approvalStatus: "进行中",
   },
   {
-    id: "ETH-A-2024-009",
+    id: "8",
     projectId: "ETH-A-2024-009",
     reviewType: "初始审查",
     name: "转基因猪模型在器官移植安全性评估中的应用",

@@ -276,7 +276,10 @@ function InitialReviewContent() {
 
   // 处理项目点击
   const handleItemClick = (item: any) => {
-    router.push(`/ethic-review/initial-review/${item.id}`)
+    // 始终使用id属性作为路由参数
+    const id = item.id;
+    console.log("点击项目，跳转到详情页: ", id);
+    router.push(`/ethic-review/initial-review/${id}`);
   }
 
   // 批量操作按钮
