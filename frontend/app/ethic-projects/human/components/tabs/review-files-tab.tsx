@@ -25,15 +25,15 @@ import {
   FileJson
 } from "lucide-react"
 
-// 评审文件标签组件
-export default function ReviewFilesTab({ projectId, projectType }: { projectId?: string; projectType?: "animal" | "human" }) {
+// 人体伦理项目评审文件标签组件
+export default function ReviewFilesTab({ projectId, projectType = "human" }: { projectId?: string; projectType?: "animal" | "human" }) {
   const [activeTab, setActiveTab] = useState("submitted")
   
   // 模拟文件数据
   const submittedFiles = [
     {
       id: "1",
-      name: "项目申请书.pdf",
+      name: "人体研究项目申请书.pdf",
       category: "项目申请",
       version: "V1.0",
       size: "2.4 MB",
@@ -43,8 +43,8 @@ export default function ReviewFilesTab({ projectId, projectType }: { projectId?:
     },
     {
       id: "2",
-      name: projectType === "human" ? "知情同意书.docx" : "动物使用申请.docx",
-      category: projectType === "human" ? "知情同意" : "动物使用",
+      name: "受试者知情同意书.docx",
+      category: "知情同意",
       version: "V1.0",
       size: "1.8 MB",
       uploadDate: "2024-01-05",
@@ -53,8 +53,8 @@ export default function ReviewFilesTab({ projectId, projectType }: { projectId?:
     },
     {
       id: "3",
-      name: projectType === "human" ? "研究方案.pdf" : "动物实验方案.pdf",
-      category: "实验方案",
+      name: "临床研究方案.pdf",
+      category: "研究方案",
       version: "V1.2",
       size: "3.5 MB",
       uploadDate: "2024-01-10",
@@ -63,7 +63,7 @@ export default function ReviewFilesTab({ projectId, projectType }: { projectId?:
     },
     {
       id: "4",
-      name: "研究者简历.pdf",
+      name: "研究者资质证明.pdf",
       category: "研究者资质",
       version: "V1.0",
       size: "1.2 MB",
@@ -73,72 +73,82 @@ export default function ReviewFilesTab({ projectId, projectType }: { projectId?:
     },
     {
       id: "5",
-      name: projectType === "human" ? "伦理审查申请表.pdf" : "伦理审查申请表.pdf",
+      name: "人体伦理审查申请表.pdf",
       category: "伦理申请",
       version: "V1.0",
       size: "0.9 MB",
       uploadDate: "2024-01-05",
       status: "已通过",
       icon: <FileText className="h-4 w-4 text-red-500" />
-      },
-      {
+    },
+    {
       id: "6",
-      name: projectType === "human" ? "病例报告表.xlsx" : "实验记录表.xlsx",
+      name: "受试者个人数据记录表.xlsx",
       category: "数据记录",
       version: "V1.0",
       size: "1.1 MB",
       uploadDate: "2024-01-05",
       status: "已通过",
       icon: <FileSpreadsheetIcon className="h-4 w-4 text-green-500" />
-      }
-    ]
+    }
+  ]
   
   const reviewFiles = [
     {
       id: "7",
-      name: "伦理委员会审查意见.pdf",
+      name: "人体伦理委员会审查意见.pdf",
       category: "审查意见",
       version: "V1.0",
       size: "0.7 MB",
       uploadDate: "2024-01-15",
-      reviewer: "医学院伦理审查委员会",
+      reviewer: "医学院人体伦理审查委员会",
       icon: <FileText className="h-4 w-4 text-red-500" />
-        },
-        {
+    },
+    {
       id: "8",
-      name: "伦理审查批准证书.pdf",
+      name: "人体伦理审查批准证书.pdf",
       category: "审批证书",
       version: "V1.0",
       size: "0.5 MB",
       uploadDate: "2024-01-20",
-      reviewer: "医学院伦理审查委员会",
+      reviewer: "医学院人体伦理审查委员会",
       icon: <FileText className="h-4 w-4 text-red-500" />
     }
   ]
   
   const amendmentFiles = [
-        {
+    {
       id: "9",
-      name: projectType === "human" ? "方案修订说明.docx" : "实验方案修订说明.docx",
+      name: "知情同意书修订说明.docx",
       category: "修订说明",
       version: "V1.0",
       size: "0.8 MB",
       uploadDate: "2024-02-10",
       status: "已通过",
       icon: <FileText className="h-4 w-4 text-blue-500" />
-        },
-        {
+    },
+    {
       id: "10",
-      name: projectType === "human" ? "研究方案_修订版.pdf" : "动物实验方案_修订版.pdf",
-      category: "实验方案",
+      name: "临床研究方案_修订版.pdf",
+      category: "研究方案",
       version: "V2.0",
       size: "3.6 MB",
       uploadDate: "2024-02-10",
       status: "已通过",
       icon: <FileText className="h-4 w-4 text-red-500" />
+    },
+    {
+      id: "11",
+      name: "受试者招募材料.pdf",
+      category: "招募材料",
+      version: "V1.0",
+      size: "1.2 MB",
+      uploadDate: "2024-02-15",
+      status: "已通过",
+      icon: <FileText className="h-4 w-4 text-red-500" />
     }
   ]
-  
+
   // 获取文件状态样式
   const getStatusStyle = (status: string) => {
     switch (status) {
@@ -155,7 +165,7 @@ export default function ReviewFilesTab({ projectId, projectType }: { projectId?:
     }
   }
     
-    return (
+  return (
     <div className="space-y-6">
       {/* 文件统计卡片 */}
       <Card className="border-slate-200 shadow-sm overflow-hidden">
@@ -166,7 +176,7 @@ export default function ReviewFilesTab({ projectId, projectType }: { projectId?:
             送审文件概览
           </CardTitle>
           <CardDescription>
-            项目申请与审查相关的所有文件
+            人体伦理项目申请与审查相关的所有文件
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -209,7 +219,7 @@ export default function ReviewFilesTab({ projectId, projectType }: { projectId?:
                 <div className="text-xs text-slate-500 mt-1">方案修订与更新文件</div>
               </CardContent>
             </Card>
-                    </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -243,7 +253,7 @@ export default function ReviewFilesTab({ projectId, projectType }: { projectId?:
                   <CloudUpload className="h-4 w-4" />
                   <span>上传文件</span>
                 </Button>
-                      </div>
+              </div>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
@@ -286,7 +296,7 @@ export default function ReviewFilesTab({ projectId, projectType }: { projectId?:
                           <Button variant="ghost" size="icon" className="h-8 w-8">
                             <Download className="h-4 w-4" />
                           </Button>
-                      </div>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -338,7 +348,7 @@ export default function ReviewFilesTab({ projectId, projectType }: { projectId?:
                           <Button variant="ghost" size="icon" className="h-8 w-8">
                             <Download className="h-4 w-4" />
                           </Button>
-                    </div>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -361,7 +371,7 @@ export default function ReviewFilesTab({ projectId, projectType }: { projectId?:
                   <CloudUpload className="h-4 w-4" />
                   <span>上传修订文件</span>
                 </Button>
-                  </div>
+              </div>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
@@ -420,10 +430,10 @@ export default function ReviewFilesTab({ projectId, projectType }: { projectId?:
                   </Button>
                 </div>
               )}
-          </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
   )
-}
+} 

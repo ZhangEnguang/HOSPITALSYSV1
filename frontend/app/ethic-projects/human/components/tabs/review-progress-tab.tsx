@@ -21,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 
 // 导入新的自定义组件
-import { ReviewTimelineCard as ReviewCard, AnimationStyles } from "./review-progress-card"
+import { ReviewTimelineCard as ReviewCard, AnimationStyles } from "../../../components/tabs/review-progress-card"
 
 // 简化版审查流程卡片组件 - 模拟截图中的样式
 const ReviewTimelineCard = ({ 
@@ -418,7 +418,7 @@ const ReviewTimelineCard = ({
 };
 
 // 审查进度标签页组件
-export default function ReviewProgressTab({ projectId, projectType = "animal" }: { projectId?: string; projectType?: "animal" | "human" }) {
+export default function ReviewProgressTab({ projectId, projectType = "human" }: { projectId?: string; projectType?: "animal" | "human" }) {
   const [activeTab, setActiveTab] = useState("timeline")
   // 添加审查卡片模式视图状态
   const [activeView, setActiveView] = useState("progress")
@@ -434,64 +434,62 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
   const inProgressReviews = [
       {
         id: "1",
-      type: projectType === "human" ? "伦理委员会初步审查" : "动物实验伦理审查",
-      submittedDate: "2024-01-20",
-      expectedCompletionDate: "2024-02-25",
-      currentStep: "专家评审",
-      progress: 75,
+        type: "人体伦理委员会初步审查",
+        submittedDate: "2024-01-20",
+        expectedCompletionDate: "2024-02-25",
+        currentStep: "临床专家评审",
+        progress: 75,
         status: "审核中",
-      reviewer: "医学院伦理审查委员会",
+        reviewer: "医学院人体伦理审查委员会",
         submittedBy: "王教授",
         reviewHistory: [
-        {
-          action: "提交申请",
-          date: "2024-01-20",
-          operator: "王教授",
-          comments: projectType === "human" ? "提交人体伦理项目初审申请" : "提交动物实验伦理项目初审申请"
-        },
-        {
-          action: "形式审查",
-          date: "2024-01-22",
-          operator: "李审查员",
-          comments: "项目申请资料完整性检查通过"
-        },
-        {
-          action: "指定专家评审",
-          date: "2024-01-25",
-          operator: "张主任",
-          comments: projectType === "human" 
-            ? "分配2名伦理学专家和1名临床专家进行评审"
-            : "分配2名动物福利专家和1名实验设计专家进行评审"
-        },
-        {
-          action: "专家评审中",
-          date: "2024-02-05",
-          operator: "系统",
-          comments: "已收到2名专家的评审意见，等待1名专家完成评审"
-        }
+          {
+            action: "提交申请",
+            date: "2024-01-20",
+            operator: "王教授",
+            comments: "提交临床研究人体伦理项目初审申请"
+          },
+          {
+            action: "形式审查",
+            date: "2024-01-22",
+            operator: "李审查员",
+            comments: "受试者知情同意书及项目申请资料完整性检查通过"
+          },
+          {
+            action: "指定专家评审",
+            date: "2024-01-25",
+            operator: "张主任",
+            comments: "分配2名伦理学专家和1名临床医学专家进行评审"
+          },
+          {
+            action: "专家评审中",
+            date: "2024-02-05",
+            operator: "系统",
+            comments: "已收到2名专家的评审意见，等待临床医学专家完成评审"
+          }
         ],
         documents: [
-        {
-          name: projectType === "human" ? "项目申请表.pdf" : "动物实验申请表.pdf",
-          status: "已审核",
-          submittedDate: "2024-01-20",
-          reviewedDate: "2024-01-22",
-          uploadDate: "2024-01-20"
-      },
-      {
-          name: projectType === "human" ? "研究方案.pdf" : "实验方案.pdf",
-        status: "审核中",
-          submittedDate: "2024-01-20",
-          reviewedDate: "",
-          uploadDate: "2024-01-20"
-        },
-        {
-          name: projectType === "human" ? "知情同意书.docx" : "动物福利保障措施.docx",
-          status: "审核中",
-          submittedDate: "2024-01-20",
-          reviewedDate: "",
-          uploadDate: "2024-01-20"
-        }
+          {
+            name: "人体研究项目申请表.pdf",
+            status: "已审核",
+            submittedDate: "2024-01-20",
+            reviewedDate: "2024-01-22",
+            uploadDate: "2024-01-20"
+          },
+          {
+            name: "临床研究方案.pdf",
+            status: "审核中",
+            submittedDate: "2024-01-20",
+            reviewedDate: "",
+            uploadDate: "2024-01-20"
+          },
+          {
+            name: "受试者知情同意书.docx",
+            status: "审核中",
+            submittedDate: "2024-01-20",
+            reviewedDate: "",
+            uploadDate: "2024-01-20"
+          }
         ]
       }
   ]
@@ -499,51 +497,53 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
   // 模拟已完成的审查数据
   const completedReviews = [
       {
-      id: "2",
-      type: "科研处项目备案审核",
-      submittedDate: "2023-12-10",
-      completedDate: "2023-12-20",
-      progress: 100,
-      status: "审核通过",
-      reviewer: "科研处",
+        id: "2",
+        type: "医学院人体伦理项目备案审核",
+        submittedDate: "2023-12-10",
+        completedDate: "2023-12-20",
+        progress: 100,
+        status: "审核通过",
+        reviewer: "医学院科研处",
         submittedBy: "王教授",
+        result: "符合伦理要求，同意开展研究",
+        remarks: "项目应严格遵循知情同意原则，确保受试者权益，研究过程中发生不良事件须及时报告。",
         reviewHistory: [
-        {
-          action: "提交备案申请",
-          date: "2023-12-10",
-          operator: "王教授",
-          comments: projectType === "human" ? "提交人体伦理研究项目备案申请" : "提交动物实验伦理项目备案申请"
-        },
-        {
-          action: "文件审查",
-          date: "2023-12-15",
-          operator: "刘助理",
-          comments: "项目基本信息与研究计划审核"
-        },
-        {
-          action: "备案批准",
-          date: "2023-12-20",
-          operator: "周处长",
-          comments: projectType === "human" ? "项目备案审核通过，编号：人伦备2023-105" : "项目备案审核通过，编号：动伦备2023-089"
-        }
+          {
+            action: "提交备案申请",
+            date: "2023-12-10",
+            operator: "王教授",
+            comments: "提交人体伦理研究项目备案申请"
+          },
+          {
+            action: "文件审查",
+            date: "2023-12-15",
+            operator: "刘助理",
+            comments: "受试者招募计划与受试者保护措施审核通过"
+          },
+          {
+            action: "备案批准",
+            date: "2023-12-20",
+            operator: "周处长",
+            comments: "项目备案审核通过，编号：人伦备2023-105"
+          }
         ],
         documents: [
-        {
-          name: "项目备案表.pdf",
-          status: "已通过",
-          submittedDate: "2023-12-10",
-          reviewedDate: "2023-12-15",
-          uploadDate: "2023-12-10"
-      },
-      {
-          name: projectType === "human" ? "研究人员资质证明.pdf" : "实验操作人员资质证明.pdf",
-        status: "已通过",
-          submittedDate: "2023-12-10",
-          reviewedDate: "2023-12-20",
-          uploadDate: "2023-12-10"
-        }
-      ]
-    }
+          {
+            name: "人体研究项目备案表.pdf",
+            status: "已通过",
+            submittedDate: "2023-12-10",
+            reviewedDate: "2023-12-15",
+            uploadDate: "2023-12-10"
+          },
+          {
+            name: "研究人员资质证明.pdf",
+            status: "已通过",
+            submittedDate: "2023-12-10",
+            reviewedDate: "2023-12-20",
+            uploadDate: "2023-12-10"
+          }
+        ]
+      }
   ]
   
   // 模拟审查记录数据
@@ -552,7 +552,7 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
       id: "1",
       date: "2024-01-05",
       event: "提交初审申请",
-      description: "项目负责人提交了初审申请及相关文件",
+      description: "项目负责人提交了人体研究伦理审查申请及相关文件",
       status: "已完成",
       actor: "王教授",
       actorRole: "项目负责人"
@@ -561,7 +561,7 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
       id: "2",
       date: "2024-01-08",
       event: "形式审查",
-      description: "伦理办公室对申请材料进行形式审查",
+      description: "伦理办公室对受试者知情同意书等申请材料进行形式审查",
       status: "已完成",
       actor: "伦理办公室",
       actorRole: "审查人员"
@@ -570,7 +570,7 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
       id: "3",
       date: "2024-01-12",
       event: "专家审查",
-      description: projectType === "human" ? "3名伦理委员会成员进行专家审查" : "2名动物实验伦理专家进行审查",
+      description: "3名人体伦理委员会成员进行专家审查",
       status: "已完成",
       actor: "伦理委员会",
       actorRole: "专家组"
@@ -579,7 +579,7 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
       id: "4",
       date: "2024-01-15",
       event: "伦理委员会会议",
-      description: "伦理委员会召开会议讨论项目申请",
+      description: "人体伦理委员会召开会议讨论临床研究申请",
       status: "已完成",
       actor: "伦理委员会",
       actorRole: "委员会"
@@ -588,7 +588,7 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
       id: "5",
       date: "2024-01-20",
       event: "批准通过",
-      description: "伦理委员会批准项目，发放批准证书",
+      description: "人体伦理委员会批准研究项目，发放批准证书",
       status: "已完成",
       actor: "伦理委员会主席",
       actorRole: "主席"
@@ -597,7 +597,7 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
       id: "6",
       date: "2024-02-10",
       event: "方案修订",
-      description: projectType === "human" ? "项目组提交了知情同意书修订版本" : "项目组提交了动物使用计划修订版本",
+      description: "项目组提交了知情同意书修订版本",
       status: "已完成",
       actor: "王教授",
       actorRole: "项目负责人"
@@ -615,7 +615,7 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
       id: "8",
       date: "2024-08-05",
       event: "进度报告提交",
-      description: "项目组将提交中期进度报告",
+      description: "项目组将提交受试者招募进展及中期数据分析报告",
       status: "待处理",
       actor: "王教授",
       actorRole: "项目负责人"
@@ -624,12 +624,12 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
       id: "9",
       date: "2025-01-20",
       event: "年度报告",
-      description: "项目组需提交年度总结报告",
+      description: "项目组需提交受试者安全性跟踪及年度总结报告",
       status: "待处理",
       actor: "王教授",
       actorRole: "项目负责人"
-      }
-    ]
+    }
+  ]
   
   // 模拟审查会议记录
   const reviewMeetings = [
@@ -637,61 +637,50 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
       id: "1",
       date: "2024-01-15",
       type: "常规会议",
-      reviewType: "动物实验伦理审查",
-      attendees: "12名伦理委员会成员",
+      reviewType: "人体伦理研究审查",
+      attendees: "12名人体伦理委员会成员",
       decision: "批准通过",
-      comments: "委员会认为项目设计合理，" + 
-        (projectType === "human" 
-          ? "知情同意程序完善，风险与受益平衡，建议加强受试者隐私保护措施。" 
-          : "符合动物福利要求，建议加强动物使用过程中的疼痛管理。"),
+      comments: "委员会认为项目设计合理，知情同意程序完善，风险与受益平衡，建议加强受试者隐私保护措施。",
       meetingNumber: "EC-2024-01"
     },
     {
       id: "2",
       date: "2023-12-10",
       type: "快速审查会议",
-      reviewType: "科研处项目备案审核",
+      reviewType: "医学院人体伦理项目备案审核",
       attendees: "5名委员",
       decision: "批准通过",
-      comments: projectType === "human" 
-        ? "项目备案材料完整，研究风险较低，符合快速审查条件。" 
-        : "项目备案材料完整，实验方案规范，符合3R原则，同意备案。",
+      comments: "项目备案材料完整，研究风险较低，符合快速审查条件。",
       meetingNumber: "EC-2023-52"
     },
     {
       id: "3",
       date: "2024-02-03",
       type: "临时会议",
-      reviewType: "方案修订审查",
+      reviewType: "知情同意书修订审查",
       attendees: "8名委员",
       decision: "有条件通过",
-      comments: projectType === "human" 
-        ? "同意知情同意书的修订，但要求明确说明数据保存期限。" 
-        : "同意减少动物使用数量的修订，但需增加动物福利监测频次。",
+      comments: "同意知情同意书的修订，但要求明确说明数据保存期限和受试者退出研究的权益保障。",
       meetingNumber: "EC-2024-05"
     },
     {
       id: "4",
       date: "2024-03-12",
       type: "常规会议",
-      reviewType: "安全性报告审查",
+      reviewType: "不良事件报告审查",
       attendees: "14名委员",
       decision: "批准通过",
-      comments: projectType === "human" 
-        ? "审阅了安全性报告，未发现严重不良事件，研究可继续进行。" 
-        : "审阅了动物使用监测报告，动物福利得到良好保障，研究可继续进行。",
+      comments: "审阅了安全性报告，未发现严重不良事件，研究可继续进行。建议加强受试者随访。",
       meetingNumber: "EC-2024-11"
     },
     {
       id: "5",
       date: "2024-04-28",
       type: "专题会议",
-      reviewType: "中期进展审查",
+      reviewType: "临床研究中期进展审查",
       attendees: "10名委员",
       decision: "批准通过",
-      comments: projectType === "human" 
-        ? "项目进展顺利，受试者招募达标，数据质量良好，可继续开展。" 
-        : "实验进展符合预期，动物使用符合3R原则，可继续开展。",
+      comments: "项目进展顺利，受试者招募达标，数据质量良好，可继续开展。请注意做好受试者退出的管理工作。",
       meetingNumber: "EC-2024-17"
     }
   ]
@@ -702,70 +691,56 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
       id: "1",
       date: "2024-01-13",
       reviewer: "李委员",
-      reviewType: "动物实验伦理审查",
-      comments: projectType === "human" 
-        ? "知情同意书语言应更通俗易懂，建议修改第三部分关于风险描述的内容。" 
-        : "建议完善动物疼痛评估方案，增加麻醉方案细节。",
+      reviewType: "人体伦理研究审查",
+      comments: "知情同意书语言应更通俗易懂，建议修改第三部分关于风险描述的内容，并增加受试者可随时退出研究的说明。",
       status: "已修订"
     },
     {
       id: "2",
       date: "2024-01-13",
       reviewer: "张委员",
-      reviewType: "动物实验伦理审查",
-      comments: projectType === "human" 
-        ? "样本量计算依据需要进一步说明，建议补充统计学分析方法。" 
-        : "替代方案的考虑不够充分，建议进一步说明为何必须使用活体动物。",
+      reviewType: "人体伦理研究审查",
+      comments: "样本量计算依据需要进一步说明，建议补充统计学分析方法和样本量估算公式。",
       status: "已修订"
     },
     {
       id: "3",
       date: "2024-01-14",
       reviewer: "赵委员",
-      reviewType: "动物实验伦理审查",
-      comments: projectType === "human" 
-        ? "数据安全保护措施需进一步加强，建议明确数据保存期限和访问权限控制措施。" 
-        : "实验终点的人道处理标准需要明确，建议参考AVMA最新指南。",
+      reviewType: "人体伦理研究审查",
+      comments: "数据安全保护措施需进一步加强，建议明确数据保存期限和访问权限控制措施，确保受试者隐私得到充分保障。",
       status: "已修订"
     },
     {
       id: "4",
       date: "2023-12-15",
       reviewer: "刘助理",
-      reviewType: "科研处项目备案审核",
-      comments: projectType === "human" 
-        ? "项目预算与工作量匹配性需要优化，建议调整预算分配。" 
-        : "动物来源与品系描述不够清晰，需补充实验动物供应商资质证明。",
+      reviewType: "医学院人体伦理项目备案审核",
+      comments: "项目预算与工作量匹配性需要优化，建议调整受试者补偿费用分配，并明确研究人员工作量。",
       status: "已修订"
     },
     {
       id: "5",
       date: "2024-02-05",
       reviewer: "王专家",
-      reviewType: "方案修订审查",
-      comments: projectType === "human" 
-        ? "修订后的方案应明确说明更改的内容及理由，建议添加修订说明表。" 
-        : "修订后的动物数量减少合理，但应提供更详细的统计学支持。",
+      reviewType: "知情同意书修订审查",
+      comments: "修订后的知情同意书应明确说明更改的内容及理由，建议添加修订说明表，并重点标注修改内容便于受试者理解。",
       status: "待修订"
     },
     {
       id: "6",
       date: "2024-03-15",
       reviewer: "钱委员",
-      reviewType: "安全性报告审查",
-      comments: projectType === "human" 
-        ? "安全性报告中的轻度不良反应分析不够详细，需补充与试验干预的相关性评估。" 
-        : "动物行为异常记录不够系统，建议采用标准化评分系统。",
+      reviewType: "不良事件报告审查",
+      comments: "安全性报告中的轻度不良反应分析不够详细，需补充与试验干预的相关性评估及后续随访记录。",
       status: "已回复"
     },
     {
       id: "7",
       date: "2024-04-30",
       reviewer: "孙主任",
-      reviewType: "中期进展审查",
-      comments: projectType === "human" 
-        ? "数据收集进度良好，但失访率略高，建议采取措施提高依从性。" 
-        : "实验进展符合预期，动物使用数量控制良好，动物福利监测记录完整。",
+      reviewType: "临床研究中期进展审查",
+      comments: "数据收集进度良好，但失访率略高，建议采取措施提高受试者依从性，并补充失访原因分析。",
       status: "已确认"
     }
   ]
@@ -844,10 +819,10 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
             <div>
               <CardTitle className="text-lg text-slate-800 flex items-center gap-2">
                 <FileCheck className="h-5 w-5 text-blue-500" />
-                伦理审查进度
+                人体伦理审查进度
               </CardTitle>
               <CardDescription className="text-slate-500">
-                已完成 {completedSteps} 项审查步骤，共 {totalSteps} 项
+                已完成 {completedSteps} 项人体伦理审查步骤，共 {totalSteps} 项
               </CardDescription>
           </div>
             <div className="flex gap-2">
@@ -865,7 +840,7 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
         <CardContent>
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-slate-700">总体审查进度</span>
+              <span className="text-sm font-medium text-slate-700">人体伦理审查总体进度</span>
               <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                 <CheckCircle className="h-3.5 w-3.5 mr-1" />
                 已获批准
@@ -875,7 +850,7 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
             <div className="flex justify-between mt-1 text-xs text-slate-500">
               <span>提交申请</span>
               <span>形式审查</span>
-              <span>专家审查</span>
+              <span>专家评审</span>
               <span>委员会审批</span>
               <span>后续跟踪</span>
               </div>
@@ -886,12 +861,12 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
               <CardHeader className="pb-1">
                 <CardTitle className="text-sm flex items-center gap-2 text-blue-600">
                   <CalendarCheck className="h-4 w-4" />
-                  批准日期
+                  伦理批准日期
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="font-semibold">2024-01-20</div>
-                <div className="text-xs text-slate-500 mt-1">有效期: 1年</div>
+                <div className="text-xs text-slate-500 mt-1">伦理批准有效期: 1年</div>
               </CardContent>
             </Card>
             
@@ -899,11 +874,11 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
               <CardHeader className="pb-1">
                 <CardTitle className="text-sm flex items-center gap-2 text-purple-600">
                   <Building className="h-4 w-4" />
-                  审批单位
+                  伦理审批单位
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="font-semibold">医学院伦理审查委员会</div>
+                <div className="font-semibold">医学院人体伦理审查委员会</div>
                 <div className="text-xs text-slate-500 mt-1">批号: EC-2024-001</div>
               </CardContent>
             </Card>
@@ -912,12 +887,12 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
               <CardHeader className="pb-1">
                 <CardTitle className="text-sm flex items-center gap-2 text-amber-600">
                   <Calendar className="h-4 w-4" />
-                  下次审查
+                  下次伦理审查
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="font-semibold">2024-08-05</div>
-                <div className="text-xs text-slate-500 mt-1">需提交: 进度报告</div>
+                <div className="text-xs text-slate-500 mt-1">需提交: 受试者安全性与进度报告</div>
               </CardContent>
             </Card>
           </div>
@@ -936,11 +911,11 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
               </TabsTrigger>
               <TabsTrigger value="meetings" className="data-[state=active]:bg-purple-50 data-[state=active]:text-purple-700">
                 <Users className="h-4 w-4 mr-2" />
-                审查会议
+                伦理委员会会议
               </TabsTrigger>
               <TabsTrigger value="comments" className="data-[state=active]:bg-green-50 data-[state=active]:text-green-700">
                 <MessageSquare className="h-4 w-4 mr-2" />
-                审查意见
+                伦理审查意见
               </TabsTrigger>
             </TabsList>
 
@@ -950,7 +925,7 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base flex items-center gap-2">
                     <BarChart3 className="h-5 w-5 text-blue-500" />
-                    审查流程时间线
+                    人体伦理审查流程时间线
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -1005,7 +980,7 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base flex items-center gap-2">
                       <Users className="h-5 w-5 text-purple-500" />
-                      伦理委员会会议记录
+                      人体伦理委员会会议记录
                     </CardTitle>
                     <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                       总计: {reviewMeetings.length}次会议
@@ -1095,7 +1070,7 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base flex items-center gap-2">
                       <MessageCircle className="h-5 w-5 text-green-500" />
-                      审查意见与反馈
+                      人体伦理审查意见与反馈
                     </CardTitle>
                     <Button variant="outline" size="sm" onClick={() => setShowAddReviewDialog(true)}>
                       <FilePlus className="h-4 w-4 mr-2" />
