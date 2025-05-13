@@ -631,6 +631,8 @@ export default function EthicProjectCard({
                           key={action.id}
                           onClick={(e) => {
                             e.stopPropagation();
+                            console.log(`点击${action.label}按钮, 项目ID=${item.id}, action=${action.id}`);
+                            console.log("传递给action.onClick的item:", item);
                             action.onClick(item, e);
                           }}
                           disabled={action.disabled ? action.disabled(item) : false}

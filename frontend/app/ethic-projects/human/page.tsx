@@ -347,7 +347,13 @@ export default function HumanEthicProjectsPage() {
       label: "编辑项目",
       icon: <Pencil className="h-4 w-4" />,
       onClick: (item: EthicProject) => {
-        router.push(`/ethic-projects/edit/human/${item.id}`);
+        console.log("点击编辑项目按钮，项目ID:", item.id, "项目名称:", item.name);
+        
+        // 检查模拟数据中是否存在该ID的项目
+        const editPath = `/ethic-projects/edit/human/${item.id}`;
+        console.log("准备跳转到路径:", editPath);
+        
+        router.push(editPath);
       },
       disabled: (item: EthicProject) => item.status === "已完成",
     },
@@ -508,6 +514,10 @@ export default function HumanEthicProjectsPage() {
       实验方法: "体外细胞培养与动物模型验证",
       动物福利保障: "符合国家实验动物伦理标准"
     };
+
+    // 输出扩展后的项目对象，方便调试
+    console.log(`渲染卡片: 项目ID=${extendedItem.id}, 项目名称=${extendedItem.name}`);
+    console.log(`扩展的字段: 项目类型=${extendedItem.项目类型}, 项目来源=${extendedItem.项目来源}`);
 
     return (
       <CustomCardWrapper

@@ -37,7 +37,13 @@ type MemberType = {
   phone: string;
 }
 
-export function HumanEthicProjectForm() {
+// 定义组件接口
+interface HumanEthicProjectFormProps {
+  initialData?: any;
+  editMode?: boolean;
+}
+
+export function HumanEthicProjectForm({ initialData, editMode = false }: HumanEthicProjectFormProps) {
   const router = useRouter()
   const { toast } = useToast()
   const [showCompletionDialog, setShowCompletionDialog] = useState(false)
@@ -45,7 +51,7 @@ export function HumanEthicProjectForm() {
   const [formTouched, setFormTouched] = useState<Record<string, boolean>>({})
   
   // 项目成员状态
-  const [members, setMembers] = useState<MemberType[]>([])
+  const [members, setMembers] = useState<MemberType[]>(initialData?.members || [])
   const [showMemberDialog, setShowMemberDialog] = useState(false)
   const [currentMember, setCurrentMember] = useState<MemberType>({
     id: "",
@@ -58,32 +64,79 @@ export function HumanEthicProjectForm() {
   const [isEditingMember, setIsEditingMember] = useState(false)
   const [memberErrors, setMemberErrors] = useState<Record<string, string>>({})
   
+  // 将日期字符串转换为Date对象
+  const parseDate = (dateString: string | undefined) => {
+    if (!dateString) return new Date();
+    try {
+      return new Date(dateString);
+    } catch (error) {
+      console.error("日期解析错误:", error);
+      return new Date();
+    }
+  };
+  
+  // 构建初始表单数据
+  const defaultStartDate = new Date();
+  const defaultEndDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
+  
   // 表单数据
-  const [formData, setFormData] = useState({
-    // 基本信息
-    projectNumber: "",
-    name: "",
-    projectType: "",
-    projectSource: "",
-    startDate: new Date(),
-    endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
-    budget: "",
-    participantCount: "",
-    researchPurpose: "",
-    researchMethod: "",
-    inclusionCriteria: "",
-    exclusionCriteria: "",
-    dataProtection: "",
-    
-    // 主要研究者信息
-    leader: "",
-    department: "",
-    title: "",
-    phone: "",
-    email: "",
-    address: "",
-    implementationUnit: "",
-  })
+  const [formData, setFormData] = useState(() => {
+    if (initialData) {
+      return {
+        // 基本信息
+        projectNumber: initialData.projectNumber || "",
+        name: initialData.name || "",
+        projectType: initialData.projectType || "",
+        projectSource: initialData.projectSource || "",
+        startDate: parseDate(initialData.startDate),
+        endDate: parseDate(initialData.endDate),
+        budget: initialData.budget || "",
+        participantCount: initialData.participantCount || "",
+        ethicsCommittee: initialData.ethicsCommittee || "",
+        researchPurpose: initialData.researchPurpose || "",
+        researchMethod: initialData.researchMethod || "",
+        inclusionCriteria: initialData.inclusionCriteria || "",
+        exclusionCriteria: initialData.exclusionCriteria || "",
+        dataProtection: initialData.dataProtection || "",
+        
+        // 主要研究者信息
+        leader: initialData.leader || "",
+        department: initialData.department || "",
+        title: initialData.title || "",
+        phone: initialData.phone || "",
+        email: initialData.email || "",
+        address: initialData.address || "",
+        implementationUnit: initialData.researchUnit || initialData.implementationUnit || "",
+      };
+    } else {
+      return {
+        // 基本信息
+        projectNumber: "",
+        name: "",
+        projectType: "",
+        projectSource: "",
+        startDate: defaultStartDate,
+        endDate: defaultEndDate,
+        budget: "",
+        participantCount: "",
+        ethicsCommittee: "",
+        researchPurpose: "",
+        researchMethod: "",
+        inclusionCriteria: "",
+        exclusionCriteria: "",
+        dataProtection: "",
+        
+        // 主要研究者信息
+        leader: "",
+        department: "",
+        title: "",
+        phone: "",
+        email: "",
+        address: "",
+        implementationUnit: "",
+      };
+    }
+  });
 
   // 更新表单数据
   const updateFormData = (field: string, value: any) => {
@@ -383,8 +436,17 @@ export function HumanEthicProjectForm() {
       console.log("提交表单数据:", formData)
       console.log("项目成员:", members)
       
-      // 显示完成对话框
-      setShowCompletionDialog(true)
+      if (editMode) {
+        toast({
+          title: "更新成功",
+          description: "项目信息已成功更新"
+        })
+        // 更新成功后返回列表页
+        router.push("/ethic-projects/human")
+      } else {
+        // 显示完成对话框
+        setShowCompletionDialog(true)
+      }
     } catch (error) {
       console.error("表单提交出错:", error)
       toast({
@@ -410,6 +472,7 @@ export function HumanEthicProjectForm() {
       endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
       budget: "",
       participantCount: "",
+      ethicsCommittee: "",
       researchPurpose: "",
       researchMethod: "",
       inclusionCriteria: "",
@@ -479,7 +542,7 @@ export function HumanEthicProjectForm() {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold">新增人体伦理项目</h1>
+          <h1 className="text-2xl font-bold">{editMode ? "编辑人体伦理项目" : "新增人体伦理项目"}</h1>
         </div>
       </div>
 
@@ -630,6 +693,29 @@ export function HumanEthicProjectForm() {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
+              <Label htmlFor="ethicsCommittee" className="text-muted-foreground">伦理委员会</Label>
+              <Input 
+                id="ethicsCommittee" 
+                value={formData.ethicsCommittee} 
+                onChange={(e) => updateFormData("ethicsCommittee", e.target.value)} 
+                placeholder="请输入伦理委员会名称"
+                className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="implementationUnit" className="text-muted-foreground">研究单位</Label>
+              <Input 
+                id="implementationUnit" 
+                value={formData.implementationUnit} 
+                onChange={(e) => updateFormData("implementationUnit", e.target.value)} 
+                placeholder="请输入研究单位"
+                className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
               <Label htmlFor="budget" className="text-muted-foreground">项目预算</Label>
               <Input 
                 id="budget" 
@@ -731,16 +817,6 @@ export function HumanEthicProjectForm() {
                 )}
               />
               {formTouched.department && <ErrorMessage message={formErrors.department || ""} />}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="implementationUnit" className="text-muted-foreground">研究单位</Label>
-              <Input 
-                id="implementationUnit" 
-                value={formData.implementationUnit} 
-                onChange={(e) => updateFormData("implementationUnit", e.target.value)} 
-                placeholder="请输入研究单位"
-                className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
-              />
             </div>
           </div>
 
@@ -908,7 +984,7 @@ export function HumanEthicProjectForm() {
           onMouseDown={() => console.log("鼠标按下确认按钮")}
           className="bg-blue-600 hover:bg-blue-700 text-white rounded-md h-10 px-4 py-2 transition-colors focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1" 
         >
-          确认
+          {editMode ? "更新" : "确认"}
         </Button>
       </div>
 
