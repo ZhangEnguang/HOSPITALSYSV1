@@ -343,6 +343,14 @@ export default function HumanEthicProjectsPage() {
       },
     },
     {
+      id: "upload",
+      label: "上传实验数据",
+      icon: <FileText className="h-4 w-4" />,
+      onClick: (item: EthicProject) => {
+        router.push(`/ethic-projects/human/upload/${item.id}`)
+      },
+    },
+    {
       id: "edit",
       label: "编辑项目",
       icon: <Pencil className="h-4 w-4" />,
