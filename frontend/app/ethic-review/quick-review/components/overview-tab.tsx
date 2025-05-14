@@ -59,9 +59,10 @@ export default function EthicProjectOverviewTab({
   const aiModelName = project.aiModelName || "EthicGPT 2024"
   const aiModelVersion = project.aiModelVersion || "v3.1"
   const aiSuggestions: string[] = project.aiSuggestions || [
-    "完善动物实验中的3R原则应用文档",
-    "加强实验设计的伦理标准执行",
-    "详细记录动物福利保障措施"
+    "完善受试者基因数据保护与匿名化方案",
+    "明确CRISPR技术仅限于体外诊断用途，禁止人体基因组修饰",
+    "加强实验动物福利保障措施，严格遵循3R原则",
+    "建立基因信息安全泄露应急处理机制"
   ]
   const progressScore = project.progressScore || "良好"
   const riskScore = project.riskScore || "低"
@@ -328,11 +329,51 @@ export default function EthicProjectOverviewTab({
                               </div>
                             );
                           } else {
-                            return (
-                              <p key={idx} className="mb-3">
-                                {paragraph}
-                              </p>
-                            );
+                            // 处理普通段落，包含(1)、(2)、(3)格式的内容需要转换为列表形式
+                            const text = paragraph;
+                            if (text.includes('(1)') && text.includes('(2)') && text.includes('(3)')) {
+                              // 找到建议部分的起始位置
+                              const startPos = text.indexOf('(1)');
+                              // 将起始部分作为普通段落
+                              const introText = text.substring(0, startPos).trim();
+                              // 提取建议点并转换为数组
+                              const suggestions = [
+                                text.substring(text.indexOf('(1)'), text.indexOf('(2)')).trim(),
+                                text.substring(text.indexOf('(2)'), text.indexOf('(3)')).trim(),
+                                text.substring(text.indexOf('(3)')).trim()
+                              ];
+                              
+                              // 提取最后一条建议后的内容（如果有）
+                              let endText = '';
+                              const lastSuggestion = suggestions[2];
+                              if (lastSuggestion.includes('。')) {
+                                const endPos = lastSuggestion.indexOf('。') + 1;
+                                endText = lastSuggestion.substring(endPos).trim();
+                                suggestions[2] = lastSuggestion.substring(0, endPos).trim();
+                              }
+                              
+                              return (
+                                <div key={idx}>
+                                  <p className="mb-2">{introText}</p>
+                                  <div className="pl-2 space-y-2 mb-2">
+                                    {suggestions.map((suggestion, i) => (
+                                      <div key={i} className="flex items-start">
+                                        <span className="mr-2 flex-shrink-0">{suggestion.substring(0, 3)}</span>
+                                        <span>{suggestion.substring(3)}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                  {endText && <p className="mt-2">{endText}</p>}
+                                </div>
+                              );
+                            } else {
+                              // 处理普通段落
+                              return (
+                                <p key={idx} className="mb-3">
+                                  {paragraph}
+                                </p>
+                              );
+                            }
                           }
                         })}
                       </p>
@@ -363,13 +404,14 @@ export default function EthicProjectOverviewTab({
                       </div>
                       <p className="mt-2 text-slate-600 border-t border-slate-100 pt-2">
                         <span className="font-medium text-primary">AI建议：</span>
-                        {aiSuggestions.map((suggestion: string, index: number) => (
-                          <span key={index} className="inline-flex items-center gap-1.5 mt-1">
-                            <ChevronRight className="h-3.5 w-3.5 text-primary" />
-                            <span>{suggestion}</span>
-                            {index < aiSuggestions.length - 1 && <br />}
-                          </span>
-                        ))}
+                        <div className="mt-2">
+                          {aiSuggestions.map((suggestion: string, index: number) => (
+                            <div key={index} className="flex items-start gap-1.5 mt-1.5">
+                              <ChevronRight className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
+                              <span className="text-sm">{suggestion}</span>
+                            </div>
+                          ))}
+                        </div>
                       </p>
                     </>
                   ) : (
@@ -438,11 +480,51 @@ export default function EthicProjectOverviewTab({
                               </div>
                             );
                           } else {
-                            return (
-                              <p key={idx} className="mb-3">
-                                {paragraph}
-                              </p>
-                            );
+                            // 处理普通段落，包含(1)、(2)、(3)格式的内容需要转换为列表形式
+                            const text = paragraph;
+                            if (text.includes('(1)') && text.includes('(2)') && text.includes('(3)')) {
+                              // 找到建议部分的起始位置
+                              const startPos = text.indexOf('(1)');
+                              // 将起始部分作为普通段落
+                              const introText = text.substring(0, startPos).trim();
+                              // 提取建议点并转换为数组
+                              const suggestions = [
+                                text.substring(text.indexOf('(1)'), text.indexOf('(2)')).trim(),
+                                text.substring(text.indexOf('(2)'), text.indexOf('(3)')).trim(),
+                                text.substring(text.indexOf('(3)')).trim()
+                              ];
+                              
+                              // 提取最后一条建议后的内容（如果有）
+                              let endText = '';
+                              const lastSuggestion = suggestions[2];
+                              if (lastSuggestion.includes('。')) {
+                                const endPos = lastSuggestion.indexOf('。') + 1;
+                                endText = lastSuggestion.substring(endPos).trim();
+                                suggestions[2] = lastSuggestion.substring(0, endPos).trim();
+                              }
+                              
+                              return (
+                                <div key={idx}>
+                                  <p className="mb-2">{introText}</p>
+                                  <div className="pl-2 space-y-2 mb-2">
+                                    {suggestions.map((suggestion, i) => (
+                                      <div key={i} className="flex items-start">
+                                        <span className="mr-2 flex-shrink-0">{suggestion.substring(0, 3)}</span>
+                                        <span>{suggestion.substring(3)}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                  {endText && <p className="mt-2">{endText}</p>}
+                                </div>
+                              );
+                            } else {
+                              // 处理普通段落
+                              return (
+                                <p key={idx} className="mb-3">
+                                  {paragraph}
+                                </p>
+                              );
+                            }
                           }
                         })}
                       </p>
@@ -471,13 +553,14 @@ export default function EthicProjectOverviewTab({
                       </div>
                       <p className="mt-2 text-slate-600 border-t border-slate-100 pt-2">
                         <span className="font-medium text-primary">AI建议：</span>
-                        {aiSuggestions.map((suggestion: string, index: number) => (
-                          <span key={index} className="inline-flex items-center gap-1.5 mt-1">
-                            <ChevronRight className="h-3.5 w-3.5 text-primary" />
-                            <span>{suggestion}</span>
-                            {index < aiSuggestions.length - 1 && <br />}
-                          </span>
-                        ))}
+                        <div className="mt-2">
+                          {aiSuggestions.map((suggestion: string, index: number) => (
+                            <div key={index} className="flex items-start gap-1.5 mt-1.5">
+                              <ChevronRight className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
+                              <span className="text-sm">{suggestion}</span>
+                            </div>
+                          ))}
+                        </div>
                       </p>
                     </>
                   )}

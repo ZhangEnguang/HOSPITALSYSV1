@@ -171,7 +171,7 @@ export default function RiskAnalysisTab({
               <Shield className="h-4 w-4 text-blue-500 mr-2" />
               风险缓解建议
             </h3>
-            <div className="pl-6">
+            <div className="pl-0">
               <ul className="space-y-3">
                 {riskInfo.suggestions.map((suggestion: string, index: number) => (
                   <li key={index} className="flex items-start bg-white p-3 rounded-md border border-blue-100 shadow-sm hover:shadow-md transition-all duration-200">
