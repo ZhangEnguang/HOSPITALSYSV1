@@ -79,8 +79,8 @@ export const mockEthicProjects = [
   {
     id: "5",
     projectNumber: "人伦2025002",
-    name: "新生儿脐带血干细胞提取技术评估",
-    description: "研究新生儿脐带血干细胞提取技术的临床安全性与有效性，评估伦理标准",
+    name: "新生儿肺带血干细胞提取技术评估",
+    description: "研究新生儿肺带血干细胞提取技术的临床安全性与有效性，评估伦理标准",
     status: "进行中",
     auditStatus: "审核中",
     priority: "中",

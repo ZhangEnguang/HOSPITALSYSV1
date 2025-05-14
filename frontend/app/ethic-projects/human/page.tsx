@@ -339,7 +339,10 @@ export default function HumanEthicProjectsPage() {
       label: "查看详情",
       icon: <Eye className="h-4 w-4" />,
       onClick: (item: EthicProject) => {
-        router.push(`/ethic-projects/human/${item.id}`)
+        // 确保ID是字符串类型
+        const itemId = String(item.id);
+        console.log("点击查看详情按钮，项目ID:", itemId, "类型:", typeof itemId, "项目名称:", item.name);
+        router.push(`/ethic-projects/human/${itemId}`);
       },
     },
     {
@@ -347,7 +350,9 @@ export default function HumanEthicProjectsPage() {
       label: "上传实验数据",
       icon: <FileText className="h-4 w-4" />,
       onClick: (item: EthicProject) => {
-        router.push(`/ethic-projects/human/upload/${item.id}`)
+        // 确保ID是字符串类型
+        const itemId = String(item.id);
+        router.push(`/ethic-projects/human/upload/${itemId}`);
       },
     },
     {
@@ -355,10 +360,12 @@ export default function HumanEthicProjectsPage() {
       label: "编辑项目",
       icon: <Pencil className="h-4 w-4" />,
       onClick: (item: EthicProject) => {
-        console.log("点击编辑项目按钮，项目ID:", item.id, "项目名称:", item.name);
+        // 确保ID是字符串类型
+        const itemId = String(item.id);
+        console.log("点击编辑项目按钮，项目ID:", itemId, "类型:", typeof itemId, "项目名称:", item.name);
         
         // 检查模拟数据中是否存在该ID的项目
-        const editPath = `/ethic-projects/edit/human/${item.id}`;
+        const editPath = `/ethic-projects/edit/human/${itemId}`;
         console.log("准备跳转到路径:", editPath);
         
         router.push(editPath);
@@ -380,7 +387,12 @@ export default function HumanEthicProjectsPage() {
       id: "view",
       label: "查看详情",
       icon: <Eye className="h-4 w-4" />,
-      onClick: (item: EthicProject) => router.push(`/ethic-projects/human/${item.id}`),
+      onClick: (item: EthicProject) => {
+        // 确保ID是字符串类型
+        const itemId = String(item.id);
+        console.log("表格视图点击查看详情，项目ID:", itemId, "类型:", typeof itemId);
+        router.push(`/ethic-projects/human/${itemId}`);
+      },
     },
     {
       id: "edit",
@@ -527,6 +539,9 @@ export default function HumanEthicProjectsPage() {
     console.log(`渲染卡片: 项目ID=${extendedItem.id}, 项目名称=${extendedItem.name}`);
     console.log(`扩展的字段: 项目类型=${extendedItem.项目类型}, 项目来源=${extendedItem.项目来源}`);
 
+    // 确保ID是字符串类型
+    const itemId = String(item.id);
+
     return (
       <CustomCardWrapper
         item={extendedItem}
@@ -538,11 +553,14 @@ export default function HumanEthicProjectsPage() {
         statusVariants={adaptedStatusColors}
         progressField="progress"
         tasksField={{ completed: "tasks.completed", total: "tasks.total" }}
-        detailsUrl={`/ethic-projects/human/${item.id}`}
+        detailsUrl={`/ethic-projects/human/${itemId}`}
         className=""
         selected={selectedCardId === item.id}
         onSelect={() => onCardSelection(item.id)}
-        onClick={() => router.push(`/ethic-projects/human/${item.id}`)}
+        onClick={() => {
+          console.log("卡片点击: 项目ID=", itemId, "类型:", typeof itemId);
+          router.push(`/ethic-projects/human/${itemId}`);
+        }}
       />
     );
   };
@@ -613,7 +631,11 @@ export default function HumanEthicProjectsPage() {
               selectedRows={selectedRows}
               onSelectedRowsChange={setSelectedRows}
               batchActions={configuredBatchActions}
-              onItemClick={(item: EthicProject) => router.push(`/ethic-projects/human/${item.id}`)}
+              onItemClick={(item: EthicProject) => {
+                const itemId = String(item.id);
+                console.log("DataList onItemClick: 项目ID=", itemId, "类型:", typeof itemId);
+                router.push(`/ethic-projects/human/${itemId}`);
+              }}
               detailsUrlPrefix="/ethic-projects/human"
               categories={filterCategories}
               seniorFilterValues={seniorFilterValues}

@@ -98,35 +98,6 @@ interface AISummary {
 // 人体伦理项目模拟数据
 const humanEthicProjects = [
   {
-    id: "1",
-    name: "冠心病患者饮食干预效果研究",
-    description: "研究不同饮食模式对冠心病患者血脂和心血管事件的影响",
-    status: "进行中",
-    projectType: "临床研究", 
-    participantCount: "120人",
-    ethicsCommittee: "北京医学伦理委员会",
-    researchUnit: "内科学系",
-    leader: { name: "王教授", title: "教授", email: "wang@example.com", phone: "13800000001" },
-    createdAt: "2023-10-12",
-    progress: 35,
-    tasks: { completed: 3, total: 8 },
-    type: "人体伦理",
-    source: "国家自然科学基金",
-    startDate: "2024-01-01",
-    endDate: "2026-12-31",
-    budget: 850000,
-    auditStatus: "审核通过",
-    priority: "高",
-    projectNumber: "人伦2025001",
-    department: "临床医学院",
-    members: [
-      { name: "李助理", title: "研究助理", department: "临床医学院", role: "数据收集", contact: "li@example.com" },
-      { name: "张医生", title: "主治医师", department: "内科", role: "患者管理", contact: "zhang@example.com" },
-      { name: "刘营养师", title: "高级营养师", department: "营养科", role: "饮食指导", contact: "13800000003" },
-      { name: "赵博士", title: "博士后", department: "临床医学院", role: "数据分析", contact: "zhao@example.com" }
-    ]
-  },
-  {
     id: "2",
     name: "2型糖尿病新药临床试验",
     description: "评估新型口服降糖药物的安全性和有效性",
@@ -156,52 +127,151 @@ const humanEthicProjects = [
   },
   {
     id: "3",
-    name: "脑卒中康复新技术评估研究",
-    description: "评估新型康复技术对脑卒中患者运动功能恢复的效果",
-    status: "已完成",
-    projectType: "干预性研究",
+    name: "多人种样本基因测序与健康风险预测",
+    description: "采集不同人种血液样本进行基因组测序分析，研究疾病易感性与健康风险预测",
+    status: "进行中",
+    projectType: "基因研究",
+    participantCount: "500人",
+    ethicsCommittee: "北京医学伦理委员会",
+    researchUnit: "基因组医学中心",
+    leader: { name: "王建国", title: "教授", email: "wang@example.com", phone: "13800138000" },
+    createdAt: "2024-01-01",
+    progress: 35,
+    tasks: { completed: 12, total: 36 },
+    type: "人体伦理",
+    source: "国家重点研发计划",
+    startDate: "2024-01-15", 
+    endDate: "2027-12-31",
+    budget: 2450000,
+    auditStatus: "审核通过",
+    priority: "高",
+    projectNumber: "人伦2025001",
+    department: "基础医学系",
+    members: [
+      { name: "李助理", title: "助理研究员", department: "基础医学系", role: "数据分析", contact: "li@example.com" },
+      { name: "张博士", title: "博士后", department: "公共卫生学院", role: "样本采集", contact: "zhang@example.com" }
+    ]
+  },
+  // 添加与mockEthicProjects中ID为5的项目相匹配的项目
+  {
+    id: "5",
+    name: "新生儿肺带血干细胞提取技术评估",
+    description: "研究新生儿肺带血干细胞提取技术的临床安全性与有效性，评估伦理标准",
+    status: "进行中",
+    projectType: "干细胞研究", 
     participantCount: "80人",
     ethicsCommittee: "北京医学伦理委员会",
-    researchUnit: "康复医学科",
-    leader: { name: "张教授", title: "教授", email: "zhang@example.com", phone: "13800000003" },
-    createdAt: "2023-08-20",
-    progress: 100,
-    tasks: { completed: 6, total: 6 },
+    researchUnit: "儿科学系",
+    leader: { name: "孙丽娜", title: "教授", email: "sun@example.com", phone: "13800000555" },
+    createdAt: "2024-02-01",
+    progress: 45,
+    tasks: { completed: 9, total: 20 },
     type: "人体伦理",
-    source: "省级科研基金",
-    startDate: "2023-09-01", 
-    endDate: "2024-03-31",
-    budget: 650000,
+    source: "国家自然科学基金",
+    startDate: "2024-02-15", 
+    endDate: "2025-12-15",
+    budget: 920000,
+    auditStatus: "审核中",
+    priority: "中",
+    projectNumber: "人伦2025002",
+    department: "儿科学系",
+    members: [
+      { name: "王研究员", title: "副研究员", department: "儿科学系", role: "技术开发", contact: "wang@example.com" },
+      { name: "李医生", title: "主治医师", department: "新生儿科", role: "临床评估", contact: "li@example.com" },
+      { name: "张技术员", title: "高级技术员", department: "细胞库", role: "样本处理", contact: "zhang@example.com" }
+    ]
+  },
+  // 添加ID为7的老年痴呆症患者实验性药物临床试验项目
+  {
+    id: "7",
+    name: "老年痴呆症患者实验性药物临床试验",
+    description: "针对老年痴呆症患者的实验性药物临床试验，评估药效与安全性",
+    status: "进行中",
+    projectType: "临床试验",
+    participantCount: "150人",
+    ethicsCommittee: "北京医学伦理委员会",
+    researchUnit: "神经内科",
+    leader: { name: "郑海涛", title: "主任医师", email: "zheng@example.com", phone: "13900139001" },
+    createdAt: "2024-01-05",
+    progress: 30,
+    tasks: { completed: 9, total: 30 },
+    type: "人体伦理",
+    source: "国家重点研发计划",
+    startDate: "2024-01-01",
+    endDate: "2026-12-31",
+    budget: 1680000,
     auditStatus: "审核通过",
     priority: "高",
     projectNumber: "人伦2025003",
-    department: "康复医学院",
+    department: "神经内科学系",
     members: [
-      { name: "孙医生", title: "主治医师", department: "康复科", role: "临床指导", contact: "sun@example.com" },
-      { name: "钱技术员", title: "治疗师", department: "康复中心", role: "技术操作", contact: "13800000007" },
-      { name: "郑博士", title: "博士研究生", department: "康复医学院", role: "数据分析", contact: "zheng@example.com" }
+      { name: "李研究员", title: "副研究员", department: "神经内科", role: "项目协调", contact: "li@example.com" },
+      { name: "张医生", title: "主治医师", department: "精神科", role: "患者评估", contact: "zhang@example.com" },
+      { name: "王技术员", title: "实验技术员", department: "药理实验室", role: "药理分析", contact: "wang@example.com" }
+    ]
+  },
+  // 添加ID为9的孕妇胎儿血液采集技术伦理研究项目
+  {
+    id: "9",
+    name: "孕妇胎儿血液采集技术伦理研究",
+    description: "研究孕妇胎儿血液采集技术的安全性与伦理规范，制定相关标准",
+    status: "规划中",
+    projectType: "伦理规范研究",
+    participantCount: "90人",
+    ethicsCommittee: "北京医学伦理委员会",
+    researchUnit: "妇产科",
+    leader: { name: "刘晓峰", title: "教授", email: "liu@example.com", phone: "13800138009" },
+    createdAt: "2024-06-10",
+    progress: 0,
+    tasks: { completed: 0, total: 24 },
+    type: "人体伦理",
+    source: "省级科研基金",
+    startDate: "2024-07-01",
+    endDate: "2025-12-31",
+    budget: 750000,
+    auditStatus: "待审核",
+    priority: "高",
+    projectNumber: "人伦2025004",
+    department: "妇产科学系",
+    members: [
+      { name: "张主任", title: "主任医师", department: "妇产科", role: "临床指导", contact: "zhang@example.com" },
+      { name: "李博士", title: "博士后", department: "伦理学研究中心", role: "伦理规范制定", contact: "li@example.com" },
+      { name: "王医生", title: "副主任医师", department: "产科", role: "技术实施", contact: "wang@example.com" }
+    ]
+  },
+  // 添加ID为11的人体干细胞移植治疗帕金森病研究项目
+  {
+    id: "11",
+    name: "人体干细胞移植治疗帕金森病研究",
+    description: "研究人体干细胞移植治疗帕金森病的临床疗效与安全性评估",
+    status: "进行中",
+    projectType: "干细胞治疗",
+    participantCount: "60人",
+    ethicsCommittee: "北京医学伦理委员会",
+    researchUnit: "神经科学研究所",
+    leader: { name: "周健", title: "研究员", email: "zhou@example.com", phone: "13800138011" },
+    createdAt: "2024-03-15",
+    progress: 20,
+    tasks: { completed: 5, total: 25 },
+    type: "人体伦理",
+    source: "国家自然科学基金",
+    startDate: "2024-04-01",
+    endDate: "2027-03-31",
+    budget: 1350000,
+    auditStatus: "审核中",
+    priority: "高",
+    projectNumber: "人伦2025005",
+    department: "干细胞研究中心",
+    members: [
+      { name: "林教授", title: "教授", department: "干细胞研究中心", role: "技术指导", contact: "lin@example.com" },
+      { name: "张医生", title: "主治医师", department: "神经内科", role: "临床实施", contact: "zhang@example.com" },
+      { name: "王技术员", title: "高级技术员", department: "细胞培养室", role: "细胞培养", contact: "wang@example.com" }
     ]
   }
 ];
 
 // 项目AI摘要内容
 const projectAISummaries: { [key: string]: AISummary } = {
-  "1": {
-    content: "【伦理规范执行情况】\n• 已获得伦理委员会批准（批准号：IRB-2023-08-12）\n• 知情同意实施评分95/100（优秀）\n\n【患者保护措施】\n• 完善的数据隐私保护方案\n• 严格的不良反应监测流程\n• 标准化的知情同意流程\n\n【研究现状】\n• 已完成40%受试者随访\n• 中期数据显示饮食干预有积极效果",
-    aiModel: "GPT-Scientific 2023",
-    version: "v2.4.1",
-    recommendations: [
-      "加强饮食依从性监测",
-      "扩大样本量提高统计功效"
-    ],
-    confidenceScore: 95,
-    analysisTime: "2024-03-15 10:32",
-    platformScores: {
-      progress: "良好",
-      risk: "低",
-      achievement: "良好"
-    }
-  },
   "2": {
     content: "【伦理规范执行情况】\n• 已提交伦理委员会申请（流程号：IRB-2024-02-18）\n• 试验方案评分92/100（优秀）\n\n【患者保护措施】\n• 全面的安全监测计划\n• 明确的受试者退出标准\n• 完善的数据保密措施\n\n【研究准备】\n• 研究者培训已完成\n• 试验药物准备就绪",
     aiModel: "GPT-Scientific 2023",
@@ -219,19 +289,83 @@ const projectAISummaries: { [key: string]: AISummary } = {
     }
   },
   "3": {
-    content: "【伦理规范执行情况】\n• 伦理委员会批准（批准号：IRB-2023-06-05）\n• 方案执行评分96/100（优秀）\n\n【患者保护措施】\n• 严格的患者安全监测\n• 个性化康复方案调整\n• 充分的隐私保护\n\n【研究成果】\n• 新技术组患者运动功能恢复速度提高35%\n• 已形成3篇高质量论文和1项专利申请",
+    content: "【伦理规范执行情况】\n• 已获得伦理委员会批准（批准号：IRB-2024-01-20）\n• 知情同意实施评分90/100（良好）\n\n【样本采集保障】\n• 严格的隐私保护措施\n• 完善的知情同意流程\n• 样本编码匿名化处理\n\n【研究现状】\n• 已完成30%样本采集\n• 初步数据分析显示种族间基因差异明显",
     aiModel: "GPT-Scientific 2023",
     version: "v2.4.1",
     recommendations: [
-      "推进技术成果转化应用",
-      "开展更长期的随访研究"
+      "增加少数民族样本比例",
+      "完善数据安全存储方案"
     ],
-    confidenceScore: 98,
-    analysisTime: "2024-02-28 09:15",
+    confidenceScore: 93,
+    analysisTime: "2024-03-10 09:45",
     platformScores: {
-      progress: "优秀",
+      progress: "良好",
+      risk: "中等",
+      achievement: "良好"
+    }
+  },
+  "5": {
+    content: "【伦理规范执行情况】\n• 伦理委员会审核中（流程号：IRB-2024-02-15）\n• 方案设计评分94/100（优秀）\n\n【患者保护措施】\n• 新生儿安全防护机制完善\n• 家长全程知情同意流程\n• 样本保存符合国家标准\n\n【研究进展】\n• 技术团队培训已完成\n• 初步实验结果显示干细胞活性良好",
+    aiModel: "GPT-Scientific 2023",
+    version: "v2.4.1",
+    recommendations: [
+      "优化干细胞提取步骤",
+      "增加长期保存稳定性评估"
+    ],
+    confidenceScore: 91,
+    analysisTime: "2024-03-12 14:22",
+    platformScores: {
+      progress: "良好",
       risk: "低",
-      achievement: "优秀"
+      achievement: "待评估"
+    }
+  },
+  "7": {
+    content: "【伦理规范执行情况】\n• 已获得伦理委员会批准（批准号：IRB-2024-01-10）\n• 知情同意实施评分93/100（优秀）\n\n【患者保护措施】\n• 认知障碍患者知情同意特殊流程\n• 家属全程参与决策机制\n• 严格的不良反应监测系统\n\n【研究进展】\n• 已完成首批患者筛选入组\n• 初步安全性数据显示良好耐受性",
+    aiModel: "GPT-Scientific 2023",
+    version: "v2.4.1",
+    recommendations: [
+      "加强长期随访管理",
+      "细化认知能力评估工具"
+    ],
+    confidenceScore: 94,
+    analysisTime: "2024-03-05 11:20",
+    platformScores: {
+      progress: "良好",
+      risk: "中等",
+      achievement: "待评估"
+    }
+  },
+  "9": {
+    content: "【伦理规范准备情况】\n• 伦理委员会申请准备中（预计流程号：IRB-2024-06-25）\n• 方案设计评分91/100（良好）\n\n【患者保护措施规划】\n• 孕妇与胎儿双重安全保障措施\n• 详尽的风险评估与应对预案\n• 特殊人群知情同意强化流程\n\n【前期准备】\n• 技术团队已完成培训\n• 安全性预评估完成",
+    aiModel: "GPT-Scientific 2023",
+    version: "v2.4.1",
+    recommendations: [
+      "增强心理支持服务体系",
+      "建立胎儿安全实时监测机制"
+    ],
+    confidenceScore: 90,
+    analysisTime: "2024-06-15 09:30",
+    platformScores: {
+      progress: "待启动",
+      risk: "中等",
+      achievement: "待评估"
+    }
+  },
+  "11": {
+    content: "【伦理规范执行情况】\n• 伦理委员会审核中（流程号：IRB-2024-03-30）\n• 方案设计评分95/100（优秀）\n\n【患者保护措施】\n• 干细胞来源严格审核\n• 移植过程安全保障体系\n• 全程副作用监测机制\n\n【研究进展】\n• 已完成干细胞制备与鉴定\n• 患者筛选标准确立",
+    aiModel: "GPT-Scientific 2023",
+    version: "v2.4.1",
+    recommendations: [
+      "完善长期预后评估体系",
+      "增加免疫排斥反应监测频率"
+    ],
+    confidenceScore: 92,
+    analysisTime: "2024-04-10 15:35",
+    platformScores: {
+      progress: "初期",
+      risk: "较高",
+      achievement: "待评估"
     }
   }
 };
@@ -270,19 +404,23 @@ export default function HumanEthicProjectDetailPage({ params }: { params: { id: 
   // 获取项目详情
   const getProjectDetail = () => {
     // 使用projectId查找项目
-    console.log("正在查找人体伦理项目ID:", projectId);
+    console.log("正在查找人体伦理项目ID:", projectId, "类型:", typeof projectId);
+    console.log("数据库中所有ID:", humanEthicProjects.map(p => ({id: p.id, type: typeof p.id})));
     
-    const project = humanEthicProjects.find((p) => p.id === projectId);
+    // 使用类型转换确保比较时类型一致
+    const project = humanEthicProjects.find((p) => String(p.id) === String(projectId));
     if (!project) {
       console.error("未找到人体伦理项目:", projectId);
       return null;
     }
     
-    console.log("找到人体伦理项目:", project.name);
+    console.log("找到人体伦理项目:", project.name, "项目ID:", project.id);
 
     // 添加AI摘要数据
-    const aiSummary = projectAISummaries[projectId];
+    const aiSummaryId = String(projectId);
+    const aiSummary = projectAISummaries[aiSummaryId];
     if (aiSummary) {
+      console.log("找到AI摘要数据，ID:", aiSummaryId);
       return {
         ...project,
         aiSummary: aiSummary.content,
@@ -295,6 +433,8 @@ export default function HumanEthicProjectDetailPage({ params }: { params: { id: 
         confidenceScore: aiSummary.confidenceScore,
         analysisTime: aiSummary.analysisTime,
       };
+    } else {
+      console.log("未找到AI摘要数据，ID:", aiSummaryId);
     }
 
     return project;
