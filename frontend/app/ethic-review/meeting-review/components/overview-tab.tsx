@@ -363,13 +363,14 @@ export default function EthicProjectOverviewTab({
                       </div>
                       <p className="mt-2 text-slate-600 border-t border-slate-100 pt-2">
                         <span className="font-medium text-primary">AI建议：</span>
-                        {aiSuggestions.map((suggestion: string, index: number) => (
-                          <span key={index} className="inline-flex items-center gap-1.5 mt-1">
-                            <ChevronRight className="h-3.5 w-3.5 text-primary" />
-                            <span>{suggestion}</span>
-                            {index < aiSuggestions.length - 1 && <br />}
-                          </span>
-                        ))}
+                        <div className="mt-2">
+                          {aiSuggestions.map((suggestion: string, index: number) => (
+                            <div key={index} className="flex items-start gap-1.5 mt-1.5">
+                              <ChevronRight className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
+                              <span className="text-sm">{suggestion}</span>
+                            </div>
+                          ))}
+                        </div>
                       </p>
                     </>
                   ) : (
@@ -471,13 +472,14 @@ export default function EthicProjectOverviewTab({
                       </div>
                       <p className="mt-2 text-slate-600 border-t border-slate-100 pt-2">
                         <span className="font-medium text-primary">AI建议：</span>
-                        {aiSuggestions.map((suggestion: string, index: number) => (
-                          <span key={index} className="inline-flex items-center gap-1.5 mt-1">
-                            <ChevronRight className="h-3.5 w-3.5 text-primary" />
-                            <span>{suggestion}</span>
-                            {index < aiSuggestions.length - 1 && <br />}
-                          </span>
-                        ))}
+                        <div className="mt-2">
+                          {aiSuggestions.map((suggestion: string, index: number) => (
+                            <div key={index} className="flex items-start gap-1.5 mt-1.5">
+                              <ChevronRight className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
+                              <span className="text-sm">{suggestion}</span>
+                            </div>
+                          ))}
+                        </div>
                       </p>
                     </>
                   )}
