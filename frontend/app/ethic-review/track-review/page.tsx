@@ -301,7 +301,8 @@ function TrackReviewContent() {
 
   // 处理项目点击
   const handleItemClick = (item: any) => {
-    router.push(`/ethic-review/track-review/${item.id}`)
+    console.log("跟踪报告项目点击:", item);
+    router.push(`/ethic-review/track-review/${item.id}`);
   }
 
   return (

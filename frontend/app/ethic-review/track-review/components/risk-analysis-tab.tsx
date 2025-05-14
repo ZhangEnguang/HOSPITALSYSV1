@@ -62,8 +62,8 @@ function RiskLevelBadge({ level }: { level: string }) {
   )
 }
 
-// 风险分析标签页组件
-export default function RiskAnalysisTab({
+// 跟踪报告风险分析标签页组件
+export default function TrackReportRiskTab({
   project
 }: { 
   project: any 
@@ -78,6 +78,47 @@ export default function RiskAnalysisTab({
     suggestions: ["暂无风险建议"],
     aiConfidence: 92
   }
+
+  // 为人体细胞治疗方案项目显示特定的AI建议
+  const displayAiRecommendations = () => {
+    if (project.id === "ETH-TRK-2024-001") {
+      return (
+        <ul className="space-y-3">
+          <li className="flex items-start bg-white p-3 rounded-md border border-blue-100 shadow-sm hover:shadow-md transition-all duration-200">
+            <div className="bg-amber-50 p-1 rounded-full mr-3 mt-0.5 flex-shrink-0">
+              <LightbulbIcon className="h-3.5 w-3.5 text-amber-500" />
+            </div>
+            <span className="text-sm text-gray-700">针对入组缓慢问题，建议扩大招募中心范围并优化筛选流程，特别是放宽非关键入排标准</span>
+          </li>
+          <li className="flex items-start bg-white p-3 rounded-md border border-blue-100 shadow-sm hover:shadow-md transition-all duration-200">
+            <div className="bg-amber-50 p-1 rounded-full mr-3 mt-0.5 flex-shrink-0">
+              <LightbulbIcon className="h-3.5 w-3.5 text-amber-500" />
+            </div>
+            <span className="text-sm text-gray-700">对已观察到轻度发热和注射部位红肿的受试者增加监测频率，建议从每月一次增加到每两周一次</span>
+          </li>
+          <li className="flex items-start bg-white p-3 rounded-md border border-blue-100 shadow-sm hover:shadow-md transition-all duration-200">
+            <div className="bg-amber-50 p-1 rounded-full mr-3 mt-0.5 flex-shrink-0">
+              <LightbulbIcon className="h-3.5 w-3.5 text-amber-500" />
+            </div>
+            <span className="text-sm text-gray-700">根据中期数据分析结果，建议保持当前剂量方案，同时加强随访管理以减少脱落率</span>
+          </li>
+        </ul>
+      );
+    }
+    
+    return (
+      <ul className="space-y-3">
+        {riskInfo.suggestions.map((suggestion: string, index: number) => (
+          <li key={index} className="flex items-start bg-white p-3 rounded-md border border-blue-100 shadow-sm hover:shadow-md transition-all duration-200">
+            <div className="bg-amber-50 p-1 rounded-full mr-3 mt-0.5 flex-shrink-0">
+              <LightbulbIcon className="h-3.5 w-3.5 text-amber-500" />
+            </div>
+            <span className="text-sm text-gray-700">{suggestion}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  };
 
   // 处理刷新AI分析
   const handleRefreshAnalysis = () => {
@@ -113,7 +154,7 @@ export default function RiskAnalysisTab({
             <span>项目整体风险评估及控制建议</span>
             <span className="text-xs text-gray-500 flex items-center">
               <Timer className="h-3 w-3 mr-1" />
-              最近分析: {lastAnalyzed}
+              最近分析: {project.id === "ETH-TRK-2024-001" ? "2024-05-18 15:20" : lastAnalyzed}
             </span>
           </CardDescription>
         </CardHeader>
@@ -129,14 +170,14 @@ export default function RiskAnalysisTab({
                 <span className="text-sm font-medium text-slate-700">AI分析置信度</span>
               </div>
               <Badge className="bg-blue-50 text-blue-700 border-blue-200 px-2">
-                {riskInfo.aiConfidence || 95}%
+                {project.id === "ETH-TRK-2024-001" && project.risk?.aiConfidence ? project.risk.aiConfidence : riskInfo.aiConfidence || 95}%
               </Badge>
             </div>
             
             <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full transition-all duration-500"
-                style={{ width: `${riskInfo.aiConfidence || 95}%` }}
+                style={{ width: `${project.id === "ETH-TRK-2024-001" && project.risk?.aiConfidence ? project.risk.aiConfidence : riskInfo.aiConfidence || 95}%` }}
               ></div>
             </div>
             
@@ -159,7 +200,9 @@ export default function RiskAnalysisTab({
               风险分析
             </h3>
             <div className="pl-6 text-sm text-gray-600 leading-relaxed bg-white p-4 rounded-md border border-blue-100 shadow-sm">
-              {riskInfo.analysis}
+              {project.id === "ETH-TRK-2024-001" ? 
+                "细胞治疗存在免疫排斥反应风险，但通过改进的预处理方案已将发生率从原方案的12%降低至现方案的5.2%。新增的随访方案有效提高了不良反应早期发现率，已观察到的两例严重不良事件均得到了及时处理，未造成永久性损伤。综合考虑，当前项目的风险等级为中等，且呈稳定下降趋势。" 
+                : riskInfo.analysis}
             </div>
           </div>
 
@@ -172,16 +215,7 @@ export default function RiskAnalysisTab({
               风险缓解建议
             </h3>
             <div className="pl-6">
-              <ul className="space-y-3">
-                {riskInfo.suggestions.map((suggestion: string, index: number) => (
-                  <li key={index} className="flex items-start bg-white p-3 rounded-md border border-blue-100 shadow-sm hover:shadow-md transition-all duration-200">
-                    <div className="bg-amber-50 p-1 rounded-full mr-3 mt-0.5 flex-shrink-0">
-                      <LightbulbIcon className="h-3.5 w-3.5 text-amber-500" />
-                    </div>
-                    <span className="text-sm text-gray-700">{suggestion}</span>
-                  </li>
-                ))}
-              </ul>
+              {displayAiRecommendations()}
             </div>
           </div>
 
@@ -229,13 +263,19 @@ export default function RiskAnalysisTab({
                 <div className="pl-6 text-sm text-gray-600 leading-relaxed bg-white p-4 rounded-md border border-blue-100 shadow-sm">
                   <p className="font-medium text-gray-700 mb-2">该项目在受试者权益保障方面采取了以下措施：</p>
                   <ul className="space-y-2">
-                    {[
+                    {(project.id === "ETH-TRK-2024-001" ? [
+                      "知情同意文档已更新，进一步明确了潜在风险的描述",
+                      "增加了24小时紧急联系电话和专属医务人员支持",
+                      "建立了受试者权益保障基金，为可能出现的不良反应提供医疗保障",
+                      "新增受试者定期反馈机制，每月收集受试者体验反馈",
+                      "完善了个人隐私和数据保护方案，所有数据均采用双重加密"
+                    ] : [
                       "全面详细的知情同意过程",
                       "明确的风险与获益解释",
                       "完善的个人隐私和数据保护方案",
                       "充分的医疗支持和不良事件处理流程",
                       "明确的受试者退出机制"
-                    ].map((item, index) => (
+                    ]).map((item, index) => (
                       <li key={index} className="flex items-start">
                         <div className="bg-green-50 p-1 rounded-full flex-shrink-0 mr-2">
                           <CheckCircle2 className="h-3 w-3 text-green-500" />
@@ -322,6 +362,45 @@ export default function RiskAnalysisTab({
                     痛苦控制措施
                   </h3>
                   <p className="text-sm text-gray-600">采用适当的麻醉和镇痛方案，建立明确的人道终点标准，确保动物不受不必要的痛苦。</p>
+                </div>
+              </>
+            ) : project.id === "ETH-TRK-2024-001" ? (
+              <>
+                <div className="space-y-2 p-4 bg-white rounded-md border border-green-100 shadow-sm hover:shadow transition-all duration-200">
+                  <h3 className="text-sm font-medium text-gray-700 flex items-center">
+                    <div className="bg-green-50 p-1 rounded-md mr-2">
+                      <MessageCircle className="h-4 w-4 text-green-600" />
+                    </div>
+                    优化预处理方案
+                  </h3>
+                  <p className="text-sm text-gray-600">改良细胞治疗预处理流程，引入了新型封闭培养体系，有效降低了免疫排斥反应发生率。</p>
+                </div>
+                <div className="space-y-2 p-4 bg-white rounded-md border border-green-100 shadow-sm hover:shadow transition-all duration-200">
+                  <h3 className="text-sm font-medium text-gray-700 flex items-center">
+                    <div className="bg-green-50 p-1 rounded-md mr-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    </div>
+                    增强安全监测
+                  </h3>
+                  <p className="text-sm text-gray-600">采用多指标监测体系，设定七个关键监测时间点，引入生物标志物实时监测技术，提高不良反应早期发现率。</p>
+                </div>
+                <div className="space-y-2 p-4 bg-white rounded-md border border-green-100 shadow-sm hover:shadow transition-all duration-200">
+                  <h3 className="text-sm font-medium text-gray-700 flex items-center">
+                    <div className="bg-green-50 p-1 rounded-md mr-2">
+                      <Activity className="h-4 w-4 text-green-600" />
+                    </div>
+                    专业应急团队
+                  </h3>
+                  <p className="text-sm text-gray-600">组建专职医疗应急团队，配备专用抢救设备，建立三级医疗干预机制，确保不良反应快速处置。</p>
+                </div>
+                <div className="space-y-2 p-4 bg-white rounded-md border border-green-100 shadow-sm hover:shadow transition-all duration-200">
+                  <h3 className="text-sm font-medium text-gray-700 flex items-center">
+                    <div className="bg-green-50 p-1 rounded-md mr-2">
+                      <Shield className="h-4 w-4 text-green-600" />
+                    </div>
+                    随访计划优化
+                  </h3>
+                  <p className="text-sm text-gray-600">优化随访频率和内容，对高风险人群增加随访频次，引入远程监测系统，实现关键指标的连续监测。</p>
                 </div>
               </>
             ) : (
