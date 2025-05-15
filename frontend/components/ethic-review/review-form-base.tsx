@@ -80,7 +80,8 @@ export function ReviewFormBase({
   
   // 返回列表
   const handleReturnToList = () => {
-    router.push(returnPath)
+    // 使用window.location跳转，确保一定会触发页面跳转
+    window.location.href = returnPath
   }
 
   // 保存草稿

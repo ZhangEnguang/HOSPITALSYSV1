@@ -226,7 +226,7 @@ export const cardActions = [
     label: "编辑项目",
     icon: <FileEdit className="h-4 w-4" />,
     onClick: (item: any) => {
-      window.location.href = `/ethic-review/human-genetics-review/${item.id}/edit`
+      window.location.href = `/ethic-review/human-genetics-review/edit?id=${item.id}`
     },
   },
   {
