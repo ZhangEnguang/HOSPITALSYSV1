@@ -159,7 +159,14 @@ export default function DataListTable<T extends { id: string }>({
                 .map((item) => (
                   <TableRow
                     key={item.id}
-                    onClick={() => onItemClick && onItemClick(item)}
+                    onClick={(e) => {
+                      // 检查点击元素是否在操作按钮区域内
+                      const isActionCell = (e.target as HTMLElement).closest('[data-action-cell="true"]');
+                      // 如果点击的是操作按钮区域，不触发行点击事件
+                      if (!isActionCell && onItemClick) {
+                        onItemClick(item);
+                      }
+                    }}
                     className=""
                   >
                     {/* 选择列单元格 */}
@@ -189,6 +196,7 @@ export default function DataListTable<T extends { id: string }>({
                       <TableCell 
                         className="text-right whitespace-nowrap sticky right-0 bg-background pr-4" 
                         onClick={(e) => e.stopPropagation()}
+                        data-action-cell="true"
                       >
                         <div className="flex justify-end">
                           <DropdownMenu>

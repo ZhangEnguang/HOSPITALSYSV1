@@ -420,6 +420,26 @@ export default function DataList({
     )
   }
 
+  // 将处理函数注册到全局对象，供table和card组件调用
+  useEffect(() => {
+    // 避免在服务器端执行
+    if (typeof window === 'undefined') return;
+    
+    // 安全地将处理函数注册到window对象
+    (window as any).__dataListHandlers = {
+      handleViewDetails: onViewDetails,
+      handleEditConfig: onEditConfig,
+      handleDeleteConfig: onDeleteConfig,
+    };
+    
+    // 清理函数
+    return () => {
+      if (typeof window !== 'undefined') {
+        delete (window as any).__dataListHandlers;
+      }
+    };
+  }, [onViewDetails, onEditConfig, onDeleteConfig]);
+
   return (
     <div className={cn("space-y-4", className)}>
       <DataListHeader

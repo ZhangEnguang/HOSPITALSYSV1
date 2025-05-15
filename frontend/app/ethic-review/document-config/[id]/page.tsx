@@ -136,7 +136,19 @@ export default function DocumentConfigDetailPage() {
   
   // 编辑配置
   const handleEdit = () => {
-    router.push(`/ethic-review/document-config/${id}/edit`)
+    console.log("从详情页面跳转编辑", id);
+    // 避免在服务器端执行
+    if (typeof window === 'undefined') {
+      router.push(`/ethic-review/document-config/${id}/edit`);
+      return;
+    }
+    
+    // 尝试使用临时调试函数
+    if ((window as any).__debugEditConfig) {
+      (window as any).__debugEditConfig(id);
+    } else {
+      router.push(`/ethic-review/document-config/${id}/edit`);
+    }
   }
   
   // 打开历史版本对话框
@@ -245,9 +257,9 @@ export default function DocumentConfigDetailPage() {
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">{config?.name}</h3>
                 {config?.status && (
-                  <Badge variant={config.status === "enabled" ? "default" : "destructive"}>
-                    {config.status === "enabled" ? "启用" : "禁用"}
-                  </Badge>
+                <Badge variant={config.status === "enabled" ? "default" : "destructive"}>
+                  {config.status === "enabled" ? "启用" : "禁用"}
+                </Badge>
                 )}
               </div>
               
@@ -291,7 +303,7 @@ export default function DocumentConfigDetailPage() {
             
             <div className="border border-gray-200 rounded-md flex-grow overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-grow custom-scrollbar">
-                <table className="w-full text-sm border-collapse">
+              <table className="w-full text-sm border-collapse">
                   <thead className="sticky top-0 z-10">
                     <tr className="bg-gray-50 shadow-sm">
                       <th className="py-3 px-4 text-left font-medium text-slate-700 border-b border-gray-200 bg-gray-50">文件名称</th>
@@ -299,43 +311,43 @@ export default function DocumentConfigDetailPage() {
                       <th className="py-3 px-4 text-center font-medium text-slate-700 border-b border-gray-200 bg-gray-50">必填</th>
                       <th className="py-3 px-4 text-center font-medium text-slate-700 border-b border-gray-200 bg-gray-50">模板</th>
                       <th className="py-3 px-4 text-left font-medium text-slate-700 border-b border-gray-200 bg-gray-50">描述</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                  </tr>
+                </thead>
+                <tbody>
                     {config?.documents?.map((doc: any, index: number) => (
-                      <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                        <td className="py-3 px-4 border-b border-gray-200 font-medium">{doc.name}</td>
-                        <td className="py-3 px-4 border-b border-gray-200">{doc.type}</td>
-                        <td className="py-3 px-4 border-b border-gray-200 text-center">
-                          <Badge variant={doc.requirementLevel === "必交" ? "default" : "outline"}>
-                            {doc.requirementLevel}
-                          </Badge>
-                        </td>
-                        <td className="py-3 px-4 border-b border-gray-200 text-center">
-                          {doc.template ? (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <Download className="h-4 w-4 text-blue-500" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>下载模板</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          ) : (
-                            <span className="text-gray-400">无</span>
-                          )}
-                        </td>
-                        <td className="py-3 px-4 border-b border-gray-200 max-w-[300px] truncate">
-                          {doc.description || "无描述"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                      <td className="py-3 px-4 border-b border-gray-200 font-medium">{doc.name}</td>
+                      <td className="py-3 px-4 border-b border-gray-200">{doc.type}</td>
+                      <td className="py-3 px-4 border-b border-gray-200 text-center">
+                        <Badge variant={doc.requirementLevel === "必交" ? "default" : "outline"}>
+                          {doc.requirementLevel}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-4 border-b border-gray-200 text-center">
+                        {doc.template ? (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <Download className="h-4 w-4 text-blue-500" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>下载模板</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : (
+                          <span className="text-gray-400">无</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 border-b border-gray-200 max-w-[300px] truncate">
+                        {doc.description || "无描述"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
               </div>
             </div>
           </CardContent>

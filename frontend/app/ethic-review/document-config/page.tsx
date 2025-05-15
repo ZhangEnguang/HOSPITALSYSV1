@@ -403,7 +403,20 @@ function DocumentConfigContent() {
   
   // 处理编辑配置
   const handleEditConfig = (item: any) => {
-    router.push(`/ethic-review/document-config/${item.id}/edit`)
+    console.log("编辑配置被调用", item.id);
+    
+    // 使用最可靠的导航方式
+    if (typeof window !== 'undefined') {
+      // 构建编辑页面URL
+      const editUrl = `/ethic-review/document-config/edit/${item.id}`;
+      console.log("正在导航到编辑页面:", editUrl);
+      
+      // 直接使用location.href进行导航
+      window.location.href = editUrl;
+    } else {
+      // 服务器端渲染时使用router
+      router.push(`/ethic-review/document-config/edit/${item.id}`);
+    }
   }
   
   // 处理删除配置
@@ -420,16 +433,29 @@ function DocumentConfigContent() {
   
   // 在DOM加载时注册处理函数到window对象供table和card调用
   useEffect(() => {
+    // 避免在服务器端执行
+    if (typeof window === 'undefined') return;
+    
+    // 使用正确的赋值语法，避免被误解为函数调用
     (window as any).__dataListHandlers = {
-      handleViewDetails,
-      handleEditConfig,
-      handleDeleteConfig
-    }
+      handleViewDetails: handleViewDetails,
+      handleEditConfig: handleEditConfig,
+      handleDeleteConfig: handleDeleteConfig
+    };
+    
+    // 添加一个临时调试函数到window对象
+    (window as any).__debugEditConfig = (id: string) => {
+      console.log("通过调试函数跳转到编辑页面", id);
+      router.push(`/ethic-review/document-config/${id}/edit`)
+    };
     
     return () => {
-      delete (window as any).__dataListHandlers
+      if (typeof window !== 'undefined') {
+        delete (window as any).__dataListHandlers
+        delete (window as any).__debugEditConfig
+      }
     }
-  }, [])
+  }, [router])
   
   return (
     <div className="w-full px-1 space-y-6">
