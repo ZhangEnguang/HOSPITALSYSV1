@@ -156,6 +156,7 @@ export default function DataListCard({
         selected && "ring-2 ring-primary",
         className
       )}
+      onClick={handleClick}
     >
       <CardHeader className="p-6">
         <div className="flex items-start justify-between">

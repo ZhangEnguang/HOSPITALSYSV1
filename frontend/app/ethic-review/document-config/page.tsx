@@ -292,9 +292,8 @@ function DocumentConfigContent() {
 
   // 处理项目点击 - 此函数将不再使用，但保留以备将来需要
   const handleItemClick = (item: any) => {
-    // router.push(`/ethic-review/document-config/${item.id}`)
-    // 不执行任何操作
-    console.log("Item clicked, but navigation disabled:", item.id)
+    router.push(`/ethic-review/document-config/${item.id}`)
+    console.log("Item clicked, navigating to:", item.id)
   }
 
   // 处理添加新配置
@@ -387,6 +386,7 @@ function DocumentConfigContent() {
       onPageSizeChange={handlePageSizeChange}
       selectedRows={selectedRows}
       onSelectedRowsChange={handleSelectionChange}
+      onItemClick={handleItemClick}
       idField="id"
       batchActions={[
         {

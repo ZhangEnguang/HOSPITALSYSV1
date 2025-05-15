@@ -364,20 +364,35 @@ export const cardActions = [
     id: "view",
     label: "查看详情",
     icon: <Eye className="h-4 w-4" />,
-    handler: "handleViewDetails",
+    onClick: (item: any) => {
+      const handleViewDetails = (window as any).__dataListHandlers?.handleViewDetails;
+      if (handleViewDetails) {
+        handleViewDetails(item);
+      }
+    },
   },
   {
     id: "edit",
     label: "编辑配置",
     icon: <FileEdit className="h-4 w-4" />,
-    handler: "handleEditConfig",
+    onClick: (item: any) => {
+      const handleEditConfig = (window as any).__dataListHandlers?.handleEditConfig;
+      if (handleEditConfig) {
+        handleEditConfig(item);
+      }
+    },
   },
   {
     id: "delete",
     label: "删除配置",
     icon: <Trash2 className="h-4 w-4" />,
     variant: "destructive",
-    handler: "handleDeleteConfig",
+    onClick: (item: any) => {
+      const handleDeleteConfig = (window as any).__dataListHandlers?.handleDeleteConfig;
+      if (handleDeleteConfig) {
+        handleDeleteConfig(item);
+      }
+    },
   },
 ];
 
