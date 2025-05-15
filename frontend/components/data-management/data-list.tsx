@@ -467,8 +467,8 @@ export default function DataList({
       />
 
       {viewMode === "list" ? (
-        <div className="bg-white rounded-md">
-          <div className="p-4">
+        <div className="bg-white rounded-md w-full">
+          <div className="p-2">
             <DataListTable
               data={localData}
               columns={tableColumns}

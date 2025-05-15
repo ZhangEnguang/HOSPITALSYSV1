@@ -95,8 +95,8 @@ export default function DataListTable<T extends { id: string }>({
   }
 
   return (
-    <div>
-      <div className="relative w-full overflow-auto">
+    <div className="w-full">
+      <div className="relative w-full overflow-visible">
         <Table>
           <TableHeader>
             <TableRow>

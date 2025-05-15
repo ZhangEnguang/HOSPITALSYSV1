@@ -39,8 +39,91 @@ interface Column {
   cell: (item: any) => JSX.Element
 }
 
+// 定义卡片字段类型
+interface CardFieldConfig {
+  label: string
+  value: string
+  render: (item: any) => React.ReactNode
+  className?: string
+}
+
+interface CardField {
+  id: string
+  label: string
+  value: (item: any) => React.ReactNode
+  className?: string
+}
+
+// 将cardFields转换为DataListCard需要的格式
+const adaptedCardFields: CardField[] = cardFields
+  // 只保留最重要的几个字段，避免卡片内容溢出
+  .filter(field => ['reviewType', 'projectType', 'documentCount', 'status'].includes(field.value))
+  .map((field: CardFieldConfig) => ({
+    id: field.value,  // 使用value字段作为id
+    label: field.label,
+    value: (item: any) => field.render ? field.render(item) : item[field.value], // 将render函数转为value函数
+    className: field.className || ""  // 如果没有className则提供空字符串默认值
+  }))
+
 function DocumentConfigContent() {
   const router = useRouter()
+  
+  // 确保表格列包含操作列
+  const ensureTableColumns = () => {
+    // 检查是否已经包含操作列
+    const hasActionsColumn = tableColumns.some(col => col.id === 'actions');
+    
+    if (!hasActionsColumn) {
+      // 添加操作列到表格列
+      return [...tableColumns, {
+        id: "actions",
+        header: "操作",
+        className: "w-[120px] text-right pr-4",
+        cell: (item: any) => {
+          return (
+            <div className="flex items-center justify-end">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreVertical className="h-4 w-4" />
+                    <span className="sr-only">打开菜单</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem 
+                    className="cursor-pointer"
+                    onClick={() => handleViewDetails(item)}
+                  >
+                    <Eye className="mr-2 h-4 w-4" />
+                    <span>查看详情</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    className="cursor-pointer"
+                    onClick={() => handleEditConfig(item)}
+                  >
+                    <FileEdit className="mr-2 h-4 w-4" />
+                    <span>编辑配置</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    className="cursor-pointer text-red-600 focus:text-red-600"
+                    onClick={() => handleDeleteConfig(item)}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    <span>删除配置</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          );
+        }
+      }];
+    }
+    
+    return tableColumns;
+  };
+  
+  // 获取处理后的表格列
+  const processedTableColumns = ensureTableColumns();
   
   // 状态管理
   const [data, setData] = useState(documentConfigItems)
@@ -56,9 +139,16 @@ function DocumentConfigContent() {
     status: "全部状态",
   })
   const [seniorFilterValues, setSeniorFilterValues] = useState<Record<string, any>>({})
-  const [visibleColumns, setVisibleColumns] = useState(
-    tableColumns.reduce((acc, col) => ({ ...acc, [col.id]: true }), {} as Record<string, boolean>)
-  )
+  const [visibleColumns, setVisibleColumns] = useState(() => {
+    // 确保actions列可见
+    const columns = processedTableColumns.reduce(
+      (acc, col) => ({ ...acc, [col.id]: true }), 
+      {} as Record<string, boolean>
+    );
+    // 明确设置actions列为可见
+    columns['actions'] = true;
+    return columns;
+  })
   const [selectedRows, setSelectedRows] = useState<string[]>([])
   
   // 定义排序选项类型
@@ -328,137 +418,73 @@ function DocumentConfigContent() {
     }
   }
   
-  // 将操作处理函数挂载到全局对象，以便表格组件可以访问
+  // 在DOM加载时注册处理函数到window对象供table和card调用
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      (window as any).__dataListHandlers = {
-        handleViewDetails,
-        handleEditConfig,
-        handleDeleteConfig
-      }
+    (window as any).__dataListHandlers = {
+      handleViewDetails,
+      handleEditConfig,
+      handleDeleteConfig
     }
     
-    // 组件卸载时清理
     return () => {
-      if (typeof window !== 'undefined') {
-        delete (window as any).__dataListHandlers
-      }
+      delete (window as any).__dataListHandlers
     }
   }, [])
   
   return (
-    <DataList
-      title="送审文件配置"
-      data={data}
-      addButtonLabel="新建文件配置"
-      onAddNew={handleAddNew}
-      onAIAssist={handleAIAssist}
-      searchValue={searchValue}
-      searchPlaceholder="搜索配置名称、审查类型或项目类型..."
-      noResultsText="未找到符合条件的送审文件配置"
-      onSearchChange={handleSearchChange}
-      onSearch={handleSearchExecute}
-      quickFilters={quickFilters}
-      onQuickFilterChange={handleQuickFilterChange}
-      quickFilterValues={filterValues}
-      seniorFilterValues={seniorFilterValues}
-      onAdvancedFilter={handleAdvancedFilter}
-      categories={filterCategories}
-      sortOptions={sortOptions}
-      activeSortOption={sortOption}
-      onSortChange={handleSortChange}
-      defaultViewMode={viewMode}
-      onViewModeChange={handleViewModeChange}
-      tableColumns={typedTableColumns as any}
-      visibleColumns={visibleColumns}
-      onVisibleColumnsChange={handleVisibleColumnsChange}
-      cardFields={cardFields}
-      cardActions={cardActions}
-      titleField="name"
-      descriptionField="description"
-      statusField="status"
-      statusVariants={dataListStatusVariants}
-      getStatusName={getStatusName}
-      pageSize={pageSize}
-      currentPage={currentPage}
-      totalItems={totalItems}
-      onPageChange={handlePageChange}
-      onPageSizeChange={handlePageSizeChange}
-      selectedRows={selectedRows}
-      onSelectedRowsChange={handleSelectionChange}
-      onItemClick={handleItemClick}
-      idField="id"
-      batchActions={[
-        {
-          id: "bulkEnable",
-          label: "批量启用",
-          icon: <CheckCircle className="h-4 w-4" />,
-          onClick: () => {
-            console.log("批量启用", selectedRows);
-            // 实际应用中应调用API批量更新数据
-            const newData = data.map(item => 
-              selectedRows.includes(item.id) 
-                ? { ...item, status: "enabled" } 
-                : item
-            );
-            setData(newData);
-            alert(`已成功启用${selectedRows.length}项配置`);
-          },
-        },
-        {
-          id: "bulkDisable",
-          label: "批量禁用",
-          icon: <XCircle className="h-4 w-4" />,
-          onClick: () => {
-            console.log("批量禁用", selectedRows);
-            // 实际应用中应调用API批量更新数据
-            const newData = data.map(item => 
-              selectedRows.includes(item.id) 
-                ? { ...item, status: "disabled" } 
-                : item
-            );
-            setData(newData);
-            alert(`已成功禁用${selectedRows.length}项配置`);
-          },
-        },
-        {
-          id: "bulkDuplicate",
-          label: "批量复制",
-          icon: <Copy className="h-4 w-4" />,
-          onClick: () => {
-            console.log("批量复制", selectedRows);
-            alert(`已选择${selectedRows.length}项进行批量复制`);
-          },
-        },
-        {
-          id: "bulkDelete",
-          label: "批量删除",
-          icon: <Trash2 className="h-4 w-4" />,
-          variant: "destructive",
-          onClick: () => {
-            const confirmed = window.confirm(`确定要删除选中的${selectedRows.length}项配置吗？`);
-            if (confirmed) {
-              console.log("批量删除", selectedRows);
-              // 实际应用中应调用API批量删除数据
-              const newData = data.filter(item => !selectedRows.includes(item.id));
-              setData(newData);
-              setTotalItems(newData.length);
-              setSelectedRows([]);
-              alert(`已成功删除${selectedRows.length}项配置`);
-            }
-          },
-        },
-      ]}
-      onViewDetails={handleViewDetails}
-      onEditConfig={handleEditConfig}
-      onDeleteConfig={handleDeleteConfig}
-    />
+    <div className="w-full px-1 space-y-6">
+      <DataList
+        title="送审文件配置"
+        data={data}
+        searchValue={searchValue}
+        onSearchChange={handleSearchChange}
+        onSearch={handleSearchExecute}
+        searchPlaceholder="搜索送审文件配置..."
+        quickFilters={quickFilters}
+        quickFilterValues={filterValues}
+        onQuickFilterChange={handleQuickFilterChange}
+        sortOptions={sortOptions}
+        activeSortOption={sortOption}
+        onSortChange={handleSortChange}
+        defaultViewMode={viewMode as "grid" | "list"}
+        onViewModeChange={handleViewModeChange}
+        categories={filterCategories}
+        seniorFilterValues={seniorFilterValues}
+        onAdvancedFilter={handleAdvancedFilter}
+        tableColumns={processedTableColumns as any}
+        cardFields={adaptedCardFields}
+        cardActions={cardActions}
+        titleField="name"
+        descriptionField="description"
+        statusField="status"
+        statusVariants={dataListStatusVariants}
+        getStatusName={getStatusName}
+        pageSize={pageSize}
+        currentPage={currentPage}
+        totalItems={totalItems}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+        selectedRows={selectedRows}
+        onSelectedRowsChange={handleSelectionChange}
+        onItemClick={handleItemClick}
+        onViewDetails={handleViewDetails}
+        onEditConfig={handleEditConfig}
+        onDeleteConfig={handleDeleteConfig}
+        detailsUrlPrefix="/ethic-review/document-config"
+        onAddNew={handleAddNew}
+        addButtonLabel="新建送审文件配置"
+        onAIAssist={handleAIAssist}
+        showColumnToggle={true}
+        visibleColumns={visibleColumns}
+        onVisibleColumnsChange={handleVisibleColumnsChange}
+      />
+    </div>
   )
 }
 
 export default function DocumentConfigPage() {
   return (
-    <div className="flex flex-col min-h-[calc(100vh-4rem)]">
+    <div className="flex flex-col min-h-[calc(100vh-4rem)] w-full">
       <Suspense fallback={<div>加载中...</div>}>
         <DocumentConfigContent />
       </Suspense>
