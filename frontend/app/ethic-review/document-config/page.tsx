@@ -183,68 +183,96 @@ function DocumentConfigContent() {
     // 筛选逻辑
     let filtered = [...documentConfigItems]
     
-    // 配置名称筛选
-    if (filters.name) {
-      filtered = filtered.filter(item => 
-        item.name.toLowerCase().includes(filters.name.toLowerCase())
-      )
-    }
-    
-    // 审查类型筛选
-    if (filters.reviewType) {
-      filtered = filtered.filter(item => item.reviewType === filters.reviewType)
-    }
-    
-    // 项目类型筛选
-    if (filters.projectType) {
-      filtered = filtered.filter(item => item.projectType === filters.projectType)
-    }
-    
-    // 状态筛选
-    if (filters.status) {
-      filtered = filtered.filter(item => item.status === filters.status)
-    }
-    
-    // 文件数量筛选
-    if (filters.documentCount) {
-      const count = parseInt(filters.documentCount)
-      if (!isNaN(count)) {
-        filtered = filtered.filter(item => item.documentCount === count)
-      }
-    }
-    
-    // 必交文件数筛选
-    if (filters.requiredCount) {
-      const count = parseInt(filters.requiredCount)
-      if (!isNaN(count)) {
-        filtered = filtered.filter(item => item.requiredCount === count)
-      }
-    }
-    
-    // 选交文件数筛选
-    if (filters.optionalCount) {
-      const count = parseInt(filters.optionalCount)
-      if (!isNaN(count)) {
-        filtered = filtered.filter(item => item.optionalCount === count)
-      }
-    }
-    
-    // 创建日期筛选
-    if (filters.createdAt) {
-      const filterDate = new Date(filters.createdAt)
-      filtered = filtered.filter(item => {
-        const itemDate = new Date(item.createdAt)
-        return itemDate.toDateString() === filterDate.toDateString()
+    // 兼容旧版和新版高级筛选格式
+    if (filters.groups && filters.groupOperator) {
+      // 新版高级筛选格式 (SeniorFilterDTO)
+      
+      // 这里就是直接使用未处理的格式，实际应用中需要根据结构进行解析
+      console.log("使用新版高级筛选格式", filters)
+      
+      // 简单处理：从conditions中提取字段和值进行筛选
+      filters.groups.forEach((group: any) => {
+        group.conditions.forEach((condition: any) => {
+          const { fieldId, value, compareType } = condition
+          
+          if (fieldId && value) {
+            filtered = filtered.filter(item => {
+              if (compareType === "=") {
+                return (item as any)[fieldId] === value
+              } else if (compareType === "contains") {
+                return String((item as any)[fieldId]).toLowerCase().includes(String(value).toLowerCase())
+              }
+              return true
+            })
+          }
+        })
       })
-    }
-    
-    // 更新日期筛选
-    if (filters.updatedAt) {
-      const filterDate = new Date(filters.updatedAt)
-      filtered = filtered.filter(item => {
-        const itemDate = new Date(item.updatedAt)
-        return itemDate.toDateString() === filterDate.toDateString()
-      })
+    } else {
+      // 旧版单字段筛选格式
+      
+      // 配置名称筛选
+      if (filters.name) {
+        filtered = filtered.filter(item => 
+          item.name.toLowerCase().includes(filters.name.toLowerCase())
+        )
+      }
+      
+      // 审查类型筛选
+      if (filters.reviewType) {
+        filtered = filtered.filter(item => item.reviewType === filters.reviewType)
+      }
+      
+      // 项目类型筛选
+      if (filters.projectType) {
+        filtered = filtered.filter(item => item.projectType === filters.projectType)
+      }
+      
+      // 状态筛选
+      if (filters.status) {
+        filtered = filtered.filter(item => item.status === filters.status)
+      }
+      
+      // 文件数量筛选
+      if (filters.documentCount) {
+        const count = parseInt(filters.documentCount)
+        if (!isNaN(count)) {
+          filtered = filtered.filter(item => item.documentCount === count)
+        }
+      }
+      
+      // 必交文件数筛选
+      if (filters.requiredCount) {
+        const count = parseInt(filters.requiredCount)
+        if (!isNaN(count)) {
+          filtered = filtered.filter(item => item.requiredCount === count)
+        }
+      }
+      
+      // 选交文件数筛选
+      if (filters.optionalCount) {
+        const count = parseInt(filters.optionalCount)
+        if (!isNaN(count)) {
+          filtered = filtered.filter(item => item.optionalCount === count)
+        }
+      }
+      
+      // 创建日期筛选
+      if (filters.createdAt) {
+        const filterDate = new Date(filters.createdAt)
+        filtered = filtered.filter(item => {
+          const itemDate = new Date(item.createdAt)
+          return itemDate.toDateString() === filterDate.toDateString()
+        })
+      }
+      
+      // 更新日期筛选
+      if (filters.updatedAt) {
+        const filterDate = new Date(filters.updatedAt)
+        filtered = filtered.filter(item => {
+          const itemDate = new Date(item.updatedAt)
+          return itemDate.toDateString() === filterDate.toDateString()
+        })
+      }
     }
     
     setData(filtered)
@@ -300,6 +328,24 @@ function DocumentConfigContent() {
       setTotalItems(newData.length)
     }
   }
+  
+  // 将操作处理函数挂载到全局对象，以便表格组件可以访问
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).__dataListHandlers = {
+        handleViewDetails,
+        handleEditConfig,
+        handleDeleteConfig
+      }
+    }
+    
+    // 组件卸载时清理
+    return () => {
+      if (typeof window !== 'undefined') {
+        delete (window as any).__dataListHandlers
+      }
+    }
+  }, [])
   
   return (
     <DataList
@@ -403,6 +449,9 @@ function DocumentConfigContent() {
           },
         },
       ]}
+      onViewDetails={handleViewDetails}
+      onEditConfig={handleEditConfig}
+      onDeleteConfig={handleDeleteConfig}
     />
   )
 }

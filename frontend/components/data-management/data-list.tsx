@@ -120,6 +120,9 @@ interface DataListProps {
     isSelected: boolean, 
     onToggleSelect: (selected: boolean) => void
   ) => React.ReactNode
+  onViewDetails?: (item: any) => void
+  onEditConfig?: (item: any) => void
+  onDeleteConfig?: (item: any) => void
 }
 
 // export const filterCategories = [
@@ -313,6 +316,9 @@ export default function DataList({
   showColumnToggle,
   showHeaderButtons = true,
   customCardRenderer,
+  onViewDetails,
+  onEditConfig,
+  onDeleteConfig,
 }: DataListProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">(defaultViewMode)
   const [showBatchActions, setShowBatchActions] = useState(false)

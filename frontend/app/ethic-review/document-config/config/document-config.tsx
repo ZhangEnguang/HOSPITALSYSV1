@@ -191,32 +191,48 @@ export const tableColumns = [
     id: "actions",
     header: "操作",
     className: "w-[120px] text-right pr-4",
-    cell: (item: any) => (
-      <div className="flex items-center justify-end">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreVertical className="h-4 w-4" />
-              <span className="sr-only">打开菜单</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem className="cursor-pointer">
-              <Eye className="mr-2 h-4 w-4" />
-              <span>查看详情</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer">
-              <FileEdit className="mr-2 h-4 w-4" />
-              <span>编辑配置</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600">
-              <Trash2 className="mr-2 h-4 w-4" />
-              <span>删除配置</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    ),
+    cell: (item: any) => {
+      // 获取来自于 DataList 组件的动作处理器
+      const handleViewDetails = (window as any).__dataListHandlers?.handleViewDetails;
+      const handleEditConfig = (window as any).__dataListHandlers?.handleEditConfig;
+      const handleDeleteConfig = (window as any).__dataListHandlers?.handleDeleteConfig;
+    
+      return (
+        <div className="flex items-center justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreVertical className="h-4 w-4" />
+                <span className="sr-only">打开菜单</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem 
+                className="cursor-pointer"
+                onClick={() => handleViewDetails?.(item)}
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                <span>查看详情</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                className="cursor-pointer"
+                onClick={() => handleEditConfig?.(item)}
+              >
+                <FileEdit className="mr-2 h-4 w-4" />
+                <span>编辑配置</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                className="cursor-pointer text-red-600 focus:text-red-600"
+                onClick={() => handleDeleteConfig?.(item)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                <span>删除配置</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      );
+    },
   },
 ];
 
@@ -348,17 +364,20 @@ export const cardActions = [
     id: "view",
     label: "查看详情",
     icon: <Eye className="h-4 w-4" />,
+    handler: "handleViewDetails",
   },
   {
     id: "edit",
     label: "编辑配置",
     icon: <FileEdit className="h-4 w-4" />,
+    handler: "handleEditConfig",
   },
   {
     id: "delete",
     label: "删除配置",
     icon: <Trash2 className="h-4 w-4" />,
     variant: "destructive",
+    handler: "handleDeleteConfig",
   },
 ];
 
