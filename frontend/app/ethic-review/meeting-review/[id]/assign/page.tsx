@@ -120,6 +120,7 @@ export default function AssignExpertsPage({ params }: { params: { id: string } }
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [selectedExpertDetails, setSelectedExpertDetails] = useState<any[]>([]);
   const [selectedWorksheetDetail, setSelectedWorksheetDetail] = useState<any>(null);
+  const [redirectAfterSave, setRedirectAfterSave] = useState(false);
 
   // 调试信息
   useEffect(() => {
@@ -328,6 +329,16 @@ export default function AssignExpertsPage({ params }: { params: { id: string } }
     setShowConfirmDialog(true);
   };
 
+  // 处理保存后的重定向
+  useEffect(() => {
+    if (redirectAfterSave) {
+      // 重置标志
+      setRedirectAfterSave(false);
+      // 执行重定向到会议审查列表
+      router.push("/ethic-review/meeting-review");
+    }
+  }, [redirectAfterSave, router]);
+
   // 确认分配处理
   const handleConfirmAssignment = async () => {
     startLoading();
@@ -336,7 +347,7 @@ export default function AssignExpertsPage({ params }: { params: { id: string } }
       // 这里可以添加实际的保存逻辑，例如API调用
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      // 先关闭对话框
+      // 关闭对话框
       setShowConfirmDialog(false);
       
       // 显示成功消息
@@ -349,8 +360,8 @@ export default function AssignExpertsPage({ params }: { params: { id: string } }
       // 停止加载状态
       stopLoading();
       
-      // 使用await确保跳转完成
-      await router.push("/ethic-review/meeting-review");
+      // 设置重定向标志，让useEffect处理导航
+      setRedirectAfterSave(true);
     } catch (error) {
       console.error("分配专家时发生错误:", error);
       stopLoading();
@@ -544,7 +555,15 @@ export default function AssignExpertsPage({ params }: { params: { id: string } }
       />
 
       {/* 确认分配对话框 */}
-      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+      <Dialog 
+        open={showConfirmDialog} 
+        onOpenChange={(open) => {
+          // 只处理对话框关闭事件，且仅在非加载状态下
+          if (!open && !isLoading) {
+            setShowConfirmDialog(false);
+          }
+        }}
+      >
         <DialogContent className="max-w-[550px] p-0 overflow-hidden">
           <div className="p-6 pb-2 border-b bg-gradient-to-r from-blue-50/80 to-indigo-50/80">
             <DialogTitle className="text-lg font-semibold text-slate-800 flex items-center">

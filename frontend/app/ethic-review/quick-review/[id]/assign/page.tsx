@@ -481,7 +481,7 @@ export default function AssignExpertsPage({ params }: { params: { id: string } }
           <div className="ml-3">
             <h3 className="text-base font-medium flex items-center">
               <UserRoundPlus className="h-4 w-4 mr-2 text-blue-600" />
-              专家分配模式
+              快速审查专家分配模式
             </h3>
             <p className="text-sm text-slate-600 mt-1">
               您正在为项目分配审查专家。请在右侧<strong>AI智能推荐</strong>面板中查看系统推荐的专家和工作表，
