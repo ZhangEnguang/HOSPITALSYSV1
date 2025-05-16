@@ -639,6 +639,31 @@ export default function AssignExpertsPage({ params }: { params: { id: string } }
                   </p>
                 </div>
               </div>
+              
+              <div className="mt-4">
+                <h3 className="text-sm font-medium mb-2 flex items-center text-slate-700">
+                  <FileSignature className="h-4 w-4 mr-2 text-blue-500" />
+                  项目基本信息
+                </h3>
+                <div className="border rounded-md overflow-hidden">
+                  <table className="w-full min-w-full divide-y divide-slate-200">
+                    <thead className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-200">
+                      <tr>
+                        <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-700">项目名称</th>
+                        <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-700">项目编号</th>
+                        <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-700">类型</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="py-2 px-3 text-sm text-slate-700">{currentProject?.title || '-'}</td>
+                        <td className="py-2 px-3 text-sm text-slate-700">{currentProject?.reviewNumber || '-'}</td>
+                        <td className="py-2 px-3 text-sm text-slate-700">{currentProject?.projectType || '-'}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
           

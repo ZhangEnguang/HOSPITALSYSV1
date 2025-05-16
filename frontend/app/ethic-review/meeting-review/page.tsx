@@ -14,7 +14,7 @@ import {
   dataListStatusVariants,
   getStatusName
 } from "./config/meeting-review-config"
-import { Brain, Eye, Users, ClipboardCheck, MoreVertical, CheckCircle, XCircle, Trash2 } from "lucide-react"
+import { Brain, Eye, Users, ClipboardCheck, MoreVertical, CheckCircle, XCircle, Trash2, UserPlus, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { 
   DropdownMenu, 
@@ -286,6 +286,35 @@ function MeetingReviewContent() {
     console.log("点击项目", item.id)
   }
 
+  // 批量删除项目
+  const handleBatchDelete = () => {
+    // 在实际应用中，这里应该有一个确认对话框
+    console.log("批量删除项目", selectedRows)
+    // 删除选中的项目
+    const newData = data.filter(item => !selectedRows.includes(item.id))
+    setData(newData)
+    setTotalItems(newData.length)
+    setSelectedRows([])
+  }
+  
+  // 批量分配专家
+  const handleBatchAssignExperts = () => {
+    // 获取选中项目
+    const selectedItems = data.filter(item => selectedRows.includes(item.id))
+    console.log("批量分配专家", selectedItems)
+    // 在实际应用中，应该打开一个模态框来选择专家
+    router.push(`/ethic-review/meeting-review/batch-assign?ids=${selectedRows.join(",")}`)
+  }
+  
+  // 批量意见汇总
+  const handleBatchSummaryOpinions = () => {
+    // 获取选中项目
+    const selectedItems = data.filter(item => selectedRows.includes(item.id))
+    console.log("批量意见汇总", selectedItems)
+    // 在实际应用中，应该生成一个汇总报告
+    router.push(`/ethic-review/meeting-review/batch-summary?ids=${selectedRows.join(",")}`)
+  }
+  
   // 处理添加新项目
   const handleAddNew = () => {
     router.push("/ethic-review/meeting-review/create")
@@ -353,45 +382,26 @@ function MeetingReviewContent() {
       idField="id"
       batchActions={[
         {
-          id: "bulkApprove",
-          label: "批量通过",
-          icon: <CheckCircle className="h-4 w-4" />,
-          onClick: () => {
-            console.log("批量通过", selectedRows);
-            // 这里可以添加批量通过的逻辑
-            alert(`已选择${selectedRows.length}项进行批量通过`);
-          },
-        },
-        {
-          id: "bulkReject",
-          label: "批量驳回",
-          icon: <XCircle className="h-4 w-4" />,
-          onClick: () => {
-            console.log("批量驳回", selectedRows);
-            // 这里可以添加批量驳回的逻辑
-            alert(`已选择${selectedRows.length}项进行批量驳回`);
-          },
-        },
-        {
-          id: "bulkAssign",
-          label: "批量分配",
-          icon: <Users className="h-4 w-4" />,
-          onClick: () => {
-            console.log("批量分配", selectedRows);
-            // 这里可以添加批量分配的逻辑
-            alert(`已选择${selectedRows.length}项进行批量分配`);
-          },
-        },
-        {
-          id: "bulkDelete",
+          id: "batchDelete",
           label: "批量删除",
           icon: <Trash2 className="h-4 w-4" />,
-          onClick: () => {
-            console.log("批量删除", selectedRows);
-            // 这里可以添加批量删除的逻辑
-            alert(`已选择${selectedRows.length}项进行批量删除`);
-          },
+          onClick: handleBatchDelete,
+          variant: "destructive"
         },
+        {
+          id: "batchAssignExperts",
+          label: "批量分配专家",
+          icon: <UserPlus className="h-4 w-4" />,
+          onClick: handleBatchAssignExperts,
+          variant: "default"
+        },
+        {
+          id: "batchSummaryOpinions",
+          label: "批量意见汇总",
+          icon: <FileText className="h-4 w-4" />,
+          onClick: handleBatchSummaryOpinions,
+          variant: "default"
+        }
       ]}
     />
   )

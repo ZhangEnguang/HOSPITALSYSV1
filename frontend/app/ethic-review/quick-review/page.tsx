@@ -14,7 +14,7 @@ import {
   dataListStatusVariants,
   getStatusName
 } from "./config/quick-review-config"
-import { Brain, Eye, Users, ClipboardCheck, MoreVertical } from "lucide-react"
+import { Brain, Eye, Users, ClipboardCheck, MoreVertical, Trash2, UserPlus, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { 
   DropdownMenu, 
@@ -277,6 +277,60 @@ function QuickReviewContent() {
     console.log("点击项目", item.id)
   }
 
+  // 批量删除项目
+  const handleBatchDelete = () => {
+    // 在实际应用中，这里应该有一个确认对话框
+    console.log("批量删除项目", selectedRows)
+    // 删除选中的项目
+    const newData = data.filter(item => !selectedRows.includes(item.id))
+    setData(newData)
+    setTotalItems(newData.length)
+    setSelectedRows([])
+  }
+  
+  // 批量分配专家
+  const handleBatchAssignExperts = () => {
+    // 获取选中项目
+    const selectedItems = data.filter(item => selectedRows.includes(item.id))
+    console.log("批量分配专家", selectedItems)
+    // 在实际应用中，应该打开一个模态框来选择专家
+    router.push(`/ethic-review/quick-review/batch-assign?ids=${selectedRows.join(",")}`)
+  }
+  
+  // 批量意见汇总
+  const handleBatchSummaryOpinions = () => {
+    // 获取选中项目
+    const selectedItems = data.filter(item => selectedRows.includes(item.id))
+    console.log("批量意见汇总", selectedItems)
+    // 在实际应用中，应该生成一个汇总报告
+    router.push(`/ethic-review/quick-review/batch-summary?ids=${selectedRows.join(",")}`)
+  }
+
+  // 定义批量操作按钮
+  const batchActions = [
+    {
+      id: "batchDelete",
+      label: "批量删除",
+      icon: <Trash2 className="h-4 w-4" />,
+      onClick: handleBatchDelete,
+      variant: "destructive"
+    },
+    {
+      id: "batchAssignExperts",
+      label: "批量分配专家",
+      icon: <UserPlus className="h-4 w-4" />,
+      onClick: handleBatchAssignExperts,
+      variant: "default"
+    },
+    {
+      id: "batchSummaryOpinions",
+      label: "批量意见汇总",
+      icon: <FileText className="h-4 w-4" />,
+      onClick: handleBatchSummaryOpinions,
+      variant: "default"
+    }
+  ]
+
   // 处理添加新项目
   const handleAddNew = () => {
     router.push("/ethic-review/quick-review/create")
@@ -342,6 +396,7 @@ function QuickReviewContent() {
       selectedRows={selectedRows}
       onSelectedRowsChange={handleSelectionChange}
       idField="id"
+      batchActions={batchActions}
     />
   )
 }
