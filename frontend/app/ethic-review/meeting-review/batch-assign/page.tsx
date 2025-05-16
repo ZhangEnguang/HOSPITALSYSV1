@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { ArrowLeft, ChevronRight, Zap, User, ClipboardList, Calendar, CheckCircle2, BookOpen, Check, UserRoundPlus, ArrowRight, LucideCheck, FileText, CheckCircle, X, AlertTriangle, FileCheck, FileSignature, Filter, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { quickReviewItems } from "../data/quick-review-demo-data"
+import { meetingReviewItems } from "../data/meeting-review-demo-data"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/components/ui/use-toast"
@@ -178,7 +178,7 @@ export default function BatchAssignPage() {
   // 加载项目数据
   useEffect(() => {
     const filteredProjects = ids.length > 0 
-      ? quickReviewItems.filter(item => ids.includes(item.id))
+      ? meetingReviewItems.filter(item => ids.includes(item.id))
       : [];
     
     setProjects(filteredProjects);
@@ -502,12 +502,12 @@ export default function BatchAssignPage() {
       toast({
         title: "分配成功",
         description: groupByType 
-          ? `已成功为${projects.length}个项目按分组分配专家和工作表` 
-          : `已成功为${projects.length}个项目分配专家和工作表`,
+          ? `已成功为${projects.length}个会议审查项目按分组分配专家和工作表` 
+          : `已成功为${projects.length}个会议审查项目分配专家和工作表`,
       });
       
-      // 直接跳转到列表页面，避免使用复杂的路由方法
-      window.location.href = "/ethic-review/quick-review";
+      // 直接跳转到列表页面
+      window.location.href = "/ethic-review/meeting-review";
     }, 1000);
   }
 
@@ -540,7 +540,7 @@ export default function BatchAssignPage() {
                   <UserRoundPlus className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-800">待分配快速审查项目</h2>
+                  <h2 className="text-lg font-semibold text-slate-800">待分配会议审查项目</h2>
                   <p className="text-xs text-slate-500 mt-0.5">已选择 {projects.length} 个项目进行批量分配</p>
                 </div>
               </div>
