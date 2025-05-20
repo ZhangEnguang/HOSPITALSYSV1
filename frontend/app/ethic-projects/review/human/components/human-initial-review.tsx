@@ -1,12 +1,16 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "@/components/ui/use-toast"
 
 import { ReviewFormBase } from "@/components/ethic-review/review-form-base"
 import { ProjectInfoCard, ProjectInfoField } from "@/components/ethic-review/project-info-card"
 import { ReviewFileList, ReviewFileItem } from "@/components/ethic-review/review-file-list"
+import { ReviewSubmitDialog } from "@/components/ethic-review/review-submit-dialog"
+import { FileReviewIssue } from "@/app/services/ai-file-review"
+import { Button } from "@/components/ui/button"
+import { SendHorizontal } from "lucide-react"
 
 // 默认项目数据
 const DEFAULT_PROJECT_DATA = {
@@ -28,6 +32,12 @@ export function HumanInitialReview({
   
   // 用于管理项目数据的状态
   const [projectData, setProjectData] = useState(initialProjectData)
+  
+  // 显示提交对话框的状态
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false)
+  
+  // 存储文件对象的Map
+  const [filesMap, setFilesMap] = useState<Map<number, File[]>>(new Map())
   
   // 从URL参数中获取项目ID和其他信息，并更新项目数据
   useEffect(() => {
@@ -164,37 +174,195 @@ export function HumanInitialReview({
   ]
 
   // 管理送审文件清单状态
-  const [reviewFiles, setReviewFiles] = useState(initialReviewFiles)
-
-  // 处理表单提交
-  const handleSubmit = (data: any) => {
-    console.log("提交人体伦理初始审查表单:", data)
-    toast({
-      title: "提交成功",
-      description: "人体伦理初始审查表单已提交成功"
+  const [reviewFiles, setReviewFiles] = useState<ReviewFileItem[]>(initialReviewFiles)
+  
+  // 更新文件列表，并维护文件对象Map
+  const handleFilesChange = useCallback((newFiles: ReviewFileItem[]) => {
+    console.log("文件列表已更新:", newFiles)
+    
+    // 更新文件状态
+    setReviewFiles(newFiles)
+    
+    // 更新文件对象Map
+    const newFilesMap = new Map<number, File[]>()
+    
+    newFiles.forEach(item => {
+      if (item.files && item.files.length > 0) {
+        // 为每个文件项保存实际的File对象
+        const fileObjects: File[] = []
+        
+        // 这里我们模拟File对象，实际应用中这些应该是真实的File对象
+        item.files.forEach(fileInfo => {
+          if (fileInfo instanceof File) {
+            // 如果已经是File对象
+            fileObjects.push(fileInfo)
+          } else if (fileInfo.file instanceof File) {
+            // 如果有file属性且是File对象
+            fileObjects.push(fileInfo.file)
+          } else {
+            // 创建一个模拟的File对象
+            const mockFile = new File(
+              ["mock content"], 
+              fileInfo.name || "未命名文件", 
+              { type: fileInfo.type || "application/octet-stream" }
+            )
+            fileObjects.push(mockFile)
+          }
+        })
+        
+        if (fileObjects.length > 0) {
+          newFilesMap.set(item.id, fileObjects)
+        }
+      }
     })
+    
+    setFilesMap(newFilesMap)
+  }, [])
+
+  // 检查是否有必填文件未上传
+  const hasMissingRequiredFiles = useCallback(() => {
+    const missingFiles = reviewFiles.filter(
+      file => file.required && (!file.files || file.files.length === 0)
+    )
+    return missingFiles.length > 0
+  }, [reviewFiles])
+
+  // 处理表单提交前的验证
+  const handlePreSubmit = () => {
+    // 检查必填文件
+    if (hasMissingRequiredFiles()) {
+      toast({
+        title: "文件不完整",
+        description: "请上传所有必需的文件后再提交",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    setShowSubmitDialog(true)
+  }
+
+  // 处理文件问题更新
+  const handleUpdateFileIssues = (issues: FileReviewIssue[], updatedFiles?: Map<number, File[]>) => {
+    // 这里可以根据修复的问题更新文件列表
+    console.log("文件问题已更新:", issues)
+    
+    // 如果AI修复了文件，更新文件对象
+    if (updatedFiles && updatedFiles.size > 0) {
+      setFilesMap(new Map(updatedFiles))
+      
+      // 根据修复后的文件，更新文件列表UI
+      const updatedReviewFiles = [...reviewFiles]
+      
+      issues.forEach(issue => {
+        if (issue.fixed) {
+          // 找到对应的文件项
+          const fileIndex = updatedReviewFiles.findIndex(file => file.id === issue.fileId)
+          if (fileIndex !== -1) {
+            const fileItem = updatedReviewFiles[fileIndex]
+            
+            // 获取修复后的文件
+            const fixedFiles = updatedFiles.get(issue.fileId)
+            if (fixedFiles && fixedFiles.length > 0) {
+              // 更新文件信息
+              const updatedFileList = fixedFiles.map(file => ({
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                file: file // 保存File对象引用
+              }))
+              
+              // 如果是版本号问题，更新版本号字段
+              if (issue.issueType === 'version') {
+                const versionMatch = fixedFiles[0].name.match(/[vV](\d+(\.\d+)*)/i)
+                if (versionMatch) {
+                  updatedReviewFiles[fileIndex] = {
+                    ...fileItem,
+                    files: updatedFileList,
+                    versionNumber: versionMatch[1]
+                  }
+                } else {
+                  updatedReviewFiles[fileIndex] = {
+                    ...fileItem,
+                    files: updatedFileList
+                  }
+                }
+              } else {
+                // 其他问题类型只更新文件列表
+                updatedReviewFiles[fileIndex] = {
+                  ...fileItem,
+                  files: updatedFileList
+                }
+              }
+            }
+          }
+        }
+      })
+      
+      // 更新状态
+      setReviewFiles(updatedReviewFiles)
+    }
+  }
+
+  // 处理表单最终提交
+  const handleFinalSubmit = () => {
+    console.log("提交人体伦理初始审查表单:", { projectData, reviewFiles })
+    
+    // 关闭对话框
+    setShowSubmitDialog(false)
+    
+    // 模拟API提交
+    setTimeout(() => {
+      // 显示成功提示
+      toast({
+        title: "提交成功",
+        description: "人体伦理初始审查表单已提交成功，将进入审查流程"
+      })
+      
+      // 提交成功后跳转到项目列表页
+      setTimeout(() => {
+        router.push("/ethic-projects/human")
+      }, 1500)
+    }, 500)
   }
 
   return (
-    <ReviewFormBase
-      title="新建初始审查"
-      returnPath="/ethic-projects/human"
-      projectInfo={projectData}
-      fileList={reviewFiles}
-      onSubmit={handleSubmit}
-    >
-      {/* 项目信息卡片 */}
-      <ProjectInfoCard 
-        title="项目信息"
-        fields={projectInfoFields}
-      />
-
-      {/* 送审文件列表 */}
-      <ReviewFileList
-        title="送审文件信息"
+    <>
+      <ReviewFormBase
+        title="新建初始审查"
+        returnPath="/ethic-projects/human"
+        projectInfo={projectData}
         fileList={reviewFiles}
-        onChange={setReviewFiles}
+        customSubmitButton={
+          <Button onClick={handlePreSubmit} className="bg-primary">
+            <SendHorizontal className="mr-2 h-4 w-4" />
+            提交送审
+          </Button>
+        }
+      >
+        {/* 项目信息卡片 */}
+        <ProjectInfoCard 
+          title="项目信息"
+          fields={projectInfoFields}
+        />
+
+        {/* 送审文件列表 */}
+        <ReviewFileList
+          title="送审文件信息"
+          fileList={reviewFiles}
+          onChange={handleFilesChange}
+        />
+      </ReviewFormBase>
+      
+      {/* 提交确认对话框 */}
+      <ReviewSubmitDialog
+        isOpen={showSubmitDialog}
+        onOpenChange={setShowSubmitDialog}
+        fileList={reviewFiles}
+        onConfirmSubmit={handleFinalSubmit}
+        onUpdateFileIssues={handleUpdateFileIssues}
+        files={filesMap}
       />
-    </ReviewFormBase>
+    </>
   )
 } 

@@ -28,6 +28,7 @@ export function ReviewFormBase({
   onSubmit, // 提交回调
   children, // 自定义内容区域
   amendmentDescription, // 修改说明（可选，仅用于修改审查）
+  customSubmitButton, // 自定义提交按钮
 }: {
   title: string
   returnPath: string
@@ -36,6 +37,7 @@ export function ReviewFormBase({
   onSubmit?: (data: any) => void
   children?: React.ReactNode
   amendmentDescription?: string
+  customSubmitButton?: React.ReactNode
 }) {
   const router = useRouter()
   
@@ -210,13 +212,17 @@ export function ReviewFormBase({
           >
             取消
           </Button>
-          <Button 
-            type="button" 
-            onClick={handleSubmit} 
-            className="bg-blue-600 hover:bg-blue-700 text-white rounded-md h-10 px-4 py-2 transition-colors focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
-          >
-            确认
-          </Button>
+          {customSubmitButton ? (
+            customSubmitButton
+          ) : (
+            <Button 
+              type="button" 
+              onClick={handleSubmit} 
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-md h-10 px-4 py-2 transition-colors focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+            >
+              确认
+            </Button>
+          )}
         </div>
       </div>
 
