@@ -1,12 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { FileReviewIssue, renameFile, convertFileFormat } from "@/app/services/ai-file-review"
-import { Loader2, Check, X, RefreshCw, FileIcon, FileText } from "lucide-react"
+import { Loader2, Check, X, FileIcon, FileText } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
@@ -23,7 +21,6 @@ export function FileDiffView({ issue, file, onApplyFix, onCancel }: FileDiffView
   const [selectedFix, setSelectedFix] = useState<string>(
     issue.suggestedValue || (issue.fixOptions && issue.fixOptions[0]) || ''
   )
-  const [activeTab, setActiveTab] = useState("compare")
   
   const isVersionIssue = issue.issueType === 'version'
   const isNamingIssue = issue.issueType === 'naming'
@@ -62,16 +59,20 @@ export function FileDiffView({ issue, file, onApplyFix, onCancel }: FileDiffView
         const result = await renameFile(file, newFileName)
         
         if (result.success && result.file) {
+          // 先设置处理状态为false，确保UI状态正确更新
+          setIsProcessing(false)
           toast({
             title: "修复成功",
             description: result.message
           })
+          // 调用回调函数，传递修复后的信息和文件
           onApplyFix({
             ...issue,
             fixed: true,
             severity: 'info',
             message: `已自动修复: ${issue.message}`
           }, result.file)
+          return // 提前返回，避免执行finally块
         } else {
           toast({
             title: "修复失败",
@@ -85,16 +86,20 @@ export function FileDiffView({ issue, file, onApplyFix, onCancel }: FileDiffView
         const result = await convertFileFormat(file, targetFormat)
         
         if (result.success && result.file) {
+          // 先设置处理状态为false，确保UI状态正确更新
+          setIsProcessing(false)
           toast({
             title: "转换成功",
             description: result.message
           })
+          // 调用回调函数，传递修复后的信息和文件
           onApplyFix({
             ...issue,
             fixed: true,
             severity: 'info',
             message: `已自动修复: ${issue.message}`
           }, result.file)
+          return // 提前返回，避免执行finally块
         } else {
           toast({
             title: "转换失败",
@@ -103,6 +108,8 @@ export function FileDiffView({ issue, file, onApplyFix, onCancel }: FileDiffView
           })
         }
       } else {
+        // 先设置处理状态为false，确保UI状态正确更新
+        setIsProcessing(false)
         // 其他修复逻辑
         onApplyFix({
           ...issue,
@@ -110,6 +117,7 @@ export function FileDiffView({ issue, file, onApplyFix, onCancel }: FileDiffView
           severity: 'info',
           message: `已自动修复: ${issue.message}`
         })
+        return // 提前返回，避免执行finally块
       }
     } catch (error) {
       console.error("应用修复失败:", error)
@@ -200,113 +208,90 @@ export function FileDiffView({ issue, file, onApplyFix, onCancel }: FileDiffView
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-medium">修复问题</CardTitle>
-          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-            {issue.issueType === 'version' ? '版本号' : 
-              issue.issueType === 'naming' ? '命名规范' : 
-              issue.issueType === 'fileType' ? '文件类型' : 
-              '格式问题'}
-          </Badge>
-        </div>
-        <CardDescription>
-          {issue.message}
-        </CardDescription>
-      </CardHeader>
+    <div className="w-full py-2">
+      <div className="flex items-center justify-between mb-5">
+        <h2 className="text-lg font-medium text-gray-800">修复问题</h2>
+        <Badge variant="outline" className="bg-white text-blue-600 border-blue-200 rounded-full px-3 shadow-sm whitespace-nowrap">
+          {issue.issueType === 'version' ? '版本号' : 
+            issue.issueType === 'naming' ? '命名规范' : 
+            issue.issueType === 'fileType' ? '文件类型' : 
+            '格式问题'}
+        </Badge>
+      </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="compare">对比视图</TabsTrigger>
-          <TabsTrigger value="preview">预览效果</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="compare" className="p-0">
-          <div className="grid grid-cols-2 gap-0 border-t">
-            <div className="p-4 border-r bg-gray-50">
-              <div className="text-sm font-medium mb-2 text-slate-500">原始文件</div>
-              <div className="flex items-center gap-2 p-3 bg-white border rounded-md">
-                <FileIcon className="h-5 w-5 text-slate-400" />
-                <span className="text-sm truncate" title={file?.name || issue.fileName}>
-                  {file?.name || issue.originalValue || issue.fileName}
-                </span>
-              </div>
-              {isVersionIssue && (
-                <div className="mt-2 px-3 py-1 bg-red-50 text-red-700 rounded text-xs inline-block">
-                  缺少版本号或格式不正确
-                </div>
-              )}
-              {isNamingIssue && (
-                <div className="mt-2 px-3 py-1 bg-red-50 text-red-700 rounded text-xs inline-block">
-                  文件命名不符合规范
-                </div>
-              )}
-              {isFileTypeIssue && (
-                <div className="mt-2 px-3 py-1 bg-red-50 text-red-700 rounded text-xs inline-block">
-                  文件类型不符合要求
-                </div>
-              )}
+      <p className="text-sm text-gray-500 mb-5 break-words">
+        {issue.message}
+      </p>
+      
+      <div className="border border-gray-100 rounded-lg mb-6 overflow-hidden shadow-sm">
+        <div className="grid grid-cols-2 gap-0">
+          <div className="p-5 border-r bg-gray-50">
+            <h3 className="text-sm font-medium mb-3 text-gray-600 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
+              原始文件
+            </h3>
+            <div className="flex items-center gap-2 p-4 bg-white border border-gray-100 rounded-md shadow-sm">
+              <FileIcon className="h-5 w-5 text-gray-400 flex-shrink-0" />
+              <span className="text-sm truncate text-gray-700 min-w-0" title={file?.name || issue.fileName}>
+                {file?.name || issue.originalValue || issue.fileName}
+              </span>
             </div>
-            
-            <div className="p-4">
-              <div className="text-sm font-medium mb-2 text-slate-500">修复后</div>
-              <div className="flex items-center gap-2 p-3 bg-white border border-green-200 rounded-md">
-                <FileText className="h-5 w-5 text-green-500" />
-                <span className="text-sm truncate text-green-700 font-medium" title={
-                  isVersionIssue ? file?.name.replace(/(\.[^.]+)$/, `_V${selectedFix}$1`) :
-                  isNamingIssue ? selectedFix :
-                  `${file?.name.replace(/\.[^.]+$/, '')}_converted.${selectedFix || 'pdf'}`
-                }>
-                  {isVersionIssue ? file?.name.replace(/(\.[^.]+)$/, `_V${selectedFix}$1`) :
-                   isNamingIssue ? selectedFix :
-                   `${file?.name.replace(/\.[^.]+$/, '')}_converted.${selectedFix || 'pdf'}`}
-                </span>
+            {isVersionIssue && (
+              <div className="mt-3 px-3 py-1.5 bg-white border border-red-100 text-red-600 rounded-md text-xs shadow-sm whitespace-normal">
+                缺少版本号或格式不正确
               </div>
-              <div className="mt-2 px-3 py-1 bg-green-50 text-green-700 rounded text-xs inline-block">
-                {isVersionIssue ? '添加了标准版本号' : 
-                 isNamingIssue ? '符合命名规范' : 
-                 '转换为标准格式'}
+            )}
+            {isNamingIssue && (
+              <div className="mt-3 px-3 py-1.5 bg-white border border-red-100 text-red-600 rounded-md text-xs shadow-sm whitespace-normal">
+                文件命名不符合规范
               </div>
+            )}
+            {isFileTypeIssue && (
+              <div className="mt-3 px-3 py-1.5 bg-white border border-red-100 text-red-600 rounded-md text-xs shadow-sm whitespace-normal">
+                文件类型不符合要求
+              </div>
+            )}
+          </div>
+          
+          <div className="p-5">
+            <h3 className="text-sm font-medium mb-3 text-gray-600 flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+              修复后预览
+            </h3>
+            <div className="flex items-center gap-2 p-4 bg-white border border-emerald-100 rounded-md shadow-sm">
+              <FileText className="h-5 w-5 text-emerald-500 flex-shrink-0" />
+              <span className="text-sm truncate text-emerald-700 font-medium min-w-0" title={
+                isVersionIssue ? file?.name.replace(/(\.[^.]+)$/, `_V${selectedFix}$1`) :
+                isNamingIssue ? selectedFix :
+                `${file?.name.replace(/\.[^.]+$/, '')}_converted.${selectedFix || 'pdf'}`
+              }>
+                {isVersionIssue ? file?.name.replace(/(\.[^.]+)$/, `_V${selectedFix}$1`) :
+                 isNamingIssue ? selectedFix :
+                 `${file?.name.replace(/\.[^.]+$/, '')}_converted.${selectedFix || 'pdf'}`}
+              </span>
+            </div>
+            <div className="mt-3 px-3 py-1.5 bg-white border border-emerald-100 text-emerald-600 rounded-md text-xs shadow-sm whitespace-normal">
+              {isVersionIssue ? '添加了标准版本号' : 
+               isNamingIssue ? '符合命名规范' : 
+               '转换为标准格式'}
             </div>
           </div>
-        </TabsContent>
-        
-        <TabsContent value="preview" className="border-t p-4">
-          <div className="text-sm font-medium mb-3">应用该修复后:</div>
-          <ul className="space-y-2">
-            <li className="flex items-center gap-2 text-sm">
-              <Check className="h-4 w-4 text-green-500" />
-              {isVersionIssue ? '文件将添加标准版本号' : 
-               isNamingIssue ? '文件将符合命名规范' : 
-               '文件将转换为合规格式'}
-            </li>
-            <li className="flex items-center gap-2 text-sm">
-              <Check className="h-4 w-4 text-green-500" />
-              原始文件{isFileTypeIssue ? '将保留作为备份' : '不会被修改'}
-            </li>
-            {isFileTypeIssue && (
-              <li className="flex items-center gap-2 text-sm">
-                <Check className="h-4 w-4 text-green-500" />
-                文档内容和格式将保持不变
-              </li>
-            )}
-          </ul>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
       
       {/* 修复选项 */}
-      <CardContent className="pt-2 pb-0">
+      <div className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-sm">
         {isVersionIssue && renderVersionFixOptions()}
         {isNamingIssue && renderNamingFixOptions()}
         {isFileTypeIssue && renderFileTypeOptions()}
-      </CardContent>
+      </div>
       
-      <CardFooter className="flex justify-between pt-4 pb-4">
+      <div className="flex justify-between pt-4 border-t border-gray-100">
         <Button 
           variant="outline" 
           onClick={onCancel}
           disabled={isProcessing}
+          className="border-gray-200 text-gray-700 hover:bg-gray-50"
         >
           <X className="mr-2 h-4 w-4" />
           取消
@@ -314,7 +299,7 @@ export function FileDiffView({ issue, file, onApplyFix, onCancel }: FileDiffView
         <Button 
           onClick={handleApplyFix} 
           disabled={isProcessing}
-          className="bg-blue-600 hover:bg-blue-700"
+          className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md"
         >
           {isProcessing ? (
             <>
@@ -328,7 +313,7 @@ export function FileDiffView({ issue, file, onApplyFix, onCancel }: FileDiffView
             </>
           )}
         </Button>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   )
 } 

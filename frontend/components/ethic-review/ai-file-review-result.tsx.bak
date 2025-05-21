@@ -497,159 +497,157 @@ export function AIFileReviewResult({
             </Button>
           </div>
 
-          <ScrollArea className="max-h-[450px] pr-4">
-            <div className="pr-2">
-              <Accordion
-                type="multiple"
-                value={expandedItems}
-                onValueChange={setExpandedItems}
-                className="w-full space-y-2"
-              >
-                {sortedIssues.map((issue, index) => (
-                  <AccordionItem key={index} value={`item-${index}`} className="border border-gray-100 rounded-lg overflow-hidden shadow-sm bg-white">
-                    <AccordionTrigger className="hover:no-underline px-4 py-3 bg-white hover:bg-gray-50">
-                      <div className="flex items-center gap-3 text-left w-full pr-4">
-                        {renderSeverityIcon(issue.severity)}
-                        <div className="flex-1 min-w-0">
-                          <div className={`font-medium truncate ${
-                          issue.severity === 'error' 
-                            ? 'text-red-600' 
-                            : issue.severity === 'warning'
-                                ? 'text-amber-600'
-                              : 'text-blue-600'
-                        }`}>
-                            {issue.fileName}
-                          </div>
-                          <div className="text-gray-500 text-sm truncate max-w-lg">
-                            {issue.message}
-                          </div>
+          <ScrollArea className="max-h-[450px] pr-2">
+            <Accordion
+              type="multiple"
+              value={expandedItems}
+              onValueChange={setExpandedItems}
+              className="w-full space-y-2"
+            >
+              {sortedIssues.map((issue, index) => (
+                <AccordionItem key={index} value={`item-${index}`} className="border border-gray-100 rounded-lg overflow-hidden shadow-sm bg-white">
+                  <AccordionTrigger className="hover:no-underline px-4 py-3 bg-white hover:bg-gray-50">
+                    <div className="flex items-center gap-3 text-left w-full pr-4">
+                      {renderSeverityIcon(issue.severity)}
+                      <div className="flex-1 min-w-0">
+                        <div className={`font-medium truncate ${
+                        issue.severity === 'error' 
+                          ? 'text-red-600' 
+                          : issue.severity === 'warning'
+                              ? 'text-amber-600'
+                            : 'text-blue-600'
+                      }`}>
+                          {issue.fileName}
                         </div>
-                        {issue.fixed && (
-                          <Badge variant="outline" className="ml-2 flex-shrink-0 bg-emerald-50 text-emerald-600 border-emerald-100 rounded-full whitespace-nowrap">
-                            已修复
+                        <div className="text-gray-500 text-sm truncate max-w-lg">
+                          {issue.message}
+                        </div>
+                      </div>
+                      {issue.fixed && (
+                        <Badge variant="outline" className="ml-2 flex-shrink-0 bg-emerald-50 text-emerald-600 border-emerald-100 rounded-full whitespace-nowrap">
+                          已修复
+                        </Badge>
+                      )}
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="bg-gray-50 px-6 pt-2 pb-4">
+                    <div className="pl-7 pt-2">
+                      <Alert className="border border-gray-200 bg-white shadow-sm rounded-lg">
+                        <AlertTitle className="flex items-center gap-2 text-gray-800">
+                          <Badge variant="outline" className="bg-white border-gray-200 text-gray-600 whitespace-nowrap">
+                            {getIssueTypeName(issue.issueType)}
                           </Badge>
-                        )}
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="bg-gray-50 px-5 pt-2 pb-4">
-                      <div className="pl-7 pt-2 pr-1">
-                        <Alert className="border border-gray-200 bg-white shadow-sm rounded-lg overflow-hidden">
-                          <AlertTitle className="flex items-center gap-2 text-gray-800">
-                            <Badge variant="outline" className="bg-white border-gray-200 text-gray-600 whitespace-nowrap">
-                              {getIssueTypeName(issue.issueType)}
-                            </Badge>
-                            <span>智能建议</span>
-                          </AlertTitle>
-                          <AlertDescription className="mt-2 text-gray-600">
-                            <div className="mb-3">
-                              <p>{issue.suggestion}</p>
-                              {issue.autoFixable && !issue.fixed && (
-                                <p className="text-blue-600 text-sm mt-2">
-                                  我们可以帮您自动处理此问题，点击下方"查看并修复"即可预览修改效果。
-                                </p>
-                              )}
-                              {issue.issueType === 'quantity' && !issue.fixed && (
-                                <p className="text-blue-600 text-sm mt-2">
-                                  请点击"上传文件"按钮，选择并上传符合要求的文件。
-                                </p>
-                              )}
-                              {!issue.autoFixable && !issue.fixed && issue.issueType !== 'quantity' && (
-                                <p className="text-amber-600 text-sm mt-2">
-                                  此问题需要您手动修改，按照上述建议操作即可解决问题。
-                                </p>
-                              )}
-                            </div>
-                            
-                            <div className="flex justify-end mt-4">
-                              {issue.autoFixable && !issue.fixed ? (
-                                <Button 
-                                  variant="outline"
-                                  size="sm"
-                                  className="bg-white border-blue-200 text-blue-700 hover:text-blue-800 hover:bg-blue-50 shadow-sm whitespace-nowrap mr-1"
-                                  onClick={() => handleFixSingleIssue(issue)}
-                                >
-                                  <FileText className="mr-1 h-3.5 w-3.5" />
-                                  查看并修复
-                                </Button>
-                              ) : issue.issueType === 'quantity' && !issue.fixed ? (
-                                <Button 
-                                  variant="outline"
-                                  size="sm"
-                                  className="bg-white border-blue-200 text-blue-700 hover:text-blue-800 hover:bg-blue-50 shadow-sm whitespace-nowrap mr-1"
-                                  onClick={() => handleFileUpload(issue.fileId, 'document')}
-                                >
-                                  <Upload className="mr-1 h-3.5 w-3.5" />
-                                  上传文件
-                                </Button>
-                              ) : issue.fixed ? (
-                                <Badge variant="outline" className="bg-emerald-50 text-emerald-600 border-emerald-100 rounded-full px-3 whitespace-nowrap mr-1">
-                                  问题已修复
-                                </Badge>
-                              ) : (
-                                <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200 rounded-full px-3 whitespace-nowrap mr-1">
-                                  需手动修复
-                                </Badge>
-                              )}
-                            </div>
-                            
-                            {/* 显示文件上传进度和状态 */}
-                            {uploadingFiles.filter(f => f.issueId === issue.fileId).length > 0 && (
-                              <div className="mt-4 space-y-3 border border-blue-100 bg-blue-50 p-3 rounded-md">
-                                <h4 className="text-sm font-medium text-blue-700 flex items-center">
-                                  <Clock className="h-4 w-4 mr-1 animate-pulse" />
-                                  文件处理中
-                                </h4>
-                                
-                                {uploadingFiles
-                                  .filter(f => f.issueId === issue.fileId)
-                                  .map((uploadFile, index) => (
-                                    <div key={index} className="space-y-2">
-                                      <div className="flex items-center justify-between">
-                                        <span className="text-sm text-gray-600">{uploadFile.fileName}</span>
-                                        <span className="text-xs font-medium">
-                                          {uploadFile.status === 'uploading' ? `${uploadFile.progress}%` :
-                                           uploadFile.status === 'processing' ? '处理中...' :
-                                           uploadFile.status === 'complete' ? '完成' :
-                                           '失败'}
-                                        </span>
-                                      </div>
-                                      
-                                      {uploadFile.status === 'uploading' && (
-                                        <Progress value={uploadFile.progress} className="h-1" />
-                                      )}
-                                      
-                                      {uploadFile.status === 'processing' && (
-                                        <div className="flex items-center text-xs text-blue-600">
-                                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                          AI正在分析文件内容，请稍候...
-                                        </div>
-                                      )}
-                                      
-                                      {uploadFile.status === 'error' && (
-                                        <div className="flex items-center text-xs text-red-600">
-                                          <AlertCircle className="h-3 w-3 mr-1" />
-                                          处理失败，请重试
-                                        </div>
-                                      )}
-                                      
-                                      {uploadFile.status === 'complete' && (
-                                        <div className="flex items-center text-xs text-emerald-600">
-                                          <CheckCircle2 className="h-3 w-3 mr-1" />
-                                          文件已通过审查
-                                        </div>
-                                      )}
-                                    </div>
-                                  ))}
-                              </div>
+                          <span>智能建议</span>
+                        </AlertTitle>
+                        <AlertDescription className="mt-2 text-gray-600">
+                          <div className="mb-3">
+                            <p>{issue.suggestion}</p>
+                            {issue.autoFixable && !issue.fixed && (
+                              <p className="text-blue-600 text-sm mt-2">
+                                我们可以帮您自动处理此问题，点击下方"查看并修复"即可预览修改效果。
+                              </p>
                             )}
-                          </AlertDescription>
-                        </Alert>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </div>
+                            {issue.issueType === 'quantity' && !issue.fixed && (
+                              <p className="text-blue-600 text-sm mt-2">
+                                请点击"上传文件"按钮，选择并上传符合要求的文件。
+                              </p>
+                            )}
+                            {!issue.autoFixable && !issue.fixed && issue.issueType !== 'quantity' && (
+                              <p className="text-amber-600 text-sm mt-2">
+                                此问题需要您手动修改，按照上述建议操作即可解决问题。
+                              </p>
+                            )}
+                          </div>
+                          
+                          <div className="flex justify-end mt-4">
+                            {issue.autoFixable && !issue.fixed ? (
+                              <Button 
+                                variant="outline"
+                                size="sm"
+                                className="bg-white border-blue-200 text-blue-700 hover:text-blue-800 hover:bg-blue-50 shadow-sm whitespace-nowrap"
+                                onClick={() => handleFixSingleIssue(issue)}
+                              >
+                                <FileText className="mr-1 h-3.5 w-3.5" />
+                                查看并修复
+                              </Button>
+                            ) : issue.issueType === 'quantity' && !issue.fixed ? (
+                              <Button 
+                                variant="outline"
+                                size="sm"
+                                className="bg-white border-blue-200 text-blue-700 hover:text-blue-800 hover:bg-blue-50 shadow-sm whitespace-nowrap"
+                                onClick={() => handleFileUpload(issue.fileId, 'document')}
+                              >
+                                <Upload className="mr-1 h-3.5 w-3.5" />
+                                上传文件
+                              </Button>
+                            ) : issue.fixed ? (
+                              <Badge variant="outline" className="bg-emerald-50 text-emerald-600 border-emerald-100 rounded-full px-3 whitespace-nowrap">
+                                问题已修复
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200 rounded-full px-3 whitespace-nowrap">
+                                需手动修复
+                              </Badge>
+                            )}
+                          </div>
+                          
+                          {/* 显示文件上传进度和状态 */}
+                          {uploadingFiles.filter(f => f.issueId === issue.fileId).length > 0 && (
+                            <div className="mt-4 space-y-3 border border-blue-100 bg-blue-50 p-3 rounded-md">
+                              <h4 className="text-sm font-medium text-blue-700 flex items-center">
+                                <Clock className="h-4 w-4 mr-1 animate-pulse" />
+                                文件处理中
+                              </h4>
+                              
+                              {uploadingFiles
+                                .filter(f => f.issueId === issue.fileId)
+                                .map((uploadFile, index) => (
+                                  <div key={index} className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-sm text-gray-600">{uploadFile.fileName}</span>
+                                      <span className="text-xs font-medium">
+                                        {uploadFile.status === 'uploading' ? `${uploadFile.progress}%` :
+                                         uploadFile.status === 'processing' ? '处理中...' :
+                                         uploadFile.status === 'complete' ? '完成' :
+                                         '失败'}
+                                      </span>
+                                    </div>
+                                    
+                                    {uploadFile.status === 'uploading' && (
+                                      <Progress value={uploadFile.progress} className="h-1" />
+                                    )}
+                                    
+                                    {uploadFile.status === 'processing' && (
+                                      <div className="flex items-center text-xs text-blue-600">
+                                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                        AI正在分析文件内容，请稍候...
+                                      </div>
+                                    )}
+                                    
+                                    {uploadFile.status === 'error' && (
+                                      <div className="flex items-center text-xs text-red-600">
+                                        <AlertCircle className="h-3 w-3 mr-1" />
+                                        处理失败，请重试
+                                      </div>
+                                    )}
+                                    
+                                    {uploadFile.status === 'complete' && (
+                                      <div className="flex items-center text-xs text-emerald-600">
+                                        <CheckCircle2 className="h-3 w-3 mr-1" />
+                                        文件已通过审查
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                            </div>
+                          )}
+                        </AlertDescription>
+                      </Alert>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
           </ScrollArea>
         </div>
 
@@ -727,14 +725,14 @@ export function AIFileReviewResult({
           setShowBatchFixAlert(open);
         }}
       >
-        <AlertDialogContent className="bg-white border border-gray-100 rounded-xl shadow-md p-0 overflow-hidden max-w-3xl">
+        <AlertDialogContent className="bg-white border border-gray-100 rounded-xl shadow-md p-0 overflow-hidden max-w-2xl">
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-1">
-            <AlertDialogHeader className="p-5 bg-white rounded-t-lg overflow-y-auto max-h-[80vh]">
+            <AlertDialogHeader className="p-5 bg-white rounded-t-lg">
               <AlertDialogTitle className="text-xl font-medium text-gray-800 flex items-center">
                 <WandSparkles className="mr-2 h-5 w-5 text-blue-600" />
                 智能批量修复助手
               </AlertDialogTitle>
-              <AlertDialogDescription className="text-gray-600 mt-3 space-y-3 pr-2">
+              <AlertDialogDescription className="text-gray-600 mt-3 space-y-3">
                 {isFixing ? (
                   <div className="py-6 flex flex-col items-center justify-center">
                     <div className="relative w-16 h-16 mb-4">

@@ -175,7 +175,7 @@ export function ReviewFormBase({
   };
 
   return (
-    <div className="container py-6 space-y-6 max-w-5xl">
+    <div className="container pb-6 px-6 space-y-6 max-w-5xl">
       {/* 头部 - 返回按钮和标题 */}
       <div className="flex items-center">
         <div className="flex items-center gap-2">

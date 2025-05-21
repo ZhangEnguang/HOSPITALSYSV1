@@ -13,7 +13,7 @@ import {
 import { FileReviewIssue, FileReviewResult, aiReviewFiles } from "@/app/services/ai-file-review"
 import { ReviewFileItem } from "@/components/ethic-review/review-file-list"
 import { AIFileReviewResult } from "@/components/ethic-review/ai-file-review-result"
-import { ArrowRight, Check, X } from "lucide-react"
+import { ArrowRight, Check, X, ArrowLeft, Plus } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 
 interface ReviewSubmitDialogProps {
@@ -23,6 +23,8 @@ interface ReviewSubmitDialogProps {
   onConfirmSubmit: () => void
   onUpdateFileIssues?: (issues: FileReviewIssue[], updatedFiles?: Map<number, File[]>) => void
   files?: Map<number, File[]> // 文件ID到文件列表的映射
+  skipAIReview?: boolean // 新增：是否跳过AI审查
+  reviewResult?: FileReviewResult | null // 新增：传入已有的审查结果
 }
 
 export function ReviewSubmitDialog({
@@ -31,25 +33,39 @@ export function ReviewSubmitDialog({
   fileList,
   onConfirmSubmit,
   onUpdateFileIssues,
-  files
+  files,
+  skipAIReview = false,
+  reviewResult: initialReviewResult = null
 }: ReviewSubmitDialogProps) {
-  const [reviewResult, setReviewResult] = useState<FileReviewResult | null>(null)
+  const [reviewResult, setReviewResult] = useState<FileReviewResult | null>(initialReviewResult)
   const [isReviewing, setIsReviewing] = useState(false)
-  const [hasReviewed, setHasReviewed] = useState(false)
+  const [hasReviewed, setHasReviewed] = useState(!!initialReviewResult)
   const [reviewError, setReviewError] = useState<string | null>(null)
 
   // 确保文件列表有效
   const validFileList = Array.isArray(fileList) ? fileList : []
 
-  // 监听对话框打开状态变化，确保isOpen改变时自动开始审查
+  // 监听对话框打开状态变化，确保isOpen改变时自动开始审查（除非跳过AI审查）
   useEffect(() => {
-    if (isOpen && !isReviewing && !hasReviewed) {
+    if (isOpen && !isReviewing && !hasReviewed && !skipAIReview) {
       startAIReview()
     }
-  }, [isOpen])
+    
+    // 如果有初始审查结果，更新状态
+    if (isOpen && initialReviewResult) {
+      setReviewResult(initialReviewResult)
+      setHasReviewed(true)
+    }
+  }, [isOpen, initialReviewResult, skipAIReview])
 
   // 启动AI审查
   const startAIReview = async () => {
+    // 如果跳过AI审查，直接返回
+    if (skipAIReview) {
+      setHasReviewed(true)
+      return
+    }
+    
     setIsReviewing(true)
     setHasReviewed(false)
     setReviewError(null)
@@ -123,8 +139,10 @@ export function ReviewSubmitDialog({
       if (!open) {
         // 关闭对话框时重置状态
         setTimeout(() => {
+          if (!initialReviewResult) {
           setReviewResult(null)
           setHasReviewed(false)
+          }
           setReviewError(null)
         }, 300) // 给对话框关闭动画一些时间
       }
@@ -149,19 +167,31 @@ export function ReviewSubmitDialog({
       onUpdateFileIssues(fixedIssues)
     }
   }
+  
+  // 处理返回列表操作
+  const handleReturnToList = () => {
+    localStorage.setItem('reviewSubmitAction', 'returnToList')
+    handleOpenChange(false)
+  }
+  
+  // 处理继续新增操作
+  const handleContinueAdd = () => {
+    localStorage.setItem('reviewSubmitAction', 'continueAdd')
+    onConfirmSubmit()
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[800px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>提交审查</DialogTitle>
+          <DialogTitle>确认提交审查</DialogTitle>
           <DialogDescription>
-            在提交前，系统将使用AI检查您的送审文件是否符合要求
+            您的审查申请已准备就绪，提交后将进入伦理审查流程
           </DialogDescription>
         </DialogHeader>
 
-        {/* AI文件审查结果 */}
-        {isReviewing || reviewResult ? (
+        {/* AI文件审查结果，如果跳过AI审查则不显示 */}
+        {!skipAIReview && (isReviewing || reviewResult) ? (
           <div className="py-4">
             <AIFileReviewResult 
               result={reviewResult || { hasIssues: false, issues: [], totalFiles: 0, validFiles: 0 }}
@@ -170,7 +200,7 @@ export function ReviewSubmitDialog({
               files={files}
             />
           </div>
-        ) : (
+        ) : (!skipAIReview && (
           <div className="py-8 text-center text-muted-foreground flex flex-col items-center gap-4">
             <p>正在准备文件审查...</p>
             {reviewError && (
@@ -186,25 +216,23 @@ export function ReviewSubmitDialog({
               </div>
             )}
           </div>
-        )}
+        ))}
 
         <DialogFooter className="sm:justify-between">
-          <Button variant="outline" onClick={() => handleOpenChange(false)}>
-            <X className="mr-2 h-4 w-4" />
-            取消
+          <Button variant="outline" onClick={handleReturnToList}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            返回列表
           </Button>
           
-          {hasReviewed && reviewResult && !reviewResult.hasIssues ? (
-            <Button onClick={onConfirmSubmit} className="bg-green-600 hover:bg-green-700">
-              <Check className="mr-2 h-4 w-4" />
-              确认提交
+          {(skipAIReview || (hasReviewed && reviewResult)) && (
+            <Button 
+              onClick={handleContinueAdd} 
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              继续新增
             </Button>
-          ) : hasReviewed && reviewResult && reviewResult.hasIssues ? (
-            <Button variant="outline" onClick={() => handleOpenChange(false)}>
-              返回修改文件
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          ) : null}
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

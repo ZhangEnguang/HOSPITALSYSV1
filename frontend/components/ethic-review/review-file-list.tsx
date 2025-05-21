@@ -20,6 +20,7 @@ export type ReviewFileItem = {
   versionNumber: string;
   hasTemplate: boolean;
   templateUrl: string;
+  aiModified?: boolean; // 是否经过AI修复
 }
 
 // 文件预览类型
@@ -200,21 +201,42 @@ export function ReviewFileList({
                 {fileList.map((item, index) => (
                   <tr 
                     key={item.id} 
-                    className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors`}
+                    className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors ${
+                      item.aiModified ? 'border-l-4 border-l-green-500' : ''
+                    }`}
                   >
                     <td className="py-3 px-4 align-top border-b border-gray-200">
-                      <div className="font-medium text-slate-800">{item.fileName}</div>
+                      <div className="font-medium text-slate-800 flex items-center">
+                        {item.fileName}
+                        {item.aiModified && (
+                          <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            已修复
+                          </span>
+                        )}
+                      </div>
                       {/* 已上传文件列表 - 移到文件名称下方 */}
                       {item.files.length > 0 && (
                         <div className="mt-1.5 space-y-1">
                           {item.files.map((file, index) => (
-                            <div key={index} className="flex items-center gap-1 text-xs py-0.5 pl-1 pr-0.5 rounded bg-blue-50 border border-blue-100">
-                              <FileText className="h-3 w-3 text-blue-500 flex-shrink-0" />
+                            <div key={index} className={`flex items-center gap-1 text-xs py-0.5 pl-1 pr-0.5 rounded ${
+                              item.aiModified ? 'bg-green-50 border border-green-200' : 'bg-blue-50 border border-blue-100'
+                            }`}>
+                              <FileText className={`h-3 w-3 ${item.aiModified ? 'text-green-500' : 'text-blue-500'} flex-shrink-0`} />
                               <span 
-                                className="truncate flex-1 text-blue-700 cursor-pointer hover:underline"
+                                className={`truncate flex-1 ${
+                                  item.aiModified ? 'text-green-700' : 'text-blue-700'
+                                } cursor-pointer hover:underline`}
                                 onClick={() => handlePreviewFile(file)}
                               >
                                 {file.name}
+                                {item.aiModified && (
+                                  <span className="ml-1 inline-flex items-center rounded-full text-xs font-medium text-green-700">
+                                    (已修复)
+                                  </span>
+                                )}
                               </span>
                               <Button
                                 type="button"

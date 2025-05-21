@@ -8,9 +8,21 @@ import { ReviewFormBase } from "@/components/ethic-review/review-form-base"
 import { ProjectInfoCard, ProjectInfoField } from "@/components/ethic-review/project-info-card"
 import { ReviewFileList, ReviewFileItem } from "@/components/ethic-review/review-file-list"
 import { ReviewSubmitDialog } from "@/components/ethic-review/review-submit-dialog"
-import { FileReviewIssue } from "@/app/services/ai-file-review"
+import { AIFileReviewResult } from "@/components/ethic-review/ai-file-review-result"
+import { FileReviewIssue, aiReviewFiles, FileReviewResult } from "@/app/services/ai-file-review"
 import { Button } from "@/components/ui/button"
-import { SendHorizontal } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { SendHorizontal, FileCheck2, X, Loader2, ArrowLeft } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 // 默认项目数据
 const DEFAULT_PROJECT_DATA = {
@@ -22,6 +34,17 @@ const DEFAULT_PROJECT_DATA = {
   department: "内分泌科",
   ethicsCommittee: "北京医学伦理委员会"
 }
+
+// 为上传文件定义类型
+interface FileWithData {
+  name: string;
+  size: number;
+  type: string;
+  file: File;
+}
+
+// 扩展文件类型，使其兼容可能的情况
+type FileWithAttributes = File | FileWithData;
 
 // 人体伦理初始审查表单组件
 export function HumanInitialReview({
@@ -38,6 +61,18 @@ export function HumanInitialReview({
   
   // 存储文件对象的Map
   const [filesMap, setFilesMap] = useState<Map<number, File[]>>(new Map())
+  
+  // 新增：AI审查状态
+  const [showAIReview, setShowAIReview] = useState(false)
+  const [isReviewing, setIsReviewing] = useState(false)
+  const [reviewResult, setReviewResult] = useState<FileReviewResult | null>(null)
+  const [reviewError, setReviewError] = useState<string | null>(null)
+  const [reviewProgress, setReviewProgress] = useState(0)
+  
+  // 新增：确认对话框状态
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [confirmMessage, setConfirmMessage] = useState("")
+  const [confirmTitle, setConfirmTitle] = useState("")
   
   // 从URL参数中获取项目ID和其他信息，并更新项目数据
   useEffect(() => {
@@ -191,20 +226,24 @@ export function HumanInitialReview({
         // 为每个文件项保存实际的File对象
         const fileObjects: File[] = []
         
-        // 这里我们模拟File对象，实际应用中这些应该是真实的File对象
-        item.files.forEach(fileInfo => {
+        // 处理不同类型的文件对象
+        item.files.forEach((fileInfo: any) => {
           if (fileInfo instanceof File) {
             // 如果已经是File对象
             fileObjects.push(fileInfo)
-          } else if (fileInfo.file instanceof File) {
+          } else if (fileInfo && typeof fileInfo === 'object' && 'file' in fileInfo && fileInfo.file instanceof File) {
             // 如果有file属性且是File对象
             fileObjects.push(fileInfo.file)
           } else {
             // 创建一个模拟的File对象
             const mockFile = new File(
               ["mock content"], 
-              fileInfo.name || "未命名文件", 
-              { type: fileInfo.type || "application/octet-stream" }
+              (fileInfo && typeof fileInfo === 'object' && 'name' in fileInfo) ? (fileInfo.name as string) || "未命名文件" : "未命名文件", 
+              { 
+                type: (fileInfo && typeof fileInfo === 'object' && 'type' in fileInfo) ? 
+                  (fileInfo.type as string) || "application/octet-stream" : 
+                  "application/octet-stream" 
+              }
             )
             fileObjects.push(mockFile)
           }
@@ -229,6 +268,8 @@ export function HumanInitialReview({
 
   // 处理表单提交前的验证
   const handlePreSubmit = () => {
+    // 注释掉必填文件校验逻辑，允许即使没有上传必填文件也可以进入AI审查页面
+    /*
     // 检查必填文件
     if (hasMissingRequiredFiles()) {
       toast({
@@ -238,10 +279,125 @@ export function HumanInitialReview({
       })
       return
     }
+    */
     
-    setShowSubmitDialog(true)
+    // 检查是否有未修复的问题
+    if (reviewResult && reviewResult.hasIssues) {
+      const hasErrors = reviewResult.issues.some(i => i.severity === 'error');
+      const hasWarnings = reviewResult.issues.some(i => i.severity === 'warning');
+      
+      if (hasErrors || hasWarnings) {
+        // 使用自定义对话框，显示确认信息
+        setConfirmTitle(hasErrors ? "存在严重问题" : "存在警告问题");
+        setConfirmMessage(hasErrors 
+          ? "文件中存在严重问题，确定要继续提交吗？" 
+          : "文件中存在警告问题，确定要继续提交吗？");
+        setShowConfirmDialog(true);
+        return;
+      }
+    }
+    
+    // 如果没有问题或问题已全部修复，直接显示提交对话框
+    setShowSubmitDialog(true);
   }
 
+  // 新增：处理确认对话框
+  const handleConfirmSubmit = () => {
+    // 关闭确认对话框
+    setShowConfirmDialog(false);
+    // 显示提交对话框
+    setShowSubmitDialog(true);
+  }
+
+  // 新增：开始AI审查
+  const startAIReview = async () => {
+    setIsReviewing(true)
+    setReviewError(null)
+    setShowAIReview(true)
+    
+    // 初始化进度值为0
+    setReviewProgress(0)
+    
+    // 为确保动画显示4-5秒，设置固定的时间间隔
+    const totalAnimationTime = 4500 // 4.5秒的动画时间
+    const updateInterval = 200 // 每200毫秒更新一次
+    const totalSteps = totalAnimationTime / updateInterval // 总步数
+    let currentStep = 0
+    
+    // 创建进度更新模拟器 - 确保在4.5秒内完成
+    const progressInterval = setInterval(() => {
+      currentStep++
+      // 使用平滑的S形曲线模拟进度（慢开始，中间快，结束慢）
+      const progressPercentage = currentStep / totalSteps
+      const smoothProgress = Math.round(
+        100 * (1 / (1 + Math.exp(-10 * (progressPercentage - 0.5))))
+      )
+      
+      setReviewProgress(smoothProgress > 95 ? 95 : smoothProgress)
+      
+      // 如果达到了总步数，停止定时器
+      if (currentStep >= totalSteps) {
+        clearInterval(progressInterval)
+      }
+    }, updateInterval)
+    
+    try {
+      console.log("开始AI文件审查，文件列表:", reviewFiles)
+      
+      // 使用Promise和setTimeout确保动画至少显示totalAnimationTime的时间
+      const reviewPromise = aiReviewFiles(reviewFiles)
+      const timerPromise = new Promise(resolve => setTimeout(resolve, totalAnimationTime))
+      
+      // 等待两个Promise都完成 - 确保至少显示4.5秒
+      const [result] = await Promise.all([reviewPromise, timerPromise])
+      
+      console.log("AI文件审查完成:", result)
+      setReviewResult(result)
+      
+      // 审查成功后，迅速完成进度条
+      setReviewProgress(100)
+    } catch (error) {
+      console.error("AI文件审查失败:", error)
+      setReviewError("文件审查过程发生错误，请重试")
+      toast({
+        title: "审查失败",
+        description: "文件审查过程发生错误，请重试",
+        variant: "destructive"
+      })
+      
+      // 设置一个默认的错误结果
+      setReviewResult({
+        hasIssues: true,
+        issues: [{
+          fileId: 0,
+          fileName: "系统",
+          issueType: 'format',
+          severity: 'error',
+          message: "文件审查过程发生错误",
+          suggestion: "请刷新页面后重试",
+          autoFixable: false
+        }],
+        totalFiles: reviewFiles.length,
+        validFiles: 0
+      })
+    } finally {
+      // 结束进度动画
+      clearInterval(progressInterval)
+      // 延迟关闭加载状态，确保进度条动画能完成
+      setTimeout(() => {
+        setIsReviewing(false)
+      }, 500)
+    }
+  }
+
+  // 关闭AI审查
+  const closeAIReview = () => {
+    setShowAIReview(false)
+    setTimeout(() => {
+      setReviewResult(null)
+    }, 300)
+  }
+  
   // 处理文件问题更新
   const handleUpdateFileIssues = (issues: FileReviewIssue[], updatedFiles?: Map<number, File[]>) => {
     // 这里可以根据修复的问题更新文件列表
@@ -269,8 +425,8 @@ export function HumanInitialReview({
                 name: file.name,
                 size: file.size,
                 type: file.type,
-                file: file // 保存File对象引用
-              }))
+                file
+              })) as unknown as File[]
               
               // 如果是版本号问题，更新版本号字段
               if (issue.issueType === 'version') {
@@ -279,19 +435,22 @@ export function HumanInitialReview({
                   updatedReviewFiles[fileIndex] = {
                     ...fileItem,
                     files: updatedFileList,
-                    versionNumber: versionMatch[1]
+                    versionNumber: versionMatch[1],
+                    aiModified: true // 标记为AI修复过的文件
                   }
                 } else {
                   updatedReviewFiles[fileIndex] = {
                     ...fileItem,
-                    files: updatedFileList
+                    files: updatedFileList,
+                    aiModified: true // 标记为AI修复过的文件
                   }
                 }
               } else {
                 // 其他问题类型只更新文件列表
                 updatedReviewFiles[fileIndex] = {
                   ...fileItem,
-                  files: updatedFileList
+                  files: updatedFileList,
+                  aiModified: true // 标记为AI修复过的文件
                 }
               }
             }
@@ -301,6 +460,15 @@ export function HumanInitialReview({
       
       // 更新状态
       setReviewFiles(updatedReviewFiles)
+    }
+    
+    // 更新审查结果
+    if (reviewResult) {
+      setReviewResult({
+        ...reviewResult,
+        issues: issues,
+        hasIssues: issues.some(issue => issue.severity === 'error' || issue.severity === 'warning')
+      })
     }
   }
 
@@ -319,42 +487,320 @@ export function HumanInitialReview({
         description: "人体伦理初始审查表单已提交成功，将进入审查流程"
       })
       
-      // 提交成功后跳转到项目列表页
+      // 根据对话框中选择的操作执行不同的跳转逻辑
+      const returnToList = localStorage.getItem('reviewSubmitAction') === 'returnToList';
       setTimeout(() => {
-        router.push("/ethic-projects/human")
-      }, 1500)
+        if (returnToList) {
+          // 如果选择了"返回列表"，跳转到项目列表页
+          router.push("/ethic-projects/human");
+        } else {
+          // 如果选择了"继续新增"，重置表单状态并准备新建
+          resetForm();
+        }
+      }, 1500);
     }, 500)
   }
+  
+  // 新增：重置表单状态
+  const resetForm = () => {
+    // 重置文件列表
+    setReviewFiles(initialReviewFiles);
+    setFilesMap(new Map());
+    
+    // 重置审查状态
+    setReviewResult(null);
+    setShowAIReview(false);
+    
+    // 显示成功提示
+    toast({
+      title: "准备新建",
+      description: "已重置表单，您可以开始新的审查申请"
+    });
+  }
 
-  return (
-    <>
-      <ReviewFormBase
-        title="新建初始审查"
-        returnPath="/ethic-projects/human"
-        projectInfo={projectData}
-        fileList={reviewFiles}
-        customSubmitButton={
+  // 新增：获取审查结果的审查状态
+  const getReviewStatusBadge = () => {
+    if (isReviewing) {
+      return (
+        <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
+          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+          审查中 {reviewProgress > 0 && `(${reviewProgress}%)`}
+        </Badge>
+      )
+    }
+    
+    if (!reviewResult) return null
+    
+    if (!reviewResult.hasIssues) {
+      return (
+        <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">
+          全部通过
+        </Badge>
+      )
+    }
+    
+    if (reviewResult.issues.some((i: FileReviewIssue) => i.severity === 'error')) {
+      return (
+        <Badge variant="outline" className="bg-red-50 text-red-600 border-red-200">
+          有严重问题
+        </Badge>
+      )
+    }
+    
+    return (
+      <Badge variant="outline" className="bg-amber-50 text-amber-600 border-amber-200">
+        有警告问题
+      </Badge>
+    )
+  }
+
+  // 渲染常规表单视图
+  const renderNormalView = () => (
+    <ReviewFormBase
+    
+      title="新建初始审查"
+      returnPath="/ethic-projects/human"
+      projectInfo={projectData}
+      fileList={reviewFiles}
+      customSubmitButton={
+        <div className="flex items-center gap-3">
+          <Button 
+            onClick={() => startAIReview()} 
+            variant="outline"
+            className="border-blue-200 text-blue-700 hover:text-blue-800 hover:bg-blue-50"
+          >
+            <FileCheck2 className="mr-2 h-4 w-4" />
+            AI形式审查
+          </Button>
           <Button onClick={handlePreSubmit} className="bg-primary">
             <SendHorizontal className="mr-2 h-4 w-4" />
             提交送审
           </Button>
-        }
-      >
-        {/* 项目信息卡片 */}
-        <ProjectInfoCard 
-          title="项目信息"
-          fields={projectInfoFields}
-        />
+        </div>
+      }
+    >
+      {/* 项目信息卡片 */}
+      <ProjectInfoCard 
+        title="项目信息"
+        fields={projectInfoFields}
+      />
 
-        {/* 送审文件列表 */}
-        <ReviewFileList
-          title="送审文件信息"
-          fileList={reviewFiles}
-          onChange={handleFilesChange}
-        />
-      </ReviewFormBase>
+      {/* 送审文件列表 */}
+      <ReviewFileList
+        title="送审文件信息"
+        fileList={reviewFiles}
+        onChange={handleFilesChange}
+      />
+    </ReviewFormBase>
+  )
+
+  // 渲染AI审查分栏视图
+  const renderAIReviewView = () => (
+    <div className="w-full pb-6 px-6">
+      {/* 头部 - 标题和返回按钮 */}
+      <div className="flex items-center mb-6">
+        {/* 返回按钮 */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={closeAIReview}
+          className="mr-4"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="text-2xl font-bold">新建初始审查</h1>
+      </div>
       
-      {/* 提交确认对话框 */}
+      {/* 左右分栏布局 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* 左侧：表单内容 */}
+        <div className="space-y-6">
+          {/* 项目信息卡片 */}
+          <ProjectInfoCard 
+            title="项目信息"
+            fields={projectInfoFields}
+          />
+
+          {/* 送审文件列表 */}
+          <ReviewFileList
+            title="送审文件信息"
+            fileList={reviewFiles}
+            onChange={handleFilesChange}
+          />
+        </div>
+        
+        {/* 右侧：AI审查结果 */}
+        <div className="border border-[#e8ecf5] rounded-lg shadow-sm bg-white flex flex-col overflow-hidden" style={{ maxHeight: "800px" }}>
+          <div className="border-b border-[#e8ecf5] bg-gradient-to-r from-gray-50 to-white px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <h2 className="text-lg font-semibold text-gray-800">AI形式审查</h2>
+                <Badge variant="outline" className="bg-indigo-50 text-indigo-600 border-indigo-100 font-medium">
+                  智能审查
+                </Badge>
+              </div>
+              {getReviewStatusBadge() && (
+                <div>
+                  {getReviewStatusBadge()}
+                </div>
+              )}
+            </div>
+            
+            {/* 审查进度条 - 仅在审查过程中显示 */}
+            {isReviewing && (
+              <div className="mt-3">
+                <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-blue-400 to-indigo-500 transition-all duration-300 ease-out"
+                    style={{ width: `${reviewProgress}%` }}
+                  ></div>
+                </div>
+                <div className="flex justify-between mt-1 text-xs text-gray-500">
+                  <span>审查文件中</span>
+                  <span>
+                    {reviewProgress < 100 
+                      ? `预计剩余时间: ${Math.ceil((100 - reviewProgress) / 20)} 秒` 
+                      : "处理完成"}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <div className="p-6 pb-0 overflow-hidden flex flex-col bg-[#fafbfd]">
+            {isReviewing ? (
+              <div className="flex flex-col items-center py-16">
+                <div className="text-center mb-8">
+                  <h3 className="text-lg font-medium text-gray-900 mb-1">正在分析文件内容</h3>
+                  <p className="text-sm text-gray-500">这可能需要几秒钟...</p>
+                </div>
+                
+                {/* 文件审查动画效果 */}
+                <div className="relative w-64 h-48 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                  {/* 文档扫描线动画 */}
+                  <div 
+                    className="absolute top-0 left-0 w-full h-1 bg-blue-400 opacity-70"
+                    style={{
+                      animation: "scanLine 1.5s ease-in-out infinite",
+                      boxShadow: "0 0 8px 1px rgba(59, 130, 246, 0.5)"
+                    }}
+                  ></div>
+                  
+                  {/* 模拟文档内容 */}
+                  <div className="px-4 py-3">
+                    {[...Array(8)].map((_, i) => (
+                      <div 
+                        key={i} 
+                        className="h-2 bg-gray-200 rounded-full mb-2 animate-pulse"
+                        style={{ 
+                          width: `${Math.floor(Math.random() * 40) + 60}%`,
+                          animationDelay: `${i * 0.1}s`,
+                          opacity: isReviewing ? 1 : 0.5
+                        }}
+                      ></div>
+                    ))}
+                  </div>
+                  
+                  {/* 审查文件提示 */}
+                  <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-blue-50 to-transparent p-3">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 w-4 h-4 rounded-full bg-blue-500 animate-pulse mr-2"></div>
+                      <div className="text-xs text-blue-700 whitespace-nowrap overflow-hidden">
+                        <span 
+                          className="inline-block"
+                          style={{
+                            animation: "textScroll 8s linear infinite",
+                            animationDelay: "0.5s"
+                          }}
+                        >
+                          检查文件格式 → 验证内容完整性 → 分析文件结构 → 检查版本一致性 → 验证数据有效性
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* 自定义CSS动画 */}
+                <style jsx>{`
+                  @keyframes scanLine {
+                    0% { top: 4%; }
+                    50% { top: 92%; }
+                    100% { top: 4%; }
+                  }
+                  
+                  @keyframes textScroll {
+                    0% { transform: translateX(100%); }
+                    100% { transform: translateX(-100%); }
+                  }
+                `}</style>
+              </div>
+            ) : (
+              <div className="flex flex-col">
+                <AIFileReviewResult
+                  result={reviewResult || { hasIssues: false, issues: [], totalFiles: 0, validFiles: 0 }}
+                  isLoading={isReviewing}
+                  onFixIssues={handleUpdateFileIssues}
+                  files={filesMap}
+                />
+              </div>
+            )}
+          </div>
+          
+          {/* 底部操作按钮 */}
+          <div className="border-t border-[#e8ecf5] p-4 bg-white rounded-b-md flex justify-between items-center mt-auto">
+            <div></div>
+            <div className="flex gap-3">
+              <Button
+                onClick={startAIReview}
+                variant="outline"
+                className={`
+                  border-blue-200 text-blue-700 hover:text-blue-800 hover:bg-blue-50 shadow-sm
+                  ${isReviewing ? 'min-w-[140px] relative overflow-hidden' : ''}
+                `}
+                disabled={isReviewing}
+              >
+                {isReviewing ? (
+                  <>
+                    <div className="flex items-center justify-center">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <span className="mr-1">审查中</span>
+                      <span className="text-xs">{reviewProgress}%</span>
+                    </div>
+                    {/* 进度条背景 */}
+                    <div className="absolute bottom-0 left-0 h-1 w-full bg-blue-100"></div>
+                    {/* 实际进度 */}
+                    <div 
+                      className="absolute bottom-0 left-0 h-1 bg-blue-500 transition-all duration-300 ease-out"
+                      style={{ width: `${reviewProgress}%` }}
+                    ></div>
+                  </>
+                ) : (
+                  <>
+                    <FileCheck2 className="mr-2 h-4 w-4" />
+                    重新审查
+                  </>
+                )}
+              </Button>
+              <Button 
+                onClick={handlePreSubmit} 
+                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-sm"
+                disabled={isReviewing}
+              >
+                <SendHorizontal className="mr-2 h-4 w-4" />
+                提交送审
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  return (
+    <>
+      {showAIReview ? renderAIReviewView() : renderNormalView()}
+      
+      {/* 提交确认对话框 - 仍然保留但隐藏AI审查部分，因为我们现在在界面上直接展示 */}
       <ReviewSubmitDialog
         isOpen={showSubmitDialog}
         onOpenChange={setShowSubmitDialog}
@@ -362,7 +808,27 @@ export function HumanInitialReview({
         onConfirmSubmit={handleFinalSubmit}
         onUpdateFileIssues={handleUpdateFileIssues}
         files={filesMap}
+        skipAIReview={true} // 标记跳过AI审查，直接显示确认按钮
+        reviewResult={reviewResult} // 传递已有的审查结果
       />
+      
+      {/* 新增：问题确认对话框 */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirmTitle}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmMessage}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmSubmit} className="bg-blue-600 hover:bg-blue-700 text-white">
+              继续提交
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 } 
