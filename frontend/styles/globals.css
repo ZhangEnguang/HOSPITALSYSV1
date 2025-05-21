@@ -110,3 +110,18 @@ body {
   padding: 0.5rem !important;
 }
 
+/* 自定义容器类，无最大宽度限制 */
+.container-fluid {
+  width: 100%;
+  padding-right: 2rem;
+  padding-left: 2rem;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+/* 仅针对人体伦理初始审查页面的容器样式 */
+.human-ethics-initial-review-container .container,
+.human-ethics-initial-review-container .container.pb-6.px-6.space-y-6 {
+  max-width: none !important;
+}
+

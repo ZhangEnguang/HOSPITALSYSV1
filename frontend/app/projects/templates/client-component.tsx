@@ -185,7 +185,7 @@ function ProjectTemplatesContent() {
         }}
       ></div>
 
-      <div className="container mx-auto py-6 max-w-7xl">
+      <div className="container mx-auto pb-6 max-w-7xl">
         <div className="flex items-center mb-6">
           <Button variant="ghost" size="icon" className="mr-2" onClick={() => router.push("/projects")}>
             <ArrowLeft className="h-5 w-5" />

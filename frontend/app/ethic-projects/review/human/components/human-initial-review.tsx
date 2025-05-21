@@ -10,9 +10,11 @@ import { ReviewFileList, ReviewFileItem } from "@/components/ethic-review/review
 import { ReviewSubmitDialog } from "@/components/ethic-review/review-submit-dialog"
 import { AIFileReviewResult } from "@/components/ethic-review/ai-file-review-result"
 import { FileReviewIssue, aiReviewFiles, FileReviewResult } from "@/app/services/ai-file-review"
+import { AIFormCheckGuide, shouldShowAIGuide } from "@/components/ethic-review/ai-form-check-guide"
+import { AIReviewReminder } from "@/components/ethic-review/ai-review-reminder"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { SendHorizontal, FileCheck2, X, Loader2, ArrowLeft } from "lucide-react"
+import { SendHorizontal, FileCheck2, X, Loader2, ArrowLeft, Sparkles } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -62,17 +64,22 @@ export function HumanInitialReview({
   // 存储文件对象的Map
   const [filesMap, setFilesMap] = useState<Map<number, File[]>>(new Map())
   
-  // 新增：AI审查状态
+  // AI审查状态
   const [showAIReview, setShowAIReview] = useState(false)
   const [isReviewing, setIsReviewing] = useState(false)
   const [reviewResult, setReviewResult] = useState<FileReviewResult | null>(null)
   const [reviewError, setReviewError] = useState<string | null>(null)
   const [reviewProgress, setReviewProgress] = useState(0)
   
-  // 新增：确认对话框状态
+  // 确认对话框状态
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [confirmMessage, setConfirmMessage] = useState("")
   const [confirmTitle, setConfirmTitle] = useState("")
+  
+  // 新增：AI引导和轻量级提醒状态
+  const [showAIGuide, setShowAIGuide] = useState(false)
+  const [showAIReminder, setShowAIReminder] = useState(false)
+  const [hasUsedAIReview, setHasUsedAIReview] = useState(false)
   
   // 从URL参数中获取项目ID和其他信息，并更新项目数据
   useEffect(() => {
@@ -88,6 +95,19 @@ export function HumanInitialReview({
       }
     }
   }, [searchParams])
+
+  // 检查是否需要显示AI引导
+  useEffect(() => {
+    // 检查是否应该显示AI引导
+    if (shouldShowAIGuide()) {
+      // 给用户一点时间查看页面后再显示引导
+      const timer = setTimeout(() => {
+        setShowAIGuide(true)
+      }, 1000)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [])
 
   // 项目信息字段定义
   const projectInfoFields: ProjectInfoField[] = [
@@ -268,37 +288,30 @@ export function HumanInitialReview({
 
   // 处理表单提交前的验证
   const handlePreSubmit = () => {
-    // 注释掉必填文件校验逻辑，允许即使没有上传必填文件也可以进入AI审查页面
-    /*
-    // 检查必填文件
-    if (hasMissingRequiredFiles()) {
-      toast({
-        title: "文件不完整",
-        description: "请上传所有必需的文件后再提交",
-        variant: "destructive"
-      })
-      return
-    }
-    */
-    
-    // 检查是否有未修复的问题
-    if (reviewResult && reviewResult.hasIssues) {
-      const hasErrors = reviewResult.issues.some(i => i.severity === 'error');
-      const hasWarnings = reviewResult.issues.some(i => i.severity === 'warning');
-      
-      if (hasErrors || hasWarnings) {
-        // 使用自定义对话框，显示确认信息
-        setConfirmTitle(hasErrors ? "存在严重问题" : "存在警告问题");
-        setConfirmMessage(hasErrors 
-          ? "文件中存在严重问题，确定要继续提交吗？" 
-          : "文件中存在警告问题，确定要继续提交吗？");
-        setShowConfirmDialog(true);
-        return;
+    // 如果已经使用了AI审查，或已经查看过AI提醒，则直接进入常规提交流程
+    if (hasUsedAIReview) {
+      // 检查是否有未修复的问题
+      if (reviewResult && reviewResult.hasIssues) {
+        const hasErrors = reviewResult.issues.some(i => i.severity === 'error');
+        const hasWarnings = reviewResult.issues.some(i => i.severity === 'warning');
+        
+        if (hasErrors || hasWarnings) {
+          // 使用自定义对话框，显示确认信息
+          setConfirmTitle(hasErrors ? "存在严重问题" : "存在警告问题");
+          setConfirmMessage(hasErrors 
+            ? "文件中存在严重问题，确定要继续提交吗？" 
+            : "文件中存在警告问题，确定要继续提交吗？");
+          setShowConfirmDialog(true);
+          return;
+        }
       }
+      
+      // 如果没有问题或问题已全部修复，直接显示提交对话框
+      setShowSubmitDialog(true);
+    } else {
+      // 如果没有使用AI审查，显示轻量级提醒
+      setShowAIReminder(true);
     }
-    
-    // 如果没有问题或问题已全部修复，直接显示提交对话框
-    setShowSubmitDialog(true);
   }
 
   // 新增：处理确认对话框
@@ -308,167 +321,150 @@ export function HumanInitialReview({
     // 显示提交对话框
     setShowSubmitDialog(true);
   }
+  
+  // 新增：处理AI引导完成
+  const handleAIGuideContinue = () => {
+    startAIReview();
+  }
+  
+  // 新增：处理轻量级提醒的启动AI审查
+  const handleReminderStartAIReview = () => {
+    startAIReview();
+    setHasUsedAIReview(true);
+  }
+  
+  // 新增：处理轻量级提醒的继续提交
+  const handleReminderContinueSubmit = () => {
+    setHasUsedAIReview(true); // 标记为已经提示过
+    setShowSubmitDialog(true);
+  }
 
-  // 新增：开始AI审查
+  // 启动AI审查
   const startAIReview = async () => {
-    setIsReviewing(true)
-    setReviewError(null)
-    setShowAIReview(true)
-    
-    // 初始化进度值为0
-    setReviewProgress(0)
-    
-    // 为确保动画显示4-5秒，设置固定的时间间隔
-    const totalAnimationTime = 4500 // 4.5秒的动画时间
-    const updateInterval = 200 // 每200毫秒更新一次
-    const totalSteps = totalAnimationTime / updateInterval // 总步数
-    let currentStep = 0
-    
-    // 创建进度更新模拟器 - 确保在4.5秒内完成
-    const progressInterval = setInterval(() => {
-      currentStep++
-      // 使用平滑的S形曲线模拟进度（慢开始，中间快，结束慢）
-      const progressPercentage = currentStep / totalSteps
-      const smoothProgress = Math.round(
-        100 * (1 / (1 + Math.exp(-10 * (progressPercentage - 0.5))))
-      )
-      
-      setReviewProgress(smoothProgress > 95 ? 95 : smoothProgress)
-      
-      // 如果达到了总步数，停止定时器
-      if (currentStep >= totalSteps) {
-        clearInterval(progressInterval)
+    // 检查是否有文件可供审查
+    let hasFiles = false;
+    for (const [_, files] of filesMap.entries()) {
+      if (files && files.length > 0) {
+        hasFiles = true;
+        break;
       }
-    }, updateInterval)
+    }
+    
+    if (!hasFiles) {
+      toast({
+        title: "无法启动审查",
+        description: "请先上传至少一个文件再进行AI形式审查",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsReviewing(true);
+    setShowAIReview(true);
+    setReviewError(null);
+    setReviewProgress(0);
+    setHasUsedAIReview(true);
+    
+    // 构建审查文件列表
+    const reviewFileList = [...initialReviewFiles].map(file => {
+      const uploadedFiles = filesMap.get(file.id) || [];
+      return {
+        ...file,
+        files: uploadedFiles
+      };
+    });
     
     try {
-      console.log("开始AI文件审查，文件列表:", reviewFiles)
+      // 模拟进度增长
+      const progressInterval = setInterval(() => {
+        setReviewProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + Math.floor(Math.random() * 8) + 1;
+        });
+      }, 300);
       
-      // 使用Promise和setTimeout确保动画至少显示totalAnimationTime的时间
-      const reviewPromise = aiReviewFiles(reviewFiles)
-      const timerPromise = new Promise(resolve => setTimeout(resolve, totalAnimationTime))
+      const result = await aiReviewFiles(reviewFileList);
       
-      // 等待两个Promise都完成 - 确保至少显示4.5秒
-      const [result] = await Promise.all([reviewPromise, timerPromise])
+      // 清除进度条定时器
+      clearInterval(progressInterval);
+      setReviewProgress(100);
       
-      console.log("AI文件审查完成:", result)
-      setReviewResult(result)
+      // 设置短暂延迟显示100%，然后显示结果
+      setTimeout(() => {
+        setReviewResult(result);
+        setIsReviewing(false);
+        
+        if (result.hasIssues) {
+          const errorCount = result.issues.filter(i => i.severity === 'error').length;
+          const warningCount = result.issues.filter(i => i.severity === 'warning').length;
+          
+          toast({
+            title: "AI审查完成",
+            description: `发现${errorCount > 0 ? `${errorCount}个错误` : ''}${errorCount > 0 && warningCount > 0 ? '和' : ''}${warningCount > 0 ? `${warningCount}个警告` : ''}，请查看详情`,
+            variant: errorCount > 0 ? "destructive" : (warningCount > 0 ? "warning" : "default")
+          });
+        } else {
+          toast({
+            title: "AI审查完成",
+            description: "未发现问题，您的文件符合要求",
+            variant: "success"
+          });
+        }
+      }, 500);
       
-      // 审查成功后，迅速完成进度条
-      setReviewProgress(100)
     } catch (error) {
-      console.error("AI文件审查失败:", error)
-      setReviewError("文件审查过程发生错误，请重试")
+      console.error("AI审查出错:", error);
+      setReviewError("AI审查过程中发生错误，请重试");
+      setIsReviewing(false);
+      
       toast({
         title: "审查失败",
-        description: "文件审查过程发生错误，请重试",
+        description: "AI审查过程中发生错误，请重试",
         variant: "destructive"
-      })
-      
-      // 设置一个默认的错误结果
-      setReviewResult({
-        hasIssues: true,
-        issues: [{
-          fileId: 0,
-          fileName: "系统",
-          issueType: 'format',
-          severity: 'error',
-          message: "文件审查过程发生错误",
-          suggestion: "请刷新页面后重试",
-          autoFixable: false
-        }],
-        totalFiles: reviewFiles.length,
-        validFiles: 0
-      })
-    } finally {
-      // 结束进度动画
-      clearInterval(progressInterval)
-      // 延迟关闭加载状态，确保进度条动画能完成
-      setTimeout(() => {
-        setIsReviewing(false)
-      }, 500)
+      });
     }
   }
 
   // 关闭AI审查
   const closeAIReview = () => {
-    setShowAIReview(false)
-    setTimeout(() => {
-      setReviewResult(null)
-    }, 300)
+    setShowAIReview(false);
   }
-  
-  // 处理文件问题更新
+
+  // 更新文件问题
   const handleUpdateFileIssues = (issues: FileReviewIssue[], updatedFiles?: Map<number, File[]>) => {
-    // 这里可以根据修复的问题更新文件列表
-    console.log("文件问题已更新:", issues)
-    
-    // 如果AI修复了文件，更新文件对象
-    if (updatedFiles && updatedFiles.size > 0) {
-      setFilesMap(new Map(updatedFiles))
-      
-      // 根据修复后的文件，更新文件列表UI
-      const updatedReviewFiles = [...reviewFiles]
-      
-      issues.forEach(issue => {
-        if (issue.fixed) {
-          // 找到对应的文件项
-          const fileIndex = updatedReviewFiles.findIndex(file => file.id === issue.fileId)
-          if (fileIndex !== -1) {
-            const fileItem = updatedReviewFiles[fileIndex]
-            
-            // 获取修复后的文件
-            const fixedFiles = updatedFiles.get(issue.fileId)
-            if (fixedFiles && fixedFiles.length > 0) {
-              // 更新文件信息
-              const updatedFileList = fixedFiles.map(file => ({
-                name: file.name,
-                size: file.size,
-                type: file.type,
-                file
-              })) as unknown as File[]
-              
-              // 如果是版本号问题，更新版本号字段
-              if (issue.issueType === 'version') {
-                const versionMatch = fixedFiles[0].name.match(/[vV](\d+(\.\d+)*)/i)
-                if (versionMatch) {
-                  updatedReviewFiles[fileIndex] = {
-                    ...fileItem,
-                    files: updatedFileList,
-                    versionNumber: versionMatch[1],
-                    aiModified: true // 标记为AI修复过的文件
-                  }
-                } else {
-                  updatedReviewFiles[fileIndex] = {
-                    ...fileItem,
-                    files: updatedFileList,
-                    aiModified: true // 标记为AI修复过的文件
-                  }
-                }
-              } else {
-                // 其他问题类型只更新文件列表
-                updatedReviewFiles[fileIndex] = {
-                  ...fileItem,
-                  files: updatedFileList,
-                  aiModified: true // 标记为AI修复过的文件
-                }
-              }
-            }
-          }
-        }
-      })
-      
-      // 更新状态
-      setReviewFiles(updatedReviewFiles)
+    // 如果提供了新的文件集合，更新filesMap
+    if (updatedFiles) {
+      setFilesMap(updatedFiles);
     }
     
-    // 更新审查结果
+    // 更新审查结果中的问题
     if (reviewResult) {
-      setReviewResult({
+      const updatedResult = {
         ...reviewResult,
         issues: issues,
-        hasIssues: issues.some(issue => issue.severity === 'error' || issue.severity === 'warning')
-      })
+        hasIssues: issues.length > 0
+      };
+      setReviewResult(updatedResult);
+      
+      if (issues.length === 0) {
+        toast({
+          title: "文件已修复",
+          description: "所有问题已修复，可以继续提交",
+          variant: "success"
+        });
+      } else {
+        const errorCount = issues.filter(i => i.severity === 'error').length;
+        const warningCount = issues.filter(i => i.severity === 'warning').length;
+        
+        toast({
+          title: "问题已更新",
+          description: `剩余${errorCount > 0 ? `${errorCount}个错误` : ''}${errorCount > 0 && warningCount > 0 ? '和' : ''}${warningCount > 0 ? `${warningCount}个警告` : ''}`,
+          variant: errorCount > 0 ? "destructive" : (warningCount > 0 ? "warning" : "default")
+        });
+      }
     }
   }
 
@@ -557,7 +553,6 @@ export function HumanInitialReview({
   // 渲染常规表单视图
   const renderNormalView = () => (
     <ReviewFormBase
-    
       title="新建初始审查"
       returnPath="/ethic-projects/human"
       projectInfo={projectData}
@@ -569,7 +564,7 @@ export function HumanInitialReview({
             variant="outline"
             className="border-blue-200 text-blue-700 hover:text-blue-800 hover:bg-blue-50"
           >
-            <FileCheck2 className="mr-2 h-4 w-4" />
+            <Sparkles className="mr-2 h-4 w-4" />
             AI形式审查
           </Button>
           <Button onClick={handlePreSubmit} className="bg-primary">
@@ -796,23 +791,24 @@ export function HumanInitialReview({
     </div>
   )
 
+  // 渲染主界面
   return (
-    <>
+    <div className="human-ethics-initial-review-container w-full">
       {showAIReview ? renderAIReviewView() : renderNormalView()}
       
-      {/* 提交确认对话框 - 仍然保留但隐藏AI审查部分，因为我们现在在界面上直接展示 */}
+      {/* 提交确认对话框 */}
       <ReviewSubmitDialog
         isOpen={showSubmitDialog}
         onOpenChange={setShowSubmitDialog}
-        fileList={reviewFiles}
+        fileList={initialReviewFiles}
         onConfirmSubmit={handleFinalSubmit}
         onUpdateFileIssues={handleUpdateFileIssues}
         files={filesMap}
-        skipAIReview={true} // 标记跳过AI审查，直接显示确认按钮
-        reviewResult={reviewResult} // 传递已有的审查结果
+        skipAIReview={hasUsedAIReview} // 如果已经使用过AI审查，则跳过再次审查
+        reviewResult={reviewResult}
       />
       
-      {/* 新增：问题确认对话框 */}
+      {/* 问题确认对话框 */}
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -822,13 +818,26 @@ export function HumanInitialReview({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>取消</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmSubmit} className="bg-blue-600 hover:bg-blue-700 text-white">
-              继续提交
-            </AlertDialogAction>
+            <AlertDialogCancel>返回修改</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmSubmit}>继续提交</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+      
+      {/* AI形式审查引导对话框 */}
+      <AIFormCheckGuide
+        isOpen={showAIGuide}
+        onOpenChange={setShowAIGuide}
+        onContinue={handleAIGuideContinue}
+      />
+      
+      {/* AI轻量级提醒对话框 */}
+      <AIReviewReminder
+        isOpen={showAIReminder}
+        onOpenChange={setShowAIReminder}
+        onStartAIReview={handleReminderStartAIReview}
+        onContinueSubmit={handleReminderContinueSubmit}
+      />
+    </div>
   )
 } 
