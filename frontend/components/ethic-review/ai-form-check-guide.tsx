@@ -139,9 +139,9 @@ export function AIFormCheckGuide({ isOpen, onOpenChange, onContinue }: AIFormChe
 
 // 检查是否应该显示引导
 export function shouldShowAIGuide(): boolean {
-  // 【演示版本】始终返回 true，使每次都显示引导
-  // TODO: 实际上线前需要恢复下方代码逻辑
-  return true;
+  // 【演示版本】返回 false，避免每次自动显示引导
+  // TODO: 实际上线前需要根据用户偏好决定是否显示
+  return false;
   
   /*
   if (typeof window === "undefined") return true

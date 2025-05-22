@@ -544,7 +544,7 @@ export function AIFileReviewResult({
                             <p>{issue.suggestion}</p>
                             {issue.autoFixable && !issue.fixed && (
                               <p className="text-blue-600 text-sm mt-2">
-                                我们可以帮您自动处理此问题，点击下方"查看并修复"即可预览修改效果。
+                                您可以手动处理此问题，点击下方"手动修复"即可预览修改效果。
                               </p>
                             )}
                             {issue.issueType === 'quantity' && !issue.fixed && (
@@ -568,7 +568,7 @@ export function AIFileReviewResult({
                                 onClick={() => handleFixSingleIssue(issue)}
                               >
                                 <FileText className="mr-1 h-3.5 w-3.5" />
-                                查看并修复
+                                手动修复
                               </Button>
                             ) : issue.issueType === 'quantity' && !issue.fixed ? (
                               <Button 

@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { toast } from "@/hooks/use-toast"
 
 // 送审文件字段类型
 export type ReviewFileItem = {
@@ -33,13 +34,28 @@ type FilePreview = {
 } | null;
 
 // 自定义标题组件
-const SectionTitle = ({ icon, title }: { icon: React.ReactNode, title: string }) => {
+const SectionTitle = ({ 
+  icon, 
+  title, 
+  rightElement 
+}: { 
+  icon: React.ReactNode, 
+  title: string,
+  rightElement?: React.ReactNode 
+}) => {
   return (
-    <div className="flex items-center gap-2 bg-blue-50 p-3 rounded-md mb-4">
-      <div className="text-blue-500">
-        {icon}
+    <div className="flex items-center justify-between bg-blue-50 p-3 rounded-md mb-4">
+      <div className="flex items-center gap-2">
+        <div className="text-blue-500">
+          {icon}
+        </div>
+        <h3 className="text-base font-medium text-slate-900">{title}</h3>
       </div>
-      <h3 className="text-base font-medium text-slate-900">{title}</h3>
+      {rightElement && (
+        <div>
+          {rightElement}
+        </div>
+      )}
     </div>
   )
 }
@@ -48,14 +64,67 @@ const SectionTitle = ({ icon, title }: { icon: React.ReactNode, title: string })
 export function ReviewFileList({
   title = "送审文件信息",
   fileList,
-  onChange
+  onChange,
+  onAIReview
 }: {
   title?: string;
   fileList: ReviewFileItem[];
   onChange?: (newFileList: ReviewFileItem[]) => void;
+  onAIReview?: () => void;
 }) {
   // 文件预览状态
   const [previewFile, setPreviewFile] = useState<FilePreview>(null);
+
+  // 检查文件列表中是否有已上传的文件
+  const hasUploadedFiles = (): boolean => {
+    return fileList.some(item => item.files && item.files.length > 0);
+  };
+
+  // AI形式审查按钮点击处理
+  const handleAIReviewClick = () => {
+    if (!hasUploadedFiles()) {
+      // 如果没有上传文件，显示提示
+      toast({
+        title: "无法启动审查",
+        description: "请先上传至少一个文件才能使用AI形式审查功能",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // 有文件时，直接调用回调函数，不显示toast提示
+    if (onAIReview) {
+      onAIReview();
+    }
+  };
+
+  // AI形式审查按钮
+  const aiReviewButton = onAIReview && (
+    <Button 
+      onClick={handleAIReviewClick} 
+      variant="outline"
+      className="border-blue-200 text-blue-700 hover:text-blue-800 hover:bg-blue-50"
+      size="sm"
+    >
+      <svg 
+        viewBox="0 0 24 24" 
+        width="16" 
+        height="16" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        fill="none" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        className="mr-1.5"
+      >
+        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+        <path d="M13.5 1.5 12 3l1.5 1.5"></path>
+        <path d="M21 14v3a2 2 0 0 1-2 2h-1"></path>
+        <path d="M12 17v3a2 2 0 0 0 2 2h1"></path>
+      </svg>
+      AI形式审查
+    </Button>
+  );
 
   // 处理文件上传
   const handleFileUpload = (id: number, files: FileList) => {
@@ -173,7 +242,8 @@ export function ReviewFileList({
       <CardContent className="p-6 space-y-6">
         <SectionTitle 
           icon={<FileTextIcon className="h-5 w-5" />} 
-          title={title} 
+          title={title}
+          rightElement={aiReviewButton}
         />
 
         <div className="space-y-4">

@@ -2,29 +2,26 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "@/hooks/use-toast"
 
 import { ReviewFormBase } from "@/components/ethic-review/review-form-base"
 import { ProjectInfoCard, ProjectInfoField } from "@/components/ethic-review/project-info-card"
 import { ReviewFileList, ReviewFileItem } from "@/components/ethic-review/review-file-list"
-import { ReviewSubmitDialog } from "@/components/ethic-review/review-submit-dialog"
+import { SubmitSuccessDialog } from "@/components/ethic-review/submit-success-dialog"
 import { AIFileReviewResult } from "@/components/ethic-review/ai-file-review-result"
 import { FileReviewIssue, aiReviewFiles, FileReviewResult } from "@/app/services/ai-file-review"
-import { AIFormCheckGuide, shouldShowAIGuide } from "@/components/ethic-review/ai-form-check-guide"
-import { AIReviewReminder } from "@/components/ethic-review/ai-review-reminder"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { SendHorizontal, FileCheck2, X, Loader2, ArrowLeft, Sparkles } from "lucide-react"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+import { 
+  SendHorizontal, 
+  FileCheck2, 
+  X, 
+  Loader2, 
+  ArrowLeft, 
+  PanelRight,
+  PanelLeftClose,
+  Minimize2
+} from "lucide-react"
 
 // 默认项目数据
 const DEFAULT_PROJECT_DATA = {
@@ -58,8 +55,8 @@ export function HumanInitialReview({
   // 用于管理项目数据的状态
   const [projectData, setProjectData] = useState(initialProjectData)
   
-  // 显示提交对话框的状态
-  const [showSubmitDialog, setShowSubmitDialog] = useState(false)
+  // 显示提交成功对话框的状态
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false)
   
   // 存储文件对象的Map
   const [filesMap, setFilesMap] = useState<Map<number, File[]>>(new Map())
@@ -70,16 +67,7 @@ export function HumanInitialReview({
   const [reviewResult, setReviewResult] = useState<FileReviewResult | null>(null)
   const [reviewError, setReviewError] = useState<string | null>(null)
   const [reviewProgress, setReviewProgress] = useState(0)
-  
-  // 确认对话框状态
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-  const [confirmMessage, setConfirmMessage] = useState("")
-  const [confirmTitle, setConfirmTitle] = useState("")
-  
-  // 新增：AI引导和轻量级提醒状态
-  const [showAIGuide, setShowAIGuide] = useState(false)
-  const [showAIReminder, setShowAIReminder] = useState(false)
-  const [hasUsedAIReview, setHasUsedAIReview] = useState(false)
+  const [isPanelCollapsed, setIsPanelCollapsed] = useState(false) // 面板是否折叠
   
   // 从URL参数中获取项目ID和其他信息，并更新项目数据
   useEffect(() => {
@@ -95,19 +83,6 @@ export function HumanInitialReview({
       }
     }
   }, [searchParams])
-
-  // 检查是否需要显示AI引导
-  useEffect(() => {
-    // 检查是否应该显示AI引导
-    if (shouldShowAIGuide()) {
-      // 给用户一点时间查看页面后再显示引导
-      const timer = setTimeout(() => {
-        setShowAIGuide(true)
-      }, 1000)
-      
-      return () => clearTimeout(timer)
-    }
-  }, [])
 
   // 项目信息字段定义
   const projectInfoFields: ProjectInfoField[] = [
@@ -278,67 +253,12 @@ export function HumanInitialReview({
     setFilesMap(newFilesMap)
   }, [])
 
-  // 检查是否有必填文件未上传
-  const hasMissingRequiredFiles = useCallback(() => {
-    const missingFiles = reviewFiles.filter(
-      file => file.required && (!file.files || file.files.length === 0)
-    )
-    return missingFiles.length > 0
-  }, [reviewFiles])
-
   // 处理表单提交前的验证
   const handlePreSubmit = () => {
-    // 如果已经使用了AI审查，或已经查看过AI提醒，则直接进入常规提交流程
-    if (hasUsedAIReview) {
-      // 检查是否有未修复的问题
-      if (reviewResult && reviewResult.hasIssues) {
-        const hasErrors = reviewResult.issues.some(i => i.severity === 'error');
-        const hasWarnings = reviewResult.issues.some(i => i.severity === 'warning');
-        
-        if (hasErrors || hasWarnings) {
-          // 使用自定义对话框，显示确认信息
-          setConfirmTitle(hasErrors ? "存在严重问题" : "存在警告问题");
-          setConfirmMessage(hasErrors 
-            ? "文件中存在严重问题，确定要继续提交吗？" 
-            : "文件中存在警告问题，确定要继续提交吗？");
-          setShowConfirmDialog(true);
-          return;
-        }
-      }
-      
-      // 如果没有问题或问题已全部修复，直接显示提交对话框
-      setShowSubmitDialog(true);
-    } else {
-      // 如果没有使用AI审查，显示轻量级提醒
-      setShowAIReminder(true);
-    }
-  }
-
-  // 新增：处理确认对话框
-  const handleConfirmSubmit = () => {
-    // 关闭确认对话框
-    setShowConfirmDialog(false);
-    // 显示提交对话框
-    setShowSubmitDialog(true);
+    // 直接显示提交成功对话框
+    setShowSuccessDialog(true);
   }
   
-  // 新增：处理AI引导完成
-  const handleAIGuideContinue = () => {
-    startAIReview();
-  }
-  
-  // 新增：处理轻量级提醒的启动AI审查
-  const handleReminderStartAIReview = () => {
-    startAIReview();
-    setHasUsedAIReview(true);
-  }
-  
-  // 新增：处理轻量级提醒的继续提交
-  const handleReminderContinueSubmit = () => {
-    setHasUsedAIReview(true); // 标记为已经提示过
-    setShowSubmitDialog(true);
-  }
-
   // 启动AI审查
   const startAIReview = async () => {
     // 检查是否有文件可供审查
@@ -351,9 +271,10 @@ export function HumanInitialReview({
     }
     
     if (!hasFiles) {
+      // 使用toast提示
       toast({
         title: "无法启动审查",
-        description: "请先上传至少一个文件再进行AI形式审查",
+        description: "请先上传至少一个文件才能使用AI形式审查功能",
         variant: "destructive"
       });
       return;
@@ -363,7 +284,6 @@ export function HumanInitialReview({
     setShowAIReview(true);
     setReviewError(null);
     setReviewProgress(0);
-    setHasUsedAIReview(true);
     
     // 构建审查文件列表
     const reviewFileList = [...initialReviewFiles].map(file => {
@@ -396,41 +316,39 @@ export function HumanInitialReview({
       setTimeout(() => {
         setReviewResult(result);
         setIsReviewing(false);
-        
-        if (result.hasIssues) {
-          const errorCount = result.issues.filter(i => i.severity === 'error').length;
-          const warningCount = result.issues.filter(i => i.severity === 'warning').length;
-          
-          toast({
-            title: "AI审查完成",
-            description: `发现${errorCount > 0 ? `${errorCount}个错误` : ''}${errorCount > 0 && warningCount > 0 ? '和' : ''}${warningCount > 0 ? `${warningCount}个警告` : ''}，请查看详情`,
-            variant: errorCount > 0 ? "destructive" : (warningCount > 0 ? "warning" : "default")
-          });
-        } else {
-          toast({
-            title: "AI审查完成",
-            description: "未发现问题，您的文件符合要求",
-            variant: "success"
-          });
-        }
       }, 500);
       
     } catch (error) {
       console.error("AI审查出错:", error);
       setReviewError("AI审查过程中发生错误，请重试");
       setIsReviewing(false);
-      
-      toast({
-        title: "审查失败",
-        description: "AI审查过程中发生错误，请重试",
-        variant: "destructive"
-      });
     }
   }
 
   // 关闭AI审查
   const closeAIReview = () => {
     setShowAIReview(false);
+    setIsPanelCollapsed(false); // 重置折叠状态
+  }
+
+  // 切换面板折叠状态
+  const togglePanelCollapse = () => {
+    setIsPanelCollapsed(prev => !prev);
+  }
+
+  // 返回按钮的工具提示文本
+  const getCloseButtonTooltip = () => {
+    return "收起审查面板，返回单栏视图";
+  }
+
+  // 切换按钮的工具提示文本
+  const getToggleButtonTooltip = () => {
+    return isPanelCollapsed ? "展开审查面板" : "收起审查面板";
+  }
+
+  // 处理重新审查
+  const handleRefreshReview = () => {
+    startAIReview();
   }
 
   // 更新文件问题
@@ -438,6 +356,28 @@ export function HumanInitialReview({
     // 如果提供了新的文件集合，更新filesMap
     if (updatedFiles) {
       setFilesMap(updatedFiles);
+      
+      // 找出已修复的文件
+      const fixedIssues = issues.filter(issue => issue.fixed);
+      
+      // 如果有已修复的问题，更新相应文件的aiModified状态
+      if (fixedIssues.length > 0) {
+        const updatedReviewFiles = reviewFiles.map(file => {
+          // 检查此文件是否有对应的已修复问题
+          const hasFixedIssue = fixedIssues.some(issue => issue.fileId === file.id);
+          // 如果有已修复问题，标记文件为已修复
+          if (hasFixedIssue) {
+            return {
+              ...file,
+              aiModified: true
+            };
+          }
+          return file;
+        });
+        
+        // 更新文件列表状态
+        setReviewFiles(updatedReviewFiles);
+      }
     }
     
     // 更新审查结果中的问题
@@ -448,56 +388,21 @@ export function HumanInitialReview({
         hasIssues: issues.length > 0
       };
       setReviewResult(updatedResult);
-      
-      if (issues.length === 0) {
-        toast({
-          title: "文件已修复",
-          description: "所有问题已修复，可以继续提交",
-          variant: "success"
-        });
-      } else {
-        const errorCount = issues.filter(i => i.severity === 'error').length;
-        const warningCount = issues.filter(i => i.severity === 'warning').length;
-        
-        toast({
-          title: "问题已更新",
-          description: `剩余${errorCount > 0 ? `${errorCount}个错误` : ''}${errorCount > 0 && warningCount > 0 ? '和' : ''}${warningCount > 0 ? `${warningCount}个警告` : ''}`,
-          variant: errorCount > 0 ? "destructive" : (warningCount > 0 ? "warning" : "default")
-        });
-      }
     }
   }
-
-  // 处理表单最终提交
-  const handleFinalSubmit = () => {
-    console.log("提交人体伦理初始审查表单:", { projectData, reviewFiles })
+  
+  // 保存草稿
+  const handleSaveDraft = () => {
+    console.log("保存草稿:", { projectData, reviewFiles })
     
-    // 关闭对话框
-    setShowSubmitDialog(false)
-    
-    // 模拟API提交
-    setTimeout(() => {
-      // 显示成功提示
-      toast({
-        title: "提交成功",
-        description: "人体伦理初始审查表单已提交成功，将进入审查流程"
-      })
-      
-      // 根据对话框中选择的操作执行不同的跳转逻辑
-      const returnToList = localStorage.getItem('reviewSubmitAction') === 'returnToList';
-      setTimeout(() => {
-        if (returnToList) {
-          // 如果选择了"返回列表"，跳转到项目列表页
-          router.push("/ethic-projects/human");
-        } else {
-          // 如果选择了"继续新增"，重置表单状态并准备新建
-          resetForm();
-        }
-      }, 1500);
-    }, 500)
+    // 模拟API保存
+    toast({
+      title: "草稿已保存",
+      description: "您可以稍后继续编辑"
+    })
   }
   
-  // 新增：重置表单状态
+  // 重置表单状态
   const resetForm = () => {
     // 重置文件列表
     setReviewFiles(initialReviewFiles);
@@ -507,14 +412,11 @@ export function HumanInitialReview({
     setReviewResult(null);
     setShowAIReview(false);
     
-    // 显示成功提示
-    toast({
-      title: "准备新建",
-      description: "已重置表单，您可以开始新的审查申请"
-    });
+    // 关闭成功对话框
+    setShowSuccessDialog(false);
   }
 
-  // 新增：获取审查结果的审查状态
+  // 获取审查结果的审查状态
   const getReviewStatusBadge = () => {
     if (isReviewing) {
       return (
@@ -559,14 +461,6 @@ export function HumanInitialReview({
       fileList={reviewFiles}
       customSubmitButton={
         <div className="flex items-center gap-3">
-          <Button 
-            onClick={() => startAIReview()} 
-            variant="outline"
-            className="border-blue-200 text-blue-700 hover:text-blue-800 hover:bg-blue-50"
-          >
-            <Sparkles className="mr-2 h-4 w-4" />
-            AI形式审查
-          </Button>
           <Button onClick={handlePreSubmit} className="bg-primary">
             <SendHorizontal className="mr-2 h-4 w-4" />
             提交送审
@@ -585,6 +479,7 @@ export function HumanInitialReview({
         title="送审文件信息"
         fileList={reviewFiles}
         onChange={handleFilesChange}
+        onAIReview={startAIReview}
       />
     </ReviewFormBase>
   )
@@ -593,23 +488,39 @@ export function HumanInitialReview({
   const renderAIReviewView = () => (
     <div className="w-full pb-6 px-6">
       {/* 头部 - 标题和返回按钮 */}
-      <div className="flex items-center mb-6">
-        {/* 返回按钮 */}
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={closeAIReview}
-          className="mr-4"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-2xl font-bold">新建初始审查</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center">
+          {/* 返回按钮 */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={closeAIReview}
+            className="mr-4 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full"
+            title={getCloseButtonTooltip()}
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-2xl font-bold">新建初始审查</h1>
+          {isPanelCollapsed && (
+            <Badge variant="outline" className="ml-3 bg-blue-50 text-blue-600 border-blue-100 flex items-center gap-1">
+              <PanelLeftClose className="h-3 w-3" />
+              <span>已收起AI面板</span>
+            </Badge>
+          )}
+        </div>
+        
+        {/* 分栏模式标签 - 只在面板展开时显示 */}
+        {!isPanelCollapsed && (
+          <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-100">
+            分栏模式
+          </Badge>
+        )}
       </div>
       
       {/* 左右分栏布局 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className={`grid grid-cols-1 ${isPanelCollapsed ? 'md:grid-cols-1' : 'md:grid-cols-2'} gap-6 relative transition-all duration-300`}>
         {/* 左侧：表单内容 */}
-        <div className="space-y-6">
+        <div className={`space-y-6 ${isPanelCollapsed ? 'w-full' : ''}`}>
           {/* 项目信息卡片 */}
           <ProjectInfoCard 
             title="项目信息"
@@ -621,172 +532,186 @@ export function HumanInitialReview({
             title="送审文件信息"
             fileList={reviewFiles}
             onChange={handleFilesChange}
+            onAIReview={startAIReview}
           />
-        </div>
-        
-        {/* 右侧：AI审查结果 */}
-        <div className="border border-[#e8ecf5] rounded-lg shadow-sm bg-white flex flex-col overflow-hidden" style={{ maxHeight: "800px" }}>
-          <div className="border-b border-[#e8ecf5] bg-gradient-to-r from-gray-50 to-white px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <h2 className="text-lg font-semibold text-gray-800">AI形式审查</h2>
-                <Badge variant="outline" className="bg-indigo-50 text-indigo-600 border-indigo-100 font-medium">
-                  智能审查
-                </Badge>
-              </div>
-              {getReviewStatusBadge() && (
-                <div>
-                  {getReviewStatusBadge()}
-                </div>
-              )}
-            </div>
-            
-            {/* 审查进度条 - 仅在审查过程中显示 */}
-            {isReviewing && (
-              <div className="mt-3">
-                <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-blue-400 to-indigo-500 transition-all duration-300 ease-out"
-                    style={{ width: `${reviewProgress}%` }}
-                  ></div>
-                </div>
-                <div className="flex justify-between mt-1 text-xs text-gray-500">
-                  <span>审查文件中</span>
-                  <span>
-                    {reviewProgress < 100 
-                      ? `预计剩余时间: ${Math.ceil((100 - reviewProgress) / 20)} 秒` 
-                      : "处理完成"}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
           
-          <div className="p-6 pb-0 overflow-hidden flex flex-col bg-[#fafbfd]">
-            {isReviewing ? (
-              <div className="flex flex-col items-center py-16">
-                <div className="text-center mb-8">
-                  <h3 className="text-lg font-medium text-gray-900 mb-1">正在分析文件内容</h3>
-                  <p className="text-sm text-gray-500">这可能需要几秒钟...</p>
-                </div>
-                
-                {/* 文件审查动画效果 */}
-                <div className="relative w-64 h-48 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-                  {/* 文档扫描线动画 */}
-                  <div 
-                    className="absolute top-0 left-0 w-full h-1 bg-blue-400 opacity-70"
-                    style={{
-                      animation: "scanLine 1.5s ease-in-out infinite",
-                      boxShadow: "0 0 8px 1px rgba(59, 130, 246, 0.5)"
-                    }}
-                  ></div>
-                  
-                  {/* 模拟文档内容 */}
-                  <div className="px-4 py-3">
-                    {[...Array(8)].map((_, i) => (
-                      <div 
-                        key={i} 
-                        className="h-2 bg-gray-200 rounded-full mb-2 animate-pulse"
-                        style={{ 
-                          width: `${Math.floor(Math.random() * 40) + 60}%`,
-                          animationDelay: `${i * 0.1}s`,
-                          opacity: isReviewing ? 1 : 0.5
-                        }}
-                      ></div>
-                    ))}
-                  </div>
-                  
-                  {/* 审查文件提示 */}
-                  <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-blue-50 to-transparent p-3">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 w-4 h-4 rounded-full bg-blue-500 animate-pulse mr-2"></div>
-                      <div className="text-xs text-blue-700 whitespace-nowrap overflow-hidden">
-                        <span 
-                          className="inline-block"
-                          style={{
-                            animation: "textScroll 8s linear infinite",
-                            animationDelay: "0.5s"
-                          }}
-                        >
-                          检查文件格式 → 验证内容完整性 → 分析文件结构 → 检查版本一致性 → 验证数据有效性
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* 自定义CSS动画 */}
-                <style jsx>{`
-                  @keyframes scanLine {
-                    0% { top: 4%; }
-                    50% { top: 92%; }
-                    100% { top: 4%; }
-                  }
-                  
-                  @keyframes textScroll {
-                    0% { transform: translateX(100%); }
-                    100% { transform: translateX(-100%); }
-                  }
-                `}</style>
-              </div>
-            ) : (
-              <div className="flex flex-col">
-                <AIFileReviewResult
-                  result={reviewResult || { hasIssues: false, issues: [], totalFiles: 0, validFiles: 0 }}
-                  isLoading={isReviewing}
-                  onFixIssues={handleUpdateFileIssues}
-                  files={filesMap}
-                />
-              </div>
-            )}
-          </div>
-          
-          {/* 底部操作按钮 */}
-          <div className="border-t border-[#e8ecf5] p-4 bg-white rounded-b-md flex justify-between items-center mt-auto">
-            <div></div>
-            <div className="flex gap-3">
-              <Button
-                onClick={startAIReview}
-                variant="outline"
-                className={`
-                  border-blue-200 text-blue-700 hover:text-blue-800 hover:bg-blue-50 shadow-sm
-                  ${isReviewing ? 'min-w-[140px] relative overflow-hidden' : ''}
-                `}
-                disabled={isReviewing}
+          {/* 添加底部操作栏 */}
+          <div className="flex justify-between items-center pt-4 mt-6">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={handleSaveDraft} 
+              className="border-[#E9ECF2] hover:bg-slate-50 rounded-md h-10 px-4 py-2 transition-colors focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+            >
+              保存草稿
+            </Button>
+            <div className="flex gap-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={closeAIReview} 
+                className="border-[#E9ECF2] hover:bg-slate-50 rounded-md h-10 px-4 py-2 transition-colors focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
               >
-                {isReviewing ? (
-                  <>
-                    <div className="flex items-center justify-center">
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      <span className="mr-1">审查中</span>
-                      <span className="text-xs">{reviewProgress}%</span>
-                    </div>
-                    {/* 进度条背景 */}
-                    <div className="absolute bottom-0 left-0 h-1 w-full bg-blue-100"></div>
-                    {/* 实际进度 */}
-                    <div 
-                      className="absolute bottom-0 left-0 h-1 bg-blue-500 transition-all duration-300 ease-out"
-                      style={{ width: `${reviewProgress}%` }}
-                    ></div>
-                  </>
-                ) : (
-                  <>
-                    <FileCheck2 className="mr-2 h-4 w-4" />
-                    重新审查
-                  </>
-                )}
+                取消
               </Button>
               <Button 
+                type="button" 
                 onClick={handlePreSubmit} 
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-sm"
-                disabled={isReviewing}
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-md h-10 px-4 py-2 transition-colors focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
               >
-                <SendHorizontal className="mr-2 h-4 w-4" />
                 提交送审
               </Button>
             </div>
           </div>
         </div>
+        
+        {/* 右侧折叠按钮 - 当面板折叠时显示 */}
+        {isPanelCollapsed && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={togglePanelCollapse}
+            className="fixed right-6 top-1/2 transform -translate-y-1/2 h-10 w-10 bg-white shadow-md border-blue-100 text-blue-600 hover:text-blue-700 hover:bg-blue-50 z-10 rounded-full flex items-center justify-center"
+            title={getToggleButtonTooltip()}
+          >
+            <PanelRight className="h-4 w-4" />
+          </Button>
+        )}
+        
+        {/* 右侧：AI审查结果 - 使用flex布局并添加独立滚动 */}
+        {!isPanelCollapsed && (
+          <div className="border border-[#e8ecf5] rounded-lg shadow-sm bg-white flex flex-col" style={{ maxHeight: "100%" }}>
+            <div className="border-b border-[#e8ecf5] bg-gradient-to-r from-gray-50 to-white px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <h2 className="text-lg font-semibold text-gray-800">AI形式审查</h2>
+                  {getReviewStatusBadge() && getReviewStatusBadge()}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-full transition-all duration-200"
+                    onClick={togglePanelCollapse}
+                    title={getToggleButtonTooltip()}
+                  >
+                    <Minimize2 className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 p-0 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full"
+                    onClick={closeAIReview}
+                    title="关闭审查面板，返回表单页面"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              {/* 审查进度条 - 仅在审查过程中显示 */}
+              {isReviewing && (
+                <div className="mt-3">
+                  <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-blue-400 to-indigo-500 transition-all duration-300 ease-out"
+                      style={{ width: `${reviewProgress}%` }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between mt-1 text-xs text-gray-500">
+                    <span>审查文件中</span>
+                    <span>
+                      {reviewProgress < 100 
+                        ? `预计剩余时间: ${Math.ceil((100 - reviewProgress) / 20)} 秒` 
+                        : "处理完成"}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* 内容区域 - 使用flex-grow和overflow-y-auto实现自动填充和滚动 */}
+            <div className="flex-grow overflow-y-auto bg-[#fafbfd]">
+              {isReviewing ? (
+                <div className="flex flex-col items-center py-16">
+                  <div className="text-center mb-8">
+                    <h3 className="text-lg font-medium text-gray-900 mb-1">正在分析文件内容</h3>
+                    <p className="text-sm text-gray-500">这可能需要几秒钟...</p>
+                  </div>
+                  
+                  {/* 文件审查动画效果 */}
+                  <div className="relative w-64 h-48 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                    {/* 文档扫描线动画 */}
+                    <div 
+                      className="absolute top-0 left-0 w-full h-1 bg-blue-400 opacity-70"
+                      style={{
+                        animation: "scanLine 1.5s ease-in-out infinite",
+                        boxShadow: "0 0 8px 1px rgba(59, 130, 246, 0.5)"
+                      }}
+                    ></div>
+                    
+                    {/* 模拟文档内容 */}
+                    <div className="px-4 py-3">
+                      {[...Array(8)].map((_, i) => (
+                        <div 
+                          key={i} 
+                          className="h-2 bg-gray-200 rounded-full mb-2 animate-pulse"
+                          style={{ 
+                            width: `${Math.floor(Math.random() * 40) + 60}%`,
+                            animationDelay: `${i * 0.1}s`,
+                            opacity: isReviewing ? 1 : 0.5
+                          }}
+                        ></div>
+                      ))}
+                    </div>
+                    
+                    {/* 审查文件提示 */}
+                    <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-blue-50 to-transparent p-3">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 w-4 h-4 rounded-full bg-blue-500 animate-pulse mr-2"></div>
+                        <div className="text-xs text-blue-700 whitespace-nowrap overflow-hidden">
+                          <span 
+                            className="inline-block"
+                            style={{
+                              animation: "textScroll 8s linear infinite",
+                              animationDelay: "0.5s"
+                            }}
+                          >
+                            检查文件格式 → 验证内容完整性 → 分析文件结构 → 检查版本一致性 → 验证数据有效性
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* 自定义CSS动画 */}
+                  <style jsx>{`
+                    @keyframes scanLine {
+                      0% { top: 4%; }
+                      50% { top: 92%; }
+                      100% { top: 4%; }
+                    }
+                    
+                    @keyframes textScroll {
+                      0% { transform: translateX(100%); }
+                      100% { transform: translateX(-100%); }
+                    }
+                  `}</style>
+                </div>
+              ) : (
+                <div className="h-full">
+                  <AIFileReviewResult
+                    result={reviewResult || { hasIssues: false, issues: [], totalFiles: 0, validFiles: 0 }}
+                    isLoading={isReviewing}
+                    onFixIssues={handleUpdateFileIssues}
+                    files={filesMap}
+                    onRefreshReview={handleRefreshReview}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -794,49 +719,16 @@ export function HumanInitialReview({
   // 渲染主界面
   return (
     <div className="human-ethics-initial-review-container w-full">
-      {showAIReview ? renderAIReviewView() : renderNormalView()}
+      <div className="transition-all duration-300 ease-in-out">
+        {showAIReview ? renderAIReviewView() : renderNormalView()}
+      </div>
       
-      {/* 提交确认对话框 */}
-      <ReviewSubmitDialog
-        isOpen={showSubmitDialog}
-        onOpenChange={setShowSubmitDialog}
-        fileList={initialReviewFiles}
-        onConfirmSubmit={handleFinalSubmit}
-        onUpdateFileIssues={handleUpdateFileIssues}
-        files={filesMap}
-        skipAIReview={hasUsedAIReview} // 如果已经使用过AI审查，则跳过再次审查
-        reviewResult={reviewResult}
-      />
-      
-      {/* 问题确认对话框 */}
-      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{confirmTitle}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {confirmMessage}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>返回修改</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmSubmit}>继续提交</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      
-      {/* AI形式审查引导对话框 */}
-      <AIFormCheckGuide
-        isOpen={showAIGuide}
-        onOpenChange={setShowAIGuide}
-        onContinue={handleAIGuideContinue}
-      />
-      
-      {/* AI轻量级提醒对话框 */}
-      <AIReviewReminder
-        isOpen={showAIReminder}
-        onOpenChange={setShowAIReminder}
-        onStartAIReview={handleReminderStartAIReview}
-        onContinueSubmit={handleReminderContinueSubmit}
+      {/* 提交成功对话框 */}
+      <SubmitSuccessDialog
+        isOpen={showSuccessDialog}
+        onOpenChange={setShowSuccessDialog}
+        onReturnToList={() => router.push("/ethic-projects/human")}
+        onContinueAdd={resetForm}
       />
     </div>
   )

@@ -463,14 +463,22 @@ export async function renameFile(file: File, newName: string): Promise<{
 }> {
   return new Promise((resolve) => {
     setTimeout(() => {
-      // 创建一个新的文件对象，使用新名称
-      const renamedFile = new File([file], newName, { type: file.type });
-      
-      resolve({
-        success: true,
-        message: `文件已重命名为"${newName}"`,
-        file: renamedFile
-      });
+      try {
+        // 创建一个新的文件对象，使用新名称
+        const renamedFile = new File([file], newName, { type: file.type });
+        
+        resolve({
+          success: true,
+          message: `文件已重命名为"${newName}"`,
+          file: renamedFile
+        });
+      } catch (error) {
+        console.error("重命名文件失败:", error);
+        resolve({
+          success: false,
+          message: "重命名文件失败，请稍后重试"
+        });
+      }
     }, 500);
   });
 } 
