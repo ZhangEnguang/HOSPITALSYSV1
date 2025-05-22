@@ -386,12 +386,24 @@ export default function DataList({
               );
             }
 
+            // 处理卡片操作，将onRowActionClick函数应用到卡片操作
+            const processedCardActions = cardActions.map(action => ({
+              ...action,
+              onClick: (item: any, e: React.MouseEvent) => {
+                if (onRowActionClick) {
+                  onRowActionClick(action, item);
+                } else if (action.onClick) {
+                  action.onClick(item, e);
+                }
+              }
+            }));
+
             // 使用标准卡片
             return (
               <DataListCard
                 key={item.id}
                 item={item}
-                actions={cardActions}
+                actions={processedCardActions}
                 fields={cardFields}
                 titleField={titleField}
                 descriptionField={descriptionField}

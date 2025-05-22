@@ -158,11 +158,11 @@ export default function DataListCard({
       )}
       onClick={handleClick}
     >
-      <CardHeader className="p-6">
+      <CardHeader className="p-4 pb-2">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-lg transition-colors duration-300 group-hover:text-primary truncate flex-1">{renderValue(title)}</h3>
+              <h3 className="font-semibold text-base transition-colors duration-300 group-hover:text-primary truncate flex-1">{renderValue(title)}</h3>
               {status && <Badge variant={getStatusVariant(status)}>{renderValue(getDisplayStatus())}</Badge>}
               {priority === "medium" && (
                 <Badge variant="destructive" className="whitespace-nowrap flex-shrink-0">
@@ -172,44 +172,48 @@ export default function DataListCard({
             </div>
             {description && <p className="text-sm text-muted-foreground truncate mt-1">{renderValue(description)}</p>}
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {actions
-                .filter((action) => !action.hidden || !action.hidden(item))
-                .map((action) => (
-                  <DropdownMenuItem
-                    key={action.id}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      action.onClick(item, e)
-                    }}
-                    disabled={action.disabled ? action.disabled(item) : false}
-                    className={action.id === "delete" ? "text-destructive" : ""}
-                  >
-                    {action.icon && <span className="mr-2">{action.icon}</span>}
-                    {action.label}
-                  </DropdownMenuItem>
-                ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {actions && actions.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2" onClick={(e) => e.stopPropagation()}>
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {actions
+                  .filter((action) => !action.hidden || !action.hidden(item))
+                  .map((action) => (
+                    <DropdownMenuItem
+                      key={action.id}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        action.onClick(item, e)
+                      }}
+                      disabled={action.disabled ? action.disabled(item) : false}
+                      className={action.id === "delete" ? "text-destructive" : ""}
+                    >
+                      {action.icon && <span className="mr-2">{action.icon}</span>}
+                      {action.label}
+                    </DropdownMenuItem>
+                  ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="grid gap-4">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+      <CardContent className="p-4 pt-0">
+        <div className="grid gap-2 mt-2">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-3">
             {fields.map((field, index) => (
-              <React.Fragment key={field.id}>
-                <div className={`grid gap-0.5 text-sm ${field.className || ""}`}>
-                  {field.label && <span className="font-medium">{field.label}</span>}
+              <div 
+                key={field.id} 
+                className={`text-sm ${field.className || ""}`}
+              >
+                {field.label && <span className="font-medium text-xs text-muted-foreground block mb-0.5">{field.label}</span>}
+                <div className="truncate">
                   {React.isValidElement(field.value(item)) ? field.value(item) : renderValue(field.value(item))}
                 </div>
-                {index < fields.length - 1 && <Separator orientation="vertical" className="h-8 hidden lg:block" />}
-              </React.Fragment>
+              </div>
             ))}
           </div>
         </div>

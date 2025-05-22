@@ -233,7 +233,10 @@ export default function Sidebar() {
     { 
       name: "实验室", 
       icon: <FlaskConical className="h-5 w-5" />, 
-      path: "/laboratory",
+      path: "#",
+      subMenus: [
+        { name: "仪器", path: "/laboratory/equipment" },
+      ]
     },
     { 
       name: "进度管理", 
@@ -311,8 +314,8 @@ export default function Sidebar() {
     // 如果点击的是当前活动项，并且有子菜单，则切换展开/折叠状态
     if (activeItem === name && menuItems.find(item => item.name === name)?.subMenus) {
       setExpandedMenu(expandedMenu === name ? null : name);
-    } else if (name === "伦理审查") {
-      // 对于伦理审查特殊处理，只切换展开/折叠状态，不进行导航
+    } else if (name === "伦理审查" || name === "实验室") {
+      // 对于伦理审查和实验室特殊处理，只切换展开/折叠状态，不进行导航
       setActiveItem(name);
       setExpandedMenu(expandedMenu === name ? null : name);
     } else {
