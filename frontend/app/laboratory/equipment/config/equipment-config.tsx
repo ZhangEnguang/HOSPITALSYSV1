@@ -14,6 +14,8 @@ import {
   CheckCircle,
   List,
   MessageSquare,
+  FileText,
+  Calendar,
 } from "lucide-react"
 
 // 模拟用户数据
@@ -436,6 +438,15 @@ export const equipmentActions = [
     icon: <Pencil className="h-4 w-4" />,
     onClick: (item: any) => {
       const url = `/laboratory/equipment/edit/${item.id}`;
+      window.open(url, "_self");
+    },
+  },
+  {
+    id: "booking",
+    label: "仪器预约",
+    icon: <Calendar className="h-4 w-4" />,
+    onClick: (item: any) => {
+      const url = `/laboratory/equipment/booking/${item.id}`;
       window.open(url, "_self");
     },
   },

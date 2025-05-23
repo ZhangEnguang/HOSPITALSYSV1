@@ -253,6 +253,14 @@ function EquipmentContent() {
             router.push(`/laboratory/equipment/edit/${row.id}`)
           } else if (action.id === "view") {
             router.push(`/laboratory/equipment/${row.id}`)
+          } else if (action.id === "booking") {
+            router.push(`/laboratory/equipment/booking/${row.id}`)
+          } else if (action.id === "maintenance") {
+            router.push(`/laboratory/equipment/maintenance/${row.id}`)
+          } else if (action.id === "usage") {
+            router.push(`/laboratory/equipment/usage/${row.id}`)
+          } else if (action.id === "report") {
+            router.push(`/laboratory/equipment/report/${row.id}`)
           }
         }}
         statusVariants={statusColors}
