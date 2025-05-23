@@ -22,6 +22,7 @@ export const allDemoEquipmentItems = [
     useFrequency: "高",
     manager: users[0],
     reservationStatus: "未预约",
+    bookingCount: 203,
     images: [
       "/equipment/XPS.png",
       "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop&auto=format"
@@ -55,6 +56,7 @@ export const allDemoEquipmentItems = [
     useFrequency: "高",
     manager: users[1],
     reservationStatus: "未预约",
+    bookingCount: 205,
     images: [
       "/equipment/XRD.png",
       "https://images.unsplash.com/photo-1518467166778-b88f373ffec7?w=400&h=300&fit=crop&auto=format"
@@ -88,6 +90,7 @@ export const allDemoEquipmentItems = [
     useFrequency: "中",
     manager: users[2],
     reservationStatus: "未预约",
+    bookingCount: 205,
     images: [
       "/equipment/danjing.png",
       "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400&h=300&fit=crop&auto=format"
@@ -121,6 +124,7 @@ export const allDemoEquipmentItems = [
     useFrequency: "高",
     manager: users[3],
     reservationStatus: "已预约",
+    bookingCount: 89,
     images: [
       "/equipment/XRD-weiquceshi.png",
       "https://images.unsplash.com/photo-1563818296-17596d4ad049?w=400&h=300&fit=crop&auto=format"
@@ -154,6 +158,7 @@ export const allDemoEquipmentItems = [
     useFrequency: "高",
     manager: users[4],
     reservationStatus: "未预约",
+    bookingCount: 156,
     images: [
       "/equipment/EPMA.png",
       "https://images.unsplash.com/photo-1595675024853-0f3ec9098ac7?w=400&h=300&fit=crop&auto=format"
@@ -187,6 +192,7 @@ export const allDemoEquipmentItems = [
     useFrequency: "中",
     manager: users[0],
     reservationStatus: "未预约",
+    bookingCount: 72,
     images: [
       "/equipment/UPS.png",
       "https://images.unsplash.com/photo-1583912267550-3c850b8a1090?w=400&h=300&fit=crop&auto=format"
@@ -220,6 +226,7 @@ export const allDemoEquipmentItems = [
     useFrequency: "高",
     manager: users[1],
     reservationStatus: "已预约",
+    bookingCount: 342,
     images: [
       "/equipment/tongbufushe.png",
       "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=400&h=300&fit=crop&auto=format"
@@ -253,6 +260,7 @@ export const allDemoEquipmentItems = [
     useFrequency: "高",
     manager: users[3],
     reservationStatus: "未预约",
+    bookingCount: 128,
     images: [
       "/equipment/yuanweiXRDceshi.png",
       "https://images.unsplash.com/photo-1576086213369-97a306d36557?w=400&h=300&fit=crop&auto=format"
@@ -286,6 +294,7 @@ export const allDemoEquipmentItems = [
     useFrequency: "高",
     manager: users[0],
     reservationStatus: "未预约",
+    bookingCount: 96,
     images: [
       "/equipment/dianguanghuaxueXRD.png",
       "https://images.unsplash.com/photo-1581093458791-9d42e31c9cb8?w=400&h=300&fit=crop&auto=format"
@@ -319,6 +328,7 @@ export const allDemoEquipmentItems = [
     useFrequency: "中",
     manager: users[2],
     reservationStatus: "未预约",
+    bookingCount: 45,
     images: [
       "/equipment/XRDhongguanzhigouceshi.png",
       "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop&auto=format"

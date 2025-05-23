@@ -124,6 +124,7 @@ interface DataListProps {
   onViewDetails?: (item: any) => void
   onEditConfig?: (item: any) => void
   onDeleteConfig?: (item: any) => void
+  gridClassName?: string
 }
 
 // export const filterCategories = [
@@ -323,6 +324,7 @@ export default function DataList({
   onViewDetails,
   onEditConfig,
   onDeleteConfig,
+  gridClassName,
 }: DataListProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">(defaultViewMode)
   const [showBatchActions, setShowBatchActions] = useState(false)
@@ -361,7 +363,7 @@ export default function DataList({
   // Render card view
   const renderCardView = () => {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className={cn("grid", gridClassName || "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4")}>
         {localData.length === 0 ? (
           <div className="col-span-3 h-[300px] flex items-center justify-center">
             <div className="text-center">

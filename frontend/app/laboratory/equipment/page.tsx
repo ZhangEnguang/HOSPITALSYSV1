@@ -266,6 +266,7 @@ function EquipmentContent() {
         selectedRows={selectedRows}
         onSelectedRowsChange={setSelectedRows}
         batchActions={configuredBatchActions}
+        gridClassName="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
         onRowActionClick={(action, row) => {
           if (action.id === "delete") {
             handleDeleteItem(row)

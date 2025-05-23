@@ -602,204 +602,120 @@ const EquipmentCard = ({
   isSelected: boolean;
   onToggleSelect: (selected: boolean) => void;
 }) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [imageErrors, setImageErrors] = useState<boolean[]>([]);
-  
-  const handlePrevImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setCurrentImageIndex((prev) => 
-      prev > 0 ? prev - 1 : (item.images?.length || 1) - 1
-    );
-  };
-  
-  const handleNextImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setCurrentImageIndex((prev) => 
-      prev < (item.images?.length || 1) - 1 ? prev + 1 : 0
-    );
-  };
-
-  const handleImageError = (index: number) => {
-    setImageErrors(prev => {
-      const newErrors = [...prev];
-      newErrors[index] = true;
-      return newErrors;
-    });
-  };
-
-  const isCurrentImageError = imageErrors[currentImageIndex];
-
   return (
     <Card
       className={cn(
         "group transition-all duration-300 border border-[#E9ECF2] shadow-none hover:shadow-[0px_38px_45px_0px_rgba(198,210,241,0.25)] hover:border-primary/20 cursor-pointer",
-        "h-[420px] flex flex-col", // 固定高度，确保卡片大小统一
+        "flex flex-col w-full", // 确保卡片占据完整宽度且为flex布局
         isSelected && "ring-2 ring-primary"
       )}
     >
-      {/* 仪器图片区域 */}
-      <div className="relative h-48 overflow-hidden rounded-t-lg bg-gray-100 flex-shrink-0">
-        {item.images && item.images.length > 0 && !isCurrentImageError ? (
-          <img
-            src={item.images[currentImageIndex]}
-            alt={`${item.name} - 图片 ${currentImageIndex + 1}`}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            onError={() => handleImageError(currentImageIndex)}
-          />
-        ) : (
-          <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-            <svg className="w-16 h-16 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-            </svg>
-          </div>
-        )}
+      {/* 仪器图片区域 - 只显示第一张图片 */}
+      <div 
+        className="relative w-full overflow-hidden rounded-t-lg bg-gray-50 flex-shrink-0"
+        style={{ paddingBottom: '60%' }}
+      >
+        <div className="absolute inset-0">
+          {item.images && item.images.length > 0 ? (
+            <img
+              src={item.images[0]}
+              alt={`${item.name} - 图片`}
+              className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 bg-white"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const parent = target.parentElement;
+                if (parent) {
+                  parent.innerHTML = `
+                    <div class="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+                      <div class="flex flex-col items-center justify-center space-y-2 text-gray-400">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="text-xs text-gray-500">暂无图片</span>
+                      </div>
+                    </div>
+                  `;
+                }
+              }}
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+              <div className="flex flex-col items-center justify-center space-y-2 text-gray-400">
+                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                </svg>
+                <span className="text-xs text-gray-500">暂无图片</span>
+              </div>
+            </div>
+          )}
+        </div>
         
-        {/* 图片导航控件 - 仅在多图片时显示 */}
-        {item.images && item.images.length > 1 && (
-          <>
-            {/* 左右滑动按钮 */}
-            <button
-              onClick={handlePrevImage}
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            
-            <button
-              onClick={handleNextImage}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-            
-            {/* 图片指示器和计数器 */}
-            <div className="absolute top-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 z-10">
-              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-              </svg>
-              <span>{currentImageIndex + 1}/{item.images.length}</span>
-            </div>
-            
-            {/* 底部圆点指示器 */}
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1 z-10">
-              {item.images.map((_: any, index: number) => (
-                <button
-                  key={index}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setCurrentImageIndex(index);
-                  }}
-                  className={cn(
-                    "w-2 h-2 rounded-full transition-all duration-200",
-                    index === currentImageIndex 
-                      ? "bg-white scale-110" 
-                      : "bg-white/50 hover:bg-white/70"
-                  )}
-                />
-              ))}
-            </div>
-          </>
+        {/* 操作按钮 - 移动到图片区域右上角 */}
+        {actions && actions.length > 0 && (
+          <div className="absolute top-2 right-2 z-10">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-white/80 backdrop-blur-sm transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {actions
+                  .filter((action) => !action.hidden || !action.hidden(item))
+                  .map((action) => (
+                    <DropdownMenuItem
+                      key={action.id}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        action.onClick(item, e)
+                      }}
+                      disabled={action.disabled ? action.disabled(item) : false}
+                      className={action.id === "delete" ? "text-destructive" : ""}
+                    >
+                      {action.icon && <span className="mr-2">{action.icon}</span>}
+                      {action.label}
+                    </DropdownMenuItem>
+                  ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         )}
       </div>
       
       {/* 卡片内容 */}
-      <div className="p-4 flex flex-col flex-1">
-        <div className="flex items-start justify-between mb-3">
+      <div className="p-3 flex flex-col flex-1">
+        <div className="mb-2">
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-base text-gray-900 transition-colors duration-300 group-hover:text-primary truncate">
+            <h3 className="font-semibold text-sm text-gray-900 transition-colors duration-300 group-hover:text-primary truncate leading-tight">
               {item.name}
             </h3>
-            <p className="text-sm text-muted-foreground truncate mt-1">
+            <p className="text-xs text-muted-foreground truncate mt-0.5">
               {item.model}
             </p>
           </div>
-          {actions && actions.length > 0 && (
-            <div className="ml-2 flex-shrink-0">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  {actions
-                    .filter((action) => !action.hidden || !action.hidden(item))
-                    .map((action) => (
-                      <DropdownMenuItem
-                        key={action.id}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          action.onClick(item, e)
-                        }}
-                        disabled={action.disabled ? action.disabled(item) : false}
-                        className={action.id === "delete" ? "text-destructive" : ""}
-                      >
-                        {action.icon && <span className="mr-2">{action.icon}</span>}
-                        {action.label}
-                      </DropdownMenuItem>
-                    ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
         </div>
 
         {/* 仪器信息 */}
         <div className="space-y-2 flex-1">
-          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-            <div>
-              <span className="text-muted-foreground">类型：</span>
-              <span className="font-medium">{item.category}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">部门：</span>
-              <span className="font-medium">{item.department}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">位置：</span>
-              <span className="font-medium">{item.location}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">价格：</span>
-              <span className="font-medium text-green-600">￥{item.price.toLocaleString()}</span>
-            </div>
-          </div>
+          {/* 移除原有的详细信息网格 */}
           
-          {/* 描述信息 */}
-          {item.description && (
-            <p className="text-sm text-muted-foreground line-clamp-3 mt-2">
-              {item.description}
-            </p>
-          )}
+          {/* 简化后只保留必要信息 */}
         </div>
         
-        {/* 购置日期和使用状态 - 固定在底部 */}
-        <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
+        {/* 预约次数和使用状态 - 固定在底部 */}
+        <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
           <span className="text-xs text-muted-foreground">
-            购置：{format(new Date(item.purchaseDate), "yyyy/MM/dd")}
+            预约次数：{item.bookingCount || 0}次
           </span>
           <Badge 
             variant={(statusColors[item.status] || "secondary") as any}
-            className="text-xs font-medium"
-            style={{
-              backgroundColor: item.status === "在用" ? "rgba(34, 197, 94, 0.9)" : 
-                              item.status === "维修中" ? "rgba(251, 146, 60, 0.9)" :
-                              item.status === "闲置" ? "rgba(107, 114, 128, 0.9)" :
-                              item.status === "报废" ? "rgba(239, 68, 68, 0.9)" :
-                              item.status === "待验收" ? "rgba(59, 130, 246, 0.9)" :
-                              item.status === "外借" ? "rgba(139, 92, 246, 0.9)" :
-                              "rgba(107, 114, 128, 0.9)",
-              color: "white"
-            }}
+            className="font-medium text-xs"
           >
             {item.status}
           </Badge>
