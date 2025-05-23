@@ -318,10 +318,10 @@ function ReagentApplicationContent() {
         onSearchChange={setSearchTerm}
         onSearch={() => {}}
         onAddNew={() => router.push("/laboratory/reagent-application/create")}
-        onAIAssist={() => router.push("/laboratory/reagent-application/ai-assist")}
+        onAIAssist={undefined}
         addButtonLabel="新增申领"
-        settingsButtonLabel="模板库"
-        onOpenSettings={() => router.push("/laboratory/reagent-application/templates")}
+        settingsButtonLabel={undefined}
+        onOpenSettings={undefined}
         quickFilters={quickFilters}
         onQuickFilterChange={(filterId, value) =>
           setFilterValues((prev) => ({ ...prev, [filterId]: value }))

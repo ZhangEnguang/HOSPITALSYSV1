@@ -72,6 +72,8 @@ interface SeniorFilterDTO {
   }>
 }
 
+export type { SeniorFilterDTO }
+
 interface Field {
   id: string
   label: string

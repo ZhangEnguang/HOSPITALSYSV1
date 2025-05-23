@@ -11,6 +11,7 @@ import DataListCard, { CardAction } from "./data-list-card"
 import DataListPagination from "./data-list-pagination"
 import DataListBatchActions from "./data-list-batch-actions"
 import { DataListAdvancedFilter } from "./data-list-advanced-filter"
+import type { SeniorFilterDTO } from "./data-list-advanced-filter"
 import { cn } from "@/lib/utils"
 
 // 创建一个显示模板库按钮的页面白名单
@@ -58,7 +59,7 @@ interface DataListProps {
   }[]
   onQuickFilterChange?: (filterId: string, value: string) => void
   quickFilterValues?: Record<string, string>
-  seniorFilterValues?: Record<string, any>
+  seniorFilterValues?: SeniorFilterDTO
   onAdvancedFilter?: (filterValues: Record<string, any>) => void
   filterValues?: Record<string, any>
   sortOptions?: SortOption[]
@@ -257,8 +258,8 @@ export default function DataList({
   activeTab,
   onTabChange = () => {},
   onAddNew = () => {},
-  onOpenSettings = () => {},
-  onAIAssist = () => {},
+  onOpenSettings,
+  onAIAssist,
   onCreateProject = () => {},
   addButtonLabel,
   settingsButtonLabel,
@@ -271,7 +272,10 @@ export default function DataList({
   onQuickFilterChange = () => {},
   quickFilterValues = {},
   filterValues,
-  seniorFilterValues = {},
+  seniorFilterValues = {
+    groupOperator: "and",
+    groups: []
+  },
   onAdvancedFilter = () => {},
   sortOptions = [],
   activeSortOption,

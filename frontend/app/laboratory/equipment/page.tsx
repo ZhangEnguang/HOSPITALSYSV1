@@ -19,6 +19,8 @@ import {
   equipmentActions,
   // 导入特定仪器类型的卡片字段
   equipmentCardFields,
+  // 导入自定义卡片渲染器
+  equipmentCustomCardRenderer,
 } from "./config/equipment-config"
 import { allDemoEquipmentItems } from "./data/equipment-demo-data"
 import {
@@ -44,11 +46,12 @@ function EquipmentContent() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterValues, setFilterValues] = useState<Record<string, any>>({})
   const [sortOption, setSortOption] = useState("purchaseDate_desc")
-  const [viewMode, setViewMode] = useState<"grid" | "list">("list")
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
   const [selectedRows, setSelectedRows] = useState<string[]>([])
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
+    image: true,
     name: true,
     model: true,
     category: true,
@@ -204,20 +207,36 @@ function EquipmentContent() {
     },
   ]
 
+  // 创建兼容DataList组件的状态变体映射
+  const compatibleStatusVariants: Record<string, "default" | "destructive" | "outline" | "secondary"> = {
+    "在用": "secondary", // 将success映射为secondary
+    "维修中": "destructive", // warning映射为destructive  
+    "闲置": "secondary",
+    "报废": "destructive",
+    "待验收": "outline",
+    "外借": "default",
+    
+    "正常": "secondary", // success映射为secondary
+    "异常": "destructive",
+    "待维护": "destructive", // warning映射为destructive
+    "已预约": "secondary",
+    "未使用": "outline",
+  }
+
   return (
     <div className="space-y-6">
       <DataList
-        title="实验室仪器管理"
+        title="仪器管理"
         data={paginatedItems}
         searchValue={searchTerm}
         searchPlaceholder="搜索仪器名称、型号或描述..."
         onSearchChange={setSearchTerm}
         onSearch={() => {}}
         onAddNew={() => router.push("/laboratory/equipment/create")}
-        onAIAssist={() => router.push("/laboratory/equipment/ai-assist")}
+        onAIAssist={undefined}
+        onOpenSettings={undefined}
+        settingsButtonLabel={undefined}
         addButtonLabel="新增仪器"
-        settingsButtonLabel="模板库"
-        onOpenSettings={() => router.push("/laboratory/equipment/templates")}
         quickFilters={quickFilters}
         onQuickFilterChange={(filterId, value) =>
           setFilterValues((prev) => ({ ...prev, [filterId]: value }))
@@ -235,6 +254,7 @@ function EquipmentContent() {
         visibleColumns={visibleColumns}
         onVisibleColumnsChange={setVisibleColumns}
         cardFields={equipmentCardFields}
+        customCardRenderer={equipmentCustomCardRenderer}
         titleField="name"
         descriptionField="description"
         statusField="status"
@@ -263,7 +283,7 @@ function EquipmentContent() {
             router.push(`/laboratory/equipment/report/${row.id}`)
           }
         }}
-        statusVariants={statusColors}
+        statusVariants={compatibleStatusVariants}
       />
 
       {/* 删除确认对话框 */}
