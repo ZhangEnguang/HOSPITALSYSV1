@@ -237,6 +237,7 @@ export default function Sidebar() {
       subMenus: [
         { name: "仪器", path: "/laboratory/equipment" },
         { name: "试剂", path: "/laboratory/reagent" },
+        { name: "耗材", path: "/laboratory/consumables" },
       ]
     },
     { 

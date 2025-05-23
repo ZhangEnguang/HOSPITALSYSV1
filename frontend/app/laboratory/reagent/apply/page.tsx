@@ -140,41 +140,6 @@ export default function ReagentApplicationsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="container mx-auto py-6">
-        <div className="mb-6 flex justify-between items-center">
-          <h1 className="text-2xl font-semibold">试剂申领管理</h1>
-          <Button onClick={() => router.push("/laboratory/reagent")}>
-            返回试剂列表
-          </Button>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>申领记录</CardTitle>
-            <CardDescription>
-              查看和管理试剂申领记录
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="mb-4">
-                <TabsTrigger value="all">全部申请</TabsTrigger>
-                <TabsTrigger value="pending">审核中</TabsTrigger>
-                <TabsTrigger value="approved">已批准</TabsTrigger>
-                <TabsTrigger value="rejected">已拒绝</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value={activeTab} className="space-y-4">
-                {filteredApplications.length === 0 ? (
-                  <div className="text-center py-10 text-muted-foreground">
-                    没有找到符合条件的申领记录
-                  </div>
-                ) : (
-                  filteredApplications.map((application) => (
-                    <Card key={application.id} className="overflow-hidden">
-                      <div className="flex items-center border-b border-gray-100 bg-gray-50 px-4 py-3">
-                        <div className="mr-3">{getStatusIcon(application.status)}</div>
     <div className="container mx-auto py-6">
       <div className="mb-6 flex justify-between items-center">
         <h1 className="text-2xl font-semibold">试剂申领管理</h1>

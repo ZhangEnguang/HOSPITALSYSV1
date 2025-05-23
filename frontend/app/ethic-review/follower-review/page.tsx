@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { toast } from "@/components/ui/use-toast"
-import DataList from "@/components/data-list"
+import DataList from "@/components/data-management/data-list"
 
 export default function EthicFollowerReviewPage() {
   const [selectedRows, setSelectedRows] = useState<string[]>([])
@@ -35,10 +35,9 @@ export default function EthicFollowerReviewPage() {
   ]
 
   return (
-    <DataList
-      selectedRows={selectedRows}
-      onSelectedRowsChange={handleSelectionChange}
-      batchActions={batchActions}
-    />
+    <div>
+      <h1>跟踪审查项目</h1>
+      <p>该页面正在开发中...</p>
+    </div>
   )
 } 
