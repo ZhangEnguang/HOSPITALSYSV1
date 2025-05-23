@@ -238,7 +238,9 @@ export default function Sidebar() {
         { name: "仪器", path: "/laboratory/equipment" },
         { name: "仪器预约", path: "/laboratory/equipment-booking" },
         { name: "试剂", path: "/laboratory/reagent" },
+        { name: "试剂申领", path: "/laboratory/reagent-application" },
         { name: "耗材", path: "/laboratory/consumables" },
+        { name: "耗材申领", path: "/laboratory/consumables-application" },
       ]
     },
     { 
