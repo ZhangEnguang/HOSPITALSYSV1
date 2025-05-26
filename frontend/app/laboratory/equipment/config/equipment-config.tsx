@@ -1,4 +1,3 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import {
@@ -7,12 +6,9 @@ import {
   Trash2,
   Check,
   Wrench,
-  BarChart,
-  AlertTriangle,
   Clock,
   Info,
   CheckCircle,
-  List,
   MessageSquare,
   FileText,
   Calendar,
@@ -368,56 +364,29 @@ export const equipmentColumns = [
     cell: (row: any) => <span>{row.location}</span>,
   },
   {
-    id: "purchaseDate",
-    header: "购置日期",
-    accessorKey: "purchaseDate",
-    cell: (row: any) => <span>{format(new Date(row.purchaseDate), "yyyy/MM/dd")}</span>,
-  },
-  {
-    id: "warrantyExpiry",
-    header: "保修到期",
-    accessorKey: "warrantyExpiry",
+    id: "bookingType",
+    header: "预约类型",
+    accessorKey: "bookingType",
     cell: (row: any) => (
-      <div className="flex items-center gap-2">
-        {new Date(row.warrantyExpiry) < new Date() ? (
-          <Badge variant="destructive" className="flex items-center gap-1">
-            <AlertTriangle className="h-3 w-3" />
-            已过期
+      <Badge variant="outline" className="text-blue-600 border-blue-200">
+        {row.bookingType}
           </Badge>
-        ) : (
-          <span>{format(new Date(row.warrantyExpiry), "yyyy/MM/dd")}</span>
-        )}
-      </div>
     ),
   },
   {
-    id: "maintenanceStatus",
-    header: "维护状态",
-    accessorKey: "maintenanceStatus",
-    cell: (row: any) => {
-      const statusMap: Record<string, ExtendedBadgeVariant> = {
-        正常: "success",
-        异常: "destructive",
-        待维护: "warning",
-      }
-      return (
-        <Badge variant={(statusMap[row.maintenanceStatus] || "secondary") as any}>
-          {row.maintenanceStatus}
-        </Badge>
-      )
-    },
+    id: "bookingMethod",
+    header: "预约方式",
+    accessorKey: "bookingMethod",
+    cell: (row: any) => <span className="text-gray-700">{row.bookingMethod}</span>,
   },
   {
-    id: "manager",
-    header: "负责人",
-    accessorKey: "manager",
+    id: "bookingCount",
+    header: "预约次数",
+    accessorKey: "bookingCount",
     cell: (row: any) => (
       <div className="flex items-center gap-2">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={row.manager.avatar} />
-          <AvatarFallback>{row.manager.name[0]}</AvatarFallback>
-        </Avatar>
-        <span className="font-medium">{row.manager.name}</span>
+        <span className="font-medium">{row.bookingCount}</span>
+        <span className="text-xs text-gray-500">次</span>
       </div>
     ),
   },
@@ -517,28 +486,10 @@ export const equipmentActions = [
   },
   {
     id: "maintenance",
-    label: "维护记录",
+    label: "维护登记",
     icon: <Wrench className="h-4 w-4" />,
     onClick: (item: any) => {
       const url = `/laboratory/equipment/maintenance/${item.id}`;
-      window.open(url, "_self");
-    },
-  },
-  {
-    id: "usage",
-    label: "使用记录",
-    icon: <List className="h-4 w-4" />,
-    onClick: (item: any) => {
-      const url = `/laboratory/equipment/usage/${item.id}`;
-      window.open(url, "_self");
-    },
-  },
-  {
-    id: "report",
-    label: "统计报表",
-    icon: <BarChart className="h-4 w-4" />,
-    onClick: (item: any) => {
-      const url = `/laboratory/equipment/report/${item.id}`;
       window.open(url, "_self");
     },
   },
