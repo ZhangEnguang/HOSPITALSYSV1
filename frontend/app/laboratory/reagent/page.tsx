@@ -19,6 +19,8 @@ import {
   reagentActions,
   // 导入特定试剂类型的卡片字段
   reagentCardFields,
+  // 导入自定义卡片渲染器
+  reagentCustomCardRenderer,
 } from "./config/reagent-config"
 import { allDemoReagentItems } from "./data/reagent-demo-data"
 import {
@@ -49,8 +51,8 @@ function ReagentContent() {
   const [pageSize, setPageSize] = useState(12)
   const [selectedRows, setSelectedRows] = useState<string[]>([])
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
+    image: true,
     name: true,
-    englishName: true,
     category: true,
     status: true,
     department: true,
@@ -69,7 +71,6 @@ function ReagentContent() {
       if (
         searchTerm &&
         !item.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !item.englishName.toLowerCase().includes(searchTerm.toLowerCase()) &&
         !item.description.toLowerCase().includes(searchTerm.toLowerCase())
       ) {
         return false
@@ -271,7 +272,7 @@ function ReagentContent() {
   return (
     <div className="space-y-6">
       <DataList
-        title="实验室试剂管理"
+        title="试剂管理"
         data={paginatedItems}
         searchValue={searchTerm}
         searchPlaceholder="搜索试剂名称、英文名或描述..."
@@ -299,6 +300,7 @@ function ReagentContent() {
         visibleColumns={visibleColumns}
         onVisibleColumnsChange={setVisibleColumns}
         cardFields={reagentCardFields}
+        customCardRenderer={reagentCustomCardRenderer}
         titleField="name"
         descriptionField="description"
         statusField="status"
@@ -312,6 +314,7 @@ function ReagentContent() {
         onSelectedRowsChange={setSelectedRows}
         batchActions={configuredBatchActions}
         onRowActionClick={handleRowAction}
+        gridClassName="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
       />
 
       {/* 删除确认对话框 */}

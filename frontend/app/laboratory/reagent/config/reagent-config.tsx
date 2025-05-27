@@ -12,6 +12,16 @@ import {
   FileText,
   BarChart,
 } from "lucide-react"
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { MoreVertical } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 // 模拟用户数据
 export const users = [
@@ -97,12 +107,12 @@ export const quickFilters = [
     label: "试剂类型",
     value: "",
     options: [
-      { id: "1", label: "生物试剂", value: "生物试剂" },
-      { id: "2", label: "化学试剂", value: "化学试剂" },
-      { id: "3", label: "分析试剂", value: "分析试剂" },
-      { id: "4", label: "医用试剂", value: "医用试剂" },
-      { id: "5", label: "标准品", value: "标准品" },
-      { id: "6", label: "染色剂", value: "染色剂" },
+      { id: "1", label: "有机溶剂", value: "有机溶剂" },
+      { id: "2", label: "无机化合物", value: "无机化合物" },
+      { id: "3", label: "有机酸", value: "有机酸" },
+      { id: "4", label: "无机盐", value: "无机盐" },
+      { id: "5", label: "无机碱", value: "无机碱" },
+      { id: "6", label: "同位素试剂", value: "同位素试剂" },
     ],
     category: "default",
   },
@@ -125,12 +135,12 @@ export const quickFilters = [
     label: "所属部门",
     value: "",
     options: [
-      { id: "1", label: "生物实验室", value: "生物实验室" },
-      { id: "2", label: "化学实验室", value: "化学实验室" },
-      { id: "3", label: "物理实验室", value: "物理实验室" },
-      { id: "4", label: "药学实验室", value: "药学实验室" },
-      { id: "5", label: "材料实验室", value: "材料实验室" },
-      { id: "6", label: "分析实验室", value: "分析实验室" },
+      { id: "1", label: "化学实验室", value: "化学实验室" },
+      { id: "2", label: "有机化学实验室", value: "有机化学实验室" },
+      { id: "3", label: "分析化学实验室", value: "分析化学实验室" },
+      { id: "4", label: "物理化学实验室", value: "物理化学实验室" },
+      { id: "5", label: "无机化学实验室", value: "无机化学实验室" },
+      { id: "6", label: "仪器分析实验室", value: "仪器分析实验室" },
     ],
     category: "default",
   },
@@ -267,12 +277,64 @@ export const sortOptions = [
 // 试剂特定列配置
 export const reagentColumns = [
   {
+    id: "image",
+    header: "图片",
+    cell: (item: any) => (
+      <div className="relative w-16 h-12 rounded-md overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200">
+        <div className="w-full h-full flex items-center justify-center p-1">
+          {item.imageUrl ? (
+            <div className="w-14 h-10 bg-white rounded border border-gray-100 flex items-center justify-center p-1">
+              <img 
+                src={item.imageUrl} 
+                alt={`${item.name} 化学结构`}
+                className="max-w-full max-h-full object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent) {
+                    parent.innerHTML = `
+                      <div class="flex items-center justify-center">
+                        <div class="w-5 h-6 relative">
+                          <div class="w-full h-5 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative">
+                            <div class="absolute inset-x-0.5 top-0.5 bottom-0.5 bg-gradient-to-b from-blue-100 to-blue-200 rounded-sm opacity-80"></div>
+                            <div class="absolute inset-x-0.5 bottom-0.5 bg-gradient-to-t from-blue-500 to-blue-400 rounded-sm opacity-70" style="height: ${Math.max(20, (item.currentAmount / item.initialAmount) * 80)}%"></div>
+                          </div>
+                          <div class="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-2.5 h-1 bg-gray-400 rounded-t border border-gray-500"></div>
+                        </div>
+                      </div>
+                    `;
+                  }
+                }}
+              />
+            </div>
+          ) : (
+            <div className="w-14 h-10 bg-white rounded border border-gray-100 flex items-center justify-center">
+              <div className="w-5 h-6 relative">
+                <div className="w-full h-5 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative">
+                  {/* 瓶身 */}
+                  <div className="absolute inset-x-0.5 top-0.5 bottom-0.5 bg-gradient-to-b from-blue-100 to-blue-200 rounded-sm opacity-80"></div>
+                  {/* 液体 */}
+                  <div 
+                    className="absolute inset-x-0.5 bottom-0.5 bg-gradient-to-t from-blue-500 to-blue-400 rounded-sm opacity-70"
+                    style={{ height: `${Math.max(20, (item.currentAmount / item.initialAmount) * 80)}%` }}
+                  ></div>
+                </div>
+                {/* 瓶盖 */}
+                <div className="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-2.5 h-1 bg-gray-400 rounded-t border border-gray-500"></div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    ),
+  },
+  {
     id: "name",
     header: "试剂名称",
     cell: (item: any) => (
       <div className="flex flex-col">
         <span className="font-medium">{item.name}</span>
-        <span className="text-sm text-muted-foreground line-clamp-1">{item.englishName}</span>
       </div>
     ),
   },
@@ -366,11 +428,6 @@ export const cardFields = [
 // 试剂卡片字段配置
 export const reagentCardFields = [
   { 
-    id: "englishName", 
-    label: "英文名称", 
-    value: (item: any) => item.englishName
-  },
-  { 
     id: "category", 
     label: "试剂类型", 
     value: (item: any) => item.category
@@ -412,35 +469,8 @@ export const reagentActions = [
     },
   },
   {
-    id: "edit",
-    label: "编辑试剂",
-    icon: <Pencil className="h-4 w-4" />,
-    onClick: (item: any) => {
-      const url = `/laboratory/reagent/edit/${item.id}`;
-      window.open(url, "_self");
-    },
-  },
-  {
-    id: "apply",
-    label: "申领试剂",
-    icon: <FileText className="h-4 w-4" />,
-    onClick: (item: any) => {
-      const url = `/laboratory/reagent/apply/${item.id}`;
-      window.open(url, "_self");
-    },
-  },
-  {
-    id: "usage",
-    label: "使用记录",
-    icon: <List className="h-4 w-4" />,
-    onClick: (item: any) => {
-      const url = `/laboratory/reagent/usage/${item.id}`;
-      window.open(url, "_self");
-    },
-  },
-  {
     id: "purchase",
-    label: "入库记录",
+    label: "试剂入库",
     icon: <FileText className="h-4 w-4" />,
     onClick: (item: any) => {
       const url = `/laboratory/reagent/purchase/${item.id}`;
@@ -448,11 +478,11 @@ export const reagentActions = [
     },
   },
   {
-    id: "report",
-    label: "消耗统计",
-    icon: <BarChart className="h-4 w-4" />,
+    id: "apply",
+    label: "试剂申领",
+    icon: <FileText className="h-4 w-4" />,
     onClick: (item: any) => {
-      const url = `/laboratory/reagent/report/${item.id}`;
+      const url = `/laboratory/reagent/apply/${item.id}`;
       window.open(url, "_self");
     },
   },
@@ -502,4 +532,273 @@ export const batchActions = [
     icon: <Trash2 className="h-4 w-4" />,
     variant: "destructive",
   },
-] 
+]
+
+// 试剂卡片组件
+const ReagentCard = ({ 
+  item, 
+  actions, 
+  isSelected, 
+  onToggleSelect 
+}: {
+  item: any;
+  actions: any[];
+  isSelected: boolean;
+  onToggleSelect: (selected: boolean) => void;
+}) => {
+  // 获取危险等级颜色和文本
+  const getDangerLevelInfo = (level: string) => {
+    switch (level) {
+      case "高":
+        return {
+          color: "bg-red-100 text-red-700 border-red-200",
+          text: "高危品"
+        };
+      case "中":
+        return {
+          color: "bg-yellow-100 text-yellow-700 border-yellow-200",
+          text: "中危品"
+        };
+      case "低":
+        return {
+          color: "bg-green-100 text-green-700 border-green-200",
+          text: "低危品"
+        };
+      default:
+        return {
+          color: "bg-gray-100 text-gray-700 border-gray-200",
+          text: "安全品"
+        };
+    }
+  };
+
+  // 获取存储条件图标
+  const getStorageIcon = (condition: string) => {
+    if (condition.includes("℃")) {
+      return "❄️";
+    } else if (condition === "常温") {
+      return "🌡️";
+    }
+    return "📦";
+  };
+
+  // 检查是否即将过期（30天内）
+  const isExpiringSoon = () => {
+    const expiryDate = new Date(item.expiryDate);
+    const today = new Date();
+    const diffTime = expiryDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 30 && diffDays > 0;
+  };
+
+  // 检查是否已过期
+  const isExpired = () => {
+    const expiryDate = new Date(item.expiryDate);
+    const today = new Date();
+    return expiryDate < today;
+  };
+
+  const dangerInfo = getDangerLevelInfo(item.dangerLevel);
+
+  return (
+    <Card
+      className={cn(
+        "group transition-all duration-300 border border-[#E9ECF2] shadow-none hover:shadow-[0px_38px_45px_0px_rgba(198,210,241,0.25)] hover:border-primary/20 cursor-pointer",
+        "flex flex-col w-full relative", // 添加relative定位，使绝对定位的按钮正确显示
+        isSelected && "ring-2 ring-primary"
+      )}
+    >
+      {/* 操作按钮 - 与仪器卡片位置一致 */}
+      {actions && actions.length > 0 && (
+        <div className="absolute top-2 right-2 z-10">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-white/80 backdrop-blur-sm transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              {actions
+                .filter((action) => !action.hidden || !action.hidden(item))
+                .map((action) => (
+                  <DropdownMenuItem
+                    key={action.id}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      action.onClick(item, e)
+                    }}
+                    disabled={action.disabled ? action.disabled(item) : false}
+                    className={action.variant === "destructive" ? "text-destructive" : ""}
+                  >
+                    {action.icon && <span className="mr-2">{action.icon}</span>}
+                    {action.label}
+                  </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+
+      {/* 上半部分：左右布局 - 左侧图片，右侧详情 */}
+      <div className="flex p-4">
+        {/* 左侧：试剂图片区域 */}
+        <div className="relative w-16 h-16 overflow-hidden rounded-lg bg-white flex-shrink-0 mr-3 flex items-center justify-center">
+          {item.imageUrl ? (
+            <div className="relative w-full h-full flex items-center justify-center">
+              <img 
+                src={item.imageUrl} 
+                alt={`${item.name} 化学结构`}
+                className="max-w-full max-h-full object-contain bg-white transition-transform duration-300 group-hover:scale-110 p-1"
+                style={{transform: 'scale(1.5)'}}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent) {
+                    parent.innerHTML = `
+                      <div class="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+                        <div class="flex flex-col items-center justify-center space-y-1 text-gray-400">
+                          <div class="w-8 h-10 relative">
+                            <div class="w-full h-8 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative shadow-sm">
+                              <div class="absolute inset-x-1 top-1 bottom-1 bg-gradient-to-b from-blue-100 to-blue-200 rounded-sm opacity-80"></div>
+                              <div class="absolute inset-x-1 bottom-1 bg-gradient-to-t from-blue-500 to-blue-400 rounded-sm opacity-70" style="height: ${Math.max(20, (item.currentAmount / item.initialAmount) * 80)}%"></div>
+                            </div>
+                            <div class="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-4 h-1.5 bg-gray-400 rounded-t border border-gray-500"></div>
+                          </div>
+                        </div>
+                      </div>
+                    `;
+                  }
+                }}
+              />
+            </div>
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+              <div className="flex flex-col items-center justify-center space-y-1 text-gray-400">
+                <div className="w-8 h-10 relative">
+                  <div className="w-full h-8 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative shadow-sm">
+                    {/* 瓶身 */}
+                    <div className="absolute inset-x-1 top-1 bottom-1 bg-gradient-to-b from-blue-100 to-blue-200 rounded-sm opacity-80"></div>
+                    {/* 液体 */}
+                    <div 
+                      className="absolute inset-x-1 bottom-1 bg-gradient-to-t from-blue-500 to-blue-400 rounded-sm opacity-70"
+                      style={{ height: `${Math.max(20, (item.currentAmount / item.initialAmount) * 80)}%` }}
+                    ></div>
+                  </div>
+                  {/* 瓶盖 */}
+                  <div className="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-4 h-1.5 bg-gray-400 rounded-t border border-gray-500"></div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 右侧：详情信息区域 */}
+        <div className="flex-1 min-w-0 relative">
+
+          {/* 试剂名称信息 */}
+          <div className="mb-2">
+            <h3 className="font-semibold text-base text-gray-900 transition-colors duration-300 group-hover:text-primary truncate leading-tight">
+              {item.name}
+            </h3>
+          </div>
+
+          {/* 试剂关键信息 */}
+          <div className="space-y-2">
+            {/* 规格 - 科研人员和管理人员都需要 */}
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">规格:</span>
+              <span className="font-medium truncate ml-2">{item.specification}</span>
+            </div>
+
+            {/* 当前库存 - 申领和入库都需要关注 */}
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">库存:</span>
+              <span className={cn(
+                "font-medium",
+                item.currentAmount <= item.initialAmount * 0.2 ? "text-red-600" : 
+                item.currentAmount <= item.initialAmount * 0.5 ? "text-yellow-600" : "text-green-600"
+              )}>
+                {item.currentAmount}{item.unit}
+              </span>
+            </div>
+
+            {/* 存储条件 - 申领时需要知道如何保存 */}
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">存储:</span>
+              <div className="flex items-center gap-1">
+                <span>{getStorageIcon(item.storageCondition)}</span>
+                <span className="font-medium">{item.storageCondition}</span>
+              </div>
+            </div>
+
+            {/* 有效期 - 关键信息，影响申领决策 */}
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">有效期:</span>
+              <span className={cn(
+                "font-medium",
+                isExpired() ? "text-red-600" : isExpiringSoon() ? "text-yellow-600" : "text-gray-900"
+              )}>
+                {format(new Date(item.expiryDate), "yyyy/MM/dd")}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+        
+      {/* 下方：库存量和危险程度标签 - 保持不变 */}
+      <div className="flex items-center justify-between px-3 border-t border-gray-100 mx-3" style={{paddingTop: '0.45rem', paddingBottom: '0.45rem'}}>
+        <div className="flex items-center gap-1">
+          <span className="text-xs text-muted-foreground">库存量:</span>
+          <span className={cn(
+            "text-xs font-medium",
+            item.currentAmount > 0 ? "text-green-600" : "text-red-600"
+          )}>
+            {item.currentAmount > 0 ? `${item.currentAmount}${item.unit}` : "无库存"}
+          </span>
+        </div>
+        <Badge 
+          variant="outline" 
+          className={cn("font-medium text-xs", dangerInfo.color)}
+        >
+          {dangerInfo.text}
+        </Badge>
+      </div>
+    </Card>
+  );
+};
+
+// 试剂自定义卡片渲染器
+export const reagentCustomCardRenderer = (
+  item: any, 
+  actions: any[], 
+  isSelected: boolean, 
+  onToggleSelect: (selected: boolean) => void,
+  onRowActionClick?: (action: any, item: any) => void
+) => {
+  // 处理操作按钮点击事件，优先使用onRowActionClick
+  const processedActions = actions.map(action => ({
+    ...action,
+    onClick: (item: any, e: React.MouseEvent) => {
+      if (onRowActionClick) {
+        onRowActionClick(action, item);
+      } else if (action.onClick) {
+        action.onClick(item, e);
+      }
+    }
+  }));
+
+  return (
+    <ReagentCard 
+      item={item}
+      actions={processedActions}
+      isSelected={isSelected}
+      onToggleSelect={onToggleSelect}
+    />
+  );
+}; 

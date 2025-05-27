@@ -178,9 +178,6 @@ export default function ReagentApplicationsPage() {
                         <div className="flex items-center justify-between">
                           <h3 className="font-medium">
                             {application.reagentName}
-                            <span className="ml-2 text-sm text-muted-foreground">
-                              {application.reagentEnglishName}
-                            </span>
                           </h3>
                           {getStatusBadge(application.status)}
                         </div>

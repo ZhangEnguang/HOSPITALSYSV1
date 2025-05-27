@@ -127,7 +127,6 @@ export default function ReagentApplyPage({ params }: { params: { id: string } })
             <div className="flex justify-between items-center">
               <div>
                 <h3 className="text-lg font-medium">{reagent.name}</h3>
-                <p className="text-sm text-muted-foreground">{reagent.englishName}</p>
               </div>
               <Badge variant={reagent.status === "正常" ? "success" as any : reagent.status === "低库存" ? "warning" as any : "destructive"}>
                 {reagent.status}

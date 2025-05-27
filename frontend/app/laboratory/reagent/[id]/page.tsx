@@ -55,140 +55,191 @@ export default function ReagentDetailPage({ params }: { params: { id: string } }
   )
 
   return (
-    <div className="container mx-auto py-6">
-      {/* 标题和返回按钮 */}
-      <div className="mb-6 flex items-center">
-        <Button
-          variant="ghost"
-          className="mr-2"
-          size="icon"
-          onClick={() => router.back()}
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-2xl font-semibold flex-1">{reagent.name}</h1>
-        <div className="flex space-x-2">
-          <Button variant="outline" size="sm" onClick={() => window.print()}>
-            <Printer className="h-4 w-4 mr-2" />
-            打印
+    <div className="container mx-auto py-8">
+      {/* 标题栏 */}
+      <div className="mb-8">
+        <div className="flex items-center mb-4">
+          <Button
+            variant="ghost"
+            className="mr-3"
+            size="icon"
+            onClick={() => router.back()}
+          >
+            <ArrowLeft className="h-5 w-5" />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => router.push(`/laboratory/reagent/edit/${reagent.id}`)}>
-            <Edit className="h-4 w-4 mr-2" />
-            编辑
-          </Button>
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold text-gray-900">{reagent.name}</h1>
+          </div>
+          <div className="flex space-x-3">
+            <Button variant="outline" size="sm" onClick={() => window.print()}>
+              <Printer className="h-4 w-4 mr-2" />
+              打印
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => router.push(`/laboratory/reagent/edit/${reagent.id}`)}>
+              <Edit className="h-4 w-4 mr-2" />
+              编辑
+            </Button>
+          </div>
+        </div>
+
+        {/* 状态标识栏 */}
+        <div className="flex items-center gap-3">
+          <Badge 
+            variant={(statusColors[reagent.status] || "secondary") as any}
+            className="px-3 py-1 text-sm font-medium"
+          >
+            {reagent.status}
+          </Badge>
+          
+          {/* 危险等级标识 */}
+          {reagent.dangerLevel && reagent.dangerLevel !== "低" && (
+            <Badge 
+              variant="outline" 
+              className={`px-3 py-1 text-sm font-medium ${
+                reagent.dangerLevel === "高" 
+                  ? "bg-red-50 text-red-700 border-red-200" 
+                  : "bg-yellow-50 text-yellow-700 border-yellow-200"
+              }`}
+            >
+              <ShieldAlert className="h-3 w-3 mr-1" />
+              {reagent.dangerLevel === "高" ? "高危试剂" : "中危试剂"}
+            </Badge>
+          )}
+
+          {/* 过期状态 */}
+          {isExpired && (
+            <Badge variant="destructive" className="px-3 py-1 text-sm font-medium">
+              <AlertTriangle className="h-3 w-3 mr-1" />
+              已过期
+            </Badge>
+          )}
+          {!isExpired && daysRemaining <= 30 && (
+            <Badge variant="outline" className="px-3 py-1 text-sm font-medium bg-yellow-50 text-yellow-700 border-yellow-200">
+              <AlertTriangle className="h-3 w-3 mr-1" />
+              即将过期 ({daysRemaining}天)
+            </Badge>
+          )}
+
+          {/* 库存状态 */}
+          {remainingPercentage <= 20 && (
+            <Badge variant="destructive" className="px-3 py-1 text-sm font-medium">
+              库存不足
+            </Badge>
+          )}
         </div>
       </div>
 
-      {/* 英文名称和状态 */}
-      <div className="mb-6 flex items-center">
-        <p className="text-muted-foreground mr-4">{reagent.englishName}</p>
-        <Badge variant={(statusColors[reagent.status] || "secondary") as any}>
-          {reagent.status}
-        </Badge>
-        {isExpired && (
-          <Badge variant="destructive" className="ml-2">
-            <AlertTriangle className="h-3 w-3 mr-1" />
-            已过期
-          </Badge>
-        )}
-        {!isExpired && daysRemaining <= 30 && (
-          <Badge variant="warning" className="ml-2">
-            <AlertTriangle className="h-3 w-3 mr-1" />
-            即将过期 ({daysRemaining}天)
-          </Badge>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
         {/* 基本信息卡片 */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>基本信息</CardTitle>
+        <Card className="lg:col-span-3 border border-gray-100 rounded-lg bg-white shadow-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-xl font-semibold text-gray-900">基本信息</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-6">
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">规格</p>
-                <p className="font-medium">{reagent.specification}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500 font-medium">规格</div>
+                <div className="text-sm font-medium text-gray-900">{reagent.specification}</div>
               </div>
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">试剂类型</p>
+              
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500 font-medium">试剂类型</div>
                 <div className="flex items-center">
-                  <Tag className="h-4 w-4 mr-1 text-blue-500" />
-                  <p className="font-medium">{reagent.category}</p>
+                  <Badge className="bg-blue-50 text-blue-700 border-blue-200">
+                    {reagent.category}
+                  </Badge>
                 </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">CAS号</p>
-                <p className="font-medium">{reagent.casNumber || "-"}</p>
+              
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500 font-medium">CAS号</div>
+                <div className="text-sm font-medium text-gray-900">{reagent.casNumber || "-"}</div>
               </div>
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">目录号</p>
-                <p className="font-medium">{reagent.catalogNumber}</p>
+              
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500 font-medium">目录号</div>
+                <div className="text-sm font-medium text-gray-900">{reagent.catalogNumber}</div>
               </div>
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">生产厂商</p>
-                <p className="font-medium">{reagent.manufacturer}</p>
+              
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500 font-medium">生产厂商</div>
+                <div className="text-sm font-medium text-gray-900">{reagent.manufacturer}</div>
               </div>
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">供应商</p>
-                <p className="font-medium">{reagent.supplier}</p>
+              
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500 font-medium">供应商</div>
+                <div className="text-sm font-medium text-gray-900">{reagent.supplier}</div>
               </div>
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">所属部门</p>
-                <div className="flex items-center">
-                  <Building className="h-4 w-4 mr-1 text-purple-500" />
-                  <p className="font-medium">{reagent.department}</p>
+              
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500 font-medium">所属部门</div>
+                <div className="flex items-center gap-1 text-sm font-medium text-gray-900">
+                  <Building className="h-4 w-4 text-gray-500" />
+                  <span>{reagent.department}</span>
                 </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">存放位置</p>
-                <div className="flex items-center">
-                  <MapPin className="h-4 w-4 mr-1 text-red-500" />
-                  <p className="font-medium">{reagent.location}</p>
+              
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500 font-medium">存放位置</div>
+                <div className="flex items-center gap-1 text-sm font-medium text-gray-900">
+                  <MapPin className="h-4 w-4 text-gray-500" />
+                  <span>{reagent.location}</span>
                 </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">存储条件</p>
-                <p className="font-medium">{reagent.storageCondition}</p>
+              
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500 font-medium">存储条件</div>
+                <div className="text-sm font-medium text-gray-900">{reagent.storageCondition}</div>
               </div>
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">危险等级</p>
-                <div className="flex items-center">
-                  {reagent.dangerLevel === "高" ? (
-                    <ShieldAlert className="h-4 w-4 mr-1 text-red-500" />
-                  ) : reagent.dangerLevel === "中" ? (
-                    <ShieldAlert className="h-4 w-4 mr-1 text-amber-500" />
-                  ) : (
-                    <ShieldAlert className="h-4 w-4 mr-1 text-green-500" />
-                  )}
-                  <p className="font-medium">{reagent.dangerLevel}</p>
+              
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500 font-medium">危险等级</div>
+                <div className="flex items-center gap-1">
+                  <Badge 
+                    variant="outline" 
+                    className={`text-xs ${
+                      reagent.dangerLevel === "高" 
+                        ? "bg-red-50 text-red-700 border-red-200" 
+                        : reagent.dangerLevel === "中"
+                          ? "bg-yellow-50 text-yellow-700 border-yellow-200"
+                          : "bg-green-50 text-green-700 border-green-200"
+                    }`}
+                  >
+                    {reagent.dangerLevel}
+                  </Badge>
                 </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">价格</p>
-                <p className="font-medium">￥{reagent.price.toLocaleString()}</p>
+              
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500 font-medium">价格</div>
+                <div className="text-sm font-medium text-gray-900">￥{reagent.price.toLocaleString()}</div>
               </div>
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">负责人</p>
-                <div className="flex items-center">
-                  <Avatar className="h-5 w-5 mr-2">
+              
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500 font-medium">负责人</div>
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-6 w-6">
                     <AvatarImage src={reagent.manager.avatar} />
-                    <AvatarFallback>{reagent.manager.name[0]}</AvatarFallback>
+                    <AvatarFallback className="text-xs">{reagent.manager.name[0]}</AvatarFallback>
                   </Avatar>
-                  <p className="font-medium">{reagent.manager.name}</p>
+                  <span className="text-sm font-medium text-gray-900">{reagent.manager.name}</span>
                 </div>
               </div>
-              <div className="col-span-2 space-y-1">
-                <p className="text-sm text-muted-foreground">描述</p>
-                <p className="font-medium">{reagent.description}</p>
+            </div>
+            
+            {/* 描述信息 */}
+            <div className="mt-6 space-y-4">
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500 font-medium">描述</div>
+                <p className="text-sm text-gray-700 leading-relaxed">{reagent.description}</p>
               </div>
+              
               {reagent.notes && (
-                <div className="col-span-2 space-y-1">
-                  <p className="text-sm text-muted-foreground">注意事项</p>
-                  <div className="flex items-start rounded-md bg-amber-50 p-3">
-                    <AlertTriangle className="h-5 w-5 text-amber-500 mr-2 mt-0.5" />
-                    <p className="text-amber-800">{reagent.notes}</p>
+                <div className="space-y-2">
+                  <div className="text-xs text-gray-500 font-medium">注意事项</div>
+                  <div className="flex items-start rounded-lg bg-amber-50 p-4 border border-amber-200">
+                    <AlertTriangle className="h-5 w-5 text-amber-600 mr-3 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-amber-800 leading-relaxed">{reagent.notes}</p>
                   </div>
                 </div>
               )}
@@ -197,82 +248,106 @@ export default function ReagentDetailPage({ params }: { params: { id: string } }
         </Card>
 
         {/* 状态卡片 */}
-        <Card>
-          <CardHeader>
-            <CardTitle>库存状态</CardTitle>
+        <Card className="border border-gray-100 rounded-lg bg-white shadow-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg font-semibold text-gray-900">库存状态</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* 库存状态 */}
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <p className="text-sm text-muted-foreground">当前库存</p>
-                <p className="font-medium">{reagent.currentAmount} / {reagent.initialAmount} {reagent.unit}</p>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">当前库存</span>
+                <span className="font-semibold text-gray-900">
+                  {reagent.currentAmount} / {reagent.initialAmount} {reagent.unit}
+                </span>
               </div>
-              <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
-                <div 
-                  className={`h-full ${
-                    remainingPercentage <= 20 
-                      ? "bg-red-500" 
-                      : remainingPercentage <= 50 
-                        ? "bg-amber-500" 
-                        : "bg-green-500"
-                  }`}
-                  style={{ width: `${remainingPercentage}%` }}
-                />
+              <div className="space-y-2">
+                <div className="h-3 rounded-full bg-gray-100 overflow-hidden">
+                  <div 
+                    className={`h-full transition-all duration-300 ${
+                      remainingPercentage <= 20 
+                        ? "bg-red-500" 
+                        : remainingPercentage <= 50 
+                          ? "bg-amber-500" 
+                          : "bg-green-500"
+                    }`}
+                    style={{ width: `${remainingPercentage}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>0</span>
+                  <span className="font-medium">{remainingPercentage.toFixed(1)}%</span>
+                  <span>{reagent.initialAmount}{reagent.unit}</span>
+                </div>
               </div>
             </div>
 
             {/* 日期信息 */}
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-2 text-blue-500" />
-                  <p className="text-sm">购置日期</p>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">购置日期</span>
                 </div>
-                <p className="font-medium">{format(new Date(reagent.purchaseDate), "yyyy/MM/dd")}</p>
+                <span className="font-medium text-gray-900">{format(new Date(reagent.purchaseDate), "yyyy/MM/dd")}</span>
               </div>
               <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-2 text-orange-500" />
-                  <p className="text-sm">开封日期</p>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">开封日期</span>
                 </div>
-                <p className="font-medium">{reagent.openDate ? format(new Date(reagent.openDate), "yyyy/MM/dd") : "-"}</p>
+                <span className="font-medium text-gray-900">{reagent.openDate ? format(new Date(reagent.openDate), "yyyy/MM/dd") : "-"}</span>
               </div>
               <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-2 text-red-500" />
-                  <p className="text-sm">有效期至</p>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">有效期至</span>
                 </div>
-                <p className={`font-medium ${isExpired ? "text-red-500" : ""}`}>
+                <span className={`font-medium ${isExpired ? "text-red-600" : daysRemaining <= 30 ? "text-yellow-600" : "text-gray-900"}`}>
                   {format(new Date(reagent.expiryDate), "yyyy/MM/dd")}
-                </p>
+                </span>
               </div>
             </div>
 
             {/* 快捷操作 */}
-            <div className="space-y-2 pt-4">
-              <h4 className="font-medium text-sm mb-3">快捷操作</h4>
+            <div className="space-y-3 pt-4 border-t border-gray-100">
+              <h4 className="font-semibold text-sm text-gray-900">快捷操作</h4>
               <div className="grid grid-cols-1 gap-2">
-                <Button variant="outline" className="justify-start" onClick={() => router.push(`/laboratory/reagent/usage/${reagent.id}`)}>
-                  <Clipboard className="h-4 w-4 mr-2" />
+                <Button 
+                  variant="outline" 
+                  className="justify-start h-10 text-sm hover:bg-gray-50" 
+                  onClick={() => router.push(`/laboratory/reagent/usage/${reagent.id}`)}
+                >
+                  <Clipboard className="h-4 w-4 mr-2 text-gray-500" />
                   使用记录
-                  <ChevronRight className="h-4 w-4 ml-auto" />
+                  <ChevronRight className="h-4 w-4 ml-auto text-gray-400" />
                 </Button>
-                <Button variant="outline" className="justify-start" onClick={() => router.push(`/laboratory/reagent/usage/${reagent.id}/new`)}>
-                  <Clipboard className="h-4 w-4 mr-2" />
+                <Button 
+                  variant="outline" 
+                  className="justify-start h-10 text-sm hover:bg-gray-50" 
+                  onClick={() => router.push(`/laboratory/reagent/usage/${reagent.id}/new`)}
+                >
+                  <Clipboard className="h-4 w-4 mr-2 text-gray-500" />
                   记录使用量
-                  <ChevronRight className="h-4 w-4 ml-auto" />
+                  <ChevronRight className="h-4 w-4 ml-auto text-gray-400" />
                 </Button>
-                <Button variant="outline" className="justify-start">
-                  <BarChart2 className="h-4 w-4 mr-2" />
+                <Button 
+                  variant="outline" 
+                  className="justify-start h-10 text-sm hover:bg-gray-50"
+                >
+                  <BarChart2 className="h-4 w-4 mr-2 text-gray-500" />
                   消耗统计
-                  <ChevronRight className="h-4 w-4 ml-auto" />
+                  <ChevronRight className="h-4 w-4 ml-auto text-gray-400" />
                 </Button>
                 {reagent.msdsUrl && (
-                  <Button variant="outline" className="justify-start" onClick={() => window.open(reagent.msdsUrl, '_blank')}>
-                    <Download className="h-4 w-4 mr-2" />
+                  <Button 
+                    variant="outline" 
+                    className="justify-start h-10 text-sm hover:bg-gray-50" 
+                    onClick={() => window.open(reagent.msdsUrl, '_blank')}
+                  >
+                    <Download className="h-4 w-4 mr-2 text-gray-500" />
                     下载MSDS
-                    <ChevronRight className="h-4 w-4 ml-auto" />
+                    <ChevronRight className="h-4 w-4 ml-auto text-gray-400" />
                   </Button>
                 )}
               </div>
@@ -281,10 +356,10 @@ export default function ReagentDetailPage({ params }: { params: { id: string } }
         </Card>
 
         {/* 使用记录卡片 */}
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>使用记录</CardTitle>
-            <CardDescription>试剂的近期使用和库存记录</CardDescription>
+        <Card className="lg:col-span-4 border border-gray-100 rounded-lg bg-white shadow-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-xl font-semibold text-gray-900">使用记录</CardTitle>
+            <CardDescription className="text-gray-600">试剂的近期使用和库存记录</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="usage">
