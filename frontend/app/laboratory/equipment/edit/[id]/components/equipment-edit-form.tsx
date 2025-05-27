@@ -11,7 +11,8 @@ import {
   X,
   Calendar,
   DollarSign,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -24,16 +25,15 @@ import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { toast } from "@/components/ui/use-toast"
 import { DatePicker } from "@/components/date-picker"
-import { allDemoEquipmentItems } from "../../data/equipment-demo-data"
+import { allDemoEquipmentItems } from "../../../data/equipment-demo-data"
 
-// 仪器表单组件接口
-interface EquipmentFormProps {
-  equipmentId?: string
-  isEditMode?: boolean
+// 仪器编辑表单组件接口
+interface EquipmentEditFormProps {
+  equipmentId: string
 }
 
-// 仪器表单组件
-export function EquipmentForm({ equipmentId, isEditMode = false }: EquipmentFormProps) {
+// 仪器编辑表单组件
+export function EquipmentEditForm({ equipmentId }: EquipmentEditFormProps) {
   const router = useRouter()
 
   // 表单数据状态
@@ -80,7 +80,79 @@ export function EquipmentForm({ equipmentId, isEditMode = false }: EquipmentForm
   const [showCompletionDialog, setShowCompletionDialog] = useState(false)
   
   // 加载状态
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  
+  // 提交状态
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // 加载仪器数据
+  useEffect(() => {
+    const loadEquipmentData = () => {
+      try {
+        setIsLoading(true)
+        
+        // 从演示数据中查找仪器
+        const equipment = allDemoEquipmentItems.find(item => item.id === equipmentId)
+        
+        if (equipment) {
+          // 填充表单数据
+          setFormData({
+            name: equipment.name || "",
+            model: equipment.model || "",
+            serialNumber: equipment.serialNumber || "",
+            description: equipment.description || "",
+            category: equipment.category || "",
+            status: equipment.status || "待验收",
+            department: equipment.department || "",
+            location: equipment.location || "",
+            purchaseDate: equipment.purchaseDate ? new Date(equipment.purchaseDate) : new Date(),
+            warrantyExpiry: equipment.warrantyExpiry ? new Date(equipment.warrantyExpiry) : new Date(new Date().setFullYear(new Date().getFullYear() + 3)),
+            price: equipment.price ? equipment.price.toString() : "",
+            supplier: equipment.supplier || "",
+            powerSupply: equipment.specifications?.powerSupply || "",
+            dimensions: equipment.specifications?.dimensions || "",
+            weight: equipment.specifications?.weight || "",
+            operatingTemperature: equipment.specifications?.operatingTemperature || "",
+            humidity: equipment.specifications?.humidity || "",
+            specialRequirements: equipment.specifications?.specialRequirements || "",
+            maintenanceStatus: equipment.maintenanceStatus || "正常",
+            useFrequency: equipment.useFrequency || "中",
+          })
+          
+          // 设置图片
+          if (equipment.images && equipment.images.length > 0) {
+            setUploadedImages(equipment.images)
+          }
+          
+          toast({
+            title: "数据加载成功",
+            description: `已加载仪器"${equipment.name}"的信息`,
+            duration: 3000,
+          })
+        } else {
+          toast({
+            title: "仪器未找到",
+            description: "未找到指定的仪器信息",
+            variant: "destructive",
+          })
+          router.push("/laboratory/equipment")
+        }
+      } catch (error) {
+        console.error("加载仪器数据失败:", error)
+        toast({
+          title: "加载失败",
+          description: "加载仪器数据时发生错误",
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    if (equipmentId) {
+      loadEquipmentData()
+    }
+  }, [equipmentId, router])
 
   // 更新表单数据
   const updateFormData = (field: string, value: any) => {
@@ -179,69 +251,61 @@ export function EquipmentForm({ equipmentId, isEditMode = false }: EquipmentForm
   const handleSaveDraft = () => {
     toast({
       title: "草稿已保存",
-      description: "您的仪器信息已保存为草稿",
+      description: "您的仪器修改已保存为草稿",
       duration: 3000,
     })
   }
 
   // 提交表单
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) {
       return
     }
     
-    // 构建完整的仪器数据，包含图片
-    const equipmentData = {
-      ...formData,
-      images: uploadedImages
+    setIsSubmitting(true)
+    
+    try {
+      // 构建完整的仪器数据，包含图片
+      const equipmentData = {
+        id: equipmentId,
+        ...formData,
+        images: uploadedImages,
+        price: formData.price ? Number(formData.price) : 0,
+        specifications: {
+          powerSupply: formData.powerSupply,
+          dimensions: formData.dimensions,
+          weight: formData.weight,
+          operatingTemperature: formData.operatingTemperature,
+          humidity: formData.humidity,
+          specialRequirements: formData.specialRequirements,
+        }
+      }
+      
+      // 模拟API调用
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      console.log("更新仪器数据:", equipmentData)
+      
+      setShowCompletionDialog(true)
+    } catch (error) {
+      toast({
+        title: "更新失败",
+        description: "更新仪器信息时发生错误，请重试",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
     }
-    
-    // 这里应该调用API保存数据
-    console.log("提交仪器数据:", equipmentData)
-    
-    setShowCompletionDialog(true)
-  }
-
-  // 继续添加下一个仪器
-  const handleContinueAdding = () => {
-    // 重置表单
-    setFormData({
-      name: "",
-      model: "",
-      serialNumber: "",
-      description: "",
-      category: "",
-      status: "待验收",
-      department: "",
-      location: "",
-      purchaseDate: new Date(),
-      warrantyExpiry: new Date(new Date().setFullYear(new Date().getFullYear() + 3)),
-      price: "",
-      supplier: "",
-      powerSupply: "",
-      dimensions: "",
-      weight: "",
-      operatingTemperature: "",
-      humidity: "",
-      specialRequirements: "",
-      maintenanceStatus: "正常",
-      useFrequency: "中",
-    })
-    setUploadedImages([])
-    setFormErrors({})
-    setFormTouched({})
-    setShowCompletionDialog(false)
-    
-    toast({
-      title: "表单已重置",
-      description: "您可以继续添加新的仪器",
-      duration: 3000,
-    })
   }
 
   // 返回列表
   const handleReturnToList = () => {
     router.push("/laboratory/equipment")
+  }
+
+  // 返回详情页
+  const handleReturnToDetail = () => {
+    router.push(`/laboratory/equipment/${equipmentId}`)
   }
 
   // 章节标题组件
@@ -266,6 +330,20 @@ export function EquipmentForm({ equipmentId, isEditMode = false }: EquipmentForm
     )
   }
 
+  // 加载状态
+  if (isLoading) {
+    return (
+      <div className="container py-6 space-y-6 max-w-5xl">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+            <p className="text-muted-foreground">正在加载仪器信息...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="container py-6 space-y-6 max-w-5xl">
       <div className="flex items-center">
@@ -277,7 +355,7 @@ export function EquipmentForm({ equipmentId, isEditMode = false }: EquipmentForm
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold">新增仪器</h1>
+          <h1 className="text-2xl font-bold">编辑仪器</h1>
         </div>
       </div>
 
@@ -672,15 +750,24 @@ export function EquipmentForm({ equipmentId, isEditMode = false }: EquipmentForm
             <Button 
               variant="outline" 
               onClick={handleSaveDraft}
+              disabled={isSubmitting}
               className="px-6"
             >
               保存草稿
             </Button>
             <Button 
               onClick={handleSubmit}
+              disabled={isSubmitting}
               className="px-6 bg-blue-600 hover:bg-blue-700"
             >
-              提交审核
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  更新中...
+                </>
+              ) : (
+                "更新仪器"
+              )}
             </Button>
           </div>
         </CardContent>
@@ -693,17 +780,17 @@ export function EquipmentForm({ equipmentId, isEditMode = false }: EquipmentForm
             <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
               <CheckCircle2 className="w-6 h-6 text-green-600" />
             </div>
-            <DialogTitle>仪器添加成功！</DialogTitle>
+            <DialogTitle>仪器更新成功！</DialogTitle>
             <DialogDescription>
-              您的仪器信息已成功提交，系统将进行审核处理。您可以选择继续添加新仪器或返回列表页面。
+              您的仪器信息已成功更新。您可以选择返回详情页面查看更新后的信息，或返回列表页面。
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex gap-2 sm:gap-0">
-            <Button variant="outline" onClick={handleContinueAdding}>
-              继续添加仪器
+            <Button variant="outline" onClick={handleReturnToDetail}>
+              查看详情
             </Button>
             <Button onClick={handleReturnToList}>
-              返回仪器列表
+              返回列表
             </Button>
           </DialogFooter>
         </DialogContent>
