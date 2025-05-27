@@ -43,6 +43,7 @@ interface UniversalDetailAdapterProps {
   
   // 自定义标签页
   tabComponents?: Record<string, React.ReactNode>
+  customTabLabels?: Record<string, string>
   
   // 自定义高度
   tabsHeight?: number
@@ -61,6 +62,9 @@ interface UniversalDetailAdapterProps {
 
   // 自定义操作按钮
   customActions?: ActionConfig[]
+  
+  // 自定义字段
+  customFields?: FieldConfig[]
 }
 
 export default function UniversalDetailAdapter({
@@ -75,6 +79,7 @@ export default function UniversalDetailAdapter({
   onEdit,
   rightSidebarComponent = null,
   tabComponents = {},
+  customTabLabels = {},
   tabsHeight = 40,
   headerHeight = 60,
   buttonsHeight = 40,
@@ -83,6 +88,7 @@ export default function UniversalDetailAdapter({
   customBackPath,
   statusColors = {},
   customActions = [],
+  customFields = [],
 }: UniversalDetailAdapterProps) {
   const router = useRouter()
   const [itemStatus, setItemStatus] = useState<string>(itemData?.status || "进行中")
@@ -212,70 +218,91 @@ export default function UniversalDetailAdapter({
   const tabConfigs: TabConfig[] = [
     {
       id: "overview",
-      label: "概览",
+      label: customTabLabels.overview || "概览",
       icon: <FileIcon className="h-4 w-4" />,
       component: tabComponents.overview || getDefaultTabComponent("overview"),
       hidden: hiddenTabs.includes("overview"),
     },
     {
+      id: "booking",
+      label: customTabLabels.booking || "预约记录",
+      icon: <Calendar className="h-4 w-4" />,
+      component: tabComponents.booking || getDefaultTabComponent("booking"),
+      hidden: hiddenTabs.includes("booking"),
+    },
+    {
+      id: "maintenance",
+      label: customTabLabels.maintenance || "维护记录",
+      icon: <GitBranch className="h-4 w-4" />,
+      component: tabComponents.maintenance || getDefaultTabComponent("maintenance"),
+      hidden: hiddenTabs.includes("maintenance"),
+    },
+    {
+      id: "recommendations",
+      label: customTabLabels.recommendations || "相关推荐",
+      icon: <Award className="h-4 w-4" />,
+      component: tabComponents.recommendations || getDefaultTabComponent("recommendations"),
+      hidden: hiddenTabs.includes("recommendations"),
+    },
+    {
       id: "process",
-      label: "执行过程",
+      label: customTabLabels.process || "执行过程",
       icon: <GitBranch className="h-4 w-4" />,
       component: tabComponents.process || getDefaultTabComponent("process"),
       hidden: hiddenTabs.includes("process"),
     },
     {
       id: "funds",
-      label: "经费管理",
+      label: customTabLabels.funds || "经费管理",
       icon: <DollarSign className="h-4 w-4" />,
       component: tabComponents.funds || getDefaultTabComponent("funds"),
       hidden: hiddenTabs.includes("funds"),
     },
     {
       id: "achievements",
-      label: "成果管理",
+      label: customTabLabels.achievements || "成果管理",
       icon: <Award className="h-4 w-4" />,
       component: tabComponents.achievements || getDefaultTabComponent("achievements"),
       hidden: hiddenTabs.includes("achievements"),
     },
     {
       id: "risks",
-      label: "风险与问题",
+      label: customTabLabels.risks || "风险与问题",
       icon: <AlertTriangle className="h-4 w-4" />,
       component: tabComponents.risks || getDefaultTabComponent("risks"),
       hidden: hiddenTabs.includes("risks"),
     },
     {
       id: "reports",
-      label: "报告",
+      label: customTabLabels.reports || "报告",
       icon: <ClipboardList className="h-4 w-4" />,
       component: tabComponents.reports || getDefaultTabComponent("reports"),
       hidden: hiddenTabs.includes("reports"),
     },
     {
       id: "statistics",
-      label: "统计分析",
+      label: customTabLabels.statistics || "统计分析",
       icon: <BarChart className="h-4 w-4" />,
       component: tabComponents.statistics || getDefaultTabComponent("statistics"),
       hidden: hiddenTabs.includes("statistics"),
     },
     {
       id: "documents",
-      label: "文档",
+      label: customTabLabels.documents || "文档",
       icon: <FileText className="h-4 w-4" />,
       component: tabComponents.documents || getDefaultTabComponent("documents"),
       hidden: hiddenTabs.includes("documents"),
     },
     {
       id: "members",
-      label: "成员",
+      label: customTabLabels.members || "成员",
       icon: <User className="h-4 w-4" />,
       component: tabComponents.members || getDefaultTabComponent("members"),
       hidden: hiddenTabs.includes("members"),
     },
     {
       id: "custom",
-      label: "关联项目",
+      label: customTabLabels.custom || "关联项目",
       icon: <Layers className="h-4 w-4" />,
       component: tabComponents.custom || getDefaultTabComponent("custom"),
       hidden: hiddenTabs.includes("custom") || !tabComponents.custom,
@@ -304,7 +331,7 @@ export default function UniversalDetailAdapter({
   ]
 
   // 定义字段配置
-  const fieldConfigs: FieldConfig[] = [
+  const defaultFieldConfigs: FieldConfig[] = [
     {
       id: "applicant",
       label: "负责人",
@@ -320,6 +347,14 @@ export default function UniversalDetailAdapter({
       hidden: hiddenFields.includes("period"),
     },
   ]
+
+  // 合并自定义字段和默认字段
+  const fieldConfigs: FieldConfig[] = customFields.length > 0 
+    ? customFields.map(field => ({
+        ...field,
+        hidden: hiddenFields.includes(field.id)
+      }))
+    : defaultFieldConfigs
 
   return (
     <>

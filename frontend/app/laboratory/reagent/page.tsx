@@ -44,7 +44,7 @@ function ReagentContent() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterValues, setFilterValues] = useState<Record<string, any>>({})
   const [sortOption, setSortOption] = useState("purchaseDate_desc")
-  const [viewMode, setViewMode] = useState<"grid" | "list">("list")
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
   const [selectedRows, setSelectedRows] = useState<string[]>([])
