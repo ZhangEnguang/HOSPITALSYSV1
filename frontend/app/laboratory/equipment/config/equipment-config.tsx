@@ -498,6 +498,11 @@ export const equipmentActions = [
     label: "删除仪器",
     icon: <Trash2 className="h-4 w-4" />,
     variant: "destructive",
+    onClick: (item: any) => {
+      // 这个onClick会被DataList组件的onRowActionClick处理
+      // 实际的删除逻辑在page.tsx中的handleDeleteItem函数中
+      console.log("删除仪器:", item.name);
+    },
   },
 ]
 
@@ -681,12 +686,25 @@ export const equipmentCustomCardRenderer = (
   item: any, 
   actions: any[], 
   isSelected: boolean, 
-  onToggleSelect: (selected: boolean) => void
+  onToggleSelect: (selected: boolean) => void,
+  onRowActionClick?: (action: any, item: any) => void
 ) => {
+  // 处理操作按钮点击事件，优先使用onRowActionClick
+  const processedActions = actions.map(action => ({
+    ...action,
+    onClick: (item: any, e: React.MouseEvent) => {
+      if (onRowActionClick) {
+        onRowActionClick(action, item);
+      } else if (action.onClick) {
+        action.onClick(item, e);
+      }
+    }
+  }));
+
   return (
     <EquipmentCard 
       item={item}
-      actions={actions}
+      actions={processedActions}
       isSelected={isSelected}
       onToggleSelect={onToggleSelect}
     />

@@ -166,14 +166,15 @@ export default function EquipmentMaintenancePage() {
       {/* 顶部导航 */}
       <div className="z-10">
         <div className="container mx-auto py-3">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {/* 返回按钮 */}
-            <button
+            <Button 
+              variant="ghost" 
+              size="icon" 
               onClick={() => router.back()}
-              className="h-8 w-8 flex items-center justify-center border rounded-md text-gray-500 hover:text-primary transition-colors duration-200 bg-white shadow-sm"
             >
-              <ArrowLeft className="h-4 w-4" />
-            </button>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
             <h1 className="text-2xl font-bold text-gray-900">
               维护登记
             </h1>

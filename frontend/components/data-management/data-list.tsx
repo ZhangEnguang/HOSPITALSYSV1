@@ -119,7 +119,8 @@ interface DataListProps {
     item: any, 
     actions: CardAction[], 
     isSelected: boolean, 
-    onToggleSelect: (selected: boolean) => void
+    onToggleSelect: (selected: boolean) => void,
+    onRowActionClick?: (action: any, item: any) => void
   ) => React.ReactNode
   onViewDetails?: (item: any) => void
   onEditConfig?: (item: any) => void
@@ -386,7 +387,8 @@ export default function DataList({
                       } else {
                         onSelectedRowsChange(selectedRows.filter((id) => id !== item.id));
                       }
-                    }
+                    },
+                    onRowActionClick
                   )}
                 </div>
               );
@@ -518,6 +520,7 @@ export default function DataList({
               onItemClick={onItemClick}
               detailsUrlPrefix={detailsUrlPrefix}
               noDataMessage={noResultsText || "暂无数据"}
+              onRowActionClick={onRowActionClick}
             />
           </div>
         </div>

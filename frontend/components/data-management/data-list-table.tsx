@@ -32,6 +32,7 @@ interface DataListTableProps<T> {
   visibleColumns?: Record<string, boolean>
   onVisibleColumnsChange?: (columns: Record<string, boolean>) => void
   onSelectedRowsChange?: (rows: string[]) => void
+  onRowActionClick?: (action: any, item: T) => void
 }
 
 export default function DataListTable<T extends { id: string }>({
@@ -47,6 +48,7 @@ export default function DataListTable<T extends { id: string }>({
   visibleColumns = {},
   onVisibleColumnsChange,
   onSelectedRowsChange,
+  onRowActionClick,
 }: DataListTableProps<T>) {
   // 过滤后的有效列配置
   const filteredColumns = columns.filter((column) => visibleColumns[column.id] !== false && Boolean(column))
@@ -213,7 +215,11 @@ export default function DataListTable<T extends { id: string }>({
                                     key={action.id}
                                     onClick={(e) => {
                                       e.stopPropagation()
-                                      action.onClick(item)
+                                      if (onRowActionClick) {
+                                        onRowActionClick(action, item)
+                                      } else if (action.onClick) {
+                                        action.onClick(item)
+                                      }
                                     }}
                                     disabled={action.disabled ? action.disabled(item) : false}
                                     className={action.id === "delete" ? "text-destructive" : ""}
