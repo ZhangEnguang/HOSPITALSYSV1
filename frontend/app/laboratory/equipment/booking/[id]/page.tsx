@@ -1,20 +1,42 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Eye, Calendar, Clock, MapPin, User, Phone, Mail, Zap, Weight, Thermometer, Droplets, ShieldCheck, Info, ChevronRight, CheckCircle2 } from "lucide-react"
+import { ArrowLeft, Eye, Calendar, Clock, MapPin, User, Phone, Mail, Zap, Weight, Thermometer, Droplets, ShieldCheck, Info, ChevronRight, CheckCircle2, Brain, AlertTriangle, Lightbulb, TrendingUp, Users, FileText, Sparkles, ChevronUp, ChevronDown } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, addWeeks, addMonths, isSameDay, isToday } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { allDemoEquipmentItems } from "../../data/equipment-demo-data"
+
+// 导入AI功能
+import { 
+  getBestTimeRecommendations, 
+  detectConflicts, 
+  getDurationSuggestion, 
+  getUsageHeatmapData,
+  type TimeRecommendation,
+  type ConflictDetection,
+  type DurationSuggestion
+} from "./ai-recommendation"
+import { 
+  getSmartFormSuggestions,
+  getProjectSuggestions,
+  type ExperimentSuggestion,
+  type ProjectSuggestion,
+  type SampleInfo,
+  type SmartFormSuggestions
+} from "./smart-form-assistant"
 
 // 从真实数据中获取仪器信息
 const getEquipmentData = (id: string) => {
@@ -102,14 +124,74 @@ export default function EquipmentBookingPage() {
   const [selectedDateForTimeSlots, setSelectedDateForTimeSlots] = useState<Date | null>(null)
 
   const [formData, setFormData] = useState({
+    booker: "",        // 预约人
+    department: "",    // 所属单位
     purpose: "",
     project: "",
     notes: "",
-    contact: "",
     phone: "",
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [bookerInputOpen, setBookerInputOpen] = useState(false)
+
+  // AI功能相关状态
+  const [timeRecommendations, setTimeRecommendations] = useState<TimeRecommendation[]>([])
+  const [conflictDetection, setConflictDetection] = useState<ConflictDetection>({
+    hasConflict: false,
+    conflictType: 'none',
+    message: '',
+    suggestion: ''
+  })
+  const [durationSuggestion, setDurationSuggestion] = useState<DurationSuggestion | null>(null)
+  const [smartFormSuggestions, setSmartFormSuggestions] = useState<SmartFormSuggestions>({
+    purpose: [],
+    project: [],
+    sampleInfo: null,
+    completionTips: []
+  })
+  const [showAIRecommendations, setShowAIRecommendations] = useState(false)
+  const [projectInputOpen, setProjectInputOpen] = useState(false)
+  const [projectInputFocused, setProjectInputFocused] = useState(false)
+  const [usageHeatmapData] = useState(getUsageHeatmapData())
+
+  // 模拟人员数据
+  const mockUsers = [
+    { id: "1", name: "张教授", department: "材料科学与工程学院", role: "教授", email: "zhang@university.edu" },
+    { id: "2", name: "李博士", department: "材料科学与工程学院", role: "博士后", email: "li@university.edu" },
+    { id: "3", name: "王研究员", department: "物理学院", role: "研究员", email: "wang@university.edu" },
+    { id: "4", name: "陈教授", department: "化学学院", role: "教授", email: "chen@university.edu" },
+    { id: "5", name: "刘博士", department: "材料科学与工程学院", role: "副教授", email: "liu@university.edu" },
+    { id: "6", name: "赵博士", department: "纳米技术研究院", role: "博士", email: "zhao@university.edu" },
+    { id: "7", name: "孙研究员", department: "纳米技术研究院", role: "研究员", email: "sun@university.edu" },
+    { id: "8", name: "马教授", department: "生物医学工程学院", role: "教授", email: "ma@university.edu" },
+    { id: "9", name: "钱博士", department: "生物医学工程学院", role: "博士后", email: "qian@university.edu" }
+  ]
+
+  // 获取预约人建议
+  const getBookerSuggestions = (input: string) => {
+    if (!input) return []
+    return mockUsers.filter(user => 
+      user.name.toLowerCase().includes(input.toLowerCase()) ||
+      user.department.toLowerCase().includes(input.toLowerCase())
+    ).slice(0, 5)
+  }
+
+  // 应用预约人选择
+  const applyBookerSelection = (user: typeof mockUsers[0]) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      booker: user.name,
+      department: user.department 
+    }))
+    setBookerInputOpen(false)
+    
+    toast({
+      title: "预约人已选择",
+      description: `已选择：${user.name}（${user.department}）`,
+      duration: 2000,
+    })
+  }
 
   // 时间段配置 - 24小时制
   const timeSlots = [
@@ -122,6 +204,48 @@ export default function EquipmentBookingPage() {
     "18:00", "18:30", "19:00", "19:30", "20:00", "20:30",
     "21:00", "21:30", "22:00", "22:30", "23:00", "23:30"
   ]
+
+  // AI功能实时更新
+  useEffect(() => {
+    // 获取时间推荐
+    const endDate = new Date()
+    endDate.setDate(endDate.getDate() + 14) // 未来两周
+    const recommendations = getBestTimeRecommendations(
+      new Date(),
+      endDate,
+      equipment.name,
+      mockBookings
+    )
+    setTimeRecommendations(recommendations)
+  }, [equipment.name])
+
+  useEffect(() => {
+    // 检测时间冲突
+    const conflicts = detectConflicts(selectedTimeSlots)
+    setConflictDetection(conflicts)
+  }, [selectedTimeSlots])
+
+  useEffect(() => {
+    // 获取时长建议
+    if (formData.purpose) {
+      const suggestion = getDurationSuggestion(formData.purpose, equipment.name)
+      setDurationSuggestion(suggestion)
+    }
+  }, [formData.purpose, equipment.name])
+
+  useEffect(() => {
+    // 使用防抖机制，避免频繁更新导致闪烁
+    const timeoutId = setTimeout(() => {
+      // 更新智能表单建议
+      const suggestions = getSmartFormSuggestions(formData, equipment.name)
+      // 更新项目建议，传入预约人信息
+      const projectSuggestions = getProjectSuggestions(formData.purpose, equipment.name, formData.project, formData.booker)
+      suggestions.project = projectSuggestions
+      setSmartFormSuggestions(suggestions)
+    }, 300) // 300ms防抖延迟
+
+    return () => clearTimeout(timeoutId)
+  }, [formData, equipment.name])
 
   // 获取当前视图的日期范围
   const getDateRange = () => {
@@ -252,10 +376,10 @@ export default function EquipmentBookingPage() {
     setIsSubmitting(true)
 
     // 表单验证
-    if (selectedTimeSlots.length === 0 || !formData.purpose || !formData.contact) {
+    if (selectedTimeSlots.length === 0 || !formData.booker || !formData.department || !formData.purpose || !formData.phone) {
       toast({
         title: "表单验证失败",
-        description: "请选择时间段并填写所有必填字段",
+        description: "请选择时间段并填写所有必填字段（预约人、所属单位、使用目的、联系电话）",
         variant: "destructive",
       })
       setIsSubmitting(false)
@@ -281,6 +405,52 @@ export default function EquipmentBookingPage() {
       })
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  // AI推荐处理函数
+  const applyTimeRecommendation = (recommendation: TimeRecommendation) => {
+    const start = new Date(recommendation.date)
+    const [hours, minutes] = recommendation.startTime.split(':').map(Number)
+    start.setHours(hours, minutes, 0, 0)
+    
+    const end = new Date(recommendation.date)
+    const [endHours, endMinutes] = recommendation.endTime.split(':').map(Number)
+    end.setHours(endHours, endMinutes, 0, 0)
+    
+    const newSlot = { start, end }
+    setSelectedTimeSlots(prev => [...prev, newSlot])
+    
+    toast({
+      title: "时间推荐已应用",
+      description: `已添加 ${recommendation.startTime} - ${recommendation.endTime} 时间段`,
+      duration: 2000,
+    })
+  }
+
+  const applyProjectSuggestion = (suggestion: ProjectSuggestion) => {
+    setFormData(prev => ({ ...prev, project: suggestion.name }))
+    setProjectInputOpen(false)
+    
+    toast({
+      title: "项目已关联",
+      description: `已关联到：${suggestion.name}`,
+      duration: 2000,
+    })
+  }
+
+  const applySampleTemplate = () => {
+    if (smartFormSuggestions.sampleInfo) {
+      setFormData(prev => ({ 
+        ...prev, 
+        notes: prev.notes + (prev.notes ? '\n\n' : '') + smartFormSuggestions.sampleInfo!.template 
+      }))
+      
+      toast({
+        title: "样品信息模板已应用",
+        description: "已在备注中添加样品信息模板",
+        duration: 2000,
+      })
     }
   }
 
@@ -513,6 +683,97 @@ export default function EquipmentBookingPage() {
                   </div>
                 </div>
 
+                {/* AI智能推荐区域 */}
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between p-4 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <Brain className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-900">AI智能推荐</h4>
+                        <p className="text-xs text-gray-500">基于历史数据为您推荐最佳时间</p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowAIRecommendations(!showAIRecommendations)}
+                      className="text-blue-600 hover:bg-blue-50"
+                    >
+                      {showAIRecommendations ? (
+                        <>
+                          <ChevronUp className="h-4 w-4 mr-1" />
+                          收起
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="h-4 w-4 mr-1" />
+                          展开
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  
+                  {showAIRecommendations && (
+                    <div className="p-4">
+                      {timeRecommendations.length > 0 ? (
+                        <div className="space-y-3">
+                          {timeRecommendations.slice(0, 3).map((recommendation, index) => (
+                            <div key={index} className="group relative bg-gray-50 rounded-lg p-3 hover:bg-blue-50 transition-colors">
+                              <div className="flex items-center justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="text-sm font-medium text-gray-900">
+                                      {format(recommendation.date, 'MM月dd日')} {recommendation.startTime} - {recommendation.endTime}
+                                    </span>
+                                    <span className={cn(
+                                      "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
+                                      recommendation.score >= 80 ? "bg-green-100 text-green-800" :
+                                      recommendation.score >= 60 ? "bg-yellow-100 text-yellow-800" :
+                                      "bg-red-100 text-red-800"
+                                    )}>
+                                      {recommendation.score}%
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-gray-600">{recommendation.reason}</p>
+                                </div>
+                                <Button
+                                  size="sm"
+                                  onClick={() => applyTimeRecommendation(recommendation)}
+                                  className="ml-3 bg-blue-600 hover:bg-blue-700 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  选择
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-6">
+                          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <Brain className="h-6 w-6 text-gray-400" />
+                          </div>
+                          <p className="text-sm text-gray-500">暂无可推荐的时间段</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* 冲突检测提示 */}
+                {conflictDetection.hasConflict && (
+                  <Alert className="border-amber-200 bg-amber-50">
+                    <AlertTriangle className="h-4 w-4 text-amber-600" />
+                    <AlertDescription className="text-amber-800">
+                      <div className="space-y-1">
+                        <p className="font-medium">{conflictDetection.message}</p>
+                        <p className="text-sm">{conflictDetection.suggestion}</p>
+                      </div>
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 {/* 视图切换和导航 */}
                 <div className="flex items-center justify-between">
                   <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as ViewMode)}>
@@ -536,8 +797,8 @@ export default function EquipmentBookingPage() {
                     <Button variant="outline" size="sm" onClick={() => navigateDate("next")} className="hover:bg-blue-50">
                       下一{viewMode === "week" ? "周" : "月"}
                     </Button>
+                  </div>
                 </div>
-              </div>
 
                 {/* 当前日期显示 */}
                 <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
@@ -728,94 +989,348 @@ export default function EquipmentBookingPage() {
                   <div className="p-2 bg-green-100 rounded-lg">
                     <Clock className="h-4 w-4 text-green-600" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <CardTitle className="text-base">填写预约信息</CardTitle>
                     <CardDescription className="text-xs">请填写详细的预约信息以便审核</CardDescription>
                   </div>
+                  {/* AI智能建议图标 */}
+                  {smartFormSuggestions.completionTips.length > 0 && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="ghost" size="sm" className="p-2 h-8 w-8 hover:bg-yellow-50">
+                          <Lightbulb className="h-4 w-4 text-yellow-600" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80 p-0" side="left" align="start">
+                        <div className="p-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Lightbulb className="h-4 w-4 text-yellow-600" />
+                            <h4 className="text-sm font-semibold text-gray-900">AI智能建议</h4>
+                          </div>
+                          <div className="space-y-2">
+                            {smartFormSuggestions.completionTips.map((tip, index) => (
+                              <div key={index} className="flex items-start gap-2 text-sm text-gray-700">
+                                <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full mt-2 flex-shrink-0"></div>
+                                <span>{tip}</span>
+                              </div>
+                            ))}
+                          </div>
+                          {/* 时长建议 */}
+                          {durationSuggestion && (
+                            <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Clock className="h-3 w-3 text-green-600" />
+                                <span className="text-xs font-medium text-green-900">推荐使用时长</span>
+                              </div>
+                              <p className="text-xs text-green-800">
+                                <span className="font-semibold">{durationSuggestion.recommended}小时</span>
+                                （{durationSuggestion.min}-{durationSuggestion.max}小时范围）
+                              </p>
+                              <p className="text-xs text-green-700 mt-1">{durationSuggestion.reason}</p>
+                            </div>
+                          )}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
                 </div>
               </CardHeader>
 
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* 第一行：预约人和所属单位 */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* 使用目的 */}
-              <div className="space-y-2">
-                      <Label htmlFor="purpose" className="text-sm font-semibold text-gray-700">
-                        使用目的 <span className="text-red-500">*</span>
+                    {/* 预约人 - 支持检索 */}
+                    <div className="space-y-2">
+                      <Label htmlFor="booker" className="text-sm font-semibold text-gray-700">
+                        预约人 <span className="text-red-500">*</span>
                       </Label>
-                <Input
-                  id="purpose"
-                  value={formData.purpose}
-                  onChange={(e) => setFormData(prev => ({ ...prev, purpose: e.target.value }))}
-                  placeholder="请输入使用目的"
-                        className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                  required
-                />
-              </div>
-
-              {/* 所属项目 */}
-              <div className="space-y-2">
-                      <Label htmlFor="project" className="text-sm font-semibold text-gray-700">所属项目</Label>
-                <Input
-                  id="project"
-                  value={formData.project}
-                  onChange={(e) => setFormData(prev => ({ ...prev, project: e.target.value }))}
-                  placeholder="请输入所属项目名称"
-                        className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                      />
+                      <Popover open={bookerInputOpen} onOpenChange={setBookerInputOpen}>
+                        <PopoverTrigger asChild>
+                          <div className="relative">
+                            <Input
+                              id="booker"
+                              value={formData.booker}
+                              onChange={(e) => {
+                                setFormData(prev => ({ ...prev, booker: e.target.value }))
+                                if (e.target.value && !bookerInputOpen) {
+                                  setBookerInputOpen(true)
+                                }
+                              }}
+                              placeholder="请输入预约人姓名（支持检索）"
+                              className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 pr-10"
+                              required
+                              onFocus={() => {
+                                if (formData.booker || getBookerSuggestions(formData.booker).length > 0) {
+                                  setBookerInputOpen(true)
+                                }
+                              }}
+                              onBlur={(e) => {
+                                // 延迟关闭，让用户有时间点击选项
+                                setTimeout(() => {
+                                  if (!e.currentTarget.contains(document.activeElement)) {
+                                    setBookerInputOpen(false)
+                                  }
+                                }, 200)
+                              }}
+                            />
+                            <User className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          </div>
+                        </PopoverTrigger>
+                        <PopoverContent 
+                          className="w-96 p-0" 
+                          side="bottom" 
+                          align="start"
+                          onOpenAutoFocus={(e) => e.preventDefault()}
+                        >
+                          <Command>
+                            <CommandInput placeholder="搜索预约人..." />
+                            <CommandList>
+                              <CommandEmpty>未找到相关人员</CommandEmpty>
+                              {getBookerSuggestions(formData.booker).length > 0 && (
+                                <CommandGroup heading="人员列表">
+                                  {getBookerSuggestions(formData.booker).map((user) => (
+                                    <CommandItem
+                                      key={user.id}
+                                      onSelect={() => applyBookerSelection(user)}
+                                      className="flex items-center justify-between cursor-pointer p-3"
+                                    >
+                                      <div className="flex-1">
+                                        <div className="font-medium text-sm">{user.name}</div>
+                                        <div className="text-xs text-gray-500 mt-1">
+                                          <div className="flex items-center gap-2">
+                                            <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">
+                                              {user.department}
+                                            </span>
+                                            <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs">
+                                              {user.role}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <User className="h-4 w-4 text-blue-500 flex-shrink-0 ml-2" />
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              )}
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </div>
 
-                    {/* 联系人 */}
+                    {/* 所属单位 - 自动带出 */}
                     <div className="space-y-2">
-                      <Label htmlFor="contact" className="text-sm font-semibold text-gray-700">
-                        联系人 <span className="text-red-500">*</span>
+                      <Label htmlFor="department" className="text-sm font-semibold text-gray-700">
+                        所属单位 <span className="text-red-500">*</span>
                       </Label>
                       <Input
-                        id="contact"
-                        value={formData.contact}
-                        onChange={(e) => setFormData(prev => ({ ...prev, contact: e.target.value }))}
-                        placeholder="请输入联系人姓名"
-                        className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                        id="department"
+                        value={formData.department}
+                        placeholder="根据预约人自动带出"
+                        className="border-gray-200 bg-gray-50 cursor-not-allowed"
+                        disabled
                         required
                       />
+                    </div>
+                  </div>
+
+                  {/* 第二行：关联项目和联系电话 */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* 关联项目 - 智能关联 */}
+                    <div className="space-y-2">
+                      <Label htmlFor="project" className="text-sm font-semibold text-gray-700">关联项目</Label>
+                      <Popover open={projectInputOpen} onOpenChange={setProjectInputOpen}>
+                        <PopoverTrigger asChild>
+                          <div className="relative">
+                            <Input
+                              id="project"
+                              value={formData.project}
+                              onChange={(e) => {
+                                setFormData(prev => ({ ...prev, project: e.target.value }))
+                                // 只有在聚焦状态且有内容时才打开
+                                if (projectInputFocused && e.target.value.length > 0 && !projectInputOpen) {
+                                  setProjectInputOpen(true)
+                                }
+                              }}
+                              placeholder="请输入关联项目名称（显示该预约人的项目）"
+                              className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 pr-10"
+                              onFocus={() => {
+                                setProjectInputFocused(true)
+                                // 如果有内容或有建议，延迟打开
+                                setTimeout(() => {
+                                  if ((formData.project.length > 0 || smartFormSuggestions.project.length > 0) && 
+                                      projectInputFocused) {
+                                    setProjectInputOpen(true)
+                                  }
+                                }, 200)
+                              }}
+                              onBlur={() => {
+                                setProjectInputFocused(false)
+                                // 延迟关闭，让用户有时间点击选项
+                                setTimeout(() => {
+                                  if (!projectInputFocused) {
+                                    setProjectInputOpen(false)
+                                  }
+                                }, 300)
+                              }}
+                            />
+                            <Users className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-400" />
+                          </div>
+                        </PopoverTrigger>
+                        <PopoverContent 
+                          className="w-96 p-0" 
+                          side="bottom" 
+                          align="start"
+                          onOpenAutoFocus={(e) => e.preventDefault()}
+                          onCloseAutoFocus={(e) => e.preventDefault()}
+                        >
+                          <Command>
+                            <CommandInput placeholder="搜索项目..." />
+                            <CommandList>
+                              <CommandEmpty>未找到相关项目</CommandEmpty>
+                              {smartFormSuggestions.project.length > 0 && (
+                                <CommandGroup heading="AI推荐项目">
+                                  {smartFormSuggestions.project.map((suggestion, index) => (
+                                    <CommandItem
+                                      key={index}
+                                      onSelect={() => applyProjectSuggestion(suggestion)}
+                                      className="flex flex-col items-start cursor-pointer p-3 space-y-2"
+                                    >
+                                      <div className="w-full flex items-center justify-between">
+                                        <div className="font-medium text-sm truncate flex-1 mr-2">
+                                          {suggestion.name}
+                                        </div>
+                                        <div className="text-xs text-purple-600 font-medium bg-purple-50 px-2 py-1 rounded-full flex-shrink-0">
+                                          {Math.round(suggestion.relevanceScore * 100)}%
+                                        </div>
+                                      </div>
+                                      <div className="w-full">
+                                        <div className="text-xs text-gray-500 space-y-1">
+                                          <div className="flex items-center gap-2">
+                                            <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">
+                                              {suggestion.category}
+                                            </span>
+                                            <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs">
+                                              {suggestion.reason}
+                                            </span>
+                                          </div>
+                                          <div className="text-xs text-gray-600">
+                                            <span className="font-medium">团队：</span>
+                                            {suggestion.team.join(', ')}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              )}
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                     
                     {/* 联系电话 */}
                     <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-sm font-semibold text-gray-700">联系电话</Label>
+                      <Label htmlFor="phone" className="text-sm font-semibold text-gray-700">
+                        联系电话 <span className="text-red-500">*</span>
+                      </Label>
                       <Input
                         id="phone"
                         value={formData.phone}
                         onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                         placeholder="请输入联系电话"
                         className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                        required
                       />
                     </div>
-              </div>
+                  </div>
 
-              {/* 备注 */}
-              <div className="space-y-2">
-                    <Label htmlFor="notes" className="text-sm font-semibold text-gray-700">备注说明</Label>
-                <Textarea
-                  id="notes"
-                  value={formData.notes}
-                  onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                      placeholder="请输入备注说明（如特殊要求、样品信息等）"
-                  rows={3}
+                  {/* 第三行：使用目的（占整行） */}
+                  <div className="space-y-2">
+                    <Label htmlFor="purpose" className="text-sm font-semibold text-gray-700">
+                      使用目的 <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="purpose"
+                      value={formData.purpose}
+                      onChange={(e) => setFormData(prev => ({ ...prev, purpose: e.target.value }))}
+                      placeholder="请输入使用目的"
                       className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
+                      required
+                    />
+                  </div>
 
-              {/* 提交按钮 */}
+                  {/* 备注 */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="notes" className="text-sm font-semibold text-gray-700">备注说明</Label>
+                      {smartFormSuggestions.sampleInfo && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={applySampleTemplate}
+                          className="text-green-600 border-green-200 hover:bg-green-50"
+                        >
+                          <FileText className="h-3 w-3 mr-1" />
+                          应用样品信息模板
+                        </Button>
+                      )}
+                    </div>
+                    <Textarea
+                      id="notes"
+                      value={formData.notes}
+                      onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                      placeholder="请输入备注说明（如特殊要求、样品信息等）"
+                      rows={5}
+                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                    />
+                    {smartFormSuggestions.sampleInfo && (
+                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
+                        <div className="flex items-center gap-2 mb-3">
+                          <FileText className="h-4 w-4 text-green-600" />
+                          <h5 className="text-sm font-semibold text-green-900">样品信息助手</h5>
+                        </div>
+                        <div className="text-sm text-green-800 space-y-3">
+                          <div>
+                            <p className="font-medium mb-2">必填信息：</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-1 text-xs">
+                              {smartFormSuggestions.sampleInfo.required.map((item, index) => (
+                                <div key={index} className="flex items-center gap-2">
+                                  <div className="w-1 h-1 bg-green-600 rounded-full"></div>
+                                  <span>{item}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <p className="font-medium mb-2">注意事项：</p>
+                            <div className="space-y-1 text-xs">
+                              {smartFormSuggestions.sampleInfo.tips.slice(0, 3).map((tip, index) => (
+                                <div key={index} className="flex items-start gap-2">
+                                  <span className="text-green-600 mt-0.5">•</span>
+                                  <span>{tip}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 提交按钮 */}
                   <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => router.back()}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => router.back()}
                       className="hover:bg-gray-50"
-                >
-                  取消
-                </Button>
+                    >
+                      取消
+                    </Button>
                     <Button 
                       type="submit" 
                       disabled={isSubmitting || selectedTimeSlots.length === 0}
@@ -832,11 +1347,11 @@ export default function EquipmentBookingPage() {
                           提交预约
                         </div>
                       )}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
