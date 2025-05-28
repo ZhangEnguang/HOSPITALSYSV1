@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { toast } from "@/components/ui/use-toast"
 import { ReagentStockInDialog } from "./components/reagent-stock-in-dialog"
+import { ReagentApplyDialog } from "./components/reagent-apply-dialog"
 
 function ReagentContent() {
   const router = useRouter()
@@ -68,6 +69,10 @@ function ReagentContent() {
   // 入库弹框状态
   const [stockInDialogOpen, setStockInDialogOpen] = useState(false)
   const [selectedReagentForStockIn, setSelectedReagentForStockIn] = useState<any>(null)
+
+  // 申领弹框状态
+  const [applyDialogOpen, setApplyDialogOpen] = useState(false)
+  const [selectedReagentForApply, setSelectedReagentForApply] = useState<any>(null)
 
   // 过滤和排序数据
   const filteredReagentItems = reagentItems
@@ -234,6 +239,12 @@ function ReagentContent() {
     setStockInDialogOpen(true)
   }
 
+  // 处理申领弹框打开
+  const handleOpenApplyDialog = (reagent: any) => {
+    setSelectedReagentForApply(reagent)
+    setApplyDialogOpen(true)
+  }
+
   // 处理行操作
   const handleRowAction = (actionId: string, item: any) => {
     if (actionId === "view") {
@@ -244,6 +255,8 @@ function ReagentContent() {
       handleDeleteItem(item)
     } else if (actionId === "stockIn") {
       handleOpenStockInDialog(item)
+    } else if (actionId === "apply") {
+      handleOpenApplyDialog(item)
     } else if (actionId === "usage") {
       router.push(`/laboratory/reagent/usage/${item.id}`)
     } else if (actionId === "purchase") {
@@ -355,6 +368,13 @@ function ReagentContent() {
         open={stockInDialogOpen}
         onOpenChange={setStockInDialogOpen}
         reagent={selectedReagentForStockIn}
+      />
+
+      {/* 申领弹框 */}
+      <ReagentApplyDialog
+        open={applyDialogOpen}
+        onOpenChange={setApplyDialogOpen}
+        reagent={selectedReagentForApply}
       />
     </div>
   )
