@@ -622,7 +622,7 @@ const ReagentCard = ({
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-32">
               {actions
                 .filter((action) => !action.hidden || !action.hidden(item))
                 .map((action) => (
@@ -645,7 +645,7 @@ const ReagentCard = ({
       )}
 
       {/* 上半部分：左右布局 - 左侧图片，右侧详情 */}
-      <div className="flex p-4">
+      <div className="flex p-4 items-center">
         {/* 左侧：试剂图片区域 */}
         <div className="relative w-16 h-16 overflow-hidden rounded-lg bg-white flex-shrink-0 mr-3 flex items-center justify-center">
           {item.imageUrl ? (
