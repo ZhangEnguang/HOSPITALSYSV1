@@ -57,11 +57,11 @@ function ReagentContent() {
     name: true,
     category: true,
     status: true,
+    currentAmount: true,
+    specification: true,
     department: true,
     location: true,
-    purchaseDate: true,
     expiryDate: true,
-    currentAmount: true,
   })
   // 删除确认对话框状态
   const [itemToDelete, setItemToDelete] = useState<any>(null)
@@ -246,7 +246,10 @@ function ReagentContent() {
   }
 
   // 处理行操作
-  const handleRowAction = (actionId: string, item: any) => {
+  const handleRowAction = (actionOrId: string | any, item: any) => {
+    // 兼容处理：如果传入的是action对象，则提取id；如果是字符串，则直接使用
+    const actionId = typeof actionOrId === 'string' ? actionOrId : actionOrId.id;
+    
     if (actionId === "view") {
       router.push(`/laboratory/reagent/${item.id}`)
     } else if (actionId === "edit") {
@@ -327,7 +330,7 @@ function ReagentContent() {
         onVisibleColumnsChange={setVisibleColumns}
         cardFields={reagentCardFields}
         customCardRenderer={(item, actions, isSelected, onToggleSelect, onRowActionClick) => 
-          reagentCustomCardRenderer(item, actions, isSelected, onToggleSelect, onRowActionClick, handleOpenStockInDialog)
+          reagentCustomCardRenderer(item, actions, isSelected, onToggleSelect, onRowActionClick, handleOpenStockInDialog, handleOpenApplyDialog)
         }
         titleField="name"
         descriptionField="description"

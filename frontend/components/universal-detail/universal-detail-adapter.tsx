@@ -238,6 +238,20 @@ export default function UniversalDetailAdapter({
       hidden: hiddenTabs.includes("maintenance"),
     },
     {
+      id: "stockIn",
+      label: customTabLabels.stockIn || "入库明细",
+      icon: <FileText className="h-4 w-4" />,
+      component: tabComponents.stockIn || getDefaultTabComponent("stockIn"),
+      hidden: hiddenTabs.includes("stockIn"),
+    },
+    {
+      id: "application",
+      label: customTabLabels.application || "申领明细",
+      icon: <ClipboardList className="h-4 w-4" />,
+      component: tabComponents.application || getDefaultTabComponent("application"),
+      hidden: hiddenTabs.includes("application"),
+    },
+    {
       id: "recommendations",
       label: customTabLabels.recommendations || "相关推荐",
       icon: <Award className="h-4 w-4" />,

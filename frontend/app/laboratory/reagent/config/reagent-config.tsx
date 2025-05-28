@@ -349,6 +349,19 @@ export const reagentColumns = [
     cell: (item: any) => <Badge variant={(statusColors[item.status] || "secondary") as any}>{item.status}</Badge>,
   },
   {
+    id: "currentAmount",
+    header: "库存量",
+    cell: (item: any) => (
+      <span className={cn(
+        "font-medium",
+        item.currentAmount <= item.initialAmount * 0.2 ? "text-red-600" : 
+        item.currentAmount <= item.initialAmount * 0.5 ? "text-yellow-600" : "text-green-600"
+      )}>
+        {item.currentAmount}{item.unit}
+      </span>
+    ),
+  },
+  {
     id: "specification",
     header: "规格",
     cell: (item: any) => <span>{item.specification}</span>,
@@ -364,11 +377,6 @@ export const reagentColumns = [
     cell: (item: any) => <span>{item.location}</span>,
   },
   {
-    id: "purchaseDate",
-    header: "购置日期",
-    cell: (item: any) => <span>{format(new Date(item.purchaseDate), "yyyy/MM/dd")}</span>,
-  },
-  {
     id: "expiryDate",
     header: "有效期至",
     cell: (item: any) => (
@@ -381,19 +389,6 @@ export const reagentColumns = [
         ) : (
           <span>{format(new Date(item.expiryDate), "yyyy/MM/dd")}</span>
         )}
-      </div>
-    ),
-  },
-  {
-    id: "manager",
-    header: "负责人",
-    cell: (item: any) => (
-      <div className="flex items-center gap-2">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={item.manager.avatar} />
-          <AvatarFallback>{item.manager.name[0]}</AvatarFallback>
-        </Avatar>
-        <span className="font-medium">{item.manager.name}</span>
       </div>
     ),
   },
@@ -487,9 +482,15 @@ export const reagentActions = [
     id: "apply",
     label: "试剂申领",
     icon: <FileText className="h-4 w-4" />,
-    onClick: (item: any) => {
-      const url = `/laboratory/reagent/apply/${item.id}`;
-      window.open(url, "_self");
+    onClick: (item: any, onOpenStockInDialog?: (reagent: any) => void, onOpenApplyDialog?: (reagent: any) => void) => {
+      // 如果提供了申领弹框回调函数，则使用弹框
+      if (onOpenApplyDialog) {
+        onOpenApplyDialog(item);
+      } else {
+        // 否则跳转到申领页面
+        const url = `/laboratory/reagent/apply/${item.id}`;
+        window.open(url, "_self");
+      }
     },
   },
   {
@@ -786,7 +787,8 @@ export const reagentCustomCardRenderer = (
   isSelected: boolean, 
   onToggleSelect: (selected: boolean) => void,
   onRowActionClick?: (action: any, item: any) => void,
-  onOpenStockInDialog?: (reagent: any) => void
+  onOpenStockInDialog?: (reagent: any) => void,
+  onOpenApplyDialog?: (reagent: any) => void
 ) => {
   // 处理操作按钮点击事件，优先使用onRowActionClick
   const processedActions = actions.map(action => ({
@@ -798,6 +800,9 @@ export const reagentCustomCardRenderer = (
         // 对于试剂入库操作，传递弹框回调函数
         if (action.id === "stockIn" && onOpenStockInDialog) {
           action.onClick(item, onOpenStockInDialog);
+        } else if (action.id === "apply" && onOpenApplyDialog) {
+          // 对于试剂申领操作，传递弹框回调函数
+          action.onClick(item, onOpenStockInDialog, onOpenApplyDialog);
         } else {
           action.onClick(item, e);
         }
