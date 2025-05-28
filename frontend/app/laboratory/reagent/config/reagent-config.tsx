@@ -68,12 +68,17 @@ type ExtendedBadgeVariant = "default" | "destructive" | "outline" | "secondary" 
 // 状态颜色映射
 export const statusColors: Record<string, ExtendedBadgeVariant> = {
   "正常": "success",
-  "低库存": "warning",
-  "已用完": "destructive",
-  "已过期": "destructive",
-  "即将过期": "warning",
-  "未入库": "outline",
-  "待检验": "secondary",
+  "低库存": "warning", 
+  "缺货": "destructive",
+  "已过期": "secondary",
+  "维护中": "secondary",
+  "故障": "destructive",
+  "申领中": "warning",
+  "已预约": "warning",
+  "使用中": "warning",
+  "清洗中": "secondary",
+  "已停用": "outline",
+  "待校准": "warning",
 }
 
 // 通用表格列配置
@@ -123,10 +128,8 @@ export const quickFilters = [
     options: [
       { id: "1", label: "正常", value: "正常" },
       { id: "2", label: "低库存", value: "低库存" },
-      { id: "3", label: "已用完", value: "已用完" },
+      { id: "3", label: "缺货", value: "缺货" },
       { id: "4", label: "已过期", value: "已过期" },
-      { id: "5", label: "即将过期", value: "即将过期" },
-      { id: "6", label: "未入库", value: "未入库" },
     ],
     category: "default",
   },
@@ -280,36 +283,34 @@ export const reagentColumns = [
     id: "image",
     header: "图片",
     cell: (item: any) => (
-      <div className="relative w-16 h-12 rounded-md overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200">
-        <div className="w-full h-full flex items-center justify-center p-1">
+      <div className="relative w-16 h-12 rounded-md overflow-hidden bg-white">
+        <div className="w-full h-full flex items-center justify-center">
           {item.imageUrl ? (
-            <div className="w-14 h-10 bg-white rounded border border-gray-100 flex items-center justify-center p-1">
-              <img 
-                src={item.imageUrl} 
-                alt={`${item.name} 化学结构`}
-                className="max-w-full max-h-full object-contain"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  const parent = target.parentElement;
-                  if (parent) {
-                    parent.innerHTML = `
-                      <div class="flex items-center justify-center">
-                        <div class="w-5 h-6 relative">
-                          <div class="w-full h-5 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative">
-                            <div class="absolute inset-x-0.5 top-0.5 bottom-0.5 bg-gradient-to-b from-blue-100 to-blue-200 rounded-sm opacity-80"></div>
-                            <div class="absolute inset-x-0.5 bottom-0.5 bg-gradient-to-t from-blue-500 to-blue-400 rounded-sm opacity-70" style="height: ${Math.max(20, (item.currentAmount / item.initialAmount) * 80)}%"></div>
-                          </div>
-                          <div class="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-2.5 h-1 bg-gray-400 rounded-t border border-gray-500"></div>
+            <img 
+              src={item.imageUrl} 
+              alt={`${item.name} 化学结构`}
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const parent = target.parentElement;
+                if (parent) {
+                  parent.innerHTML = `
+                    <div class="flex items-center justify-center w-full h-full">
+                      <div class="w-5 h-6 relative">
+                        <div class="w-full h-5 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative">
+                          <div class="absolute inset-x-0.5 top-0.5 bottom-0.5 bg-gradient-to-b from-blue-100 to-blue-200 rounded-sm opacity-80"></div>
+                          <div class="absolute inset-x-0.5 bottom-0.5 bg-gradient-to-t from-blue-500 to-blue-400 rounded-sm opacity-70" style="height: ${Math.max(20, (item.currentAmount / item.initialAmount) * 80)}%"></div>
                         </div>
+                        <div class="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-2.5 h-1 bg-gray-400 rounded-t border border-gray-500"></div>
                       </div>
-                    `;
-                  }
-                }}
-              />
-            </div>
+                    </div>
+                  `;
+                }
+              }}
+            />
           ) : (
-            <div className="w-14 h-10 bg-white rounded border border-gray-100 flex items-center justify-center">
+            <div className="w-full h-full flex items-center justify-center">
               <div className="w-5 h-6 relative">
                 <div className="w-full h-5 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative">
                   {/* 瓶身 */}
@@ -602,90 +603,132 @@ const ReagentCard = ({
   const isExpired = () => {
     const expiryDate = new Date(item.expiryDate);
     const today = new Date();
-    return expiryDate < today;
+    return expiryDate < today || item.status === "已过期";
+  };
+
+  // 检查是否库存不足
+  const isOutOfStock = () => {
+    return item.currentAmount <= 0;
+  };
+
+  // 检查是否可以申领
+  const canApply = () => {
+    return !isExpired() && !isOutOfStock();
   };
 
   const dangerInfo = getDangerLevelInfo(item.dangerLevel);
 
   return (
-    <Card
+    <Card 
       className={cn(
-        "group transition-all duration-300 border border-[#E9ECF2] shadow-none hover:shadow-[0px_38px_45px_0px_rgba(198,210,241,0.25)] hover:border-primary/20 cursor-pointer",
-        "flex flex-col w-full relative", // 添加relative定位，使绝对定位的按钮正确显示
-        isSelected && "ring-2 ring-primary"
+        "group cursor-pointer border transition-all duration-300 ease-in-out hover:shadow-lg hover:border-primary/20 relative",
+        isSelected && "ring-2 ring-primary border-primary",
+        // 过期试剂样式
+        isExpired() && "opacity-60 bg-gray-50/50 border-gray-300",
+        // 即将过期提示
+        isExpiringSoon() && !isExpired() && "border-yellow-300 bg-yellow-50/30"
       )}
     >
-      {/* 操作按钮 - 与仪器卡片位置一致 */}
-      {actions && actions.length > 0 && (
-        <div className="absolute top-2 right-2 z-10">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-white/80 backdrop-blur-sm transition-colors"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-32">
-              {actions
-                .filter((action) => !action.hidden || !action.hidden(item))
-                .map((action) => (
-                  <DropdownMenuItem
-                    key={action.id}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      action.onClick(item, e)
-                    }}
-                    disabled={action.disabled ? action.disabled(item) : false}
-                    className={action.variant === "destructive" ? "text-destructive" : ""}
-                  >
-                    {action.icon && <span className="mr-2">{action.icon}</span>}
-                    {action.label}
-                  </DropdownMenuItem>
-                ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+      {/* 过期遮罩 */}
+      {isExpired() && (
+        <div className="absolute inset-0 bg-gray-200/30 rounded-lg pointer-events-none" />
+      )}
+
+      {/* 右上角操作菜单 */}
+      <div className="absolute top-2 right-2 z-10">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 bg-white/80 hover:bg-white/90 backdrop-blur-sm"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-36">
+            {actions.map((action) => {
+              // 过期试剂禁用申领操作
+              const isDisabled = isExpired() && action.id === "apply";
+              
+              return (
+                <DropdownMenuItem 
+                  key={action.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!isDisabled && action.onClick) {
+                      action.onClick(item, e);
+                    }
+                  }}
+                  className={cn(
+                    "flex items-center gap-2 cursor-pointer",
+                    action.variant === "destructive" && "text-red-600 focus:text-red-600",
+                    isDisabled && "opacity-50 cursor-not-allowed"
+                  )}
+                  disabled={isDisabled}
+                >
+                  {action.icon}
+                  <span>
+                    {isDisabled && action.id === "apply" ? "试剂已过期" : action.label}
+                  </span>
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* 过期状态标签 */}
+      {isExpired() && (
+        <div className="absolute top-2 left-2 z-10">
+          <Badge variant="destructive" className="text-xs font-medium">
+            已过期
+          </Badge>
         </div>
       )}
 
-      {/* 上半部分：左右布局 - 左侧图片，右侧详情 */}
-      <div className="flex p-4 items-center">
-        {/* 左侧：试剂图片区域 */}
-        <div className="relative w-16 h-16 overflow-hidden rounded-lg bg-white flex-shrink-0 mr-3 flex items-center justify-center">
+      {/* 即将过期提醒 */}
+      {isExpiringSoon() && !isExpired() && (
+        <div className="absolute top-2 left-2 z-10">
+          <Badge variant="outline" className="text-xs font-medium bg-yellow-100 text-yellow-700 border-yellow-300">
+            即将过期
+          </Badge>
+        </div>
+      )}
+
+      {/* 上方区域：左侧图片，右侧试剂名称 */}
+      <div className="flex items-start gap-3 p-3 pb-2">
+        {/* 左侧：试剂瓶图标 */}
+        <div className="w-14 h-16 rounded-lg overflow-hidden bg-white border border-gray-200 flex-shrink-0 group">
           {item.imageUrl ? (
-            <div className="relative w-full h-full flex items-center justify-center">
-              <img 
-                src={item.imageUrl} 
-                alt={`${item.name} 化学结构`}
-                className="max-w-full max-h-full object-contain bg-white transition-transform duration-300 group-hover:scale-110 p-1"
-                style={{transform: 'scale(1.5)'}}
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  const parent = target.parentElement;
-                  if (parent) {
-                    parent.innerHTML = `
-                      <div class="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-                        <div class="flex flex-col items-center justify-center space-y-1 text-gray-400">
-                          <div class="w-8 h-10 relative">
-                            <div class="w-full h-8 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative shadow-sm">
-                              <div class="absolute inset-x-1 top-1 bottom-1 bg-gradient-to-b from-blue-100 to-blue-200 rounded-sm opacity-80"></div>
-                              <div class="absolute inset-x-1 bottom-1 bg-gradient-to-t from-blue-500 to-blue-400 rounded-sm opacity-70" style="height: ${Math.max(20, (item.currentAmount / item.initialAmount) * 80)}%"></div>
-                            </div>
-                            <div class="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-4 h-1.5 bg-gray-400 rounded-t border border-gray-500"></div>
+            <img 
+              src={item.imageUrl} 
+              alt={`${item.name} 化学结构`}
+              className="w-full h-full object-contain transition-transform duration-300 ease-in-out group-hover:scale-110"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const parent = target.parentElement;
+                if (parent) {
+                  parent.innerHTML = `
+                    <div class="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center transition-transform duration-300 ease-in-out group-hover:scale-[1.2]">
+                      <div class="flex flex-col items-center justify-center space-y-1 text-gray-400">
+                        <div class="w-8 h-10 relative">
+                          <div class="w-full h-8 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative shadow-sm">
+                            <div class="absolute inset-x-1 top-1 bottom-1 bg-gradient-to-b from-blue-100 to-blue-200 rounded-sm opacity-80"></div>
+                            <div class="absolute inset-x-1 bottom-1 bg-gradient-to-t from-blue-500 to-blue-400 rounded-sm opacity-70" style="height: ${Math.max(20, (item.currentAmount / item.initialAmount) * 80)}%"></div>
                           </div>
+                          <div class="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-4 h-1.5 bg-gray-400 rounded-t border border-gray-500"></div>
                         </div>
                       </div>
-                    `;
-                  }
-                }}
-              />
-            </div>
+                    </div>
+                  `;
+                }
+              }}
+            />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+            <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center transition-transform duration-300 ease-in-out group-hover:scale-[1.2]">
               <div className="flex flex-col items-center justify-center space-y-1 text-gray-400">
                 <div className="w-8 h-10 relative">
                   <div className="w-full h-8 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative shadow-sm">
@@ -705,77 +748,85 @@ const ReagentCard = ({
           )}
         </div>
 
-        {/* 右侧：详情信息区域 */}
-        <div className="flex-1 min-w-0 relative">
-
-          {/* 试剂名称信息 */}
-          <div className="mb-2">
-            <h3 className="font-semibold text-base text-gray-900 transition-colors duration-300 group-hover:text-primary truncate leading-tight">
-              {item.name}
-            </h3>
-          </div>
-
-          {/* 试剂关键信息 */}
-          <div className="space-y-2">
-            {/* 规格 - 科研人员和管理人员都需要 */}
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">规格:</span>
-              <span className="font-medium truncate ml-2">{item.specification}</span>
-            </div>
-
-            {/* 当前库存 - 申领和入库都需要关注 */}
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">库存:</span>
-              <span className={cn(
-                "font-medium",
-                item.currentAmount <= item.initialAmount * 0.2 ? "text-red-600" : 
-                item.currentAmount <= item.initialAmount * 0.5 ? "text-yellow-600" : "text-green-600"
-              )}>
-                {item.currentAmount}{item.unit}
-              </span>
-            </div>
-
-            {/* 存储条件 - 申领时需要知道如何保存 */}
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">存储:</span>
-              <div className="flex items-center gap-1">
-                <span>{getStorageIcon(item.storageCondition)}</span>
-                <span className="font-medium">{item.storageCondition}</span>
-              </div>
-            </div>
-
-            {/* 有效期 - 关键信息，影响申领决策 */}
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">有效期:</span>
-              <span className={cn(
-                "font-medium",
-                isExpired() ? "text-red-600" : isExpiringSoon() ? "text-yellow-600" : "text-gray-900"
-              )}>
-                {format(new Date(item.expiryDate), "yyyy/MM/dd")}
-              </span>
-            </div>
-          </div>
+        {/* 右侧：试剂名称和别名 */}
+        <div className="flex-1 min-w-0">
+          <h3 className={cn(
+            "font-semibold text-base transition-colors duration-300 group-hover:text-primary truncate leading-tight",
+            isExpired() ? "text-gray-500" : "text-gray-900"
+          )}>
+            {item.name}
+          </h3>
+          {/* 别名作为副标题 */}
+          {item.alias && (
+            <p className={cn(
+              "text-sm mt-1 truncate",
+              isExpired() ? "text-gray-400" : "text-muted-foreground"
+            )}>
+              别名: {item.alias}
+            </p>
+          )}
+          {/* 线性分子式 */}
+          {item.linearFormula && (
+            <p className={cn(
+              "text-sm mt-1 truncate",
+              isExpired() ? "text-gray-400" : "text-muted-foreground"
+            )}>
+              线性分子式: {item.linearFormula}
+            </p>
+          )}
         </div>
       </div>
-        
-      {/* 下方：库存量和危险程度标签 - 保持不变 */}
-      <div className="flex items-center justify-between px-3 border-t border-gray-100 mx-3" style={{paddingTop: '0.45rem', paddingBottom: '0.45rem'}}>
-        <div className="flex items-center gap-1">
-          <span className="text-xs text-muted-foreground">库存量:</span>
+
+      {/* 下方区域：有效期、库存量和危险标签 */}
+      <div className="px-3 mx-3 space-y-2">
+        {/* 有效期 */}
+        <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-100">
           <span className={cn(
-            "text-xs font-medium",
-            item.currentAmount > 0 ? "text-green-600" : "text-red-600"
+            isExpired() ? "text-gray-400" : "text-muted-foreground"
+          )}>有效期:</span>
+          <span className={cn(
+            "font-medium",
+            isExpired() ? "text-red-600" : 
+            isExpiringSoon() ? "text-yellow-600" : "text-gray-900"
           )}>
-            {item.currentAmount > 0 ? `${item.currentAmount}${item.unit}` : "无库存"}
+            {format(new Date(item.expiryDate), "yyyy/MM/dd")}
           </span>
         </div>
-        <Badge 
-          variant="outline" 
-          className={cn("font-medium text-xs", dangerInfo.color)}
-        >
-          {dangerInfo.text}
-        </Badge>
+        
+        {/* 库存量和危险程度标签 */}
+        <div className="flex items-center justify-between pb-5">
+          <div className="flex items-center gap-1">
+            <span className={cn(
+              "text-sm",
+              isExpired() ? "text-gray-400" : "text-muted-foreground"
+            )}>
+              库存量:
+            </span>
+            <span className={cn(
+              "text-sm font-medium",
+              isExpired() ? "text-gray-500" :
+              isOutOfStock() ? "text-red-600" : "text-green-600"
+            )}>
+              {isOutOfStock() ? "无库存" : `${item.currentAmount}${item.unit}`}
+            </span>
+          </div>
+          <Badge 
+            variant="outline" 
+            className={cn(
+              "font-medium text-xs",
+              isExpired() ? `${dangerInfo.color} opacity-70` : dangerInfo.color
+            )}
+          >
+            {dangerInfo.text}
+          </Badge>
+        </div>
       </div>
+
+      {/* 鼠标悬停提示 */}
+      {isExpired() && (
+        <div className="absolute inset-0 pointer-events-none" title="此试剂已过期，无法申领">
+        </div>
+      )}
     </Card>
   );
 };

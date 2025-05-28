@@ -1,17 +1,16 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
-import { format } from "date-fns"
-import { cn } from "@/lib/utils"
+import { useState } from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { DatePicker } from "@/components/date-picker"
+import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
 import { toast } from "@/components/ui/use-toast"
-import { AlertCircle, Package, User, Calendar, FileText } from "lucide-react"
+import { CalendarIcon, User, Package, FileText, AlertTriangle, Clock } from "lucide-react"
+import { format } from "date-fns"
+import { cn } from "@/lib/utils"
 
 interface ReagentApplyDialogProps {
   open: boolean
@@ -20,524 +19,358 @@ interface ReagentApplyDialogProps {
 }
 
 export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApplyDialogProps) {
+  // 检查是否已过期
+  const isExpired = () => {
+    if (!reagent) return false;
+    const expiryDate = new Date(reagent.expiryDate);
+    const today = new Date();
+    return expiryDate < today || reagent.status === "已过期";
+  };
+
+  // 检查是否即将过期（30天内）
+  const isExpiringSoon = () => {
+    if (!reagent) return false;
+    const expiryDate = new Date(reagent.expiryDate);
+    const today = new Date();
+    const diffTime = expiryDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 30 && diffDays > 0;
+  };
+
+  // 检查是否库存不足
+  const isOutOfStock = () => {
+    if (!reagent) return false;
+    return reagent.currentAmount <= 0;
+  };
+
+  // 检查是否可以申领
+  const canApply = () => {
+    return !isExpired() && !isOutOfStock();
+  };
+
   // 表单数据状态
   const [formData, setFormData] = useState({
-    // 申领基本信息
-    applyAmount: "",
-    applyPurpose: "",
-    expectedUseDate: new Date(new Date().setDate(new Date().getDate() + 7)), // 默认一周后
-    urgencyLevel: "普通",
-    
-    // 申领人信息
-    applicantName: "当前用户", // 实际项目中应该从用户上下文获取
-    contactPhone: "",
-    department: "",
-    
-    // 其他信息
-    applyReason: "",
-    notes: "",
+    quantity: "",
+    unit: reagent?.unit || "mL",
+    purpose: "",
+    expectedDate: "",
+    urgency: "一般",
+    remarks: "",
   })
 
-  // 当试剂数据变化时，更新表单中的部门信息
-  useEffect(() => {
-    if (reagent) {
-      setFormData(prev => ({
-        ...prev,
-        department: reagent.department || "",
-      }))
+  // 紧急程度选项
+  const urgencyOptions = [
+    { value: "一般", label: "一般", color: "bg-gray-100 text-gray-700" },
+    { value: "紧急", label: "紧急", color: "bg-yellow-100 text-yellow-700" },
+    { value: "非常紧急", label: "非常紧急", color: "bg-red-100 text-red-700" },
+  ]
+
+  // 处理表单提交
+  const handleSubmit = () => {
+    if (isExpired()) {
+      toast({
+        title: "申领失败",
+        description: "试剂已过期，无法申领。请联系管理员进行处理。",
+        variant: "destructive",
+      })
+      return;
     }
-  }, [reagent])
 
-  // 当弹框打开状态变化时，重置表单数据
-  useEffect(() => {
-    if (!open) {
-      // 弹框关闭时重置表单
-      resetForm()
+    if (!canApply()) {
+      toast({
+        title: "申领失败", 
+        description: "试剂库存不足或状态异常，无法申领。",
+        variant: "destructive",
+      })
+      return;
     }
-  }, [open])
 
-  // 表单错误状态
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
-  
-  // 表单字段触摸状态
-  const [formTouched, setFormTouched] = useState<Record<string, boolean>>({})
-  
-  // 加载状态
-  const [isLoading, setIsLoading] = useState(false)
-  
-  // 成功状态
-  const [isSuccess, setIsSuccess] = useState(false)
-
-  // 更新表单数据
-  const updateFormData = (field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
-  }
-
-  // 处理字段失去焦点
-  const handleBlur = (field: string) => {
-    setFormTouched(prev => ({
-      ...prev,
-      [field]: true
-    }))
-  }
-
-  // 验证表单
-  const validateForm = () => {
-    const requiredFields = [
-      "applyAmount", 
-      "applyPurpose", 
-      "department",
-      "applyReason"
-    ]
-    
-    let isValid = true
-    const newErrors: Record<string, string> = {}
-    const newTouched: Record<string, boolean> = {}
-    
-    // 验证必填字段是否填写
-    requiredFields.forEach(field => {
-      newTouched[field] = true
-      
-      if (!formData[field as keyof typeof formData]) {
-        isValid = false
-        newErrors[field] = `请填写${
-          field === "applyAmount" ? "申领数量" : 
-          field === "applyPurpose" ? "申领用途" : 
-          field === "department" ? "所属部门" :
-          field === "applyReason" ? "申请理由" : ""
-        }`
-      }
-    })
-    
-    // 验证申领数量是否为有效数字且不超过库存
-    if (formData.applyAmount) {
-      const amount = Number(formData.applyAmount)
-      if (isNaN(amount) || amount <= 0) {
-        isValid = false
-        newErrors.applyAmount = "请输入有效的申领数量"
-      } else if (amount > reagent.currentAmount) {
-        isValid = false
-        newErrors.applyAmount = `申领数量不能超过当前库存（${reagent.currentAmount}${reagent.unit}）`
-      }
-    }
-    
-    // 验证预计使用日期不能是过去
-    if (formData.expectedUseDate <= new Date()) {
-      isValid = false
-      newErrors.expectedUseDate = "预计使用日期不能是过去的日期"
-    }
-    
-    setFormErrors(newErrors)
-    setFormTouched(prev => ({
-      ...prev,
-      ...newTouched
-    }))
-    
-    return isValid
-  }
-
-  // 提交表单
-  const handleSubmit = async () => {
-    if (!validateForm()) {
+    // 验证表单数据
+    if (!formData.quantity || !formData.purpose || !formData.expectedDate) {
+      toast({
+        title: "表单验证失败",
+        description: "请填写完整的申领信息",
+        variant: "destructive",
+      })
       return
     }
-    
-    setIsLoading(true)
-    
-    try {
-      // 构建申领数据
-      const applyData = {
-        reagentId: reagent.id,
-        reagentName: reagent.name,
-        specification: reagent.specification,
-        ...formData,
-        applyDate: new Date(),
-        status: "待审批"
-      }
-      
-      // 这里应该调用API保存数据
-      console.log("提交申领数据:", applyData)
-      
-      // 模拟API调用 - 95% 成功率用于演示
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (Math.random() > 0.05) {
-            resolve(applyData)
-          } else {
-            reject(new Error("服务器繁忙，请稍后重试"))
-          }
-        }, 1500)
-      })
-      
-      // 设置成功状态
-      setIsSuccess(true)
-      
-      // 成功提示
+
+    // 检查申领数量是否超过库存
+    const requestedQuantity = parseFloat(formData.quantity)
+    if (requestedQuantity > reagent.currentAmount) {
       toast({
-        title: "🎉 申领提交成功",
-        description: `${reagent.name} 申领申请已提交，申领数量：${formData.applyAmount}${reagent.unit}。请等待审批结果，我们会及时通知您。`,
-        duration: 5000,
-      })
-      
-      // 延迟关闭弹框，确保用户看到成功提示
-      setTimeout(() => {
-        onOpenChange(false)
-        resetForm()
-        setIsSuccess(false)
-      }, 2000)
-      
-    } catch (error: any) {
-      // 失败提示 - 显示具体错误信息
-      const errorMessage = error?.message || "未知错误"
-      
-      toast({
-        title: "❌ 申领提交失败",
-        description: `提交失败：${errorMessage}。请检查网络连接是否正常，确认申领信息是否正确。您可以修改信息后重新提交。`,
+        title: "申领数量超限",
+        description: `申领数量不能超过当前库存量 ${reagent.currentAmount}${reagent.unit}`,
         variant: "destructive",
-        duration: 8000,
       })
-      
-      // 失败时不关闭弹框，允许用户继续操作
-      console.error("申领提交失败:", error)
-      
-    } finally {
-      setIsLoading(false)
+      return
     }
-  }
 
-  // 重置表单
-  const resetForm = () => {
-    setFormData({
-      applyAmount: "",
-      applyPurpose: "",
-      expectedUseDate: new Date(new Date().setDate(new Date().getDate() + 7)),
-      urgencyLevel: "普通",
-      applicantName: "当前用户",
-      contactPhone: "",
-      department: reagent?.department || "",
-      applyReason: "",
-      notes: "",
+    // 模拟提交申请
+    console.log("提交申领申请:", {
+      reagentId: reagent.id,
+      reagentName: reagent.name,
+      ...formData,
+      requestedQuantity
     })
-    setFormErrors({})
-    setFormTouched({})
-    setIsLoading(false)
-    setIsSuccess(false)
+
+    toast({
+      title: "申领申请已提交",
+      description: `已成功提交 ${reagent.name} 的申领申请，申请数量：${formData.quantity}${formData.unit}`,
+    })
+
+    // 重置表单并关闭弹框
+    setFormData({
+      quantity: "",
+      unit: reagent?.unit || "mL", 
+      purpose: "",
+      expectedDate: "",
+      urgency: "一般",
+      remarks: "",
+    })
+    onOpenChange(false)
   }
 
-  // 错误信息组件
-  const ErrorMessage = ({ message }: { message: string }) => {
-    if (!message) return null
-    
-    return (
-      <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
-        <AlertCircle className="h-3 w-3" />
-        {message}
-      </div>
-    )
-  }
-
-  // 区域标题组件
-  const SectionTitle = ({ icon, title }: { icon: React.ReactNode, title: string }) => {
-    return (
-      <div className="flex items-center gap-2 mb-4">
-        <div className="text-blue-500">
-          {icon}
-        </div>
-        <h3 className="text-base font-medium text-gray-900">{title}</h3>
-      </div>
-    )
-  }
+  // 建议替代试剂
+  const getSuggestedAlternatives = () => {
+    // 这里可以实现实际的推荐逻辑
+    return [
+      { name: "乙腈 (HPLC级)", currentAmount: 3250, unit: "mL" },
+      { name: "甲醇 (HPLC级)", currentAmount: 2800, unit: "mL" },
+    ];
+  };
 
   if (!reagent) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl h-[90vh] flex flex-col p-0 gap-0">
-        {/* 固定顶部标题栏 */}
-        <DialogHeader className="flex-shrink-0 px-6 py-4 border-b border-gray-100">
-          <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
-            <Package className="h-5 w-5 text-blue-500" />
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Package className="h-5 w-5 text-blue-600" />
             试剂申领
           </DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground mt-1">
-            申领 <span className="font-medium text-foreground">{reagent.name}</span> 试剂
-          </DialogDescription>
         </DialogHeader>
 
-        {/* 可滚动的内容区域 */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
-          <div className="space-y-6">
-            {/* 试剂基本信息展示 */}
-            <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-lg">
-              <h4 className="font-medium mb-3 text-gray-900 flex items-center gap-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                试剂信息
-              </h4>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">试剂名称</span>
-                  <span className="font-medium text-gray-900">{reagent.name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">规格</span>
-                  <span className="font-medium text-gray-900">{reagent.specification}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">当前库存</span>
-                  <span className="font-medium text-blue-600">{reagent.currentAmount}{reagent.unit}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">存储条件</span>
-                  <span className="font-medium text-gray-900">{reagent.storageCondition}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* 申领基本信息 */}
-            <div>
-              <SectionTitle 
-                icon={<Package className="h-5 w-5" />} 
-                title="申领信息" 
-              />
-              
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="applyAmount" className="text-muted-foreground">
-                    申领数量 <span className="text-red-500">*</span>
-                  </Label>
-                  <div className="flex gap-2">
-                    <Input 
-                      id="applyAmount" 
-                      type="number"
-                      value={formData.applyAmount} 
-                      onChange={(e) => updateFormData("applyAmount", e.target.value)} 
-                      onBlur={() => handleBlur("applyAmount")}
-                      placeholder="请输入申领数量"
-                      className={cn(
-                        "border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
-                        formTouched.applyAmount && formErrors.applyAmount ? "border-red-500" : ""
-                      )}
-                    />
-                    <div className="flex items-center px-3 bg-gray-50 border border-[#E9ECF2] rounded-md text-sm text-muted-foreground">
-                      {reagent.unit}
+        <div className="space-y-6">
+          {/* 过期警告 */}
+          {isExpired() && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <h4 className="font-medium text-red-900 mb-2">试剂已过期</h4>
+                  <p className="text-sm text-red-700 mb-3">
+                    此试剂已于 {format(new Date(reagent.expiryDate), "yyyy年MM月dd日")} 过期，为确保实验安全和结果准确性，已禁用申领功能。
+                  </p>
+                  {getSuggestedAlternatives().length > 0 && (
+                    <div>
+                      <p className="text-sm font-medium text-red-800 mb-2">推荐替代试剂：</p>
+                      <div className="space-y-1">
+                        {getSuggestedAlternatives().map((alt, index) => (
+                          <div key={index} className="text-sm text-red-700 bg-red-100 rounded px-2 py-1">
+                            {alt.name} - 可用库存：{alt.currentAmount}{alt.unit}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  {formTouched.applyAmount && <ErrorMessage message={formErrors.applyAmount || ""} />}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="applyPurpose" className="text-muted-foreground">
-                    申领用途 <span className="text-red-500">*</span>
-                  </Label>
-                  <Select 
-                    value={formData.applyPurpose} 
-                    onValueChange={(value) => updateFormData("applyPurpose", value)}
-                    onOpenChange={(open) => !open && handleBlur("applyPurpose")}
-                  >
-                    <SelectTrigger 
-                      id="applyPurpose"
-                      className={cn(
-                        "border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
-                        formTouched.applyPurpose && formErrors.applyPurpose ? "border-red-500" : ""
-                      )}
-                    >
-                      <SelectValue placeholder="请选择申领用途" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="科研实验">科研实验</SelectItem>
-                      <SelectItem value="教学实验">教学实验</SelectItem>
-                      <SelectItem value="质量检测">质量检测</SelectItem>
-                      <SelectItem value="产品开发">产品开发</SelectItem>
-                      <SelectItem value="其他">其他</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {formTouched.applyPurpose && <ErrorMessage message={formErrors.applyPurpose || ""} />}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="expectedUseDate" className="text-muted-foreground">预计使用日期</Label>
-                  <DatePicker 
-                    id="expectedUseDate"
-                    date={formData.expectedUseDate} 
-                    onSelect={(date) => date && updateFormData("expectedUseDate", date)} 
-                    className={cn(
-                      "border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
-                      formTouched.expectedUseDate && formErrors.expectedUseDate ? "border-red-500" : ""
-                    )}
-                  />
-                  {formTouched.expectedUseDate && <ErrorMessage message={formErrors.expectedUseDate || ""} />}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="urgencyLevel" className="text-muted-foreground">紧急程度</Label>
-                  <Select 
-                    value={formData.urgencyLevel} 
-                    onValueChange={(value) => updateFormData("urgencyLevel", value)}
-                  >
-                    <SelectTrigger 
-                      id="urgencyLevel"
-                      className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
-                    >
-                      <SelectValue placeholder="请选择紧急程度" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="普通">普通</SelectItem>
-                      <SelectItem value="紧急">紧急</SelectItem>
-                      <SelectItem value="特急">特急</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  )}
                 </div>
               </div>
             </div>
+          )}
 
-            {/* 申领人信息 */}
-            <div>
-              <SectionTitle 
-                icon={<User className="h-5 w-5" />} 
-                title="申领人信息" 
-              />
-              
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="applicantName" className="text-muted-foreground">申领人</Label>
-                  <Input 
-                    id="applicantName" 
-                    value={formData.applicantName} 
-                    disabled
-                    className="border-[#E9ECF2] rounded-md bg-gray-50"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="contactPhone" className="text-muted-foreground">
-                    联系方式
-                  </Label>
-                  <Input 
-                    id="contactPhone" 
-                    value={formData.contactPhone} 
-                    onChange={(e) => updateFormData("contactPhone", e.target.value)} 
-                    onBlur={() => handleBlur("contactPhone")}
-                    placeholder="请输入手机号码"
-                    className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
-                  />
-                  {formTouched.contactPhone && <ErrorMessage message={formErrors.contactPhone || ""} />}
-                </div>
-              </div>
-
-              <div className="mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="department" className="text-muted-foreground">
-                    所属部门 <span className="text-red-500">*</span>
-                  </Label>
-                  <Select 
-                    value={formData.department} 
-                    onValueChange={(value) => updateFormData("department", value)}
-                    onOpenChange={(open) => !open && handleBlur("department")}
-                  >
-                    <SelectTrigger 
-                      id="department"
-                      className={cn(
-                        "border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
-                        formTouched.department && formErrors.department ? "border-red-500" : ""
-                      )}
-                    >
-                      <SelectValue placeholder="请选择所属部门" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="化学实验室">化学实验室</SelectItem>
-                      <SelectItem value="有机化学实验室">有机化学实验室</SelectItem>
-                      <SelectItem value="分析化学实验室">分析化学实验室</SelectItem>
-                      <SelectItem value="物理化学实验室">物理化学实验室</SelectItem>
-                      <SelectItem value="无机化学实验室">无机化学实验室</SelectItem>
-                      <SelectItem value="仪器分析实验室">仪器分析实验室</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {formTouched.department && <ErrorMessage message={formErrors.department || ""} />}
+          {/* 即将过期警告 */}
+          {!isExpired() && isExpiringSoon() && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <Clock className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h4 className="font-medium text-yellow-900 mb-1">试剂即将过期</h4>
+                  <p className="text-sm text-yellow-700">
+                    此试剂将于 {format(new Date(reagent.expiryDate), "yyyy年MM月dd日")} 过期，请尽快使用。
+                  </p>
                 </div>
               </div>
             </div>
+          )}
 
-            {/* 其他信息 */}
-            <div>
-              <SectionTitle 
-                icon={<FileText className="h-5 w-5" />} 
-                title="其他信息" 
-              />
-              
-              <div className="space-y-4 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="applyReason" className="text-muted-foreground">
-                    申请理由 <span className="text-red-500">*</span>
-                  </Label>
-                  <Textarea 
-                    id="applyReason" 
-                    value={formData.applyReason} 
-                    onChange={(e) => updateFormData("applyReason", e.target.value)} 
-                    onBlur={() => handleBlur("applyReason")}
-                    placeholder="请简要说明申领试剂的具体用途和理由"
-                    className={cn(
-                      "border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 min-h-[80px]",
-                      formTouched.applyReason && formErrors.applyReason ? "border-red-500" : ""
-                    )}
-                  />
-                  {formTouched.applyReason && <ErrorMessage message={formErrors.applyReason || ""} />}
+          {/* 库存不足警告 */}
+          {!isExpired() && isOutOfStock() && (
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h4 className="font-medium text-orange-900 mb-1">库存不足</h4>
+                  <p className="text-sm text-orange-700">
+                    当前试剂库存不足，无法进行申领。请联系管理员补充库存。
+                  </p>
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="notes" className="text-muted-foreground">备注说明</Label>
-                  <Textarea 
-                    id="notes" 
-                    value={formData.notes} 
-                    onChange={(e) => updateFormData("notes", e.target.value)} 
-                    placeholder="其他需要说明的信息（可选）"
-                    className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 min-h-[60px]"
-                  />
-                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 试剂基本信息展示 */}
+          <div className={cn(
+            "border p-4 rounded-lg",
+            isExpired() ? "bg-gray-50 border-gray-200" : "bg-blue-50/50 border-blue-100"
+          )}>
+            <h4 className={cn(
+              "font-medium mb-3 flex items-center gap-2",
+              isExpired() ? "text-gray-700" : "text-gray-900"
+            )}>
+              <div className={cn(
+                "w-2 h-2 rounded-full",
+                isExpired() ? "bg-gray-400" : "bg-blue-500"
+              )}></div>
+              试剂信息
+            </h4>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">试剂名称</span>
+                <span className={cn(
+                  "font-medium",
+                  isExpired() ? "text-gray-600" : "text-gray-900"
+                )}>{reagent.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">规格</span>
+                <span className={cn(
+                  "font-medium",
+                  isExpired() ? "text-gray-600" : "text-gray-900"
+                )}>{reagent.specification}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">当前库存</span>
+                <span className={cn(
+                  "font-medium",
+                  isExpired() ? "text-gray-600" : 
+                  reagent.currentAmount > 0 ? "text-blue-600" : "text-red-600"
+                )}>{reagent.currentAmount}{reagent.unit}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">有效期</span>
+                <span className={cn(
+                  "font-medium",
+                  isExpired() ? "text-red-600" :
+                  isExpiringSoon() ? "text-yellow-600" : "text-gray-900"
+                )}>
+                  {format(new Date(reagent.expiryDate), "yyyy/MM/dd")}
+                </span>
               </div>
             </div>
           </div>
+
+          {/* 申领表单 - 仅在可申领时显示 */}
+          {canApply() && (
+            <>
+              {/* 申领基本信息 */}
+              <div className="space-y-4">
+                <h4 className="font-medium text-gray-900 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  申领信息
+                </h4>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="quantity">申领数量 *</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="quantity"
+                        type="number"
+                        placeholder="输入数量"
+                        value={formData.quantity}
+                        onChange={(e) => setFormData(prev => ({ ...prev, quantity: e.target.value }))}
+                        className="flex-1"
+                        min="1"
+                        max={reagent.currentAmount}
+                      />
+                      <div className="flex items-center px-3 bg-gray-50 border border-gray-200 rounded-md">
+                        <span className="text-sm text-gray-600">{formData.unit}</span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      最大可申领：{reagent.currentAmount}{reagent.unit}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="expectedDate">期望使用日期 *</Label>
+                    <Input
+                      id="expectedDate"
+                      type="date"
+                      value={formData.expectedDate}
+                      onChange={(e) => setFormData(prev => ({ ...prev, expectedDate: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>紧急程度</Label>
+                  <div className="flex gap-2">
+                    {urgencyOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, urgency: option.value }))}
+                        className={cn(
+                          "px-3 py-1.5 rounded-md text-sm font-medium border transition-colors",
+                          formData.urgency === option.value
+                            ? `${option.color} border-current`
+                            : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
+                        )}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* 申领用途 */}
+              <div className="space-y-2">
+                <Label htmlFor="purpose">申领用途 *</Label>
+                <Textarea
+                  id="purpose"
+                  placeholder="请详细说明试剂用途和实验目的..."
+                  value={formData.purpose}
+                  onChange={(e) => setFormData(prev => ({ ...prev, purpose: e.target.value }))}
+                  rows={3}
+                />
+              </div>
+
+              {/* 备注 */}
+              <div className="space-y-2">
+                <Label htmlFor="remarks">备注说明</Label>
+                <Textarea
+                  id="remarks"
+                  placeholder="其他需要说明的事项（可选）..."
+                  value={formData.remarks}
+                  onChange={(e) => setFormData(prev => ({ ...prev, remarks: e.target.value }))}
+                  rows={2}
+                />
+              </div>
+            </>
+          )}
         </div>
 
-        {/* 固定底部操作栏 */}
-        <DialogFooter className="flex-shrink-0 flex gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50/50">
-          <Button 
-            variant="outline" 
-            onClick={() => onOpenChange(false)}
-            disabled={isLoading}
-            className="flex-1 h-10 border-gray-300 text-gray-700 hover:bg-gray-50"
-          >
-            {isLoading ? "取消" : "返回列表"}
+        {/* 操作按钮 */}
+        <div className="flex justify-end gap-3 pt-4 border-t">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            取消
           </Button>
-          <Button 
-            onClick={handleSubmit}
-            disabled={isLoading || isSuccess}
-            className={cn(
-              "flex-1 h-10 text-white",
-              isSuccess 
-                ? "bg-green-600 hover:bg-green-700" 
-                : "bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400"
-            )}
-          >
-            {isLoading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                提交中...
-              </div>
-            ) : isSuccess ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 text-white">✓</div>
-                提交成功
-              </div>
-            ) : (
-              "提交申请"
-            )}
-          </Button>
-        </DialogFooter>
+          {canApply() ? (
+            <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">
+              <FileText className="h-4 w-4 mr-2" />
+              提交申请
+            </Button>
+          ) : (
+            <Button disabled className="opacity-50">
+              <AlertTriangle className="h-4 w-4 mr-2" />
+              {isExpired() ? "试剂已过期" : "无法申领"}
+            </Button>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   )

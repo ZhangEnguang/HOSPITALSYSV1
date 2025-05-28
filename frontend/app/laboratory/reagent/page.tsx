@@ -241,6 +241,23 @@ function ReagentContent() {
 
   // 处理申领弹框打开
   const handleOpenApplyDialog = (reagent: any) => {
+    // 检查试剂是否已过期
+    const isExpired = () => {
+      const expiryDate = new Date(reagent.expiryDate);
+      const today = new Date();
+      return expiryDate < today || reagent.status === "已过期";
+    };
+
+    // 如果试剂已过期，显示警告但仍然打开弹框（弹框内会有更详细的提示和限制）
+    if (isExpired()) {
+      toast({
+        title: "试剂已过期",
+        description: `试剂"${reagent.name}"已过期，无法申领。`,
+        variant: "destructive",
+        duration: 5000,
+      });
+    }
+
     setSelectedReagentForApply(reagent)
     setApplyDialogOpen(true)
   }
