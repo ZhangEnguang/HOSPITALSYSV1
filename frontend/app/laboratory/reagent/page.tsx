@@ -34,6 +34,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { toast } from "@/components/ui/use-toast"
+import { ReagentStockInDialog } from "./components/reagent-stock-in-dialog"
 
 function ReagentContent() {
   const router = useRouter()
@@ -63,6 +64,10 @@ function ReagentContent() {
   })
   // 删除确认对话框状态
   const [itemToDelete, setItemToDelete] = useState<any>(null)
+  
+  // 入库弹框状态
+  const [stockInDialogOpen, setStockInDialogOpen] = useState(false)
+  const [selectedReagentForStockIn, setSelectedReagentForStockIn] = useState<any>(null)
 
   // 过滤和排序数据
   const filteredReagentItems = reagentItems
@@ -223,6 +228,12 @@ function ReagentContent() {
     }
   }
 
+  // 处理入库弹框打开
+  const handleOpenStockInDialog = (reagent: any) => {
+    setSelectedReagentForStockIn(reagent)
+    setStockInDialogOpen(true)
+  }
+
   // 处理行操作
   const handleRowAction = (actionId: string, item: any) => {
     if (actionId === "view") {
@@ -231,6 +242,8 @@ function ReagentContent() {
       router.push(`/laboratory/reagent/edit/${item.id}`)
     } else if (actionId === "delete") {
       handleDeleteItem(item)
+    } else if (actionId === "stockIn") {
+      handleOpenStockInDialog(item)
     } else if (actionId === "usage") {
       router.push(`/laboratory/reagent/usage/${item.id}`)
     } else if (actionId === "purchase") {
@@ -300,7 +313,9 @@ function ReagentContent() {
         visibleColumns={visibleColumns}
         onVisibleColumnsChange={setVisibleColumns}
         cardFields={reagentCardFields}
-        customCardRenderer={reagentCustomCardRenderer}
+        customCardRenderer={(item, actions, isSelected, onToggleSelect, onRowActionClick) => 
+          reagentCustomCardRenderer(item, actions, isSelected, onToggleSelect, onRowActionClick, handleOpenStockInDialog)
+        }
         titleField="name"
         descriptionField="description"
         statusField="status"
@@ -334,6 +349,13 @@ function ReagentContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 试剂入库弹框 */}
+      <ReagentStockInDialog
+        open={stockInDialogOpen}
+        onOpenChange={setStockInDialogOpen}
+        reagent={selectedReagentForStockIn}
+      />
     </div>
   )
 }

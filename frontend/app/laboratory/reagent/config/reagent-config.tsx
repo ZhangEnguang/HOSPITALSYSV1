@@ -469,12 +469,18 @@ export const reagentActions = [
     },
   },
   {
-    id: "purchase",
+    id: "stockIn",
     label: "试剂入库",
     icon: <FileText className="h-4 w-4" />,
-    onClick: (item: any) => {
-      const url = `/laboratory/reagent/purchase/${item.id}`;
-      window.open(url, "_self");
+    onClick: (item: any, onOpenStockInDialog?: (reagent: any) => void) => {
+      // 如果提供了弹框回调函数，则使用弹框
+      if (onOpenStockInDialog) {
+        onOpenStockInDialog(item);
+      } else {
+        // 否则跳转到入库页面
+        const url = `/laboratory/reagent/purchase/${item.id}`;
+        window.open(url, "_self");
+      }
     },
   },
   {
@@ -779,16 +785,22 @@ export const reagentCustomCardRenderer = (
   actions: any[], 
   isSelected: boolean, 
   onToggleSelect: (selected: boolean) => void,
-  onRowActionClick?: (action: any, item: any) => void
+  onRowActionClick?: (action: any, item: any) => void,
+  onOpenStockInDialog?: (reagent: any) => void
 ) => {
   // 处理操作按钮点击事件，优先使用onRowActionClick
   const processedActions = actions.map(action => ({
     ...action,
     onClick: (item: any, e: React.MouseEvent) => {
       if (onRowActionClick) {
-        onRowActionClick(action, item);
+        onRowActionClick(action.id, item);
       } else if (action.onClick) {
-        action.onClick(item, e);
+        // 对于试剂入库操作，传递弹框回调函数
+        if (action.id === "stockIn" && onOpenStockInDialog) {
+          action.onClick(item, onOpenStockInDialog);
+        } else {
+          action.onClick(item, e);
+        }
       }
     }
   }));
