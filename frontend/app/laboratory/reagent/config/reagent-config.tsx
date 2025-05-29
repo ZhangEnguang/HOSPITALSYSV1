@@ -465,8 +465,18 @@ export const reagentActions = [
     },
   },
   {
+    id: "edit",
+    label: "编辑试剂",
+    icon: <Pencil className="h-4 w-4" />,
+    onClick: (item: any) => {
+      // 跳转到试剂编辑页面
+      const url = `/laboratory/reagent/edit/${item.id}`;
+      window.open(url, "_self");
+    },
+  },
+  {
     id: "stockIn",
-    label: "试剂入库",
+    label: "入库试剂",
     icon: <FileText className="h-4 w-4" />,
     onClick: (item: any, onOpenStockInDialog?: (reagent: any) => void) => {
       // 如果提供了弹框回调函数，则使用弹框
@@ -481,7 +491,7 @@ export const reagentActions = [
   },
   {
     id: "apply",
-    label: "试剂申领",
+    label: "申领试剂",
     icon: <FileText className="h-4 w-4" />,
     onClick: (item: any, onOpenStockInDialog?: (reagent: any) => void, onOpenApplyDialog?: (reagent: any) => void) => {
       // 如果提供了申领弹框回调函数，则使用弹框

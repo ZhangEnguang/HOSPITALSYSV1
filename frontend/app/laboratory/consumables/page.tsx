@@ -265,7 +265,7 @@ function ConsumableContent() {
   return (
     <div className="space-y-6">
       <DataList
-        title="实验室耗材管理"
+        title="耗材管理"
         data={paginatedItems}
         searchValue={searchTerm}
         searchPlaceholder="搜索耗材名称、型号或描述..."
