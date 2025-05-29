@@ -457,38 +457,20 @@ export const consumableActions = [
     },
   },
   {
+    id: "stockin",
+    label: "入库耗材",
+    icon: <Package className="h-4 w-4" />,
+    onClick: (item: any) => {
+      const url = `/laboratory/consumables/stockin/${item.id}`;
+      window.open(url, "_self");
+    },
+  },
+  {
     id: "apply",
     label: "申领耗材",
     icon: <Package className="h-4 w-4" />,
     onClick: (item: any) => {
       const url = `/laboratory/consumables/apply/${item.id}`;
-      window.open(url, "_self");
-    },
-  },
-  {
-    id: "usage",
-    label: "使用记录",
-    icon: <List className="h-4 w-4" />,
-    onClick: (item: any) => {
-      const url = `/laboratory/consumables/usage/${item.id}`;
-      window.open(url, "_self");
-    },
-  },
-  {
-    id: "purchase",
-    label: "采购记录",
-    icon: <FileText className="h-4 w-4" />,
-    onClick: (item: any) => {
-      const url = `/laboratory/consumables/purchase/${item.id}`;
-      window.open(url, "_self");
-    },
-  },
-  {
-    id: "report",
-    label: "消耗统计",
-    icon: <BarChart className="h-4 w-4" />,
-    onClick: (item: any) => {
-      const url = `/laboratory/consumables/report/${item.id}`;
       window.open(url, "_self");
     },
   },

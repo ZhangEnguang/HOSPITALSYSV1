@@ -220,16 +220,12 @@ function ConsumableContent() {
       router.push(`/laboratory/consumables/${item.id}`)
     } else if (actionId === "edit") {
       router.push(`/laboratory/consumables/edit/${item.id}`)
-    } else if (actionId === "delete") {
-      handleDeleteItem(item)
+    } else if (actionId === "stockin") {
+      router.push(`/laboratory/consumables/stockin/${item.id}`)
     } else if (actionId === "apply") {
       router.push(`/laboratory/consumables/apply/${item.id}`)
-    } else if (actionId === "usage") {
-      router.push(`/laboratory/consumables/usage/${item.id}`)
-    } else if (actionId === "purchase") {
-      router.push(`/laboratory/consumables/purchase/${item.id}`)
-    } else if (actionId === "report") {
-      router.push(`/laboratory/consumables/report/${item.id}`)
+    } else if (actionId === "delete") {
+      handleDeleteItem(item)
     }
   }
 
