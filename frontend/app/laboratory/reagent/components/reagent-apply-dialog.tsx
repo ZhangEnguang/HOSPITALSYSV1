@@ -94,7 +94,7 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
       })
       return
     }
-
+    
     // 检查申领数量是否超过库存
     const requestedQuantity = parseFloat(formData.quantity)
     if (requestedQuantity > reagent.currentAmount) {
@@ -152,7 +152,7 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+          <div className="space-y-6">
           {/* 过期警告 */}
           {isExpired() && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -210,7 +210,7 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
             </div>
           )}
 
-          {/* 试剂基本信息展示 */}
+            {/* 试剂基本信息展示 */}
           <div className={cn(
             "border p-4 rounded-lg",
             isExpired() ? "bg-gray-50 border-gray-200" : "bg-blue-50/50 border-blue-100"
@@ -223,32 +223,32 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
                 "w-2 h-2 rounded-full",
                 isExpired() ? "bg-gray-400" : "bg-blue-500"
               )}></div>
-              试剂信息
-            </h4>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">试剂名称</span>
+                试剂信息
+              </h4>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">试剂名称</span>
                 <span className={cn(
                   "font-medium",
                   isExpired() ? "text-gray-600" : "text-gray-900"
                 )}>{reagent.name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">规格</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">规格</span>
                 <span className={cn(
                   "font-medium",
                   isExpired() ? "text-gray-600" : "text-gray-900"
                 )}>{reagent.specification}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">当前库存</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">当前库存</span>
                 <span className={cn(
                   "font-medium",
                   isExpired() ? "text-gray-600" : 
                   reagent.currentAmount > 0 ? "text-blue-600" : "text-red-600"
                 )}>{reagent.currentAmount}{reagent.unit}</span>
-              </div>
-              <div className="flex justify-between">
+                </div>
+                <div className="flex justify-between">
                 <span className="text-muted-foreground">有效期</span>
                 <span className={cn(
                   "font-medium",
@@ -257,34 +257,34 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
                 )}>
                   {format(new Date(reagent.expiryDate), "yyyy/MM/dd")}
                 </span>
+                </div>
               </div>
             </div>
-          </div>
 
           {/* 申领表单 - 仅在可申领时显示 */}
           {canApply() && (
             <>
-              {/* 申领基本信息 */}
+            {/* 申领基本信息 */}
               <div className="space-y-4">
                 <h4 className="font-medium text-gray-900 flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   申领信息
                 </h4>
-                
+              
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                <div className="space-y-2">
                     <Label htmlFor="quantity">申领数量 *</Label>
-                    <div className="flex gap-2">
-                      <Input
+                  <div className="flex gap-2">
+                    <Input 
                         id="quantity"
-                        type="number"
+                      type="number"
                         placeholder="输入数量"
                         value={formData.quantity}
                         onChange={(e) => setFormData(prev => ({ ...prev, quantity: e.target.value }))}
                         className="flex-1"
                         min="1"
                         max={reagent.currentAmount}
-                      />
+                    />
                       <div className="flex items-center px-3 bg-gray-50 border border-gray-200 rounded-md">
                         <span className="text-sm text-gray-600">{formData.unit}</span>
                       </div>
@@ -292,9 +292,9 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
                     <p className="text-xs text-muted-foreground">
                       最大可申领：{reagent.currentAmount}{reagent.unit}
                     </p>
-                  </div>
-
-                  <div className="space-y-2">
+                </div>
+                
+                <div className="space-y-2">
                     <Label htmlFor="expectedDate">期望使用日期 *</Label>
                     <Input
                       id="expectedDate"
@@ -302,9 +302,9 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
                       value={formData.expectedDate}
                       onChange={(e) => setFormData(prev => ({ ...prev, expectedDate: e.target.value }))}
                     />
-                  </div>
+            </div>
                 </div>
-
+                
                 <div className="space-y-2">
                   <Label>紧急程度</Label>
                   <div className="flex gap-2">
@@ -313,7 +313,7 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
                         key={option.value}
                         type="button"
                         onClick={() => setFormData(prev => ({ ...prev, urgency: option.value }))}
-                        className={cn(
+                      className={cn(
                           "px-3 py-1.5 rounded-md text-sm font-medium border transition-colors",
                           formData.urgency === option.value
                             ? `${option.color} border-current`
@@ -328,27 +328,27 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
               </div>
 
               {/* 申领用途 */}
-              <div className="space-y-2">
+                <div className="space-y-2">
                 <Label htmlFor="purpose">申领用途 *</Label>
-                <Textarea
+                  <Textarea 
                   id="purpose"
                   placeholder="请详细说明试剂用途和实验目的..."
                   value={formData.purpose}
                   onChange={(e) => setFormData(prev => ({ ...prev, purpose: e.target.value }))}
                   rows={3}
                 />
-              </div>
-
+                </div>
+                
               {/* 备注 */}
-              <div className="space-y-2">
+                <div className="space-y-2">
                 <Label htmlFor="remarks">备注说明</Label>
-                <Textarea
+                  <Textarea 
                   id="remarks"
                   placeholder="其他需要说明的事项（可选）..."
                   value={formData.remarks}
                   onChange={(e) => setFormData(prev => ({ ...prev, remarks: e.target.value }))}
                   rows={2}
-                />
+                  />
               </div>
             </>
           )}
@@ -370,7 +370,7 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
               {isExpired() ? "试剂已过期" : "无法申领"}
             </Button>
           )}
-        </div>
+              </div>
       </DialogContent>
     </Dialog>
   )

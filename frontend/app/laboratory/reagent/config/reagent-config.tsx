@@ -296,13 +296,13 @@ export const reagentColumns = [
                 const parent = target.parentElement;
                 if (parent) {
                   parent.innerHTML = `
-                    <div class="flex items-center justify-center w-full h-full">
-                      <div class="w-5 h-6 relative">
-                        <div class="w-full h-5 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative">
-                          <div class="absolute inset-x-0.5 top-0.5 bottom-0.5 bg-gradient-to-b from-blue-100 to-blue-200 rounded-sm opacity-80"></div>
-                          <div class="absolute inset-x-0.5 bottom-0.5 bg-gradient-to-t from-blue-500 to-blue-400 rounded-sm opacity-70" style="height: ${Math.max(20, (item.currentAmount / item.initialAmount) * 80)}%"></div>
+                    <div className="flex items-center justify-center w-full h-full">
+                      <div className="w-5 h-6 relative">
+                        <div className="w-full h-5 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative">
+                          <div className="absolute inset-x-0.5 top-0.5 bottom-0.5 bg-gradient-to-b from-blue-100 to-blue-200 rounded-sm opacity-80"></div>
+                          <div className="absolute inset-x-0.5 bottom-0.5 bg-gradient-to-t from-blue-500 to-blue-400 rounded-sm opacity-70" style="height: ${Math.max(20, (item.currentAmount / item.initialAmount) * 80)}%"></div>
                         </div>
-                        <div class="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-2.5 h-1 bg-gray-400 rounded-t border border-gray-500"></div>
+                        <div className="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-2.5 h-1 bg-gray-400 rounded-t border border-gray-500"></div>
                       </div>
                     </div>
                   `;
@@ -623,17 +623,12 @@ const ReagentCard = ({
       className={cn(
         "group cursor-pointer border transition-all duration-300 ease-in-out hover:shadow-lg hover:border-primary/20 relative",
         isSelected && "ring-2 ring-primary border-primary",
-        // 过期试剂样式
-        isExpired() && "opacity-60 bg-gray-50/50 border-gray-300",
+        // 过期试剂样式 - 改为红色边框和背景，与耗材缺货样式一致
+        isExpired() && "border-red-300 bg-red-50/30",
         // 即将过期提示
         isExpiringSoon() && !isExpired() && "border-yellow-300 bg-yellow-50/30"
       )}
     >
-      {/* 过期遮罩 */}
-      {isExpired() && (
-        <div className="absolute inset-0 bg-gray-200/30 rounded-lg pointer-events-none" />
-      )}
-
       {/* 右上角操作菜单 */}
       <div className="absolute top-2 right-2 z-10">
         <DropdownMenu>
@@ -712,15 +707,13 @@ const ReagentCard = ({
                 const parent = target.parentElement;
                 if (parent) {
                   parent.innerHTML = `
-                    <div class="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center transition-transform duration-300 ease-in-out group-hover:scale-[1.2]">
-                      <div class="flex flex-col items-center justify-center space-y-1 text-gray-400">
-                        <div class="w-8 h-10 relative">
-                          <div class="w-full h-8 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative shadow-sm">
-                            <div class="absolute inset-x-1 top-1 bottom-1 bg-gradient-to-b from-blue-100 to-blue-200 rounded-sm opacity-80"></div>
-                            <div class="absolute inset-x-1 bottom-1 bg-gradient-to-t from-blue-500 to-blue-400 rounded-sm opacity-70" style="height: ${Math.max(20, (item.currentAmount / item.initialAmount) * 80)}%"></div>
-                          </div>
-                          <div class="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-4 h-1.5 bg-gray-400 rounded-t border border-gray-500"></div>
+                    <div className="flex items-center justify-center w-full h-full">
+                      <div className="w-5 h-6 relative">
+                        <div className="w-full h-5 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative">
+                          <div className="absolute inset-x-0.5 top-0.5 bottom-0.5 bg-gradient-to-b from-blue-100 to-blue-200 rounded-sm opacity-80"></div>
+                          <div className="absolute inset-x-0.5 bottom-0.5 bg-gradient-to-t from-blue-500 to-blue-400 rounded-sm opacity-70" style="height: ${Math.max(20, (item.currentAmount / item.initialAmount) * 80)}%"></div>
                         </div>
+                        <div className="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-2.5 h-1 bg-gray-400 rounded-t border border-gray-500"></div>
                       </div>
                     </div>
                   `;
@@ -728,21 +721,19 @@ const ReagentCard = ({
               }}
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center transition-transform duration-300 ease-in-out group-hover:scale-[1.2]">
-              <div className="flex flex-col items-center justify-center space-y-1 text-gray-400">
-                <div className="w-8 h-10 relative">
-                  <div className="w-full h-8 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative shadow-sm">
-                    {/* 瓶身 */}
-                    <div className="absolute inset-x-1 top-1 bottom-1 bg-gradient-to-b from-blue-100 to-blue-200 rounded-sm opacity-80"></div>
-                    {/* 液体 */}
-                    <div 
-                      className="absolute inset-x-1 bottom-1 bg-gradient-to-t from-blue-500 to-blue-400 rounded-sm opacity-70"
-                      style={{ height: `${Math.max(20, (item.currentAmount / item.initialAmount) * 80)}%` }}
-                    ></div>
-                  </div>
-                  {/* 瓶盖 */}
-                  <div className="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-4 h-1.5 bg-gray-400 rounded-t border border-gray-500"></div>
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="w-5 h-6 relative">
+                <div className="w-full h-5 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative">
+                  {/* 瓶身 */}
+                  <div className="absolute inset-x-0.5 top-0.5 bottom-0.5 bg-gradient-to-b from-blue-100 to-blue-200 rounded-sm opacity-80"></div>
+                  {/* 液体 */}
+                  <div 
+                    className="absolute inset-x-0.5 bottom-0.5 bg-gradient-to-t from-blue-500 to-blue-400 rounded-sm opacity-70"
+                    style={{ height: `${Math.max(20, (item.currentAmount / item.initialAmount) * 80)}%` }}
+                  ></div>
                 </div>
+                {/* 瓶盖 */}
+                <div className="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-2.5 h-1 bg-gray-400 rounded-t border border-gray-500"></div>
               </div>
             </div>
           )}
@@ -752,7 +743,7 @@ const ReagentCard = ({
         <div className="flex-1 min-w-0">
           <h3 className={cn(
             "font-semibold text-base transition-colors duration-300 group-hover:text-primary truncate leading-tight",
-            isExpired() ? "text-gray-500" : "text-gray-900"
+            "text-gray-900"
           )}>
             {item.name}
           </h3>
@@ -760,7 +751,7 @@ const ReagentCard = ({
           {item.alias && (
             <p className={cn(
               "text-sm mt-1 truncate",
-              isExpired() ? "text-gray-400" : "text-muted-foreground"
+              "text-muted-foreground"
             )}>
               别名: {item.alias}
             </p>
@@ -769,7 +760,7 @@ const ReagentCard = ({
           {item.linearFormula && (
             <p className={cn(
               "text-sm mt-1 truncate",
-              isExpired() ? "text-gray-400" : "text-muted-foreground"
+              "text-muted-foreground"
             )}>
               线性分子式: {item.linearFormula}
             </p>
@@ -782,7 +773,7 @@ const ReagentCard = ({
         {/* 有效期 */}
         <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-100">
           <span className={cn(
-            isExpired() ? "text-gray-400" : "text-muted-foreground"
+            "text-muted-foreground"
           )}>有效期:</span>
           <span className={cn(
             "font-medium",
@@ -798,13 +789,12 @@ const ReagentCard = ({
           <div className="flex items-center gap-1">
             <span className={cn(
               "text-sm",
-              isExpired() ? "text-gray-400" : "text-muted-foreground"
+              "text-muted-foreground"
             )}>
               库存量:
             </span>
             <span className={cn(
               "text-sm font-medium",
-              isExpired() ? "text-gray-500" :
               isOutOfStock() ? "text-red-600" : "text-green-600"
             )}>
               {isOutOfStock() ? "无库存" : `${item.currentAmount}${item.unit}`}
@@ -814,7 +804,7 @@ const ReagentCard = ({
             variant="outline" 
             className={cn(
               "font-medium text-xs",
-              isExpired() ? `${dangerInfo.color} opacity-70` : dangerInfo.color
+              dangerInfo.color
             )}
           >
             {dangerInfo.text}

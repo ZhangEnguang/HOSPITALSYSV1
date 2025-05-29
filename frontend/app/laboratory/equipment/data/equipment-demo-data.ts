@@ -26,7 +26,7 @@ export const allDemoEquipmentItems = [
     bookingStatus: "未预约",
     bookingCount: 203,
     images: [
-      "/equipment/XPS.png",
+      "/equipment/xps-spectrometer.png",
       "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop&auto=format"
     ],
     specifications: {
@@ -62,7 +62,7 @@ export const allDemoEquipmentItems = [
     bookingStatus: "未预约",
     bookingCount: 205,
     images: [
-      "/equipment/XRD.png",
+      "/equipment/xrd-diffractometer.png",
       "https://images.unsplash.com/photo-1518467166778-b88f373ffec7?w=400&h=300&fit=crop&auto=format"
     ],
     specifications: {
@@ -98,7 +98,7 @@ export const allDemoEquipmentItems = [
     bookingStatus: "未预约",
     bookingCount: 205,
     images: [
-      "/equipment/danjing.png",
+      "/equipment/single-crystal-diffractometer.png",
       "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400&h=300&fit=crop&auto=format"
     ],
     specifications: {
@@ -134,7 +134,7 @@ export const allDemoEquipmentItems = [
     bookingStatus: "已预约",
     bookingCount: 89,
     images: [
-      "/equipment/XRD-weiquceshi.png",
+      "/equipment/micro-xrd.png",
       "https://images.unsplash.com/photo-1563818296-17596d4ad049?w=400&h=300&fit=crop&auto=format"
     ],
     specifications: {
@@ -170,7 +170,7 @@ export const allDemoEquipmentItems = [
     bookingStatus: "未预约",
     bookingCount: 156,
     images: [
-      "/equipment/EPMA.png",
+      "/equipment/epma-analyzer.png",
       "https://images.unsplash.com/photo-1595675024853-0f3ec9098ac7?w=400&h=300&fit=crop&auto=format"
     ],
     specifications: {
@@ -206,7 +206,7 @@ export const allDemoEquipmentItems = [
     bookingStatus: "未预约",
     bookingCount: 72,
     images: [
-      "/equipment/UPS.png",
+      "/equipment/ups-spectrometer.png",
       "https://images.unsplash.com/photo-1583912267550-3c850b8a1090?w=400&h=300&fit=crop&auto=format"
     ],
     specifications: {
@@ -242,7 +242,7 @@ export const allDemoEquipmentItems = [
     bookingStatus: "已预约",
     bookingCount: 342,
     images: [
-      "/equipment/tongbufushe.png",
+      "/equipment/synchrotron-radiation.png",
       "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=400&h=300&fit=crop&auto=format"
     ],
     specifications: {
@@ -278,7 +278,7 @@ export const allDemoEquipmentItems = [
     bookingStatus: "未预约",
     bookingCount: 128,
     images: [
-      "/equipment/yuanweiXRDceshi.png",
+      "/equipment/in-situ-xrd.png",
       "https://images.unsplash.com/photo-1576086213369-97a306d36557?w=400&h=300&fit=crop&auto=format"
     ],
     specifications: {
@@ -314,7 +314,7 @@ export const allDemoEquipmentItems = [
     bookingStatus: "未预约",
     bookingCount: 96,
     images: [
-      "/equipment/dianguanghuaxueXRD.png",
+      "/equipment/electrochemical-xrd.png",
       "https://images.unsplash.com/photo-1581093458791-9d42e31c9cb8?w=400&h=300&fit=crop&auto=format"
     ],
     specifications: {
@@ -350,7 +350,7 @@ export const allDemoEquipmentItems = [
     bookingStatus: "未预约",
     bookingCount: 45,
     images: [
-      "/equipment/XRDhongguanzhigouceshi.png",
+      "/equipment/texture-xrd.png",
       "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop&auto=format"
     ],
     specifications: {

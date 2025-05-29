@@ -12,7 +12,17 @@ import {
   FileText,
   BarChart,
   Package,
+  MoreVertical,
 } from "lucide-react"
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
 
 // 模拟用户数据
 export const users = [
@@ -491,4 +501,358 @@ export const batchActions = [
     icon: <Trash2 className="h-4 w-4" />,
     variant: "destructive",
   },
-] 
+]
+
+// 耗材卡片组件
+const ConsumableCard = ({ 
+  item, 
+  actions, 
+  isSelected, 
+  onToggleSelect 
+}: {
+  item: any;
+  actions: any[];
+  isSelected: boolean;
+  onToggleSelect: (selected: boolean) => void;
+}) => {
+  // 处理别名显示，超长时省略
+  const formatAliases = (aliases: string[], maxLength: number = 30) => {
+    if (!aliases || aliases.length === 0) return '';
+    
+    const fullText = aliases.join('、');
+    if (fullText.length <= maxLength) {
+      return fullText;
+    }
+    
+    // 逐个添加别名，直到超过长度限制
+    let result = '';
+    for (let i = 0; i < aliases.length; i++) {
+      const newText = result ? `${result}、${aliases[i]}` : aliases[i];
+      if (newText.length > maxLength - 3) { // 预留省略号的空间
+        result = result || aliases[0]; // 至少显示一个别名
+        break;
+      }
+      result = newText;
+    }
+    
+    return `${result}...`;
+  };
+
+  // 获取库存状态颜色和文本
+  const getStockLevelInfo = (status: string) => {
+    switch (status) {
+      case "缺货":
+        return {
+          color: "bg-red-100 text-red-700 border-red-200",
+          text: "缺货"
+        };
+      case "库存不足":
+        return {
+          color: "bg-yellow-100 text-yellow-700 border-yellow-200",
+          text: "库存不足"
+        };
+      case "充足":
+        return {
+          color: "bg-green-100 text-green-700 border-green-200",
+          text: "库存充足"
+        };
+      case "已停用":
+        return {
+          color: "bg-gray-100 text-gray-700 border-gray-200",
+          text: "已停用"
+        };
+      case "待采购":
+        return {
+          color: "bg-blue-100 text-blue-700 border-blue-200",
+          text: "待采购"
+        };
+      default:
+        return {
+          color: "bg-gray-100 text-gray-700 border-gray-200",
+          text: "正常"
+        };
+    }
+  };
+
+  // 检查是否库存不足
+  const isLowStock = () => {
+    return item.currentStock <= item.minStock || item.status === "库存不足";
+  };
+
+  // 检查是否缺货
+  const isOutOfStock = () => {
+    return item.currentStock <= 0 || item.status === "缺货";
+  };
+
+  // 检查是否已停用
+  const isDisabled = () => {
+    return item.status === "已停用";
+  };
+
+  // 检查是否可以申领
+  const canApply = () => {
+    return !isOutOfStock() && !isDisabled();
+  };
+
+  const stockInfo = getStockLevelInfo(item.status);
+
+  return (
+    <Card 
+      className={cn(
+        "group cursor-pointer border transition-all duration-300 ease-in-out hover:shadow-lg hover:border-primary/20 relative",
+        isSelected && "ring-2 ring-primary border-primary",
+        // 已停用耗材样式
+        isDisabled() && "opacity-60 bg-gray-50/50 border-gray-300",
+        // 缺货提示
+        isOutOfStock() && !isDisabled() && "border-red-300 bg-red-50/30",
+        // 库存不足提示
+        isLowStock() && !isOutOfStock() && !isDisabled() && "border-yellow-300 bg-yellow-50/30"
+      )}
+    >
+      {/* 停用遮罩 */}
+      {isDisabled() && (
+        <div className="absolute inset-0 bg-gray-200/30 rounded-lg pointer-events-none" />
+      )}
+
+      {/* 右上角操作菜单 */}
+      <div className="absolute top-2 right-2 z-10">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 bg-white/80 hover:bg-white/90 backdrop-blur-sm"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-36">
+            {actions.map((action) => {
+              // 已停用耗材禁用申领操作
+              const isActionDisabled = isDisabled() && action.id === "apply";
+              
+              return (
+                <DropdownMenuItem 
+                  key={action.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!isActionDisabled && action.onClick) {
+                      action.onClick(item, e);
+                    }
+                  }}
+                  className={cn(
+                    "flex items-center gap-2 cursor-pointer",
+                    action.variant === "destructive" && "text-red-600 focus:text-red-600",
+                    isActionDisabled && "opacity-50 cursor-not-allowed"
+                  )}
+                  disabled={isActionDisabled}
+                >
+                  {action.icon}
+                  <span>
+                    {isActionDisabled && action.id === "apply" ? "耗材已停用" : action.label}
+                  </span>
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* 状态标签 */}
+      {isOutOfStock() && (
+        <div className="absolute top-2 left-2 z-10">
+          <Badge variant="destructive" className="text-xs font-medium">
+            缺货
+          </Badge>
+        </div>
+      )}
+
+      {/* 库存不足提醒 */}
+      {isLowStock() && !isOutOfStock() && (
+        <div className="absolute top-2 left-2 z-10">
+          <Badge variant="outline" className="text-xs font-medium bg-yellow-100 text-yellow-700 border-yellow-300">
+            库存不足
+          </Badge>
+        </div>
+      )}
+
+      {/* 已停用标签 */}
+      {isDisabled() && (
+        <div className="absolute top-2 left-2 z-10">
+          <Badge variant="outline" className="text-xs font-medium bg-gray-100 text-gray-700 border-gray-300">
+            已停用
+          </Badge>
+        </div>
+      )}
+
+      {/* 上方区域：左侧图片，右侧耗材名称 */}
+      <div className="flex items-start gap-3 p-3 pb-2">
+        {/* 左侧：耗材图标 */}
+        <div className="w-14 h-16 rounded-lg overflow-hidden bg-white border border-gray-200 flex-shrink-0 group">
+          {item.imageUrl ? (
+            <img 
+              src={item.imageUrl} 
+              alt={`${item.name}`}
+              className="w-full h-full object-contain transition-transform duration-300 ease-in-out group-hover:scale-110"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const parent = target.parentElement;
+                if (parent) {
+                  parent.innerHTML = `
+                    <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center transition-transform duration-300 ease-in-out group-hover:scale-[1.2]">
+                      <div className="flex flex-col items-center justify-center space-y-1 text-gray-400">
+                        <div className="w-8 h-10 relative">
+                          <div className="w-full h-8 bg-gradient-to-b from-gray-200 to-gray-300 rounded border border-gray-400 relative shadow-sm">
+                            <div className="absolute inset-x-1 top-1 bottom-1 bg-gradient-to-b from-gray-100 to-gray-200 rounded-sm opacity-80"></div>
+                            <div className="absolute inset-x-1 bottom-1 bg-gradient-to-t from-gray-500 to-gray-400 rounded-sm opacity-70" style="height: ${Math.max(20, (item.currentStock / item.maxStock) * 80)}%"></div>
+                          </div>
+                          <div className="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-4 h-1.5 bg-gray-400 rounded-t border border-gray-500"></div>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                }
+              }}
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center transition-transform duration-300 ease-in-out group-hover:scale-[1.2]">
+              <div className="flex flex-col items-center justify-center space-y-1 text-gray-400">
+                <div className="w-8 h-10 relative">
+                  <div className="w-full h-8 bg-gradient-to-b from-gray-200 to-gray-300 rounded border border-gray-400 relative shadow-sm">
+                    {/* 容器 */}
+                    <div className="absolute inset-x-1 top-1 bottom-1 bg-gradient-to-b from-gray-100 to-gray-200 rounded-sm opacity-80"></div>
+                    {/* 内容物 */}
+                    <div 
+                      className="absolute inset-x-1 bottom-1 bg-gradient-to-t from-gray-500 to-gray-400 rounded-sm opacity-70"
+                      style={{ height: `${Math.max(20, (item.currentStock / item.maxStock) * 80)}%` }}
+                    ></div>
+                  </div>
+                  {/* 盖子 */}
+                  <div className="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-4 h-1.5 bg-gray-400 rounded-t border border-gray-500"></div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 右侧：耗材名称和信息 */}
+        <div className="flex-1 min-w-0">
+          <h3 className={cn(
+            "font-semibold text-base transition-colors duration-300 group-hover:text-primary truncate leading-tight",
+            isDisabled() ? "text-gray-500" : "text-gray-900"
+          )}>
+            {item.name}
+          </h3>
+          
+          {/* 别名 */}
+          {item.alias && item.alias.length > 0 && (
+            <p 
+              className={cn(
+                "text-sm mt-1 truncate cursor-help",
+                isDisabled() ? "text-gray-400" : "text-muted-foreground"
+              )}
+              title={`别名: ${item.alias.join('、')}`}
+            >
+              别名: {formatAliases(item.alias)}
+            </p>
+          )}
+          
+          {/* 规格 */}
+          {item.model && (
+            <p className={cn(
+              "text-sm mt-1 truncate",
+              isDisabled() ? "text-gray-400" : "text-muted-foreground"
+            )}>
+              规格: {item.model}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* 下方区域：采购日期、库存量和状态标签 */}
+      <div className="px-3 mx-3 space-y-2">
+        {/* 采购日期 */}
+        <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-100">
+          <span className={cn(
+            isDisabled() ? "text-gray-400" : "text-muted-foreground"
+          )}>采购日期:</span>
+          <span className={cn(
+            "font-medium",
+            isDisabled() ? "text-gray-500" : "text-gray-900"
+          )}>
+            {format(new Date(item.purchaseDate), "yyyy/MM/dd")}
+          </span>
+        </div>
+        
+        {/* 库存量和状态标签 */}
+        <div className="flex items-center justify-between pb-5">
+          <div className="flex items-center gap-1">
+            <span className={cn(
+              "text-sm",
+              isDisabled() ? "text-gray-400" : "text-muted-foreground"
+            )}>
+              库存量:
+            </span>
+            <span className={cn(
+              "text-sm font-medium",
+              isDisabled() ? "text-gray-500" :
+              isOutOfStock() ? "text-red-600" : 
+              isLowStock() ? "text-yellow-600" : "text-green-600"
+            )}>
+              {item.currentStock}{item.unit}
+            </span>
+          </div>
+          <Badge 
+            variant="outline" 
+            className={cn(
+              "font-medium text-xs",
+              isDisabled() ? `${stockInfo.color} opacity-70` : stockInfo.color
+            )}
+          >
+            {stockInfo.text}
+          </Badge>
+        </div>
+      </div>
+
+      {/* 鼠标悬停提示 */}
+      {isDisabled() && (
+        <div className="absolute inset-0 pointer-events-none" title="此耗材已停用，无法申领">
+        </div>
+      )}
+    </Card>
+  );
+};
+
+// 耗材自定义卡片渲染器
+export const consumableCustomCardRenderer = (
+  item: any, 
+  actions: any[], 
+  isSelected: boolean, 
+  onToggleSelect: (selected: boolean) => void,
+  onRowActionClick?: (action: any, item: any) => void,
+  onOpenStockInDialog?: (consumable: any) => void,
+  onOpenApplyDialog?: (consumable: any) => void
+) => {
+  // 处理操作按钮点击事件，优先使用onRowActionClick
+  const processedActions = actions.map(action => ({
+    ...action,
+    onClick: (item: any, e: React.MouseEvent) => {
+      if (onRowActionClick) {
+        onRowActionClick(action.id, item);
+      } else if (action.onClick) {
+        action.onClick(item, e);
+      }
+    }
+  }));
+
+  return (
+    <ConsumableCard 
+      item={item}
+      actions={processedActions}
+      isSelected={isSelected}
+      onToggleSelect={onToggleSelect}
+    />
+  );
+}; 

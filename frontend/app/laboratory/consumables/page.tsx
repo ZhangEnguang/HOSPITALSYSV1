@@ -19,6 +19,8 @@ import {
   consumableActions,
   // 导入特定耗材类型的卡片字段
   consumableCardFields,
+  // 导入自定义卡片渲染器
+  consumableCustomCardRenderer,
 } from "./config/consumable-config"
 import { allDemoConsumableItems } from "./data/consumable-demo-data"
 import {
@@ -291,6 +293,8 @@ function ConsumableContent() {
         visibleColumns={visibleColumns}
         onVisibleColumnsChange={setVisibleColumns}
         cardFields={consumableCardFields}
+        customCardRenderer={consumableCustomCardRenderer}
+        gridClassName="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
         titleField="name"
         descriptionField="description"
         statusField="status"
