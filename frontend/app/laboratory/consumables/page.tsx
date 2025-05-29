@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { toast } from "@/components/ui/use-toast"
 import { ConsumableStockInDialog } from "./components/consumable-stock-in-dialog"
+import { ConsumableApplyDialog } from "./components/consumable-apply-dialog"
 
 function ConsumableContent() {
   const router = useRouter()
@@ -68,6 +69,10 @@ function ConsumableContent() {
   // 入库弹框状态
   const [stockInDialogOpen, setStockInDialogOpen] = useState(false)
   const [selectedConsumableForStockIn, setSelectedConsumableForStockIn] = useState<any>(null)
+
+  // 申领弹框状态
+  const [applyDialogOpen, setApplyDialogOpen] = useState(false)
+  const [selectedConsumableForApply, setSelectedConsumableForApply] = useState<any>(null)
 
   // 过滤和排序数据
   const filteredConsumableItems = consumableItems
@@ -228,7 +233,7 @@ function ConsumableContent() {
     } else if (actionId === "stockIn") {
       handleOpenStockInDialog(item)
     } else if (actionId === "apply") {
-      router.push(`/laboratory/consumables/apply/${item.id}`)
+      handleOpenApplyDialog(item)
     } else if (actionId === "delete") {
       handleDeleteItem(item)
     }
@@ -238,6 +243,12 @@ function ConsumableContent() {
   const handleOpenStockInDialog = (consumable: any) => {
     setSelectedConsumableForStockIn(consumable)
     setStockInDialogOpen(true)
+  }
+
+  // 处理申领弹框打开
+  const handleOpenApplyDialog = (consumable: any) => {
+    setSelectedConsumableForApply(consumable)
+    setApplyDialogOpen(true)
   }
 
   // 配置批量操作
@@ -301,7 +312,7 @@ function ConsumableContent() {
         onVisibleColumnsChange={setVisibleColumns}
         cardFields={consumableCardFields}
         customCardRenderer={(item, actions, isSelected, onToggleSelect, onRowActionClick) => 
-          consumableCustomCardRenderer(item, actions, isSelected, onToggleSelect, onRowActionClick, handleOpenStockInDialog)
+          consumableCustomCardRenderer(item, actions, isSelected, onToggleSelect, onRowActionClick, handleOpenStockInDialog, handleOpenApplyDialog)
         }
         gridClassName="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
         titleField="name"
@@ -342,6 +353,13 @@ function ConsumableContent() {
         open={stockInDialogOpen}
         onOpenChange={setStockInDialogOpen}
         consumable={selectedConsumableForStockIn}
+      />
+
+      {/* 耗材申领弹框 */}
+      <ConsumableApplyDialog
+        open={applyDialogOpen}
+        onOpenChange={setApplyDialogOpen}
+        consumable={selectedConsumableForApply}
       />
     </div>
   )
