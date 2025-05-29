@@ -34,6 +34,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { toast } from "@/components/ui/use-toast"
+import { ConsumableStockInDialog } from "./components/consumable-stock-in-dialog"
 
 function ConsumableContent() {
   const router = useRouter()
@@ -63,6 +64,10 @@ function ConsumableContent() {
   })
   // 删除确认对话框状态
   const [itemToDelete, setItemToDelete] = useState<any>(null)
+
+  // 入库弹框状态
+  const [stockInDialogOpen, setStockInDialogOpen] = useState(false)
+  const [selectedConsumableForStockIn, setSelectedConsumableForStockIn] = useState<any>(null)
 
   // 过滤和排序数据
   const filteredConsumableItems = consumableItems
@@ -220,13 +225,19 @@ function ConsumableContent() {
       router.push(`/laboratory/consumables/${item.id}`)
     } else if (actionId === "edit") {
       router.push(`/laboratory/consumables/edit/${item.id}`)
-    } else if (actionId === "stockin") {
-      router.push(`/laboratory/consumables/stockin/${item.id}`)
+    } else if (actionId === "stockIn") {
+      handleOpenStockInDialog(item)
     } else if (actionId === "apply") {
       router.push(`/laboratory/consumables/apply/${item.id}`)
     } else if (actionId === "delete") {
       handleDeleteItem(item)
     }
+  }
+
+  // 处理入库弹框打开
+  const handleOpenStockInDialog = (consumable: any) => {
+    setSelectedConsumableForStockIn(consumable)
+    setStockInDialogOpen(true)
   }
 
   // 配置批量操作
@@ -289,7 +300,9 @@ function ConsumableContent() {
         visibleColumns={visibleColumns}
         onVisibleColumnsChange={setVisibleColumns}
         cardFields={consumableCardFields}
-        customCardRenderer={consumableCustomCardRenderer}
+        customCardRenderer={(item, actions, isSelected, onToggleSelect, onRowActionClick) => 
+          consumableCustomCardRenderer(item, actions, isSelected, onToggleSelect, onRowActionClick, handleOpenStockInDialog)
+        }
         gridClassName="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
         titleField="name"
         descriptionField="description"
@@ -323,6 +336,13 @@ function ConsumableContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 耗材入库弹框 */}
+      <ConsumableStockInDialog
+        open={stockInDialogOpen}
+        onOpenChange={setStockInDialogOpen}
+        consumable={selectedConsumableForStockIn}
+      />
     </div>
   )
 }

@@ -457,21 +457,33 @@ export const consumableActions = [
     },
   },
   {
-    id: "stockin",
+    id: "stockIn",
     label: "入库耗材",
     icon: <Package className="h-4 w-4" />,
-    onClick: (item: any) => {
-      const url = `/laboratory/consumables/stockin/${item.id}`;
-      window.open(url, "_self");
+    onClick: (item: any, onOpenStockInDialog?: (consumable: any) => void) => {
+      // 如果提供了弹框回调函数，则使用弹框
+      if (onOpenStockInDialog) {
+        onOpenStockInDialog(item);
+      } else {
+        // 否则跳转到入库页面
+        const url = `/laboratory/consumables/stockin/${item.id}`;
+        window.open(url, "_self");
+      }
     },
   },
   {
     id: "apply",
     label: "申领耗材",
     icon: <Package className="h-4 w-4" />,
-    onClick: (item: any) => {
-      const url = `/laboratory/consumables/apply/${item.id}`;
-      window.open(url, "_self");
+    onClick: (item: any, onOpenStockInDialog?: (consumable: any) => void, onOpenApplyDialog?: (consumable: any) => void) => {
+      // 如果提供了申领弹框回调函数，则使用弹框
+      if (onOpenApplyDialog) {
+        onOpenApplyDialog(item);
+      } else {
+        // 否则跳转到申领页面
+        const url = `/laboratory/consumables/apply/${item.id}`;
+        window.open(url, "_self");
+      }
     },
   },
   {
@@ -861,7 +873,15 @@ export const consumableCustomCardRenderer = (
       if (onRowActionClick) {
         onRowActionClick(action.id, item);
       } else if (action.onClick) {
-        action.onClick(item, e);
+        // 对于耗材入库操作，传递弹框回调函数
+        if (action.id === "stockIn" && onOpenStockInDialog) {
+          action.onClick(item, onOpenStockInDialog);
+        } else if (action.id === "apply" && onOpenApplyDialog) {
+          // 对于耗材申领操作，传递弹框回调函数
+          action.onClick(item, onOpenStockInDialog, onOpenApplyDialog);
+        } else {
+          action.onClick(item, e);
+        }
       }
     }
   }));
