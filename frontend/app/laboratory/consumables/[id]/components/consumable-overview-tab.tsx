@@ -97,10 +97,10 @@ export default function ConsumableOverviewTab({ data }: ConsumableOverviewTabPro
             </div>
             
             <div className="space-y-1">
-              <div className="text-xs text-gray-500">购置日期</div>
-              <div className="flex items-center gap-1 text-sm">
-                <Calendar className="h-4 w-4 text-gray-500" />
-                <span>{data.purchaseDate}</span>
+              <div className="text-xs text-gray-500">有效期</div>
+              <div className="flex justify-between py-2 text-sm">
+                <span className="text-muted-foreground">有效期:</span>
+                <span>{data.expiryDate}</span>
               </div>
             </div>
             

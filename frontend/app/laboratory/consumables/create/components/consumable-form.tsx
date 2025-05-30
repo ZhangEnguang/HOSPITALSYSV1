@@ -50,7 +50,7 @@ export function ConsumableForm({ consumableId, isEditMode = false }: ConsumableF
     // 供应信息
     manufacturer: "",
     supplier: "",
-    purchaseDate: new Date(),
+    expiryDate: new Date(),
     price: "",
     department: "",
     
@@ -254,7 +254,7 @@ export function ConsumableForm({ consumableId, isEditMode = false }: ConsumableF
       description: "",
       manufacturer: "",
       supplier: "",
-      purchaseDate: new Date(),
+      expiryDate: new Date(),
       price: "",
       department: "",
       location: "",
@@ -557,11 +557,11 @@ export function ConsumableForm({ consumableId, isEditMode = false }: ConsumableF
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="purchaseDate" className="text-muted-foreground">采购日期</Label>
-              <DatePicker 
-                id="purchaseDate"
-                date={formData.purchaseDate} 
-                onSelect={(date) => date && updateFormData("purchaseDate", date)} 
+              <Label htmlFor="expiryDate" className="text-muted-foreground">有效期</Label>
+              <DatePicker
+                id="expiryDate"
+                date={formData.expiryDate}
+                onSelect={(date) => date && updateFormData("expiryDate", date)}
                 className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
               />
             </div>

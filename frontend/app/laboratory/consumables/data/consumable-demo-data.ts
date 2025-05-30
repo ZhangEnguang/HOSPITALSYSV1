@@ -1,5 +1,23 @@
 import { users } from "../config/consumable-config"
 
+// 生成随机ID
+const generateId = () => Math.random().toString(36).substring(2, 10)
+
+// 获取当前日期
+const today = new Date()
+const formatDate = (date: Date) => {
+  const year = date.getFullYear()
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const day = date.getDate().toString().padStart(2, '0')
+  return `${year}/${month}/${day}`
+}
+
+// 生成不同的有效期日期
+const expiredDate = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000) // 30天前过期
+const soonExpiredDate = new Date(today.getTime() + 15 * 24 * 60 * 60 * 1000) // 15天后过期
+const normalExpiredDate = new Date(today.getTime() + 365 * 24 * 60 * 60 * 1000) // 1年后过期
+const longExpiredDate = new Date(today.getTime() + 2 * 365 * 24 * 60 * 60 * 1000) // 2年后过期
+
 export const allDemoConsumableItems = [
   {
     id: "cons-001",
@@ -20,7 +38,7 @@ export const allDemoConsumableItems = [
     location: "A栋储物柜",
     department: "生物实验室",
     status: "充足",
-    purchaseDate: "2023/11/05",
+    expiryDate: formatDate(normalExpiredDate),
     lastUsedDate: "2023/11/20",
     manager: users[0],
     notes: "耐低温，可高温高压灭菌，适用于离心分离",
@@ -45,7 +63,7 @@ export const allDemoConsumableItems = [
     location: "A栋储物柜",
     department: "生物实验室",
     status: "充足",
-    purchaseDate: "2023/10/20",
+    expiryDate: formatDate(soonExpiredDate),
     lastUsedDate: "2023/11/19",
     manager: users[1],
     notes: "无菌包装，适用于精密移液操作",
@@ -70,7 +88,7 @@ export const allDemoConsumableItems = [
     location: "B栋试剂柜",
     department: "分子生物实验室",
     status: "充足",
-    purchaseDate: "2023/11/01",
+    expiryDate: formatDate(normalExpiredDate),
     lastUsedDate: "2023/11/18",
     manager: users[2],
     notes: "适用于样品储存和高通量实验",
@@ -95,7 +113,7 @@ export const allDemoConsumableItems = [
     location: "B栋试剂柜",
     department: "分析检测实验室",
     status: "充足",
-    purchaseDate: "2023/10/25",
+    expiryDate: formatDate(normalExpiredDate),
     lastUsedDate: "2023/11/17",
     manager: users[3],
     notes: "高透明度，适用于酶标仪检测",
@@ -120,7 +138,7 @@ export const allDemoConsumableItems = [
     location: "B栋试剂柜",
     department: "分子生物实验室",
     status: "充足",
-    purchaseDate: "2023/11/05",
+    expiryDate: formatDate(normalExpiredDate),
     lastUsedDate: "2023/11/20",
     manager: users[4],
     notes: "薄壁设计，导热性好，适用于PCR扩增",
@@ -145,7 +163,7 @@ export const allDemoConsumableItems = [
     location: "C栋专用柜",
     department: "分子生物实验室",
     status: "充足",
-    purchaseDate: "2023/09/15",
+    expiryDate: formatDate(normalExpiredDate),
     lastUsedDate: "2023/11/16",
     manager: users[0],
     notes: "配有电极和梳子，适用于琼脂糖凝胶电泳",
@@ -170,7 +188,7 @@ export const allDemoConsumableItems = [
     location: "A栋储物柜",
     department: "通用实验室",
     status: "充足",
-    purchaseDate: "2023/10/10",
+    expiryDate: formatDate(normalExpiredDate),
     lastUsedDate: "2023/11/14",
     manager: users[1],
     notes: "透明材质，易清洁，适用于各种试管",
@@ -195,7 +213,7 @@ export const allDemoConsumableItems = [
     location: "A栋储物柜",
     department: "通用实验室",
     status: "充足",
-    purchaseDate: "2023/10/12",
+    expiryDate: formatDate(normalExpiredDate),
     lastUsedDate: "2023/11/15",
     manager: users[2],
     notes: "线性排列设计，节省空间",
@@ -220,7 +238,7 @@ export const allDemoConsumableItems = [
     location: "B栋试剂柜",
     department: "分子生物实验室",
     status: "充足",
-    purchaseDate: "2023/11/08",
+    expiryDate: formatDate(normalExpiredDate),
     lastUsedDate: "2023/11/19",
     manager: users[3],
     notes: "可按需分割使用，减少浪费",
@@ -245,7 +263,7 @@ export const allDemoConsumableItems = [
     location: "A栋储物柜",
     department: "精密分析实验室",
     status: "充足",
-    purchaseDate: "2023/10/30",
+    expiryDate: formatDate(normalExpiredDate),
     lastUsedDate: "2023/11/18",
     manager: users[4],
     notes: "倒角设计，提高移液精度，减少残留",
@@ -270,7 +288,7 @@ export const allDemoConsumableItems = [
     location: "C栋专用柜",
     department: "化学分析实验室",
     status: "充足",
-    purchaseDate: "2023/09/25",
+    expiryDate: formatDate(normalExpiredDate),
     lastUsedDate: "2023/11/10",
     manager: users[0],
     notes: "耐腐蚀，可高温灭菌，适用于有机溶剂",

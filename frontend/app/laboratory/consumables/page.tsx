@@ -47,7 +47,7 @@ function ConsumableContent() {
   const [consumableItems, setConsumableItems] = useState(allDemoConsumableItems)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterValues, setFilterValues] = useState<Record<string, any>>({})
-  const [sortOption, setSortOption] = useState("purchaseDate_desc")
+  const [sortOption, setSortOption] = useState("expiryDate_desc")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
@@ -59,7 +59,7 @@ function ConsumableContent() {
     status: true,
     department: true,
     location: true,
-    purchaseDate: true,
+    expiryDate: true,
     currentStock: true,
     unitPrice: true,
   })
@@ -113,12 +113,12 @@ function ConsumableContent() {
         return false
       }
 
-      if (filterValues.purchaseDateRange?.from && filterValues.purchaseDateRange?.to) {
-        const purchaseDate = new Date(item.purchaseDate)
-        const filterFrom = new Date(filterValues.purchaseDateRange.from)
-        const filterTo = new Date(filterValues.purchaseDateRange.to)
+      if (filterValues.expiryDateRange?.from && filterValues.expiryDateRange?.to) {
+        const expiryDate = new Date(item.expiryDate)
+        const filterFrom = new Date(filterValues.expiryDateRange.from)
+        const filterTo = new Date(filterValues.expiryDateRange.to)
 
-        if (purchaseDate < filterFrom || purchaseDate > filterTo) {
+        if (expiryDate < filterFrom || expiryDate > filterTo) {
           return false
         }
       }

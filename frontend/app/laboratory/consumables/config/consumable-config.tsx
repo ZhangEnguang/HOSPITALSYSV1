@@ -200,12 +200,12 @@ export const advancedFilters = [
     ],
   },
   {
-    id: "purchase",
-    title: "采购信息",
+    id: "expiry",
+    title: "有效期信息",
     fields: [
       {
-        id: "purchaseDateRange",
-        label: "采购日期范围",
+        id: "expiryDateRange",
+        label: "有效期范围",
         type: "date-range",
       },
       {
@@ -233,15 +233,15 @@ export const sortOptions = [
     direction: "desc" as const,
   },
   {
-    id: "purchaseDate_asc",
-    label: "采购日期 (最早优先)",
-    field: "purchaseDate",
+    id: "expiryDate_asc",
+    label: "有效期 (最早优先)",
+    field: "expiryDate",
     direction: "asc" as const,
   },
   {
-    id: "purchaseDate_desc",
-    label: "采购日期 (最近优先)",
-    field: "purchaseDate",
+    id: "expiryDate_desc",
+    label: "有效期 (最近优先)",
+    field: "expiryDate",
     direction: "desc" as const,
   },
   {
@@ -357,9 +357,9 @@ export const consumableColumns = [
     cell: (item: any) => <span>{item.location}</span>,
   },
   {
-    id: "purchaseDate",
-    header: "采购日期",
-    cell: (item: any) => <span>{format(new Date(item.purchaseDate), "yyyy/MM/dd")}</span>,
+    id: "expiryDate",
+    header: "有效期",
+    cell: (item: any) => <span>{format(new Date(item.expiryDate), "yyyy/MM/dd")}</span>,
   },
   {
     id: "manager",
@@ -802,18 +802,18 @@ const ConsumableCard = ({
         </div>
       </div>
 
-      {/* 下方区域：采购日期、库存量和状态标签 */}
+      {/* 下方区域：有效期、库存量和状态标签 */}
       <div className="px-3 mx-3 space-y-2">
-        {/* 采购日期 */}
+        {/* 有效期 */}
         <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-100">
           <span className={cn(
             isDisabled() ? "text-gray-400" : "text-muted-foreground"
-          )}>采购日期:</span>
+          )}>有效期:</span>
           <span className={cn(
             "font-medium",
             isDisabled() ? "text-gray-500" : "text-gray-900"
           )}>
-            {format(new Date(item.purchaseDate), "yyyy/MM/dd")}
+            {format(new Date(item.expiryDate), "yyyy/MM/dd")}
           </span>
         </div>
         

@@ -50,7 +50,7 @@ export function ConsumableEditForm({ consumableId }: ConsumableEditFormProps) {
     // 供应信息
     manufacturer: "",
     supplier: "",
-    purchaseDate: new Date(),
+    expiryDate: new Date(),
     price: "",
     department: "",
     
@@ -114,7 +114,7 @@ export function ConsumableEditForm({ consumableId }: ConsumableEditFormProps) {
           description: consumable.description,
           manufacturer: consumable.manufacturer,
           supplier: consumable.supplier,
-          purchaseDate: new Date(consumable.purchaseDate),
+          expiryDate: new Date(consumable.expiryDate),
           price: consumable.unitPrice?.toString() || "",
           department: consumable.department,
           location: consumable.location,
@@ -639,10 +639,10 @@ export function ConsumableEditForm({ consumableId }: ConsumableEditFormProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-muted-foreground">采购日期</Label>
+              <Label className="text-muted-foreground">有效期</Label>
               <DatePicker
-                date={formData.purchaseDate}
-                onSelect={(date) => updateFormData("purchaseDate", date || new Date())}
+                date={formData.expiryDate}
+                onSelect={(date) => updateFormData("expiryDate", date || new Date())}
               />
             </div>
             <div className="space-y-2">
@@ -743,7 +743,7 @@ export function ConsumableEditForm({ consumableId }: ConsumableEditFormProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="currentStock" className="text-muted-foreground">当前库存 <span className="text-red-500">*</span></Label>
               <Input 
