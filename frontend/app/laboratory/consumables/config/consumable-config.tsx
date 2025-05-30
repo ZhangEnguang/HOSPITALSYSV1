@@ -458,7 +458,7 @@ export const consumableActions = [
   },
   {
     id: "stockIn",
-    label: "入库耗材",
+    label: "耗材入库",
     icon: <Package className="h-4 w-4" />,
     onClick: (item: any, onOpenStockInDialog?: (consumable: any) => void) => {
       // 如果提供了弹框回调函数，则使用弹框
@@ -473,7 +473,7 @@ export const consumableActions = [
   },
   {
     id: "apply",
-    label: "申领耗材",
+    label: "耗材申领",
     icon: <Package className="h-4 w-4" />,
     onClick: (item: any, onOpenStockInDialog?: (consumable: any) => void, onOpenApplyDialog?: (consumable: any) => void) => {
       // 如果提供了申领弹框回调函数，则使用弹框

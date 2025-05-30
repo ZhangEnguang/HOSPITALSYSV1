@@ -19,7 +19,7 @@ interface ReagentApplyDialogProps {
 }
 
 export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApplyDialogProps) {
-  // 检查是否已过期
+  // 有效期显示逻辑 - 过期判断条件
   const isExpired = () => {
     if (!reagent) return false;
     const expiryDate = new Date(reagent.expiryDate);
@@ -37,15 +37,22 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
     return diffDays <= 30 && diffDays > 0;
   };
 
-  // 检查是否库存不足
-  const isOutOfStock = () => {
-    if (!reagent) return false;
-    return reagent.currentAmount <= 0;
+  // 库存量显示逻辑 - 库存状态判断
+  const getStockStatus = () => {
+    if (!reagent) return { text: "未知", color: "text-gray-600" };
+    
+    if (reagent.currentAmount <= 0) {
+      return { text: "无库存", color: "text-red-600" };
+    } else if (reagent.currentAmount <= reagent.initialAmount * 0.5) {
+      return { text: "库存不足", color: "text-orange-600" };
+    } else {
+      return { text: "库存充足", color: "text-green-600" };
+    }
   };
 
-  // 检查是否可以申领
+  // 申领功能逻辑 - 可申领条件（同时满足：未过期 && 库存量大于0）
   const canApply = () => {
-    return !isExpired() && !isOutOfStock();
+    return !isExpired() && reagent.currentAmount > 0;
   };
 
   // 表单数据状态
@@ -65,8 +72,9 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
     { value: "非常紧急", label: "非常紧急", color: "bg-red-100 text-red-700" },
   ]
 
-  // 处理表单提交
+  // 申领操作处理逻辑 - 点击申领时的验证
   const handleSubmit = () => {
+    // 首先检查是否过期，如过期则显示错误提示并阻止操作
     if (isExpired()) {
       toast({
         title: "申领失败",
@@ -76,10 +84,21 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
       return;
     }
 
+    // 然后检查库存是否充足，如无库存则显示错误提示并阻止操作
+    if (reagent.currentAmount <= 0) {
+      toast({
+        title: "申领失败", 
+        description: "试剂库存不足，无法申领。请联系管理员补充库存。",
+        variant: "destructive",
+      })
+      return;
+    }
+
+    // 只有通过所有验证才能进行后续操作
     if (!canApply()) {
       toast({
         title: "申领失败", 
-        description: "试剂库存不足或状态异常，无法申领。",
+        description: "试剂状态异常，无法申领。",
         variant: "destructive",
       })
       return;
@@ -131,7 +150,7 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
     onOpenChange(false)
   }
 
-  // 建议替代试剂
+  // 推荐替代试剂
   const getSuggestedAlternatives = () => {
     // 这里可以实现实际的推荐逻辑
     return [
@@ -139,6 +158,8 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
       { name: "甲醇 (HPLC级)", currentAmount: 2800, unit: "mL" },
     ];
   };
+
+  const stockStatus = getStockStatus();
 
   if (!reagent) return null
 
@@ -152,8 +173,8 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
           </DialogTitle>
         </DialogHeader>
 
-          <div className="space-y-6">
-          {/* 过期警告 */}
+        <div className="space-y-6">
+          {/* 安全性：过期试剂绝对不能申领 */}
           {isExpired() && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
               <div className="flex items-start gap-3">
@@ -180,7 +201,7 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
             </div>
           )}
 
-          {/* 即将过期警告 */}
+          {/* 即将过期警告但允许申领 */}
           {!isExpired() && isExpiringSoon() && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <div className="flex items-start gap-3">
@@ -195,8 +216,8 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
             </div>
           )}
 
-          {/* 库存不足警告 */}
-          {!isExpired() && isOutOfStock() && (
+          {/* 可用性：只有有库存的未过期试剂才能申领 */}
+          {!isExpired() && reagent.currentAmount <= 0 && (
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
@@ -210,7 +231,7 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
             </div>
           )}
 
-            {/* 试剂基本信息展示 */}
+          {/* 试剂基本信息展示 */}
           <div className={cn(
             "border p-4 rounded-lg",
             isExpired() ? "bg-gray-50 border-gray-200" : "bg-blue-50/50 border-blue-100"
@@ -223,48 +244,52 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
                 "w-2 h-2 rounded-full",
                 isExpired() ? "bg-gray-400" : "bg-blue-500"
               )}></div>
-                试剂信息
-              </h4>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">试剂名称</span>
+              试剂信息
+            </h4>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">试剂名称</span>
                 <span className={cn(
                   "font-medium",
                   isExpired() ? "text-gray-600" : "text-gray-900"
                 )}>{reagent.name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">规格</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">规格</span>
                 <span className={cn(
                   "font-medium",
                   isExpired() ? "text-gray-600" : "text-gray-900"
                 )}>{reagent.specification}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">当前库存</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">当前库存</span>
                 <span className={cn(
                   "font-medium",
-                  isExpired() ? "text-gray-600" : 
-                  reagent.currentAmount > 0 ? "text-blue-600" : "text-red-600"
+                  isExpired() ? "text-gray-600" : stockStatus.color
                 )}>{reagent.currentAmount}{reagent.unit}</span>
-                </div>
-                <div className="flex justify-between">
+              </div>
+              <div className="flex justify-between">
                 <span className="text-muted-foreground">有效期</span>
                 <span className={cn(
                   "font-medium",
-                  isExpired() ? "text-red-600" :
-                  isExpiringSoon() ? "text-yellow-600" : "text-gray-900"
+                  isExpired() ? "text-red-600" : "text-green-600"
                 )}>
                   {format(new Date(reagent.expiryDate), "yyyy/MM/dd")}
                 </span>
-                </div>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">库存状态</span>
+                <Badge variant="outline" className={cn("text-xs", stockStatus.color.replace("text-", "text-").replace("text-", "border-"))}>
+                  {stockStatus.text}
+                </Badge>
               </div>
             </div>
+          </div>
 
-          {/* 申领表单 - 仅在可申领时显示 */}
+          {/* 申领弹框内的限制：只有可申领的试剂才显示申领表单 */}
           {canApply() && (
             <>
-            {/* 申领基本信息 */}
+              {/* 申领基本信息 */}
               <div className="space-y-4">
                 <h4 className="font-medium text-gray-900 flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -272,19 +297,19 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
                 </h4>
               
                 <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+                  <div className="space-y-2">
                     <Label htmlFor="quantity">申领数量 *</Label>
-                  <div className="flex gap-2">
-                    <Input 
+                    <div className="flex gap-2">
+                      <Input 
                         id="quantity"
-                      type="number"
+                        type="number"
                         placeholder="输入数量"
                         value={formData.quantity}
                         onChange={(e) => setFormData(prev => ({ ...prev, quantity: e.target.value }))}
                         className="flex-1"
                         min="1"
                         max={reagent.currentAmount}
-                    />
+                      />
                       <div className="flex items-center px-3 bg-gray-50 border border-gray-200 rounded-md">
                         <span className="text-sm text-gray-600">{formData.unit}</span>
                       </div>
@@ -292,9 +317,9 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
                     <p className="text-xs text-muted-foreground">
                       最大可申领：{reagent.currentAmount}{reagent.unit}
                     </p>
-                </div>
-                
-                <div className="space-y-2">
+                  </div>
+                  
+                  <div className="space-y-2">
                     <Label htmlFor="expectedDate">期望使用日期 *</Label>
                     <Input
                       id="expectedDate"
@@ -302,7 +327,7 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
                       value={formData.expectedDate}
                       onChange={(e) => setFormData(prev => ({ ...prev, expectedDate: e.target.value }))}
                     />
-            </div>
+                  </div>
                 </div>
                 
                 <div className="space-y-2">
@@ -313,7 +338,7 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
                         key={option.value}
                         type="button"
                         onClick={() => setFormData(prev => ({ ...prev, urgency: option.value }))}
-                      className={cn(
+                        className={cn(
                           "px-3 py-1.5 rounded-md text-sm font-medium border transition-colors",
                           formData.urgency === option.value
                             ? `${option.color} border-current`
@@ -328,27 +353,27 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
               </div>
 
               {/* 申领用途 */}
-                <div className="space-y-2">
+              <div className="space-y-2">
                 <Label htmlFor="purpose">申领用途 *</Label>
-                  <Textarea 
+                <Textarea 
                   id="purpose"
                   placeholder="请详细说明试剂用途和实验目的..."
                   value={formData.purpose}
                   onChange={(e) => setFormData(prev => ({ ...prev, purpose: e.target.value }))}
                   rows={3}
                 />
-                </div>
+              </div>
                 
               {/* 备注 */}
-                <div className="space-y-2">
+              <div className="space-y-2">
                 <Label htmlFor="remarks">备注说明</Label>
-                  <Textarea 
+                <Textarea 
                   id="remarks"
                   placeholder="其他需要说明的事项（可选）..."
                   value={formData.remarks}
                   onChange={(e) => setFormData(prev => ({ ...prev, remarks: e.target.value }))}
                   rows={2}
-                  />
+                />
               </div>
             </>
           )}
@@ -370,7 +395,7 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
               {isExpired() ? "试剂已过期" : "无法申领"}
             </Button>
           )}
-              </div>
+        </div>
       </DialogContent>
     </Dialog>
   )

@@ -476,7 +476,7 @@ export const reagentActions = [
   },
   {
     id: "stockIn",
-    label: "入库试剂",
+    label: "试剂入库",
     icon: <FileText className="h-4 w-4" />,
     onClick: (item: any, onOpenStockInDialog?: (reagent: any) => void) => {
       // 如果提供了弹框回调函数，则使用弹框
@@ -491,7 +491,7 @@ export const reagentActions = [
   },
   {
     id: "apply",
-    label: "申领试剂",
+    label: "试剂申领",
     icon: <FileText className="h-4 w-4" />,
     onClick: (item: any, onOpenStockInDialog?: (reagent: any) => void, onOpenApplyDialog?: (reagent: any) => void) => {
       // 如果提供了申领弹框回调函数，则使用弹框
@@ -564,32 +564,6 @@ const ReagentCard = ({
   isSelected: boolean;
   onToggleSelect: (selected: boolean) => void;
 }) => {
-  // 获取危险等级颜色和文本
-  const getDangerLevelInfo = (level: string) => {
-    switch (level) {
-      case "高":
-        return {
-          color: "bg-red-100 text-red-700 border-red-200",
-          text: "高危品"
-        };
-      case "中":
-        return {
-          color: "bg-yellow-100 text-yellow-700 border-yellow-200",
-          text: "中危品"
-        };
-      case "低":
-        return {
-          color: "bg-green-100 text-green-700 border-green-200",
-          text: "低危品"
-        };
-      default:
-        return {
-          color: "bg-gray-100 text-gray-700 border-gray-200",
-          text: "安全品"
-        };
-    }
-  };
-
   // 获取存储条件图标
   const getStorageIcon = (condition: string) => {
     if (condition.includes("℃")) {
@@ -609,35 +583,59 @@ const ReagentCard = ({
     return diffDays <= 30 && diffDays > 0;
   };
 
-  // 检查是否已过期
+  // 1. 有效期显示逻辑 - 过期判断条件
   const isExpired = () => {
     const expiryDate = new Date(item.expiryDate);
     const today = new Date();
     return expiryDate < today || item.status === "已过期";
   };
 
-  // 检查是否库存不足
-  const isOutOfStock = () => {
-    return item.currentAmount <= 0;
+  // 2. 库存量显示逻辑 - 库存状态判断条件
+  const getStockStatus = () => {
+    if (item.currentAmount <= 0) {
+      return { text: "无库存", color: "text-red-600 bg-red-50" };
+    } else if (item.currentAmount <= item.initialAmount * 0.5) {
+      return { text: "库存不足", color: "text-orange-600 bg-orange-50" };
+    } else {
+      return { text: "库存充足", color: "text-green-600 bg-green-50" };
+    }
   };
 
-  // 检查是否可以申领
+  // 3. 申领功能逻辑 - 可申领条件
   const canApply = () => {
-    return !isExpired() && !isOutOfStock();
+    return !isExpired() && item.currentAmount > 0;
   };
 
-  const dangerInfo = getDangerLevelInfo(item.dangerLevel);
+  const stockStatus = getStockStatus();
+
+  // 4. 卡片整体样式逻辑
+  const getCardStyles = () => {
+    if (isExpired()) {
+      return "border-red-300 bg-red-50/30";
+    } else if (isExpiringSoon()) {
+      return "border-yellow-300 bg-yellow-50/30";
+    }
+    return "";
+  };
+
+  // 5. 悬停提示逻辑
+  const getTooltipText = () => {
+    if (isExpired()) {
+      return "此试剂已过期，无法申领";
+    } else if (item.currentAmount <= 0) {
+      return "库存不足，无法申领";
+    }
+    return "";
+  };
 
   return (
     <Card 
       className={cn(
         "group cursor-pointer border transition-all duration-300 ease-in-out hover:shadow-lg hover:border-primary/20 relative",
         isSelected && "ring-2 ring-primary border-primary",
-        // 过期试剂样式 - 改为红色边框和背景，与耗材缺货样式一致
-        isExpired() && "border-red-300 bg-red-50/30",
-        // 即将过期提示
-        isExpiringSoon() && !isExpired() && "border-yellow-300 bg-yellow-50/30"
+        getCardStyles()
       )}
+      title={getTooltipText()}
     >
       {/* 右上角操作菜单 */}
       <div className="absolute top-2 right-2 z-10">
@@ -654,8 +652,8 @@ const ReagentCard = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-36">
             {actions.map((action) => {
-              // 过期试剂禁用申领操作
-              const isDisabled = isExpired() && action.id === "apply";
+              // 申领功能验证：过期或无库存时禁用申领操作
+              const isDisabled = action.id === "apply" && !canApply();
               
               return (
                 <DropdownMenuItem 
@@ -675,7 +673,10 @@ const ReagentCard = ({
                 >
                   {action.icon}
                   <span>
-                    {isDisabled && action.id === "apply" ? "试剂已过期" : action.label}
+                    {isDisabled && action.id === "apply" 
+                      ? (isExpired() ? "试剂已过期" : "库存不足") 
+                      : action.label
+                    }
                   </span>
                 </DropdownMenuItem>
               );
@@ -684,7 +685,7 @@ const ReagentCard = ({
         </DropdownMenu>
       </div>
 
-      {/* 过期状态标签 */}
+      {/* 左上角过期状态标识 */}
       {isExpired() && (
         <div className="absolute top-2 left-2 z-10">
           <Badge variant="destructive" className="text-xs font-medium">
@@ -693,7 +694,7 @@ const ReagentCard = ({
         </div>
       )}
 
-      {/* 即将过期提醒 */}
+      {/* 即将过期提醒（未过期且30天内过期时显示） */}
       {isExpiringSoon() && !isExpired() && (
         <div className="absolute top-2 left-2 z-10">
           <Badge variant="outline" className="text-xs font-medium bg-yellow-100 text-yellow-700 border-yellow-300">
@@ -701,6 +702,19 @@ const ReagentCard = ({
           </Badge>
         </div>
       )}
+
+      {/* 右下角库存状态显示 */}
+      <div className="absolute bottom-2 right-2 z-10">
+        <Badge 
+          variant="outline" 
+          className={cn(
+            "text-xs font-medium border",
+            stockStatus.color
+          )}
+        >
+          {stockStatus.text}
+        </Badge>
+      </div>
 
       {/* 上方区域：左侧图片，右侧试剂名称 */}
       <div className="flex items-start gap-3 p-3 pb-2">
@@ -736,7 +750,7 @@ const ReagentCard = ({
                 <div className="w-full h-5 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative">
                   {/* 瓶身 */}
                   <div className="absolute inset-x-0.5 top-0.5 bottom-0.5 bg-gradient-to-b from-blue-100 to-blue-200 rounded-sm opacity-80"></div>
-                  {/* 液体 */}
+                  {/* 液体 - 根据库存量显示高度 */}
                   <div 
                     className="absolute inset-x-0.5 bottom-0.5 bg-gradient-to-t from-blue-500 to-blue-400 rounded-sm opacity-70"
                     style={{ height: `${Math.max(20, (item.currentAmount / item.initialAmount) * 80)}%` }}
@@ -780,21 +794,20 @@ const ReagentCard = ({
 
       {/* 下方区域：有效期、库存量和危险标签 */}
       <div className="px-3 mx-3 space-y-2">
-        {/* 有效期 */}
+        {/* 1. 有效期显示逻辑 - 有效期字段颜色规则 */}
         <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-100">
           <span className={cn(
             "text-muted-foreground"
           )}>有效期:</span>
           <span className={cn(
             "font-medium",
-            isExpired() ? "text-red-600" : 
-            isExpiringSoon() ? "text-yellow-600" : "text-gray-900"
+            isExpired() ? "text-red-600" : "text-green-600"
           )}>
             {format(new Date(item.expiryDate), "yyyy/MM/dd")}
           </span>
         </div>
         
-        {/* 库存量和危险程度标签 */}
+        {/* 库存量信息 */}
         <div className="flex items-center justify-between pb-5">
           <div className="flex items-center gap-1">
             <span className={cn(
@@ -805,26 +818,18 @@ const ReagentCard = ({
             </span>
             <span className={cn(
               "text-sm font-medium",
-              isOutOfStock() ? "text-red-600" : "text-green-600"
+              item.currentAmount <= 0 ? "text-red-600" : 
+              item.currentAmount <= item.initialAmount * 0.5 ? "text-orange-600" : "text-green-600"
             )}>
-              {isOutOfStock() ? "无库存" : `${item.currentAmount}${item.unit}`}
+              {item.currentAmount <= 0 ? "无库存" : `${item.currentAmount}${item.unit}`}
             </span>
           </div>
-          <Badge 
-            variant="outline" 
-            className={cn(
-              "font-medium text-xs",
-              dangerInfo.color
-            )}
-          >
-            {dangerInfo.text}
-          </Badge>
         </div>
       </div>
 
-      {/* 鼠标悬停提示 */}
-      {isExpired() && (
-        <div className="absolute inset-0 pointer-events-none" title="此试剂已过期，无法申领">
+      {/* 用户体验优化 - 鼠标悬停提示 */}
+      {getTooltipText() && (
+        <div className="absolute inset-0 pointer-events-none" title={getTooltipText()}>
         </div>
       )}
     </Card>

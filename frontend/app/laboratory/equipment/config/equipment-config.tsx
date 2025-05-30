@@ -477,7 +477,7 @@ export const equipmentActions = [
   },
   {
     id: "booking",
-    label: "预约仪器",
+    label: "预约申请",
     icon: <Calendar className="h-4 w-4" />,
     onClick: (item: any) => {
       const url = `/laboratory/equipment/booking/${item.id}`;
@@ -486,7 +486,7 @@ export const equipmentActions = [
   },
   {
     id: "maintenance",
-    label: "维护仪器",
+    label: "维护登记",
     icon: <Wrench className="h-4 w-4" />,
     onClick: (item: any) => {
       const url = `/laboratory/equipment/maintenance/${item.id}`;
