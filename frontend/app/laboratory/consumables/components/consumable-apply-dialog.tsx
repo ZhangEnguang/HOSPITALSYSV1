@@ -19,6 +19,23 @@ interface ConsumableApplyDialogProps {
 }
 
 export function ConsumableApplyDialog({ open, onOpenChange, consumable }: ConsumableApplyDialogProps) {
+  // 1. 有效期验证逻辑
+  const isExpired = () => {
+    if (!consumable) return false;
+    const expiryDate = new Date(consumable.expiryDate);
+    const today = new Date();
+    return expiryDate < today || consumable.status === "已过期";
+  };
+
+  // 检查是否即将过期（30天内）
+  const isSoonExpired = () => {
+    if (!consumable) return false;
+    const expiryDate = new Date(consumable.expiryDate);
+    const today = new Date();
+    const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+    return expiryDate <= thirtyDaysFromNow && expiryDate > today;
+  };
+
   // 检查是否已停用
   const isDisabled = () => {
     if (!consumable) return false;
@@ -28,18 +45,20 @@ export function ConsumableApplyDialog({ open, onOpenChange, consumable }: Consum
   // 检查是否库存不足
   const isOutOfStock = () => {
     if (!consumable) return false;
-    return consumable.currentStock <= 0 || consumable.status === "缺货";
+    return consumable.currentStock <= 0;
   };
 
-  // 检查是否库存预警
-  const isLowStock = () => {
-    if (!consumable) return false;
-    return consumable.currentStock <= consumable.minStock || consumable.status === "库存不足";
-  };
-
-  // 检查是否可以申领
+  // 2. 申领功能逻辑 - 同时满足条件
   const canApply = () => {
-    return !isDisabled() && !isOutOfStock();
+    return !isExpired() && !isDisabled() && !isOutOfStock();
+  };
+
+  // 获取不可申领的原因
+  const getDisabledReason = () => {
+    if (isExpired()) return "耗材已过期，无法申领";
+    if (isDisabled()) return "耗材已停用，无法申领";
+    if (isOutOfStock()) return "库存不足，无法申领";
+    return "";
   };
 
   // 表单数据状态
@@ -228,8 +247,56 @@ export function ConsumableApplyDialog({ open, onOpenChange, consumable }: Consum
         </DialogHeader>
 
           <div className="space-y-6">
+          {/* 已过期警告 */}
+          {isExpired() && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <h4 className="font-medium text-red-900 mb-2">耗材已过期</h4>
+                  <p className="text-sm text-red-700 mb-3">
+                    此耗材已超过有效期，无法进行申领操作。过期耗材可能存在质量风险，建议寻找替代方案。
+                  </p>
+                  <div className="text-sm text-red-600 bg-red-100 rounded px-2 py-1 inline-block">
+                    有效期：{format(new Date(consumable.expiryDate), "yyyy年MM月dd日")}
+                  </div>
+                  {getSuggestedAlternatives().length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-sm font-medium text-red-800 mb-2">推荐替代耗材：</p>
+                      <div className="space-y-1">
+                        {getSuggestedAlternatives().map((alt, index) => (
+                          <div key={index} className="text-sm text-red-700 bg-red-100 rounded px-2 py-1">
+                            {alt.name} - 可用库存：{alt.currentStock}{alt.unit}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 即将过期警告 */}
+          {!isExpired() && isSoonExpired() && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <Clock className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h4 className="font-medium text-yellow-900 mb-1">即将过期提醒</h4>
+                  <p className="text-sm text-yellow-700 mb-2">
+                    此耗材将在30天内过期，建议优先使用。如非必要，请考虑使用其他耗材。
+                  </p>
+                  <div className="text-sm text-yellow-700 bg-yellow-100 rounded px-2 py-1 inline-block">
+                    有效期：{format(new Date(consumable.expiryDate), "yyyy年MM月dd日")}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* 已停用警告 */}
-          {isDisabled() && (
+          {!isExpired() && isDisabled() && (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="h-5 w-5 text-gray-600 mt-0.5 flex-shrink-0" />
@@ -255,23 +322,8 @@ export function ConsumableApplyDialog({ open, onOpenChange, consumable }: Consum
             </div>
           )}
 
-          {/* 库存预警 */}
-          {!isDisabled() && isLowStock() && !isOutOfStock() && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <Clock className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h4 className="font-medium text-yellow-900 mb-1">库存预警</h4>
-                  <p className="text-sm text-yellow-700">
-                    此耗材库存已低于最低库存量（{consumable.minStock}{consumable.unit}），建议尽快补充库存。
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* 库存不足警告 */}
-          {!isDisabled() && isOutOfStock() && (
+          {!isExpired() && !isDisabled() && isOutOfStock() && (
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
@@ -323,12 +375,33 @@ export function ConsumableApplyDialog({ open, onOpenChange, consumable }: Consum
                 )}>{consumable.category}</span>
                 </div>
                 <div className="flex justify-between">
+                  <span className="text-muted-foreground">有效期</span>
+                <span className={cn(
+                  "font-medium",
+                  isDisabled() ? "text-gray-600" : 
+                  isExpired() ? "text-red-600" : "text-green-600"
+                )}>{format(new Date(consumable.expiryDate), "yyyy/MM/dd")}</span>
+                </div>
+                <div className="flex justify-between">
                   <span className="text-muted-foreground">当前库存</span>
                 <span className={cn(
                   "font-medium",
                   isDisabled() ? "text-gray-600" : 
                   consumable.currentStock > 0 ? "text-blue-600" : "text-red-600"
                 )}>{consumable.currentStock}{consumable.unit}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">状态</span>
+                <span className={cn(
+                  "font-medium",
+                  isDisabled() ? "text-gray-600" :
+                  isExpired() ? "text-red-600" :
+                  isSoonExpired() ? "text-yellow-600" : "text-green-600"
+                )}>
+                  {isExpired() ? "已过期" : 
+                   isSoonExpired() ? "即将过期" : 
+                   isDisabled() ? "已停用" : "正常"}
+                </span>
                 </div>
               </div>
             </div>

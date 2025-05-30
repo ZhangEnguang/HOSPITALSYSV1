@@ -569,50 +569,56 @@ const ConsumableCard = ({
     return `${result}...`;
   };
 
-  // 获取库存状态颜色和文本
-  const getStockLevelInfo = (status: string) => {
-    switch (status) {
-      case "缺货":
-        return {
-          color: "bg-red-100 text-red-700 border-red-200",
-          text: "缺货"
-        };
-      case "库存不足":
-        return {
-          color: "bg-yellow-100 text-yellow-700 border-yellow-200",
-          text: "库存不足"
-        };
-      case "充足":
-        return {
-          color: "bg-green-100 text-green-700 border-green-200",
-          text: "库存充足"
-        };
-      case "已停用":
-        return {
-          color: "bg-gray-100 text-gray-700 border-gray-200",
-          text: "已停用"
-        };
-      case "待采购":
-        return {
-          color: "bg-blue-100 text-blue-700 border-blue-200",
-          text: "待采购"
-        };
-      default:
-        return {
-          color: "bg-gray-100 text-gray-700 border-gray-200",
-          text: "正常"
-        };
+  // 1. 有效期显示逻辑
+  const isExpired = () => {
+    const expiryDate = new Date(item.expiryDate);
+    const today = new Date();
+    return expiryDate < today || item.status === "已过期";
+  };
+
+  // 检查是否即将过期（30天内）
+  const isSoonExpired = () => {
+    const expiryDate = new Date(item.expiryDate);
+    const today = new Date();
+    const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+    return expiryDate <= thirtyDaysFromNow && expiryDate > today;
+  };
+
+  // 2. 库存量显示逻辑
+  const getStockStatus = () => {
+    // 使用maxStock作为初始库存参考
+    if (item.currentStock <= 0) {
+      return { text: "无库存", color: "text-red-600 bg-red-50 border-red-200" };
+    } else if (item.currentStock <= item.maxStock * 0.5) {
+      return { text: "库存不足", color: "text-orange-600 bg-orange-50 border-orange-200" };
+    } else {
+      return { text: "库存充足", color: "text-green-600 bg-green-50 border-green-200" };
     }
   };
 
-  // 检查是否库存不足
-  const isLowStock = () => {
-    return item.currentStock <= item.minStock || item.status === "库存不足";
+  // 3. 申领功能逻辑
+  const canApply = () => {
+    return !isExpired() && item.currentStock > 0;
   };
 
-  // 检查是否缺货
-  const isOutOfStock = () => {
-    return item.currentStock <= 0 || item.status === "缺货";
+  // 4. 卡片整体样式逻辑
+  const getCardStyles = () => {
+    if (isExpired()) {
+      return "border-red-300 bg-red-50/30";
+    } else if (isSoonExpired()) {
+      return "border-yellow-300 bg-yellow-50/30";
+    }
+    return "";
+  };
+
+  // 获取悬停提示文本
+  const getTooltipText = () => {
+    if (isExpired()) {
+      return "此耗材已过期，无法申领";
+    } else if (item.currentStock <= 0) {
+      return "库存不足，无法申领";
+    }
+    return "";
   };
 
   // 检查是否已停用
@@ -620,12 +626,7 @@ const ConsumableCard = ({
     return item.status === "已停用";
   };
 
-  // 检查是否可以申领
-  const canApply = () => {
-    return !isOutOfStock() && !isDisabled();
-  };
-
-  const stockInfo = getStockLevelInfo(item.status);
+  const stockStatus = getStockStatus();
 
   return (
     <Card 
@@ -634,11 +635,10 @@ const ConsumableCard = ({
         isSelected && "ring-2 ring-primary border-primary",
         // 已停用耗材样式
         isDisabled() && "opacity-60 bg-gray-50/50 border-gray-300",
-        // 缺货提示
-        isOutOfStock() && !isDisabled() && "border-red-300 bg-red-50/30",
-        // 库存不足提示
-        isLowStock() && !isOutOfStock() && !isDisabled() && "border-yellow-300 bg-yellow-50/30"
+        // 卡片整体样式逻辑
+        !isDisabled() && getCardStyles()
       )}
+      title={getTooltipText()}
     >
       {/* 停用遮罩 */}
       {isDisabled() && (
@@ -660,8 +660,8 @@ const ConsumableCard = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-36">
             {actions.map((action) => {
-              // 已停用耗材禁用申领操作
-              const isActionDisabled = isDisabled() && action.id === "apply";
+              // 申领操作根据条件禁用
+              const isActionDisabled = (isDisabled() || !canApply()) && action.id === "apply";
               
               return (
                 <DropdownMenuItem 
@@ -681,7 +681,9 @@ const ConsumableCard = ({
                 >
                   {action.icon}
                   <span>
-                    {isActionDisabled && action.id === "apply" ? "耗材已停用" : action.label}
+                    {isActionDisabled && action.id === "apply" 
+                      ? (isExpired() ? "耗材已过期" : "库存不足") 
+                      : action.label}
                   </span>
                 </DropdownMenuItem>
               );
@@ -690,20 +692,20 @@ const ConsumableCard = ({
         </DropdownMenu>
       </div>
 
-      {/* 状态标签 */}
-      {isOutOfStock() && (
+      {/* 左上角状态标识 */}
+      {isExpired() && (
         <div className="absolute top-2 left-2 z-10">
-          <Badge variant="destructive" className="text-xs font-medium">
-            缺货
+          <Badge variant="destructive" className="text-xs font-medium bg-red-100 text-red-700 border-red-300">
+            已过期
           </Badge>
         </div>
       )}
 
-      {/* 库存不足提醒 */}
-      {isLowStock() && !isOutOfStock() && (
+      {/* 即将过期标识 */}
+      {!isExpired() && isSoonExpired() && (
         <div className="absolute top-2 left-2 z-10">
           <Badge variant="outline" className="text-xs font-medium bg-yellow-100 text-yellow-700 border-yellow-300">
-            库存不足
+            即将过期
           </Badge>
         </div>
       )}
@@ -811,7 +813,8 @@ const ConsumableCard = ({
           )}>有效期:</span>
           <span className={cn(
             "font-medium",
-            isDisabled() ? "text-gray-500" : "text-gray-900"
+            isDisabled() ? "text-gray-500" : 
+            isExpired() ? "text-red-600" : "text-green-600"
           )}>
             {format(new Date(item.expiryDate), "yyyy/MM/dd")}
           </span>
@@ -828,30 +831,24 @@ const ConsumableCard = ({
             </span>
             <span className={cn(
               "text-sm font-medium",
-              isDisabled() ? "text-gray-500" :
-              isOutOfStock() ? "text-red-600" : 
-              isLowStock() ? "text-yellow-600" : "text-green-600"
+              isDisabled() ? "text-gray-500" : stockStatus.color.split(' ')[0]
             )}>
               {item.currentStock}{item.unit}
             </span>
           </div>
+          
+          {/* 右下角库存状态显示 */}
           <Badge 
             variant="outline" 
             className={cn(
               "font-medium text-xs",
-              isDisabled() ? `${stockInfo.color} opacity-70` : stockInfo.color
+              isDisabled() ? "bg-gray-100 text-gray-700 border-gray-200 opacity-70" : stockStatus.color
             )}
           >
-            {stockInfo.text}
+            {stockStatus.text}
           </Badge>
         </div>
       </div>
-
-      {/* 鼠标悬停提示 */}
-      {isDisabled() && (
-        <div className="absolute inset-0 pointer-events-none" title="此耗材已停用，无法申领">
-        </div>
-      )}
     </Card>
   );
 };

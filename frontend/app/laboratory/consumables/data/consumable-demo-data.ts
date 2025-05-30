@@ -13,12 +13,15 @@ const formatDate = (date: Date) => {
 }
 
 // 生成不同的有效期日期
-const expiredDate = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000) // 30天前过期
-const soonExpiredDate = new Date(today.getTime() + 15 * 24 * 60 * 60 * 1000) // 15天后过期
+const expiredDate30 = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000) // 30天前过期
+const expiredDate60 = new Date(today.getTime() - 60 * 24 * 60 * 60 * 1000) // 60天前过期
+const soonExpiredDate15 = new Date(today.getTime() + 15 * 24 * 60 * 60 * 1000) // 15天后过期
+const soonExpiredDate25 = new Date(today.getTime() + 25 * 24 * 60 * 60 * 1000) // 25天后过期
 const normalExpiredDate = new Date(today.getTime() + 365 * 24 * 60 * 60 * 1000) // 1年后过期
 const longExpiredDate = new Date(today.getTime() + 2 * 365 * 24 * 60 * 60 * 1000) // 2年后过期
 
 export const allDemoConsumableItems = [
+  // 1. 库存充足 + 正常有效期 (可申领)
   {
     id: "cons-001",
     name: "微量离心管",
@@ -29,12 +32,12 @@ export const allDemoConsumableItems = [
     manufacturer: "艾本德",
     supplier: "德国艾本德（中国）有限公司",
     catalogNumber: "EP-15-T",
-    currentStock: 800,
+    currentStock: 810, // 81% > 50% - 库存充足
     minStock: 200,
-    maxStock: 1500,
+    maxStock: 1000,
     unit: "包",
     unitPrice: 28.0,
-    totalValue: 22400.0,
+    totalValue: 22680.0,
     location: "A栋储物柜",
     department: "生物实验室",
     status: "充足",
@@ -44,6 +47,7 @@ export const allDemoConsumableItems = [
     notes: "耐低温，可高温高压灭菌，适用于离心分离",
     imageUrl: "/consumables/microcentrifuge-tube.png",
   },
+  // 2. 库存不足 + 即将过期 (可申领但有警告)
   {
     id: "cons-002", 
     name: "移液器吸头",
@@ -54,21 +58,22 @@ export const allDemoConsumableItems = [
     manufacturer: "艾本德",
     supplier: "德国艾本德（中国）有限公司",
     catalogNumber: "TIP-200-Y",
-    currentStock: 600,
+    currentStock: 380, // 38% < 50% - 库存不足
     minStock: 150,
-    maxStock: 1200,
+    maxStock: 1000,
     unit: "盒",
     unitPrice: 52.0,
-    totalValue: 31200.0,
+    totalValue: 19760.0,
     location: "A栋储物柜",
     department: "生物实验室",
-    status: "充足",
-    expiryDate: formatDate(soonExpiredDate),
+    status: "库存不足",
+    expiryDate: formatDate(soonExpiredDate15), // 即将过期
     lastUsedDate: "2023/11/19",
     manager: users[1],
     notes: "无菌包装，适用于精密移液操作",
     imageUrl: "/consumables/pipette-tips.png",
   },
+  // 3. 无库存 + 正常有效期 (不可申领)
   {
     id: "cons-003",
     name: "深孔微孔板",
@@ -79,21 +84,22 @@ export const allDemoConsumableItems = [
     manufacturer: "康宁",
     supplier: "康宁生命科学",
     catalogNumber: "DWP-96-22",
-    currentStock: 80,
+    currentStock: 0, // 无库存
     minStock: 20,
     maxStock: 200,
     unit: "块",
     unitPrice: 28.5,
-    totalValue: 2280.0,
+    totalValue: 0.0,
     location: "B栋试剂柜",
     department: "分子生物实验室",
-    status: "充足",
+    status: "缺货",
     expiryDate: formatDate(normalExpiredDate),
     lastUsedDate: "2023/11/18",
     manager: users[2],
     notes: "适用于样品储存和高通量实验",
     imageUrl: "/consumables/deep-well-plate.png",
   },
+  // 4. 有库存 + 已过期 (不可申领)
   {
     id: "cons-004",
     name: "高透明度微孔板",
@@ -104,7 +110,7 @@ export const allDemoConsumableItems = [
     manufacturer: "NEST",
     supplier: "无锡耐思特生物科技",
     catalogNumber: "HTP-96-FB",
-    currentStock: 45,
+    currentStock: 45, // 30% - 库存不足但仍有库存
     minStock: 15,
     maxStock: 150,
     unit: "块",
@@ -112,13 +118,14 @@ export const allDemoConsumableItems = [
     totalValue: 810.0,
     location: "B栋试剂柜",
     department: "分析检测实验室",
-    status: "充足",
-    expiryDate: formatDate(normalExpiredDate),
+    status: "已过期",
+    expiryDate: formatDate(expiredDate30), // 已过期
     lastUsedDate: "2023/11/17",
     manager: users[3],
     notes: "高透明度，适用于酶标仪检测",
     imageUrl: "/consumables/clear-microplate.png",
   },
+  // 5. 库存充足 + 长期有效 (可申领)
   {
     id: "cons-005",
     name: "96孔PCR微孔板",
@@ -129,21 +136,22 @@ export const allDemoConsumableItems = [
     manufacturer: "赛默飞",
     supplier: "赛默飞世尔科技",
     catalogNumber: "PCR-96-02",
-    currentStock: 120,
+    currentStock: 180, // 60% > 50% - 库存充足
     minStock: 30,
     maxStock: 300,
     unit: "块",
     unitPrice: 12.5,
-    totalValue: 1500.0,
+    totalValue: 2250.0,
     location: "B栋试剂柜",
     department: "分子生物实验室",
     status: "充足",
-    expiryDate: formatDate(normalExpiredDate),
+    expiryDate: formatDate(longExpiredDate),
     lastUsedDate: "2023/11/20",
     manager: users[4],
     notes: "薄壁设计，导热性好，适用于PCR扩增",
     imageUrl: "/consumables/pcr-plate-96.png",
   },
+  // 6. 库存不足 + 正常有效期 (可申领)
   {
     id: "cons-006",
     name: "水平凝胶盒",
@@ -154,7 +162,7 @@ export const allDemoConsumableItems = [
     manufacturer: "北京六一",
     supplier: "北京六一生物科技",
     catalogNumber: "HGB-10-T",
-    currentStock: 8,
+    currentStock: 8, // 40% < 50% - 库存不足
     minStock: 3,
     maxStock: 20,
     unit: "套",
@@ -162,13 +170,14 @@ export const allDemoConsumableItems = [
     totalValue: 2240.0,
     location: "C栋专用柜",
     department: "分子生物实验室",
-    status: "充足",
+    status: "库存不足",
     expiryDate: formatDate(normalExpiredDate),
     lastUsedDate: "2023/11/16",
     manager: users[0],
     notes: "配有电极和梳子，适用于琼脂糖凝胶电泳",
     imageUrl: "/consumables/horizontal-gel-box.png",
   },
+  // 7. 库存充足 + 即将过期 (可申领但有警告)
   {
     id: "cons-007",
     name: "通用支架",
@@ -179,21 +188,22 @@ export const allDemoConsumableItems = [
     manufacturer: "上海如吉",
     supplier: "上海如吉生物科技",
     catalogNumber: "UST-AC-T",
-    currentStock: 25,
+    currentStock: 35, // 58% > 50% - 库存充足
     minStock: 10,
     maxStock: 60,
     unit: "个",
     unitPrice: 35.0,
-    totalValue: 875.0,
+    totalValue: 1225.0,
     location: "A栋储物柜",
     department: "通用实验室",
     status: "充足",
-    expiryDate: formatDate(normalExpiredDate),
+    expiryDate: formatDate(soonExpiredDate25), // 即将过期
     lastUsedDate: "2023/11/14",
     manager: users[1],
     notes: "透明材质，易清洁，适用于各种试管",
     imageUrl: "/consumables/universal-rack.png",
   },
+  // 8. 库存不足 + 正常有效期 (可申领)
   {
     id: "cons-008",
     name: "通用线性支架",
@@ -204,7 +214,7 @@ export const allDemoConsumableItems = [
     manufacturer: "上海如吉",
     supplier: "上海如吉生物科技",
     catalogNumber: "LST-4H-T",
-    currentStock: 30,
+    currentStock: 30, // 37.5% < 50% - 库存不足
     minStock: 12,
     maxStock: 80,
     unit: "个",
@@ -212,13 +222,14 @@ export const allDemoConsumableItems = [
     totalValue: 840.0,
     location: "A栋储物柜",
     department: "通用实验室",
-    status: "充足",
+    status: "库存不足",
     expiryDate: formatDate(normalExpiredDate),
     lastUsedDate: "2023/11/15",
     manager: users[2],
     notes: "线性排列设计，节省空间",
     imageUrl: "/consumables/linear-rack.png",
   },
+  // 9. 库存充足 + 正常有效期 (可申领)
   {
     id: "cons-009",
     name: "96孔分割PCR微孔板",
@@ -229,12 +240,12 @@ export const allDemoConsumableItems = [
     manufacturer: "赛默飞",
     supplier: "赛默飞世尔科技",
     catalogNumber: "PCR-96-ST",
-    currentStock: 60,
+    currentStock: 120, // 60% > 50% - 库存充足
     minStock: 20,
     maxStock: 200,
     unit: "套",
     unitPrice: 15.5,
-    totalValue: 930.0,
+    totalValue: 1860.0,
     location: "B栋试剂柜",
     department: "分子生物实验室",
     status: "充足",
@@ -244,6 +255,7 @@ export const allDemoConsumableItems = [
     notes: "可按需分割使用，减少浪费",
     imageUrl: "/consumables/strip-pcr-plate.png",
   },
+  // 10. 无库存 + 已过期 (不可申领)
   {
     id: "cons-010",
     name: "倒角尖端吸头",
@@ -254,21 +266,22 @@ export const allDemoConsumableItems = [
     manufacturer: "艾本德",
     supplier: "德国艾本德（中国）有限公司",
     catalogNumber: "BT-10-A",
-    currentStock: 400,
+    currentStock: 0, // 无库存
     minStock: 100,
     maxStock: 800,
     unit: "盒",
     unitPrice: 68.0,
-    totalValue: 27200.0,
+    totalValue: 0.0,
     location: "A栋储物柜",
     department: "精密分析实验室",
-    status: "充足",
-    expiryDate: formatDate(normalExpiredDate),
+    status: "缺货",
+    expiryDate: formatDate(expiredDate60), // 已过期
     lastUsedDate: "2023/11/18",
     manager: users[4],
     notes: "倒角设计，提高移液精度，减少残留",
     imageUrl: "/consumables/beveled-tips.png",
   },
+  // 11. 库存充足 + 已过期 (不可申领)
   {
     id: "cons-011",
     name: "不锈钢分液吸头",
@@ -279,16 +292,16 @@ export const allDemoConsumableItems = [
     manufacturer: "德国Brand",
     supplier: "德国Brand中国",
     catalogNumber: "SS-TIP-R",
-    currentStock: 15,
+    currentStock: 25, // 62.5% > 50% - 库存充足
     minStock: 5,
     maxStock: 40,
     unit: "支",
     unitPrice: 180.0,
-    totalValue: 2700.0,
+    totalValue: 4500.0,
     location: "C栋专用柜",
     department: "化学分析实验室",
-    status: "充足",
-    expiryDate: formatDate(normalExpiredDate),
+    status: "已过期",
+    expiryDate: formatDate(expiredDate30), // 已过期
     lastUsedDate: "2023/11/10",
     manager: users[0],
     notes: "耐腐蚀，可高温灭菌，适用于有机溶剂",
