@@ -1,16 +1,17 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Calendar, DollarSign, Package, FileText, AlertCircle } from "lucide-react"
+import React, { useState, useEffect } from "react"
+import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { DatePicker } from "@/components/date-picker"
-import { toast } from "@/hooks/use-toast"
+import { toast } from "@/components/ui/use-toast"
+import { AlertCircle, Package, Calendar, DollarSign, FileText } from "lucide-react"
 
 interface ConsumableStockInDialogProps {
   open: boolean
@@ -40,6 +41,10 @@ export function ConsumableStockInDialog({ open, onOpenChange, consumable }: Cons
     unitPrice: "",
     totalPrice: "",
     
+    // 供应商信息
+    supplier: "",
+    purchaseOrder: "",
+    
     // 其他信息
     notes: "",
   })
@@ -50,7 +55,8 @@ export function ConsumableStockInDialog({ open, onOpenChange, consumable }: Cons
       setFormData(prev => ({
         ...prev,
         location: consumable.location || "",
-        storageCondition: consumable.storageCondition || "",
+        storageCondition: "常温",
+        supplier: consumable.supplier || "",
       }))
     }
   }, [consumable])
@@ -104,8 +110,8 @@ export function ConsumableStockInDialog({ open, onOpenChange, consumable }: Cons
       "stockInAmount", 
       "batchNumber", 
       "location",
-      "storageCondition",
-      "qualityStatus"
+      "qualityStatus",
+      "supplier"
     ]
     
     let isValid = true
@@ -122,28 +128,22 @@ export function ConsumableStockInDialog({ open, onOpenChange, consumable }: Cons
           field === "stockInAmount" ? "入库数量" : 
           field === "batchNumber" ? "批次号" : 
           field === "location" ? "存放位置" : 
-          field === "storageCondition" ? "存储条件" :
-          field === "qualityStatus" ? "质检状态" : ""
+          field === "qualityStatus" ? "质检状态" :
+          field === "supplier" ? "供应商" : ""
         }`
       }
     })
     
-    // 验证数量是否为有效数字
-    if (formData.stockInAmount && isNaN(Number(formData.stockInAmount))) {
+    // 验证数量是否为有效正数
+    if (formData.stockInAmount && (isNaN(Number(formData.stockInAmount)) || Number(formData.stockInAmount) <= 0)) {
       isValid = false
-      newErrors.stockInAmount = "请输入有效的数量"
+      newErrors.stockInAmount = "请输入有效的入库数量"
     }
     
     // 验证价格是否为有效数字
-    if (formData.unitPrice && isNaN(Number(formData.unitPrice))) {
+    if (formData.unitPrice && (isNaN(Number(formData.unitPrice)) || Number(formData.unitPrice) < 0)) {
       isValid = false
       newErrors.unitPrice = "请输入有效的单价"
-    }
-    
-    // 验证有效期是否晚于生产日期
-    if (formData.expiryDate <= formData.productionDate) {
-      isValid = false
-      newErrors.expiryDate = "有效期必须晚于生产日期"
     }
     
     setFormErrors(newErrors)
@@ -151,6 +151,16 @@ export function ConsumableStockInDialog({ open, onOpenChange, consumable }: Cons
       ...prev,
       ...newTouched
     }))
+    
+    if (!isValid) {
+      // 滚动到第一个错误字段
+      const firstErrorField = Object.keys(newErrors)[0]
+      const element = document.getElementById(firstErrorField)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        element.focus()
+      }
+    }
     
     return isValid
   }
@@ -184,7 +194,7 @@ export function ConsumableStockInDialog({ open, onOpenChange, consumable }: Cons
       }
       
       // 这里应该调用API保存数据
-      console.log("提交入库数据:", stockInData)
+      console.log("提交耗材入库数据:", stockInData)
       
       // 模拟API调用 - 随机成功或失败用于演示
       await new Promise((resolve, reject) => {
@@ -230,7 +240,7 @@ export function ConsumableStockInDialog({ open, onOpenChange, consumable }: Cons
       })
       
       // 失败时不关闭弹框，允许用户继续操作
-      console.error("入库失败:", error)
+      console.error("耗材入库失败:", error)
       
     } finally {
       setIsLoading(false)
@@ -246,11 +256,13 @@ export function ConsumableStockInDialog({ open, onOpenChange, consumable }: Cons
       expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 2)),
       stockInDate: new Date(),
       location: consumable?.location || "",
-      storageCondition: consumable?.storageCondition || "",
+      storageCondition: "常温",
       qualityStatus: "待检验",
       qualityReport: null,
       unitPrice: "",
       totalPrice: "",
+      supplier: consumable?.supplier || "",
+      purchaseOrder: "",
       notes: "",
     })
     setFormErrors({})
@@ -299,7 +311,7 @@ export function ConsumableStockInDialog({ open, onOpenChange, consumable }: Cons
 
         {/* 可滚动的内容区域 */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
-          <div className="space-y-6">
+          
           {/* 耗材基本信息展示 */}
           <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-lg">
             <h4 className="font-medium mb-3 text-gray-900 flex items-center gap-2">
@@ -312,7 +324,7 @@ export function ConsumableStockInDialog({ open, onOpenChange, consumable }: Cons
                 <span className="font-medium text-gray-900">{consumable.name}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">规格</span>
+                <span className="text-muted-foreground">型号规格</span>
                 <span className="font-medium text-gray-900">{consumable.model}</span>
               </div>
               <div className="flex justify-between">
@@ -327,7 +339,7 @@ export function ConsumableStockInDialog({ open, onOpenChange, consumable }: Cons
           </div>
 
           {/* 入库基本信息 */}
-          <div>
+          <div className="mt-6">
             <SectionTitle 
               icon={<Package className="h-5 w-5" />} 
               title="入库信息" 
@@ -376,7 +388,7 @@ export function ConsumableStockInDialog({ open, onOpenChange, consumable }: Cons
                 {formTouched.batchNumber && <ErrorMessage message={formErrors.batchNumber || ""} />}
               </div>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4 mt-4">
               <div className="space-y-2">
                 <Label htmlFor="productionDate" className="text-muted-foreground">生产日期</Label>
@@ -394,15 +406,11 @@ export function ConsumableStockInDialog({ open, onOpenChange, consumable }: Cons
                   id="expiryDate"
                   date={formData.expiryDate} 
                   onSelect={(date) => date && updateFormData("expiryDate", date)} 
-                  className={cn(
-                    "border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
-                    formTouched.expiryDate && formErrors.expiryDate ? "border-red-500" : ""
-                  )}
+                  className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
                 />
-                {formTouched.expiryDate && <ErrorMessage message={formErrors.expiryDate || ""} />}
               </div>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4 mt-4">
               <div className="space-y-2">
                 <Label htmlFor="stockInDate" className="text-muted-foreground">入库日期</Label>
@@ -444,7 +452,7 @@ export function ConsumableStockInDialog({ open, onOpenChange, consumable }: Cons
           </div>
 
           {/* 存储信息 */}
-          <div>
+          <div className="mt-6">
             <SectionTitle 
               icon={<Calendar className="h-5 w-5" />} 
               title="存储信息" 
@@ -470,48 +478,93 @@ export function ConsumableStockInDialog({ open, onOpenChange, consumable }: Cons
                     <SelectValue placeholder="请选择存放位置" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="A栋储物柜">A栋储物柜</SelectItem>
-                    <SelectItem value="B栋试剂柜">B栋试剂柜</SelectItem>
-                    <SelectItem value="C栋耗材柜">C栋耗材柜</SelectItem>
-                    <SelectItem value="D栋常温架">D栋常温架</SelectItem>
+                    <SelectItem value="A栋器材柜">A栋器材柜</SelectItem>
+                    <SelectItem value="B栋耗材架">B栋耗材架</SelectItem>
+                    <SelectItem value="C栋常温库">C栋常温库</SelectItem>
+                    <SelectItem value="D栋分类储存">D栋分类储存</SelectItem>
+                    <SelectItem value="实验台抽屉">实验台抽屉</SelectItem>
                   </SelectContent>
                 </Select>
                 {formTouched.location && <ErrorMessage message={formErrors.location || ""} />}
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="storageCondition" className="text-muted-foreground">
-                  存储条件 <span className="text-red-500">*</span>
-                </Label>
+                <Label htmlFor="storageCondition" className="text-muted-foreground">存储条件</Label>
                 <Select 
                   value={formData.storageCondition} 
                   onValueChange={(value) => updateFormData("storageCondition", value)}
-                  onOpenChange={(open) => !open && handleBlur("storageCondition")}
                 >
                   <SelectTrigger 
                     id="storageCondition"
-                    className={cn(
-                      "border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
-                      formTouched.storageCondition && formErrors.storageCondition ? "border-red-500" : ""
-                    )}
+                    className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
                   >
                     <SelectValue placeholder="请选择存储条件" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="常温">常温</SelectItem>
-                    <SelectItem value="冷藏">冷藏</SelectItem>
-                    <SelectItem value="冷冻">冷冻</SelectItem>
-                    <SelectItem value="干燥">干燥</SelectItem>
+                    <SelectItem value="阴凉干燥">阴凉干燥</SelectItem>
+                    <SelectItem value="防潮">防潮</SelectItem>
                     <SelectItem value="避光">避光</SelectItem>
+                    <SelectItem value="冷藏">冷藏</SelectItem>
                   </SelectContent>
                 </Select>
-                {formTouched.storageCondition && <ErrorMessage message={formErrors.storageCondition || ""} />}
+              </div>
+            </div>
+          </div>
+
+          {/* 供应商信息 */}
+          <div className="mt-6">
+            <SectionTitle 
+              icon={<Package className="h-5 w-5" />} 
+              title="供应商信息" 
+            />
+            
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="supplier" className="text-muted-foreground">
+                  供应商 <span className="text-red-500">*</span>
+                </Label>
+                <Select 
+                  value={formData.supplier} 
+                  onValueChange={(value) => updateFormData("supplier", value)}
+                  onOpenChange={(open) => !open && handleBlur("supplier")}
+                >
+                  <SelectTrigger 
+                    id="supplier"
+                    className={cn(
+                      "border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
+                      formTouched.supplier && formErrors.supplier ? "border-red-500" : ""
+                    )}
+                  >
+                    <SelectValue placeholder="请选择供应商" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="西陆科学">西陆科学</SelectItem>
+                    <SelectItem value="国药集团">国药集团</SelectItem>
+                    <SelectItem value="百灵威">百灵威</SelectItem>
+                    <SelectItem value="阿拉丁">阿拉丁</SelectItem>
+                    <SelectItem value="默克">默克</SelectItem>
+                    <SelectItem value="赛默飞">赛默飞</SelectItem>
+                  </SelectContent>
+                </Select>
+                {formTouched.supplier && <ErrorMessage message={formErrors.supplier || ""} />}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="purchaseOrder" className="text-muted-foreground">采购单号</Label>
+                <Input 
+                  id="purchaseOrder" 
+                  value={formData.purchaseOrder} 
+                  onChange={(e) => updateFormData("purchaseOrder", e.target.value)} 
+                  placeholder="请输入采购单号"
+                  className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+                />
               </div>
             </div>
           </div>
 
           {/* 成本信息 */}
-          <div>
+          <div className="mt-6">
             <SectionTitle 
               icon={<DollarSign className="h-5 w-5" />} 
               title="成本信息" 
@@ -552,7 +605,7 @@ export function ConsumableStockInDialog({ open, onOpenChange, consumable }: Cons
           </div>
 
           {/* 质检报告和备注 */}
-          <div>
+          <div className="mt-6">
             <SectionTitle 
               icon={<FileText className="h-5 w-5" />} 
               title="其他信息" 
@@ -585,11 +638,10 @@ export function ConsumableStockInDialog({ open, onOpenChange, consumable }: Cons
               </div>
             </div>
           </div>
-          </div>
         </div>
 
         {/* 固定底部操作栏 */}
-        <DialogFooter className="flex-shrink-0 flex gap-2 px-6 py-4 border-t border-gray-100">
+        <DialogFooter className="flex-shrink-0 px-6 py-4 bg-gray-50 border-t border-gray-100 flex gap-3">
           <Button 
             variant="outline" 
             onClick={() => onOpenChange(false)}
