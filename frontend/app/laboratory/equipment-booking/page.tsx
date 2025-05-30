@@ -51,7 +51,6 @@ function EquipmentBookingContent() {
     bookingDate: true,
     duration: true,
     applicationDate: true,
-    processor: true,
   })
   // 删除确认对话框状态
   const [itemToDelete, setItemToDelete] = useState<any>(null)
@@ -160,7 +159,7 @@ function EquipmentBookingContent() {
     setBookingItems(
       bookingItems.map((item) =>
         selectedRows.includes(item.id) && item.status === "待审核"
-          ? { ...item, status: "已审核", processor: { id: "1", name: "张七", email: "zhang7@lab.edu.cn", avatar: "/avatars/01.png", role: "实验室管理员" }, processDate: new Date().toISOString() }
+          ? { ...item, status: "审核通过", processor: { id: "1", name: "张七", email: "zhang7@lab.edu.cn", avatar: "/avatars/01.png", role: "实验室管理员" }, processDate: new Date().toISOString() }
           : item,
       ),
     )
@@ -176,14 +175,14 @@ function EquipmentBookingContent() {
     setBookingItems(
       bookingItems.map((item) =>
         selectedRows.includes(item.id) && item.status === "待审核"
-          ? { ...item, status: "已拒绝", processor: { id: "1", name: "张七", email: "zhang7@lab.edu.cn", avatar: "/avatars/01.png", role: "实验室管理员" }, processDate: new Date().toISOString() }
+          ? { ...item, status: "审核退回", processor: { id: "1", name: "张七", email: "zhang7@lab.edu.cn", avatar: "/avatars/01.png", role: "实验室管理员" }, processDate: new Date().toISOString() }
           : item,
       ),
     )
     setSelectedRows([])
     toast({
       title: "批量拒绝成功",
-      description: `已拒绝${selectedRows.length}个预约申请`,
+      description: `已退回${selectedRows.length}个预约申请`,
       duration: 3000,
     })
   }
@@ -253,7 +252,7 @@ function EquipmentBookingContent() {
     },
     {
       id: "reject",
-      label: "批量拒绝",
+      label: "批量退回",
       icon: "X",
       onClick: handleBatchReject,
     },

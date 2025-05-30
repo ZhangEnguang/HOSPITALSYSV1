@@ -47,12 +47,11 @@ function ConsumablesApplicationContent() {
     applicationTitle: true,
     consumableName: true,
     quantity: true,
-    status: true,
     applicant: true,
     urgency: true,
     expectedDate: true,
     applicationDate: true,
-    processor: true,
+    status: true,
   })
   // 删除确认对话框状态
   const [itemToDelete, setItemToDelete] = useState<any>(null)
@@ -178,7 +177,7 @@ function ConsumablesApplicationContent() {
     setApplicationItems(
       applicationItems.map((item) =>
         selectedRows.includes(item.id) && item.status === "待审核"
-          ? { ...item, status: "已批准", processor: { id: "1", name: "张七", email: "zhang7@lab.edu.cn", avatar: "/avatars/01.png", role: "实验室管理员" }, processDate: new Date().toISOString() } as any
+          ? { ...item, status: "审核通过", processor: { id: "1", name: "张七", email: "zhang7@lab.edu.cn", avatar: "/avatars/01.png", role: "实验室管理员" }, processDate: new Date().toISOString() } as any
           : item,
       ),
     )
@@ -194,14 +193,14 @@ function ConsumablesApplicationContent() {
     setApplicationItems(
       applicationItems.map((item) =>
         selectedRows.includes(item.id) && item.status === "待审核"
-          ? { ...item, status: "已拒绝", processor: { id: "1", name: "张七", email: "zhang7@lab.edu.cn", avatar: "/avatars/01.png", role: "实验室管理员" }, processDate: new Date().toISOString() } as any
+          ? { ...item, status: "审核退回", processor: { id: "1", name: "张七", email: "zhang7@lab.edu.cn", avatar: "/avatars/01.png", role: "实验室管理员" }, processDate: new Date().toISOString() } as any
           : item,
       ),
     )
     setSelectedRows([])
     toast({
-      title: "批量拒绝成功",
-      description: `已拒绝${selectedRows.length}个申领申请`,
+      title: "批量退回成功",
+      description: `已退回${selectedRows.length}个申领申请`,
       duration: 3000,
     })
   }
@@ -291,7 +290,7 @@ function ConsumablesApplicationContent() {
     },
     {
       id: "reject",
-      label: "批量拒绝",
+      label: "批量退回",
       icon: "X",
       onClick: handleBatchReject,
     },

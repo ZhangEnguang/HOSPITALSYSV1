@@ -12,6 +12,7 @@ import {
   FileText,
   AlertTriangle,
   CheckCircle,
+  ClipboardCheck,
 } from "lucide-react"
 
 // 模拟用户数据
@@ -59,10 +60,8 @@ type ExtendedBadgeVariant = "default" | "destructive" | "outline" | "secondary" 
 // 状态颜色映射
 export const statusColors: Record<string, ExtendedBadgeVariant> = {
   "待审核": "secondary",
-  "已批准": "success", 
-  "已拒绝": "destructive",
-  "已发放": "default",
-  "已完成": "outline",
+  "审核通过": "success", 
+  "审核退回": "destructive",
   "已取消": "warning",
 }
 
@@ -74,11 +73,9 @@ export const quickFilters = [
     value: "",
     options: [
       { id: "1", label: "待审核", value: "待审核" },
-      { id: "2", label: "已批准", value: "已批准" },
-      { id: "3", label: "已拒绝", value: "已拒绝" },
-      { id: "4", label: "已发放", value: "已发放" },
-      { id: "5", label: "已完成", value: "已完成" },
-      { id: "6", label: "已取消", value: "已取消" },
+      { id: "2", label: "审核通过", value: "审核通过" },
+      { id: "3", label: "审核退回", value: "审核退回" },
+      { id: "4", label: "已取消", value: "已取消" },
     ],
     category: "default",
   },
@@ -293,12 +290,6 @@ export const reagentApplicationColumns = [
     ),
   },
   {
-    id: "status",
-    header: "申领状态",
-    accessorKey: "status",
-    cell: (item: any) => <Badge variant={(statusColors[item.status] || "secondary") as any}>{item.status}</Badge>,
-  },
-  {
     id: "applicant",
     header: "申请人",
     accessorKey: "applicant",
@@ -341,22 +332,10 @@ export const reagentApplicationColumns = [
     cell: (item: any) => <span>{format(new Date(item.applicationDate), "yyyy/MM/dd HH:mm")}</span>,
   },
   {
-    id: "processor",
-    header: "审核人",
-    accessorKey: "processor",
-    cell: (item: any) => (
-      item.processor ? (
-        <div className="flex items-center gap-2">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={item.processor.avatar} />
-            <AvatarFallback>{item.processor.name[0]}</AvatarFallback>
-          </Avatar>
-          <span className="font-medium">{item.processor.name}</span>
-        </div>
-      ) : (
-        <span className="text-muted-foreground">-</span>
-      )
-    ),
+    id: "status",
+    header: "审核状态",
+    accessorKey: "status",
+    cell: (item: any) => <Badge variant={(statusColors[item.status] || "secondary") as any}>{item.status}</Badge>,
   },
 ]
 
@@ -374,7 +353,7 @@ export const reagentApplicationCardFields = [
   },
   { 
     id: "status", 
-    label: "申领状态", 
+    label: "审核状态", 
     value: (item: any) => (
       <Badge variant={(statusColors[item.status] || "secondary") as any}>{item.status}</Badge>
     )
@@ -431,27 +410,9 @@ export const reagentApplicationActions = [
   {
     id: "approve",
     label: "审核申领",
-    icon: <Check className="h-4 w-4" />,
+    icon: <ClipboardCheck className="h-4 w-4" />,
     onClick: (item: any) => {
       const url = `/laboratory/reagent-application/approve/${item.id}`;
-      window.open(url, "_self");
-    },
-  },
-  {
-    id: "distribute",
-    label: "发放试剂",
-    icon: <Package className="h-4 w-4" />,
-    onClick: (item: any) => {
-      const url = `/laboratory/reagent-application/distribute/${item.id}`;
-      window.open(url, "_self");
-    },
-  },
-  {
-    id: "record",
-    label: "使用记录",
-    icon: <FileText className="h-4 w-4" />,
-    onClick: (item: any) => {
-      const url = `/laboratory/reagent-application/record/${item.id}`;
       window.open(url, "_self");
     },
   },
@@ -478,7 +439,7 @@ export const batchActions = [
   },
   {
     id: "reject",
-    label: "批量拒绝",
+    label: "批量退回",
     icon: <X className="h-4 w-4" />,
   },
   {

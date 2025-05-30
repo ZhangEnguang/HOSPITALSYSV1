@@ -12,6 +12,7 @@ import {
   User,
   Settings,
   FileText,
+  ClipboardCheck,
 } from "lucide-react"
 
 // 模拟用户数据
@@ -59,10 +60,8 @@ type ExtendedBadgeVariant = "default" | "destructive" | "outline" | "secondary" 
 // 状态颜色映射
 export const statusColors: Record<string, ExtendedBadgeVariant> = {
   "待审核": "secondary",
-  "已审核": "success", 
-  "已拒绝": "destructive",
-  "使用中": "default",
-  "已完成": "outline",
+  "审核通过": "success", 
+  "审核退回": "destructive",
   "已取消": "warning",
 }
 
@@ -74,11 +73,9 @@ export const quickFilters = [
     value: "",
     options: [
       { id: "1", label: "待审核", value: "待审核" },
-      { id: "2", label: "已审核", value: "已审核" },
-      { id: "3", label: "已拒绝", value: "已拒绝" },
-      { id: "4", label: "使用中", value: "使用中" },
-      { id: "5", label: "已完成", value: "已完成" },
-      { id: "6", label: "已取消", value: "已取消" },
+      { id: "2", label: "审核通过", value: "审核通过" },
+      { id: "3", label: "审核退回", value: "审核退回" },
+      { id: "4", label: "已取消", value: "已取消" },
     ],
     category: "default",
   },
@@ -251,12 +248,6 @@ export const equipmentBookingColumns = [
     ),
   },
   {
-    id: "status",
-    header: "预约状态",
-    accessorKey: "status",
-    cell: (item: any) => <Badge variant={(statusColors[item.status] || "secondary") as any}>{item.status}</Badge>,
-  },
-  {
     id: "applicant",
     header: "申请人",
     accessorKey: "applicant",
@@ -299,22 +290,10 @@ export const equipmentBookingColumns = [
     cell: (item: any) => <span>{format(new Date(item.applicationDate), "yyyy/MM/dd HH:mm")}</span>,
   },
   {
-    id: "processor",
-    header: "审核人",
-    accessorKey: "processor",
-    cell: (item: any) => (
-      item.processor ? (
-        <div className="flex items-center gap-2">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={item.processor.avatar} />
-            <AvatarFallback>{item.processor.name[0]}</AvatarFallback>
-          </Avatar>
-          <span className="font-medium">{item.processor.name}</span>
-        </div>
-      ) : (
-        <span className="text-muted-foreground">-</span>
-      )
-    ),
+    id: "status",
+    header: "审核状态",
+    accessorKey: "status",
+    cell: (item: any) => <Badge variant={(statusColors[item.status] || "secondary") as any}>{item.status}</Badge>,
   },
 ]
 
@@ -374,7 +353,7 @@ export const equipmentBookingActions = [
   },
   {
     id: "edit",
-    label: "编辑预约",
+    label: "编辑申领",
     icon: <Pencil className="h-4 w-4" />,
     onClick: (item: any) => {
       const url = `/laboratory/equipment-booking/edit/${item.id}`;
@@ -383,31 +362,22 @@ export const equipmentBookingActions = [
   },
   {
     id: "approve",
-    label: "审核预约",
-    icon: <Check className="h-4 w-4" />,
+    label: "审核申领",
+    icon: <ClipboardCheck className="h-4 w-4" />,
     onClick: (item: any) => {
       const url = `/laboratory/equipment-booking/approve/${item.id}`;
       window.open(url, "_self");
     },
   },
   {
-    id: "usage",
-    label: "使用记录",
-    icon: <FileText className="h-4 w-4" />,
-    onClick: (item: any) => {
-      const url = `/laboratory/equipment-booking/usage/${item.id}`;
-      window.open(url, "_self");
-    },
-  },
-  {
     id: "cancel",
-    label: "取消预约",
+    label: "取消申领",
     icon: <X className="h-4 w-4" />,
     variant: "destructive",
   },
   {
     id: "delete",
-    label: "删除预约",
+    label: "删除申领",
     icon: <Trash2 className="h-4 w-4" />,
     variant: "destructive",
   },
