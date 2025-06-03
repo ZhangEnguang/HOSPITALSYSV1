@@ -1,8 +1,7 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import { format } from "date-fns"
-// import { zhCN } from "date-fns/locale/zh-CN"
 import {
   Dialog,
   DialogContent,
@@ -14,6 +13,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 import {
   Calendar,
   Clock,
@@ -24,27 +25,33 @@ import {
   Settings,
   Target,
   MessageCircle,
-  X,
   CheckCircle,
   AlertCircle,
   XCircle,
-  Clock3
+  Clock3,
+  Check,
+  X
 } from "lucide-react"
 
-interface BookingDetailDialogProps {
+interface BookingApprovalDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   booking: any
+  onApprove?: (booking: any, comments: string) => void
+  onReject?: (booking: any, comments: string) => void
 }
 
-export function BookingDetailDialog({ 
+export function BookingApprovalDialog({ 
   open, 
   onOpenChange, 
-  booking 
-}: BookingDetailDialogProps) {
-  if (!booking) {
-    return null
-  }
+  booking,
+  onApprove,
+  onReject
+}: BookingApprovalDialogProps) {
+  const [approvalComments, setApprovalComments] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  if (!booking) return null
 
   // 状态样式配置
   const getStatusConfig = (status: string) => {
@@ -71,13 +78,55 @@ export function BookingDetailDialog({
 
   const statusConfig = getStatusConfig(booking.status)
 
+  // 处理审核通过
+  const handleApprove = async () => {
+    if (!approvalComments.trim()) {
+      alert("请填写审核意见")
+      return
+    }
+    
+    setIsSubmitting(true)
+    try {
+      if (onApprove) {
+        await onApprove(booking, approvalComments)
+      }
+      setApprovalComments("")
+      onOpenChange(false)
+    } catch (error) {
+      console.error("审核通过失败:", error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // 处理审核退回
+  const handleReject = async () => {
+    if (!approvalComments.trim()) {
+      alert("请填写审核意见")
+      return
+    }
+    
+    setIsSubmitting(true)
+    try {
+      if (onReject) {
+        await onReject(booking, approvalComments)
+      }
+      setApprovalComments("")
+      onOpenChange(false)
+    } catch (error) {
+      console.error("审核退回失败:", error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
         {/* 固定头部 */}
         <DialogHeader className="flex-shrink-0 px-6 py-4 border-b">
           <DialogTitle className="text-xl font-semibold text-gray-900">
-            预约详情信息
+            审核申领
           </DialogTitle>
         </DialogHeader>
 
@@ -255,12 +304,12 @@ export function BookingDetailDialog({
                 </CardContent>
               </Card>
 
-              {/* 备注说明 */}
+              {/* 申请备注 */}
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <MessageCircle className="h-5 w-5 text-gray-600" />
-                    备注说明
+                    申请备注
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -271,67 +320,56 @@ export function BookingDetailDialog({
                         {booking.notes || "无特殊说明"}
                       </p>
                     </div>
-                    
-                    {booking.approvalComments && (
-                      <>
-                        <Separator />
-                        <div>
-                          <span className="text-sm text-gray-500">审核意见</span>
-                          <p className="font-medium text-gray-700">
-                            {booking.approvalComments}
-                          </p>
-                        </div>
-                      </>
-                    )}
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* 处理信息 */}
-            {booking.processor && (
-              <Card className="bg-gray-50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <User className="h-5 w-5 text-indigo-600" />
-                    处理信息
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={booking.processor.avatar} />
-                        <AvatarFallback className="bg-indigo-100 text-indigo-700">
-                          {booking.processor.name[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium">{booking.processor.name}</p>
-                        <p className="text-sm text-gray-600">{booking.processor.role || "审核员"}</p>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <span className="text-sm text-gray-500">处理时间</span>
-                      <p className="font-medium">
-                        {booking.processDate ? format(new Date(booking.processDate), "yyyy年MM月dd日 HH:mm") : "未处理"}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            {/* 审核意见 */}
+            <div className="border border-blue-200 bg-blue-50 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <FileText className="h-4 w-4 text-blue-600" />
+                <Label htmlFor="approval-comments" className="text-sm font-medium">
+                  审核意见 <span className="text-red-500">*</span>
+                </Label>
+              </div>
+              <Textarea
+                id="approval-comments"
+                value={approvalComments}
+                onChange={(e) => setApprovalComments(e.target.value)}
+                placeholder="请输入审核意见..."
+                className="min-h-[60px] resize-none"
+                disabled={isSubmitting}
+              />
+            </div>
           </div>
         </div>
 
         {/* 固定底部操作栏 */}
         <div className="flex-shrink-0 flex justify-end gap-3 p-6 border-t bg-gray-50">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            关闭
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)}
+            disabled={isSubmitting}
+          >
+            取消
           </Button>
-          <Button onClick={() => window.print()}>
-            打印详情
+          <Button 
+            variant="destructive" 
+            onClick={handleReject}
+            disabled={isSubmitting || !approvalComments.trim()}
+            className="flex items-center gap-2"
+          >
+            <X className="h-4 w-4" />
+            审核退回
+          </Button>
+          <Button 
+            onClick={handleApprove}
+            disabled={isSubmitting || !approvalComments.trim()}
+            className="flex items-center gap-2"
+          >
+            <Check className="h-4 w-4" />
+            审核通过
           </Button>
         </div>
       </DialogContent>

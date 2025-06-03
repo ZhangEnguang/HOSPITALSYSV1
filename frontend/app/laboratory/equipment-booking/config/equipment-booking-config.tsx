@@ -354,7 +354,7 @@ export const equipmentBookingActions = [
   },
   {
     id: "edit",
-    label: "编辑申领",
+    label: "编辑预约",
     icon: <Pencil className="h-4 w-4" />,
     onClick: (item: any) => {
       const url = `/laboratory/equipment-booking/edit/${item.id}`;
@@ -363,7 +363,7 @@ export const equipmentBookingActions = [
   },
   {
     id: "approve",
-    label: "审核申领",
+    label: "审核预约",
     icon: <ClipboardCheck className="h-4 w-4" />,
     onClick: (item: any) => {
       const url = `/laboratory/equipment-booking/approve/${item.id}`;
@@ -372,13 +372,13 @@ export const equipmentBookingActions = [
   },
   {
     id: "cancel",
-    label: "取消申领",
+    label: "取消预约",
     icon: <X className="h-4 w-4" />,
     variant: "destructive",
   },
   {
     id: "delete",
-    label: "删除申领",
+    label: "删除预约",
     icon: <Trash2 className="h-4 w-4" />,
     variant: "destructive",
   },

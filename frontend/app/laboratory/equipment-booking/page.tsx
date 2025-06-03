@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { toast } from "@/components/ui/use-toast"
 import { BookingDetailDialog } from "./components/booking-detail-dialog"
+import { BookingApprovalDialog } from "./components/booking-approval-dialog"
 
 function EquipmentBookingContent() {
   const router = useRouter()
@@ -59,6 +60,10 @@ function EquipmentBookingContent() {
   // 预约详情弹框状态
   const [detailDialogOpen, setDetailDialogOpen] = useState(false)
   const [selectedBooking, setSelectedBooking] = useState<any>(null)
+
+  // 审核弹框状态
+  const [approvalDialogOpen, setApprovalDialogOpen] = useState(false)
+  const [selectedApprovalBooking, setSelectedApprovalBooking] = useState<any>(null)
 
   // 过滤和排序数据
   const filteredBookingItems = bookingItems
@@ -255,7 +260,9 @@ function EquipmentBookingContent() {
     } else if (actionId === "edit") {
       router.push(`/laboratory/equipment-booking/edit/${item.id}`)
     } else if (actionId === "approve") {
-      router.push(`/laboratory/equipment-booking/approve/${item.id}`)
+      // 使用弹框进行审核而不是跳转页面
+      setSelectedApprovalBooking(item)
+      setApprovalDialogOpen(true)
     } else if (actionId === "usage") {
       router.push(`/laboratory/equipment-booking/usage/${item.id}`)
     } else if (actionId === "cancel") {
@@ -273,6 +280,66 @@ function EquipmentBookingContent() {
     } else if (actionId === "delete") {
       handleDeleteItem(item)
     }
+  }
+
+  // 处理审核通过
+  const handleApproveBooking = async (booking: any, comments: string) => {
+    setBookingItems(
+      bookingItems.map((item) =>
+        item.id === booking.id
+          ? { 
+              ...item, 
+              status: "审核通过",
+              approvalComments: comments,
+              processor: { 
+                id: "1", 
+                name: "张七", 
+                email: "zhang7@lab.edu.cn", 
+                avatar: "/avatars/01.png", 
+                role: "实验室管理员",
+                phone: "18012345678"
+              }, 
+              processDate: new Date().toISOString() 
+            }
+          : item,
+      ) as any,
+    )
+    
+    toast({
+      title: "审核通过",
+      description: `预约 "${booking.bookingTitle}" 审核通过`,
+      duration: 3000,
+    })
+  }
+
+  // 处理审核退回
+  const handleRejectBooking = async (booking: any, comments: string) => {
+    setBookingItems(
+      bookingItems.map((item) =>
+        item.id === booking.id
+          ? { 
+              ...item, 
+              status: "审核退回",
+              approvalComments: comments,
+              processor: { 
+                id: "1", 
+                name: "张七", 
+                email: "zhang7@lab.edu.cn", 
+                avatar: "/avatars/01.png", 
+                role: "实验室管理员",
+                phone: "18012345678"
+              }, 
+              processDate: new Date().toISOString() 
+            }
+          : item,
+      ) as any,
+    )
+    
+    toast({
+      title: "审核退回",
+      description: `预约 "${booking.bookingTitle}" 已退回`,
+      duration: 3000,
+    })
   }
 
   // 配置批量操作
@@ -349,6 +416,15 @@ function EquipmentBookingContent() {
         open={detailDialogOpen}
         onOpenChange={setDetailDialogOpen}
         booking={selectedBooking}
+      />
+
+      {/* 审核申领弹框 */}
+      <BookingApprovalDialog
+        open={approvalDialogOpen}
+        onOpenChange={setApprovalDialogOpen}
+        booking={selectedApprovalBooking}
+        onApprove={handleApproveBooking}
+        onReject={handleRejectBooking}
       />
 
       {/* 删除确认对话框 */}
