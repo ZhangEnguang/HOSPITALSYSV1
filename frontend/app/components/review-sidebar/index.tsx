@@ -131,8 +131,10 @@ export default function ReviewSidebar({
 
   return (
     <div
-      className="fixed top-[101px] right-0 w-[350px] h-[calc(100vh-101px)] overflow-hidden z-10 flex flex-col"
+      className="fixed right-0 w-[350px] overflow-hidden z-10 flex flex-col"
       style={{
+        top: '110px',
+        height: 'calc(100vh - 110px)',
         backgroundImage: `url('https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Group%20427319383-hG1U0gKlYCq6lImzR5m61JqdH1dm6N.png')`,
         backgroundSize: "cover",
         backgroundPosition: "center",

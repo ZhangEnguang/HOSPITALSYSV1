@@ -203,7 +203,7 @@ export const tableColumns = [
               <FileEdit className="h-4 w-4 mr-2" />
               编辑项目
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => console.log("审核项目", item.id)}>
+            <DropdownMenuItem onClick={() => window.location.href = `/ethic-review/initial-review/${item.id}/review`}>
               <ClipboardCheck className="h-4 w-4 mr-2" />
               审核项目
             </DropdownMenuItem>
@@ -319,7 +319,7 @@ export const cardActions = [
     icon: <ClipboardCheck className="h-4 w-4" />,
     label: "审核项目",
     onClick: (item: any) => {
-      console.log("审核项目", item)
+      window.location.href = `/ethic-review/initial-review/${item.id}/review`
     },
   },
   {
