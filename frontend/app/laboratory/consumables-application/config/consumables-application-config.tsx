@@ -24,6 +24,7 @@ export const users = [
     email: "zhang7@lab.edu.cn",
     avatar: "/avatars/01.png",
     role: "实验室管理员",
+    phone: "18012345678",
   },
   {
     id: "2",
@@ -31,6 +32,7 @@ export const users = [
     email: "li3@lab.edu.cn",
     avatar: "/avatars/02.png",
     role: "耗材管理员",
+    phone: "18023456789",
   },
   {
     id: "3",
@@ -38,6 +40,7 @@ export const users = [
     email: "wang5@lab.edu.cn",
     avatar: "/avatars/03.png",
     role: "实验室主任",
+    phone: "18034567890",
   },
   {
     id: "4",
@@ -45,6 +48,7 @@ export const users = [
     email: "li4@lab.edu.cn",
     avatar: "/avatars/04.png",
     role: "研究员",
+    phone: "18045678901",
   },
   {
     id: "5",
@@ -52,6 +56,7 @@ export const users = [
     email: "zhao6@lab.edu.cn",
     avatar: "/avatars/05.png",
     role: "博士研究生",
+    phone: "18056789012",
   },
 ]
 
@@ -412,10 +417,6 @@ export const consumablesApplicationActions = [
     id: "approve",
     label: "审核申领",
     icon: <ClipboardCheck className="h-4 w-4" />,
-    onClick: (item: any) => {
-      const url = `/laboratory/consumables-application/approve/${item.id}`;
-      window.open(url, "_self");
-    },
   },
   {
     id: "cancel",
