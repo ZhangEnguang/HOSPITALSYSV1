@@ -29,6 +29,7 @@ import {
 import { toast } from "@/components/ui/use-toast"
 import { ReagentApplicationApprovalDialog } from "./components/reagent-application-approval-dialog"
 import { ReagentApplicationViewDialog } from "./components/reagent-application-view-dialog"
+import { ReagentApplicationEditDialog } from "./components/reagent-application-edit-dialog"
 
 function ReagentApplicationContent() {
   const router = useRouter()
@@ -65,6 +66,10 @@ function ReagentApplicationContent() {
   // 查看详情弹框状态
   const [viewDialogOpen, setViewDialogOpen] = useState(false)
   const [selectedViewApplication, setSelectedViewApplication] = useState<any>(null)
+
+  // 编辑弹框状态
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [selectedEditApplication, setSelectedEditApplication] = useState<any>(null)
 
   // 过滤和排序数据
   const filteredApplicationItems = applicationItems
@@ -267,7 +272,8 @@ function ReagentApplicationContent() {
       setSelectedViewApplication(item)
       setViewDialogOpen(true)
     } else if (actionId === "edit") {
-      router.push(`/laboratory/reagent-application/edit/${item.id}`)
+      setSelectedEditApplication(item)
+      setEditDialogOpen(true)
     } else if (actionId === "approve") {
       // 使用弹框进行审核而不是跳转页面
       setSelectedApprovalApplication(item)
@@ -291,6 +297,15 @@ function ReagentApplicationContent() {
     } else if (actionId === "delete") {
       handleDeleteItem(item)
     }
+  }
+
+  // 处理编辑申请保存
+  const handleSaveEditedApplication = (updatedApplication: any) => {
+    setApplicationItems(
+      applicationItems.map((item) =>
+        item.id === updatedApplication.id ? updatedApplication : item
+      )
+    )
   }
 
   // 处理审核通过
@@ -433,6 +448,14 @@ function ReagentApplicationContent() {
         open={viewDialogOpen}
         onOpenChange={setViewDialogOpen}
         application={selectedViewApplication}
+      />
+
+      {/* 编辑申请弹框 */}
+      <ReagentApplicationEditDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        application={selectedEditApplication}
+        onSave={handleSaveEditedApplication}
       />
 
       {/* 审核申领弹框 */}
