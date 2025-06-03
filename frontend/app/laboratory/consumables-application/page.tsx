@@ -29,6 +29,7 @@ import {
 import { toast } from "@/components/ui/use-toast"
 import { ConsumablesApplicationApprovalDialog } from "./components/consumables-application-approval-dialog"
 import { ConsumablesApplicationViewDialog } from "./components/consumables-application-view-dialog"
+import { ConsumablesApplicationEditDialog } from "./components/consumables-application-edit-dialog"
 
 function ConsumablesApplicationContent() {
   const router = useRouter()
@@ -65,6 +66,10 @@ function ConsumablesApplicationContent() {
   // 查看详情弹框状态
   const [viewDialogOpen, setViewDialogOpen] = useState(false)
   const [selectedViewApplication, setSelectedViewApplication] = useState<any>(null)
+
+  // 编辑弹框状态
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [selectedEditApplication, setSelectedEditApplication] = useState<any>(null)
 
   // 过滤和排序数据
   const filteredApplicationItems = applicationItems
@@ -266,7 +271,8 @@ function ConsumablesApplicationContent() {
       setSelectedViewApplication(item)
       setViewDialogOpen(true)
     } else if (actionId === "edit") {
-      router.push(`/laboratory/consumables-application/edit/${item.id}`)
+      setSelectedEditApplication(item)
+      setEditDialogOpen(true)
     } else if (actionId === "approve") {
       // 使用弹框进行审核而不是跳转页面
       setSelectedApprovalApplication(item)
@@ -292,6 +298,15 @@ function ConsumablesApplicationContent() {
     } else if (actionId === "delete") {
       handleDeleteItem(item)
     }
+  }
+
+  // 处理编辑申请保存
+  const handleSaveEditedApplication = (updatedApplication: any) => {
+    setApplicationItems(
+      applicationItems.map((item) =>
+        item.id === updatedApplication.id ? updatedApplication : item
+      )
+    )
   }
 
   // 处理审核通过
@@ -447,6 +462,21 @@ function ConsumablesApplicationContent() {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* 查看详情弹框 */}
+      <ConsumablesApplicationViewDialog
+        open={viewDialogOpen}
+        onOpenChange={setViewDialogOpen}
+        application={selectedViewApplication}
+      />
+
+      {/* 编辑申请弹框 */}
+      <ConsumablesApplicationEditDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        application={selectedEditApplication}
+        onSave={handleSaveEditedApplication}
+      />
+
       {/* 审核申领弹框 */}
       <ConsumablesApplicationApprovalDialog
         open={approvalDialogOpen}
@@ -454,13 +484,6 @@ function ConsumablesApplicationContent() {
         application={selectedApprovalApplication}
         onApprove={handleApproveApplication}
         onReject={handleRejectApplication}
-      />
-
-      {/* 查看详情弹框 */}
-      <ConsumablesApplicationViewDialog
-        open={viewDialogOpen}
-        onOpenChange={setViewDialogOpen}
-        application={selectedViewApplication}
       />
     </div>
   )
