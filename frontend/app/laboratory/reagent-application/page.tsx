@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { toast } from "@/components/ui/use-toast"
 import { ReagentApplicationApprovalDialog } from "./components/reagent-application-approval-dialog"
+import { ReagentApplicationViewDialog } from "./components/reagent-application-view-dialog"
 
 function ReagentApplicationContent() {
   const router = useRouter()
@@ -60,6 +61,10 @@ function ReagentApplicationContent() {
   // 审核弹框状态
   const [approvalDialogOpen, setApprovalDialogOpen] = useState(false)
   const [selectedApprovalApplication, setSelectedApprovalApplication] = useState<any>(null)
+
+  // 查看详情弹框状态
+  const [viewDialogOpen, setViewDialogOpen] = useState(false)
+  const [selectedViewApplication, setSelectedViewApplication] = useState<any>(null)
 
   // 过滤和排序数据
   const filteredApplicationItems = applicationItems
@@ -258,7 +263,9 @@ function ReagentApplicationContent() {
   const handleRowAction = (action: any, item: any) => {
     const actionId = action.id
     if (actionId === "view") {
-      router.push(`/laboratory/reagent-application/${item.id}`)
+      // 使用弹框查看详情而不是跳转页面
+      setSelectedViewApplication(item)
+      setViewDialogOpen(true)
     } else if (actionId === "edit") {
       router.push(`/laboratory/reagent-application/edit/${item.id}`)
     } else if (actionId === "approve") {
@@ -419,6 +426,13 @@ function ReagentApplicationContent() {
         onSelectedRowsChange={setSelectedRows}
         batchActions={configuredBatchActions}
         onRowActionClick={handleRowAction}
+      />
+
+      {/* 查看详情弹框 */}
+      <ReagentApplicationViewDialog
+        open={viewDialogOpen}
+        onOpenChange={setViewDialogOpen}
+        application={selectedViewApplication}
       />
 
       {/* 审核申领弹框 */}

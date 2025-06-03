@@ -165,222 +165,226 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl h-[90vh] flex flex-col p-0">
+        {/* 固定顶部标题栏 */}
+        <DialogHeader className="flex-shrink-0 px-6 py-4 border-b border-gray-200">
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5 text-blue-600" />
             试剂申领
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* 安全性：过期试剂绝对不能申领 */}
-          {isExpired() && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <h4 className="font-medium text-red-900 mb-2">试剂已过期</h4>
-                  <p className="text-sm text-red-700 mb-3">
-                    此试剂已于 {format(new Date(reagent.expiryDate), "yyyy年MM月dd日")} 过期，为确保实验安全和结果准确性，已禁用申领功能。
-                  </p>
-                  {getSuggestedAlternatives().length > 0 && (
-                    <div>
-                      <p className="text-sm font-medium text-red-800 mb-2">推荐替代试剂：</p>
-                      <div className="space-y-1">
-                        {getSuggestedAlternatives().map((alt, index) => (
-                          <div key={index} className="text-sm text-red-700 bg-red-100 rounded px-2 py-1">
-                            {alt.name} - 可用库存：{alt.currentAmount}{alt.unit}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 即将过期警告但允许申领 */}
-          {!isExpired() && isExpiringSoon() && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <Clock className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h4 className="font-medium text-yellow-900 mb-1">试剂即将过期</h4>
-                  <p className="text-sm text-yellow-700">
-                    此试剂将于 {format(new Date(reagent.expiryDate), "yyyy年MM月dd日")} 过期，请尽快使用。
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 可用性：只有有库存的未过期试剂才能申领 */}
-          {!isExpired() && reagent.currentAmount <= 0 && (
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h4 className="font-medium text-orange-900 mb-1">库存不足</h4>
-                  <p className="text-sm text-orange-700">
-                    当前试剂库存不足，无法进行申领。请联系管理员补充库存。
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 试剂基本信息展示 */}
-          <div className={cn(
-            "border p-4 rounded-lg",
-            isExpired() ? "bg-gray-50 border-gray-200" : "bg-blue-50/50 border-blue-100"
-          )}>
-            <h4 className={cn(
-              "font-medium mb-3 flex items-center gap-2",
-              isExpired() ? "text-gray-700" : "text-gray-900"
-            )}>
-              <div className={cn(
-                "w-2 h-2 rounded-full",
-                isExpired() ? "bg-gray-400" : "bg-blue-500"
-              )}></div>
-              试剂信息
-            </h4>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">试剂名称</span>
-                <span className={cn(
-                  "font-medium",
-                  isExpired() ? "text-gray-600" : "text-gray-900"
-                )}>{reagent.name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">规格</span>
-                <span className={cn(
-                  "font-medium",
-                  isExpired() ? "text-gray-600" : "text-gray-900"
-                )}>{reagent.specification}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">当前库存</span>
-                <span className={cn(
-                  "font-medium",
-                  isExpired() ? "text-gray-600" : stockStatus.color
-                )}>{reagent.currentAmount}{reagent.unit}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">有效期</span>
-                <span className={cn(
-                  "font-medium",
-                  isExpired() ? "text-red-600" : "text-green-600"
-                )}>
-                  {format(new Date(reagent.expiryDate), "yyyy/MM/dd")}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">库存状态</span>
-                <Badge variant="outline" className={cn("text-xs", stockStatus.color.replace("text-", "text-").replace("text-", "border-"))}>
-                  {stockStatus.text}
-                </Badge>
-              </div>
-            </div>
-          </div>
-
-          {/* 申领弹框内的限制：只有可申领的试剂才显示申领表单 */}
-          {canApply() && (
-            <>
-              {/* 申领基本信息 */}
-              <div className="space-y-4">
-                <h4 className="font-medium text-gray-900 flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  申领信息
-                </h4>
-              
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="quantity">申领数量 *</Label>
-                    <div className="flex gap-2">
-                      <Input 
-                        id="quantity"
-                        type="number"
-                        placeholder="输入数量"
-                        value={formData.quantity}
-                        onChange={(e) => setFormData(prev => ({ ...prev, quantity: e.target.value }))}
-                        className="flex-1"
-                        min="1"
-                        max={reagent.currentAmount}
-                      />
-                      <div className="flex items-center px-3 bg-gray-50 border border-gray-200 rounded-md">
-                        <span className="text-sm text-gray-600">{formData.unit}</span>
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      最大可申领：{reagent.currentAmount}{reagent.unit}
+        {/* 可滚动的中间内容区域 */}
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <div className="space-y-6">
+            {/* 安全性：过期试剂绝对不能申领 */}
+            {isExpired() && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <h4 className="font-medium text-red-900 mb-2">试剂已过期</h4>
+                    <p className="text-sm text-red-700 mb-3">
+                      此试剂已于 {format(new Date(reagent.expiryDate), "yyyy年MM月dd日")} 过期，为确保实验安全和结果准确性，已禁用申领功能。
                     </p>
+                    {getSuggestedAlternatives().length > 0 && (
+                      <div>
+                        <p className="text-sm font-medium text-red-800 mb-2">推荐替代试剂：</p>
+                        <div className="space-y-1">
+                          {getSuggestedAlternatives().map((alt, index) => (
+                            <div key={index} className="text-sm text-red-700 bg-red-100 rounded px-2 py-1">
+                              {alt.name} - 可用库存：{alt.currentAmount}{alt.unit}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 即将过期警告但允许申领 */}
+            {!isExpired() && isExpiringSoon() && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <Clock className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-medium text-yellow-900 mb-1">试剂即将过期</h4>
+                    <p className="text-sm text-yellow-700">
+                      此试剂将于 {format(new Date(reagent.expiryDate), "yyyy年MM月dd日")} 过期，请尽快使用。
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 可用性：只有有库存的未过期试剂才能申领 */}
+            {!isExpired() && reagent.currentAmount <= 0 && (
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-medium text-orange-900 mb-1">库存不足</h4>
+                    <p className="text-sm text-orange-700">
+                      当前试剂库存不足，无法进行申领。请联系管理员补充库存。
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 试剂基本信息展示 */}
+            <div className={cn(
+              "border p-4 rounded-lg",
+              isExpired() ? "bg-gray-50 border-gray-200" : "bg-blue-50/50 border-blue-100"
+            )}>
+              <h4 className={cn(
+                "font-medium mb-3 flex items-center gap-2",
+                isExpired() ? "text-gray-700" : "text-gray-900"
+              )}>
+                <div className={cn(
+                  "w-2 h-2 rounded-full",
+                  isExpired() ? "bg-gray-400" : "bg-blue-500"
+                )}></div>
+                试剂信息
+              </h4>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">试剂名称</span>
+                  <span className={cn(
+                    "font-medium",
+                    isExpired() ? "text-gray-600" : "text-gray-900"
+                  )}>{reagent.name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">规格</span>
+                  <span className={cn(
+                    "font-medium",
+                    isExpired() ? "text-gray-600" : "text-gray-900"
+                  )}>{reagent.specification}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">当前库存</span>
+                  <span className={cn(
+                    "font-medium",
+                    isExpired() ? "text-gray-600" : stockStatus.color
+                  )}>{reagent.currentAmount}{reagent.unit}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">有效期</span>
+                  <span className={cn(
+                    "font-medium",
+                    isExpired() ? "text-red-600" : "text-green-600"
+                  )}>
+                    {format(new Date(reagent.expiryDate), "yyyy/MM/dd")}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">库存状态</span>
+                  <Badge variant="outline" className={cn("text-xs", stockStatus.color.replace("text-", "text-").replace("text-", "border-"))}>
+                    {stockStatus.text}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+
+            {/* 申领弹框内的限制：只有可申领的试剂才显示申领表单 */}
+            {canApply() && (
+              <>
+                {/* 申领基本信息 */}
+                <div className="space-y-4">
+                  <h4 className="font-medium text-gray-900 flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    申领信息
+                  </h4>
+                
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="quantity">申领数量 *</Label>
+                      <div className="flex gap-2">
+                        <Input 
+                          id="quantity"
+                          type="number"
+                          placeholder="输入数量"
+                          value={formData.quantity}
+                          onChange={(e) => setFormData(prev => ({ ...prev, quantity: e.target.value }))}
+                          className="flex-1"
+                          min="1"
+                          max={reagent.currentAmount}
+                        />
+                        <div className="flex items-center px-3 bg-gray-50 border border-gray-200 rounded-md">
+                          <span className="text-sm text-gray-600">{formData.unit}</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        最大可申领：{reagent.currentAmount}{reagent.unit}
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="expectedDate">期望使用日期 *</Label>
+                      <Input
+                        id="expectedDate"
+                        type="date"
+                        value={formData.expectedDate}
+                        onChange={(e) => setFormData(prev => ({ ...prev, expectedDate: e.target.value }))}
+                      />
+                    </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="expectedDate">期望使用日期 *</Label>
-                    <Input
-                      id="expectedDate"
-                      type="date"
-                      value={formData.expectedDate}
-                      onChange={(e) => setFormData(prev => ({ ...prev, expectedDate: e.target.value }))}
-                    />
+                    <Label>紧急程度</Label>
+                    <div className="flex gap-2">
+                      {urgencyOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, urgency: option.value }))}
+                          className={cn(
+                            "px-3 py-1.5 rounded-md text-sm font-medium border transition-colors",
+                            formData.urgency === option.value
+                              ? `${option.color} border-current`
+                              : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
+                          )}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                
-                <div className="space-y-2">
-                  <Label>紧急程度</Label>
-                  <div className="flex gap-2">
-                    {urgencyOptions.map((option) => (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, urgency: option.value }))}
-                        className={cn(
-                          "px-3 py-1.5 rounded-md text-sm font-medium border transition-colors",
-                          formData.urgency === option.value
-                            ? `${option.color} border-current`
-                            : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
-                        )}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
 
-              {/* 申领用途 */}
-              <div className="space-y-2">
-                <Label htmlFor="purpose">申领用途 *</Label>
-                <Textarea 
-                  id="purpose"
-                  placeholder="请详细说明试剂用途和实验目的..."
-                  value={formData.purpose}
-                  onChange={(e) => setFormData(prev => ({ ...prev, purpose: e.target.value }))}
-                  rows={3}
-                />
-              </div>
-                
-              {/* 备注 */}
-              <div className="space-y-2">
-                <Label htmlFor="remarks">备注说明</Label>
-                <Textarea 
-                  id="remarks"
-                  placeholder="其他需要说明的事项（可选）..."
-                  value={formData.remarks}
-                  onChange={(e) => setFormData(prev => ({ ...prev, remarks: e.target.value }))}
-                  rows={2}
-                />
-              </div>
-            </>
-          )}
+                {/* 申领用途 */}
+                <div className="space-y-2">
+                  <Label htmlFor="purpose">申领用途 *</Label>
+                  <Textarea 
+                    id="purpose"
+                    placeholder="请详细说明试剂用途和实验目的..."
+                    value={formData.purpose}
+                    onChange={(e) => setFormData(prev => ({ ...prev, purpose: e.target.value }))}
+                    rows={3}
+                  />
+                </div>
+                  
+                {/* 备注 */}
+                <div className="space-y-2">
+                  <Label htmlFor="remarks">备注说明</Label>
+                  <Textarea 
+                    id="remarks"
+                    placeholder="其他需要说明的事项（可选）..."
+                    value={formData.remarks}
+                    onChange={(e) => setFormData(prev => ({ ...prev, remarks: e.target.value }))}
+                    rows={2}
+                  />
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
-        {/* 操作按钮 */}
-        <div className="flex justify-end gap-3 pt-4 border-t">
+        {/* 固定底部操作栏 */}
+        <div className="flex-shrink-0 flex justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-white">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             取消
           </Button>
