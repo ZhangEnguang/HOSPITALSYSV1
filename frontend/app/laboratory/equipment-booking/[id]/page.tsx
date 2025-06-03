@@ -22,14 +22,14 @@ import {
 import { Badge } from "@/components/ui/badge"
 
 // 导入标签页组件
-import EquipmentOverviewTab from "./components/equipment-overview-tab"
-import EquipmentBookingTab from "./components/equipment-booking-tab"
-import EquipmentMaintenanceTab from "./components/equipment-maintenance-tab"
-import EquipmentRecommendationTab from "./components/equipment-recommendation-tab"
+import EquipmentOverviewTab from "../../equipment/[id]/components/equipment-overview-tab"
+import EquipmentBookingTab from "../../equipment/[id]/components/equipment-booking-tab"
+import EquipmentMaintenanceTab from "../../equipment/[id]/components/equipment-maintenance-tab"
+import EquipmentRecommendationTab from "../../equipment/[id]/components/equipment-recommendation-tab"
 
 // 导入示例数据
-import { allDemoEquipmentItems } from "../data/equipment-demo-data"
-import { statusColors } from "../config/equipment-config"
+import { allDemoEquipmentItems } from "../../equipment/data/equipment-demo-data"
+import { statusColors } from "../../equipment/config/equipment-config"
 
 export default function EquipmentDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter()
