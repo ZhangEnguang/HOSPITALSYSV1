@@ -95,6 +95,60 @@ export default function UniversalDetailAdapter({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false)
 
+  // 检查是否为实验室相关模块
+  const isLabModule = () => {
+    // 检查customBackPath是否包含laboratory
+    if (customBackPath && customBackPath.includes('/laboratory')) {
+      return true
+    }
+    
+    // 检查moduleType是否为custom且路径包含laboratory
+    if (moduleType === "custom") {
+      // 如果没有明确的customBackPath，则根据URL判断
+      if (typeof window !== 'undefined') {
+        const currentPath = window.location.pathname
+        // 实验室相关路径：/laboratory/
+        if (currentPath.includes('/laboratory/')) {
+          return true
+        }
+        // 伦理项目和伦理审查不是实验室模块，即使使用了UniversalDetailAdapter
+        if (currentPath.includes('/ethic-') || currentPath.includes('/ethic/')) {
+          return false
+        }
+      }
+    }
+    
+    // 对于明确指定了实验室特有页签组件的情况，认为是实验室模块
+    if (tabComponents.booking || tabComponents.maintenance || 
+        tabComponents.stockIn || tabComponents.application || 
+        tabComponents.recommendations) {
+      return true
+    }
+    
+    return false
+  }
+
+  // 实验室特有的页签列表
+  const labSpecificTabs = ["booking", "maintenance", "stockIn", "application", "recommendations"]
+  
+  // 根据模块类型自动隐藏实验室特有的页签
+  const getHiddenTabs = () => {
+    const autoHiddenTabs = [...hiddenTabs]
+    
+    // 如果不是实验室模块，自动隐藏实验室特有的页签
+    if (!isLabModule()) {
+      labSpecificTabs.forEach(tab => {
+        if (!autoHiddenTabs.includes(tab)) {
+          autoHiddenTabs.push(tab)
+        }
+      })
+    }
+    
+    return autoHiddenTabs
+  }
+
+  const finalHiddenTabs = getHiddenTabs()
+
   // 获取模块对应的路径
   const getModulePath = (type: string) => {
     switch (type) {
@@ -221,105 +275,105 @@ export default function UniversalDetailAdapter({
       label: customTabLabels.overview || "概览",
       icon: <FileIcon className="h-4 w-4" />,
       component: tabComponents.overview || getDefaultTabComponent("overview"),
-      hidden: hiddenTabs.includes("overview"),
+      hidden: finalHiddenTabs.includes("overview"),
     },
     {
       id: "booking",
       label: customTabLabels.booking || "预约记录",
       icon: <Calendar className="h-4 w-4" />,
       component: tabComponents.booking || getDefaultTabComponent("booking"),
-      hidden: hiddenTabs.includes("booking"),
+      hidden: finalHiddenTabs.includes("booking"),
     },
     {
       id: "maintenance",
       label: customTabLabels.maintenance || "维护记录",
       icon: <GitBranch className="h-4 w-4" />,
       component: tabComponents.maintenance || getDefaultTabComponent("maintenance"),
-      hidden: hiddenTabs.includes("maintenance"),
+      hidden: finalHiddenTabs.includes("maintenance"),
     },
     {
       id: "stockIn",
       label: customTabLabels.stockIn || "入库明细",
       icon: <FileText className="h-4 w-4" />,
       component: tabComponents.stockIn || getDefaultTabComponent("stockIn"),
-      hidden: hiddenTabs.includes("stockIn"),
+      hidden: finalHiddenTabs.includes("stockIn"),
     },
     {
       id: "application",
       label: customTabLabels.application || "申领明细",
       icon: <ClipboardList className="h-4 w-4" />,
       component: tabComponents.application || getDefaultTabComponent("application"),
-      hidden: hiddenTabs.includes("application"),
+      hidden: finalHiddenTabs.includes("application"),
     },
     {
       id: "recommendations",
       label: customTabLabels.recommendations || "相关推荐",
       icon: <Award className="h-4 w-4" />,
       component: tabComponents.recommendations || getDefaultTabComponent("recommendations"),
-      hidden: hiddenTabs.includes("recommendations"),
+      hidden: finalHiddenTabs.includes("recommendations"),
     },
     {
       id: "process",
       label: customTabLabels.process || "执行过程",
       icon: <GitBranch className="h-4 w-4" />,
       component: tabComponents.process || getDefaultTabComponent("process"),
-      hidden: hiddenTabs.includes("process"),
+      hidden: finalHiddenTabs.includes("process"),
     },
     {
       id: "funds",
       label: customTabLabels.funds || "经费管理",
       icon: <DollarSign className="h-4 w-4" />,
       component: tabComponents.funds || getDefaultTabComponent("funds"),
-      hidden: hiddenTabs.includes("funds"),
+      hidden: finalHiddenTabs.includes("funds"),
     },
     {
       id: "achievements",
       label: customTabLabels.achievements || "成果管理",
       icon: <Award className="h-4 w-4" />,
       component: tabComponents.achievements || getDefaultTabComponent("achievements"),
-      hidden: hiddenTabs.includes("achievements"),
+      hidden: finalHiddenTabs.includes("achievements"),
     },
     {
       id: "risks",
       label: customTabLabels.risks || "风险与问题",
       icon: <AlertTriangle className="h-4 w-4" />,
       component: tabComponents.risks || getDefaultTabComponent("risks"),
-      hidden: hiddenTabs.includes("risks"),
+      hidden: finalHiddenTabs.includes("risks"),
     },
     {
       id: "reports",
       label: customTabLabels.reports || "报告",
       icon: <ClipboardList className="h-4 w-4" />,
       component: tabComponents.reports || getDefaultTabComponent("reports"),
-      hidden: hiddenTabs.includes("reports"),
+      hidden: finalHiddenTabs.includes("reports"),
     },
     {
       id: "statistics",
       label: customTabLabels.statistics || "统计分析",
       icon: <BarChart className="h-4 w-4" />,
       component: tabComponents.statistics || getDefaultTabComponent("statistics"),
-      hidden: hiddenTabs.includes("statistics"),
+      hidden: finalHiddenTabs.includes("statistics"),
     },
     {
       id: "documents",
       label: customTabLabels.documents || "文档",
       icon: <FileText className="h-4 w-4" />,
       component: tabComponents.documents || getDefaultTabComponent("documents"),
-      hidden: hiddenTabs.includes("documents"),
+      hidden: finalHiddenTabs.includes("documents"),
     },
     {
       id: "members",
       label: customTabLabels.members || "成员",
       icon: <User className="h-4 w-4" />,
       component: tabComponents.members || getDefaultTabComponent("members"),
-      hidden: hiddenTabs.includes("members"),
+      hidden: finalHiddenTabs.includes("members"),
     },
     {
       id: "custom",
       label: customTabLabels.custom || "关联项目",
       icon: <Layers className="h-4 w-4" />,
       component: tabComponents.custom || getDefaultTabComponent("custom"),
-      hidden: hiddenTabs.includes("custom") || !tabComponents.custom,
+      hidden: finalHiddenTabs.includes("custom") || !tabComponents.custom,
     },
   ]
 
