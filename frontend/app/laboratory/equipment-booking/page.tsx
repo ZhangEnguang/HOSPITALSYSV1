@@ -27,6 +27,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { toast } from "@/components/ui/use-toast"
+import { BookingDetailDialog } from "./components/booking-detail-dialog"
 
 function EquipmentBookingContent() {
   const router = useRouter()
@@ -54,6 +55,10 @@ function EquipmentBookingContent() {
   })
   // 删除确认对话框状态
   const [itemToDelete, setItemToDelete] = useState<any>(null)
+  
+  // 预约详情弹框状态
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false)
+  const [selectedBooking, setSelectedBooking] = useState<any>(null)
 
   // 过滤和排序数据
   const filteredBookingItems = bookingItems
@@ -159,9 +164,21 @@ function EquipmentBookingContent() {
     setBookingItems(
       bookingItems.map((item) =>
         selectedRows.includes(item.id) && item.status === "待审核"
-          ? { ...item, status: "审核通过", processor: { id: "1", name: "张七", email: "zhang7@lab.edu.cn", avatar: "/avatars/01.png", role: "实验室管理员" }, processDate: new Date().toISOString() }
+          ? { 
+              ...item, 
+              status: "审核通过", 
+              processor: { 
+                id: "1", 
+                name: "张七", 
+                email: "zhang7@lab.edu.cn", 
+                avatar: "/avatars/01.png", 
+                role: "实验室管理员",
+                phone: "18012345678"
+              }, 
+              processDate: new Date().toISOString() 
+            }
           : item,
-      ),
+      ) as any,
     )
     setSelectedRows([])
     toast({
@@ -175,9 +192,21 @@ function EquipmentBookingContent() {
     setBookingItems(
       bookingItems.map((item) =>
         selectedRows.includes(item.id) && item.status === "待审核"
-          ? { ...item, status: "审核退回", processor: { id: "1", name: "张七", email: "zhang7@lab.edu.cn", avatar: "/avatars/01.png", role: "实验室管理员" }, processDate: new Date().toISOString() }
+          ? { 
+              ...item, 
+              status: "审核退回", 
+              processor: { 
+                id: "1", 
+                name: "张七", 
+                email: "zhang7@lab.edu.cn", 
+                avatar: "/avatars/01.png", 
+                role: "实验室管理员",
+                phone: "18012345678"
+              }, 
+              processDate: new Date().toISOString() 
+            }
           : item,
-      ),
+      ) as any,
     )
     setSelectedRows([])
     toast({
@@ -216,9 +245,13 @@ function EquipmentBookingContent() {
   }
 
   // 处理行操作
-  const handleRowAction = (actionId: string, item: any) => {
+  const handleRowAction = (action: any, item: any) => {
+    const actionId = action.id; // 从action对象中提取id
+    
     if (actionId === "view") {
-      router.push(`/laboratory/equipment-booking/${item.id}`)
+      // 使用弹框显示详情而不是跳转页面
+      setSelectedBooking(item)
+      setDetailDialogOpen(true)
     } else if (actionId === "edit") {
       router.push(`/laboratory/equipment-booking/edit/${item.id}`)
     } else if (actionId === "approve") {
@@ -309,6 +342,13 @@ function EquipmentBookingContent() {
         onSelectedRowsChange={setSelectedRows}
         batchActions={configuredBatchActions}
         onRowActionClick={handleRowAction}
+      />
+
+      {/* 预约详情弹框 */}
+      <BookingDetailDialog
+        open={detailDialogOpen}
+        onOpenChange={setDetailDialogOpen}
+        booking={selectedBooking}
       />
 
       {/* 删除确认对话框 */}
