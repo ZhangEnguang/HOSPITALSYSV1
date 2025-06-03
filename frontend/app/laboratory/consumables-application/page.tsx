@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { toast } from "@/components/ui/use-toast"
 import { ConsumablesApplicationApprovalDialog } from "./components/consumables-application-approval-dialog"
+import { ConsumablesApplicationViewDialog } from "./components/consumables-application-view-dialog"
 
 function ConsumablesApplicationContent() {
   const router = useRouter()
@@ -60,6 +61,10 @@ function ConsumablesApplicationContent() {
   // 审核弹框状态
   const [approvalDialogOpen, setApprovalDialogOpen] = useState(false)
   const [selectedApprovalApplication, setSelectedApprovalApplication] = useState<any>(null)
+
+  // 查看详情弹框状态
+  const [viewDialogOpen, setViewDialogOpen] = useState(false)
+  const [selectedViewApplication, setSelectedViewApplication] = useState<any>(null)
 
   // 过滤和排序数据
   const filteredApplicationItems = applicationItems
@@ -258,7 +263,8 @@ function ConsumablesApplicationContent() {
   const handleRowAction = (action: any, item: any) => {
     const actionId = action.id
     if (actionId === "view") {
-      router.push(`/laboratory/consumables-application/${item.id}`)
+      setSelectedViewApplication(item)
+      setViewDialogOpen(true)
     } else if (actionId === "edit") {
       router.push(`/laboratory/consumables-application/edit/${item.id}`)
     } else if (actionId === "approve") {
@@ -448,6 +454,13 @@ function ConsumablesApplicationContent() {
         application={selectedApprovalApplication}
         onApprove={handleApproveApplication}
         onReject={handleRejectApplication}
+      />
+
+      {/* 查看详情弹框 */}
+      <ConsumablesApplicationViewDialog
+        open={viewDialogOpen}
+        onOpenChange={setViewDialogOpen}
+        application={selectedViewApplication}
       />
     </div>
   )
