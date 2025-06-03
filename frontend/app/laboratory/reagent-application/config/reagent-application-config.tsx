@@ -411,10 +411,6 @@ export const reagentApplicationActions = [
     id: "approve",
     label: "审核申领",
     icon: <ClipboardCheck className="h-4 w-4" />,
-    onClick: (item: any) => {
-      const url = `/laboratory/reagent-application/approve/${item.id}`;
-      window.open(url, "_self");
-    },
   },
   {
     id: "cancel",

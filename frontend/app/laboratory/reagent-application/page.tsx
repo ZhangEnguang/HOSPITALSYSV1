@@ -27,6 +27,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { toast } from "@/components/ui/use-toast"
+import { ReagentApplicationApprovalDialog } from "./components/reagent-application-approval-dialog"
 
 function ReagentApplicationContent() {
   const router = useRouter()
@@ -55,6 +56,10 @@ function ReagentApplicationContent() {
   })
   // 删除确认对话框状态
   const [itemToDelete, setItemToDelete] = useState<any>(null)
+
+  // 审核弹框状态
+  const [approvalDialogOpen, setApprovalDialogOpen] = useState(false)
+  const [selectedApprovalApplication, setSelectedApprovalApplication] = useState<any>(null)
 
   // 过滤和排序数据
   const filteredApplicationItems = applicationItems
@@ -250,13 +255,16 @@ function ReagentApplicationContent() {
   }
 
   // 处理行操作
-  const handleRowAction = (actionId: string, item: any) => {
+  const handleRowAction = (action: any, item: any) => {
+    const actionId = action.id
     if (actionId === "view") {
       router.push(`/laboratory/reagent-application/${item.id}`)
     } else if (actionId === "edit") {
       router.push(`/laboratory/reagent-application/edit/${item.id}`)
     } else if (actionId === "approve") {
-      router.push(`/laboratory/reagent-application/approve/${item.id}`)
+      // 使用弹框进行审核而不是跳转页面
+      setSelectedApprovalApplication(item)
+      setApprovalDialogOpen(true)
     } else if (actionId === "distribute") {
       router.push(`/laboratory/reagent-application/distribute/${item.id}`)
     } else if (actionId === "record") {
@@ -276,6 +284,66 @@ function ReagentApplicationContent() {
     } else if (actionId === "delete") {
       handleDeleteItem(item)
     }
+  }
+
+  // 处理审核通过
+  const handleApproveApplication = async (application: any, comments: string) => {
+    setApplicationItems(
+      applicationItems.map((item) =>
+        item.id === application.id
+          ? { 
+              ...item, 
+              status: "审核通过",
+              approvalComments: comments,
+              processor: { 
+                id: "1", 
+                name: "张七", 
+                email: "zhang7@lab.edu.cn", 
+                avatar: "/avatars/01.png", 
+                role: "实验室管理员",
+                phone: "18012345678"
+              }, 
+              processDate: new Date().toISOString() 
+            }
+          : item,
+      ) as any,
+    )
+    
+    toast({
+      title: "审核通过",
+      description: `申领 "${application.applicationTitle}" 审核通过`,
+      duration: 3000,
+    })
+  }
+
+  // 处理审核退回
+  const handleRejectApplication = async (application: any, comments: string) => {
+    setApplicationItems(
+      applicationItems.map((item) =>
+        item.id === application.id
+          ? { 
+              ...item, 
+              status: "审核退回",
+              approvalComments: comments,
+              processor: { 
+                id: "1", 
+                name: "张七", 
+                email: "zhang7@lab.edu.cn", 
+                avatar: "/avatars/01.png", 
+                role: "实验室管理员",
+                phone: "18012345678"
+              }, 
+              processDate: new Date().toISOString() 
+            }
+          : item,
+      ) as any,
+    )
+    
+    toast({
+      title: "审核退回",
+      description: `申领 "${application.applicationTitle}" 已退回`,
+      duration: 3000,
+    })
   }
 
   // 配置批量操作
@@ -351,6 +419,15 @@ function ReagentApplicationContent() {
         onSelectedRowsChange={setSelectedRows}
         batchActions={configuredBatchActions}
         onRowActionClick={handleRowAction}
+      />
+
+      {/* 审核申领弹框 */}
+      <ReagentApplicationApprovalDialog
+        open={approvalDialogOpen}
+        onOpenChange={setApprovalDialogOpen}
+        application={selectedApprovalApplication}
+        onApprove={handleApproveApplication}
+        onReject={handleRejectApplication}
       />
 
       {/* 删除确认对话框 */}
