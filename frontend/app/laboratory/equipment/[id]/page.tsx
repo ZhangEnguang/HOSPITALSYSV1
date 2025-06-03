@@ -158,7 +158,7 @@ export default function EquipmentDetailPage({ params }: { params: { id: string }
       <UniversalDetailAdapter
         itemData={equipment}
         showRightSidebar={false}
-        hiddenTabs={["process", "funds", "achievements", "risks", "reports", "statistics", "documents", "members", "custom"]}
+        hiddenTabs={["stockIn", "application", "process", "funds", "achievements", "risks", "reports", "statistics", "documents", "members", "custom"]}
         hiddenFields={["period"]} 
         hiddenActions={[]} 
         tabComponents={{

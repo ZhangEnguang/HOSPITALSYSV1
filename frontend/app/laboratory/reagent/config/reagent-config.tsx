@@ -703,19 +703,6 @@ const ReagentCard = ({
         </div>
       )}
 
-      {/* 右下角库存状态显示 */}
-      <div className="absolute bottom-2 right-2 z-10">
-        <Badge 
-          variant="outline" 
-          className={cn(
-            "text-xs font-medium border",
-            stockStatus.color
-          )}
-        >
-          {stockStatus.text}
-        </Badge>
-      </div>
-
       {/* 上方区域：左侧图片，右侧试剂名称 */}
       <div className="flex items-start gap-3 p-3 pb-2">
         {/* 左侧：试剂瓶图标 */}
@@ -807,8 +794,8 @@ const ReagentCard = ({
           </span>
         </div>
         
-        {/* 库存量信息 */}
-        <div className="flex items-center justify-between pb-5">
+        {/* 库存量信息和库存状态标签在同一行 */}
+        <div className="flex items-center justify-between pb-3">
           <div className="flex items-center gap-1">
             <span className={cn(
               "text-sm",
@@ -824,6 +811,16 @@ const ReagentCard = ({
               {item.currentAmount <= 0 ? "无库存" : `${item.currentAmount}${item.unit}`}
             </span>
           </div>
+          {/* 库存状态标签 */}
+          <Badge 
+            variant="outline" 
+            className={cn(
+              "text-xs font-medium border",
+              stockStatus.color
+            )}
+          >
+            {stockStatus.text}
+          </Badge>
         </div>
       </div>
 

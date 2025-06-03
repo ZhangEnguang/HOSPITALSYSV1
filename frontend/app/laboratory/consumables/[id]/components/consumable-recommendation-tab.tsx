@@ -1,10 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { Star, TestTube, ExternalLink } from "lucide-react"
+import { Star, TestTube, Eye, FileText } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { toast } from "@/hooks/use-toast"
 
 interface ConsumableRecommendationTabProps {
   data: any
@@ -57,6 +58,28 @@ const mockRelatedConsumables = [
 ]
 
 export default function ConsumableRecommendationTab({ data }: ConsumableRecommendationTabProps) {
+  // 处理查看详情
+  const handleViewDetails = (consumable: any) => {
+    window.open(`/laboratory/consumables/${consumable.id}`, "_self")
+  }
+
+  // 处理申领
+  const handleApplyConsumable = (consumable: any) => {
+    // 检查是否可以申领
+    if (consumable.status === "缺货" || consumable.currentStock <= 0) {
+      toast({
+        title: "无法申领",
+        description: "该耗材当前缺货或库存不足",
+        variant: "destructive",
+        duration: 3000,
+      })
+      return
+    }
+
+    // 跳转到申领页面
+    window.open(`/laboratory/consumables/apply/${consumable.id}`, "_self")
+  }
+
   return (
     <div className="space-y-6">
       <Card className="border border-gray-100 rounded-md bg-white">
@@ -117,8 +140,8 @@ export default function ConsumableRecommendationTab({ data }: ConsumableRecommen
                     </p>
                   </div>
 
-                  {/* 状态和操作 */}
-                  <div className="flex items-center justify-between">
+                  {/* 状态和操作按钮 */}
+                  <div className="flex items-center justify-between gap-2">
                     <Badge className={
                       consumable.status === "充足" 
                         ? "bg-green-50 text-green-700 border-green-200" 
@@ -128,10 +151,26 @@ export default function ConsumableRecommendationTab({ data }: ConsumableRecommen
                     }>
                       {consumable.status}
                     </Badge>
-                    <Button size="sm" variant="outline">
-                      <ExternalLink className="h-3 w-3 mr-1" />
-                      查看详情
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-8 gap-1"
+                        onClick={() => handleViewDetails(consumable)}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        <span>查看</span>
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="h-8 gap-1"
+                        onClick={() => handleApplyConsumable(consumable)}
+                        disabled={consumable.status === "缺货" || consumable.currentStock <= 0}
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        <span>申领</span>
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </Card>

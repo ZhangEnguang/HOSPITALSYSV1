@@ -1,10 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { Star, Beaker, ExternalLink } from "lucide-react"
+import { Star, Beaker, Eye, FileText } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { toast } from "@/hooks/use-toast"
 
 interface ReagentRecommendationTabProps {
   data: any
@@ -60,6 +61,28 @@ const mockRelatedReagents = [
 ]
 
 export default function ReagentRecommendationTab({ data }: ReagentRecommendationTabProps) {
+  // 处理查看详情
+  const handleViewDetails = (reagent: any) => {
+    window.open(`/laboratory/reagent/${reagent.id}`, "_self")
+  }
+
+  // 处理立即申领
+  const handleApplyReagent = (reagent: any) => {
+    // 检查是否可以申领
+    if (reagent.status !== "正常" || reagent.currentAmount <= 0) {
+      toast({
+        title: "无法申领",
+        description: "该试剂当前状态不支持申领或库存不足",
+        variant: "destructive",
+        duration: 3000,
+      })
+      return
+    }
+
+    // 跳转到申领页面
+    window.open(`/laboratory/reagent/apply/${reagent.id}`, "_self")
+  }
+
   return (
     <div className="space-y-6">
       <Card className="border border-gray-100 rounded-md bg-white">
@@ -120,8 +143,8 @@ export default function ReagentRecommendationTab({ data }: ReagentRecommendation
                     </p>
                   </div>
 
-                  {/* 状态和操作 */}
-                  <div className="flex items-center justify-between">
+                  {/* 状态和操作按钮 */}
+                  <div className="flex items-center justify-between gap-2">
                     <Badge className={
                       reagent.status === "正常" 
                         ? "bg-green-50 text-green-700 border-green-200" 
@@ -129,10 +152,26 @@ export default function ReagentRecommendationTab({ data }: ReagentRecommendation
                     }>
                       {reagent.status}
                     </Badge>
-                    <Button size="sm" variant="outline">
-                      <ExternalLink className="h-3 w-3 mr-1" />
-                      查看详情
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-8 gap-1"
+                        onClick={() => handleViewDetails(reagent)}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        <span>查看</span>
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="h-8 gap-1"
+                        onClick={() => handleApplyReagent(reagent)}
+                        disabled={reagent.status !== "正常" || reagent.currentAmount <= 0}
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        <span>申领</span>
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </Card>
