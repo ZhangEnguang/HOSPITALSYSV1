@@ -25,7 +25,8 @@ import {
   PieChart,
   LineChart,
   LayoutGrid,
-  StarIcon
+  StarIcon,
+  Sparkles
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -161,6 +162,18 @@ export default function EthicProjectOverviewTab({
     }
   }
 
+  // 生成简化的项目审查摘要（一段话总结）
+  const generateProjectSummary = () => {
+    const title = project.title || "该人遗资源项目"
+    const leader = project.leader || "项目负责人"
+    const department = project.department || "相关科室"
+    const approvalType = project.approvalType || "人遗审查"
+    const geneticMaterial = project.geneticMaterial || "遗传物质"
+    const sampleSize = project.sampleSize || "若干"
+    
+    return `${title}是一项由${department}${leader}主导的人类遗传资源伦理审查项目，涉及${geneticMaterial}样本${typeof sampleSize === 'number' ? sampleSize + '份' : sampleSize}的收集、保存和利用。该项目已完成${approvalType}申请，遗传资源管理方案规范，数据隐私保护措施到位，符合人类遗传资源管理条例要求。项目在样本采集、保存条件、使用范围、数据安全等方面建立了完善的管理制度，整体伦理风险可控，建议按规定程序审批并加强执行过程中的监督管理。`
+  }
+
   return (
     <div className="space-y-6">
       {/* AI智能摘要区域 */}
@@ -170,8 +183,8 @@ export default function EthicProjectOverviewTab({
         <CardHeader className="pb-1 relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="relative w-10 h-10">
-                <Image src="/ai-icon.png" alt="AI摘要" width={40} height={40} className="object-contain" />
+              <div className="relative w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+                <Sparkles className="h-6 w-6 text-white" />
               </div>
               <div>
                 <CardTitle className="text-lg font-semibold flex items-center gap-2">
@@ -276,76 +289,7 @@ export default function EthicProjectOverviewTab({
                         <span className="font-medium">最新分析已更新 - 检测到项目进度变更</span>
                       </div>
                       <p className="whitespace-pre-line">
-                        {aiSummaryContent.split('\n\n').map((paragraph: string, idx: number) => {
-                          // 检查段落是否包含【】标题
-                          if (paragraph.includes('【') && paragraph.includes('】')) {
-                            const titleMatch = paragraph.match(/【(.+?)】/);
-                            const title = titleMatch ? titleMatch[1] : '';
-                            const content = paragraph.replace(/【(.+?)】/, '');
-                            
-                            // 检查内容是否包含列表项（以"•"开头的行）
-                            const hasListItems = content.includes('\n•');
-                            
-                            if (hasListItems) {
-                              // 处理包含列表项的内容
-                              const listItems = content.split('\n').filter((line: string) => line.trim().length > 0);
-                              
-                              return (
-                                <div key={idx} className="mb-4">
-                                  <h4 className="text-sm font-semibold text-blue-700 bg-blue-50 py-1 px-2 rounded mb-2">
-                                    {title === "审核要点摘要" ? "项目审查摘要" : title}
-                                  </h4>
-                                  <ul className="pl-1 space-y-1">
-                                    {listItems.map((item: string, itemIdx: number) => (
-                                      <li key={itemIdx} className={`pl-5 relative ${item.startsWith('•') ? 'text-slate-700' : 'text-slate-600'}`}>
-                                        {item.startsWith('•') ? (
-                                          <>
-                                            <span className="absolute left-0 text-blue-500">•</span>
-                                            {item.substring(1).trim()}
-                                          </>
-                                        ) : item}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              );
-                            } else {
-                              return (
-                                <div key={idx} className="mb-3">
-                                  <h4 className="text-sm font-semibold text-blue-700 bg-blue-50 py-1 px-2 rounded mb-1.5">
-                                    {title === "审核要点摘要" ? "项目审查摘要" : title}
-                                  </h4>
-                                  <div className="pl-2">{content}</div>
-                                </div>
-                              );
-                            }
-                          } else if (paragraph.includes('\n•')) {
-                            // 处理不包含标题但包含列表项的段落
-                            const lines = paragraph.split('\n').filter((line: string) => line.trim().length > 0);
-                            return (
-                              <div key={idx} className="mb-3">
-                                <ul className="pl-1 space-y-1">
-                                  {lines.map((line: string, lineIdx: number) => (
-                                    <li key={lineIdx} className={`pl-5 relative ${line.startsWith('•') ? 'text-slate-700' : 'text-slate-600'}`}>
-                                      {line.startsWith('•') ? (
-                                        <>
-                                          <span className="absolute left-0 text-blue-500">•</span>
-                                          {line.substring(1).trim()}
-                                        </>
-                                      ) : line}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            );
-                          } else {
-                            return (
-                              <p key={idx} className="mb-3">
-                                {paragraph}
-                              </p>
-                            );
-                          }
-                        })}
+                        {generateProjectSummary()}
                       </p>
                       <div className="flex items-start gap-4 my-3 py-2">
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
@@ -386,76 +330,7 @@ export default function EthicProjectOverviewTab({
                   ) : (
                     <>
                       <p className="whitespace-pre-line">
-                        {aiSummaryContent.split('\n\n').map((paragraph: string, idx: number) => {
-                          // 检查段落是否包含【】标题
-                          if (paragraph.includes('【') && paragraph.includes('】')) {
-                            const titleMatch = paragraph.match(/【(.+?)】/);
-                            const title = titleMatch ? titleMatch[1] : '';
-                            const content = paragraph.replace(/【(.+?)】/, '');
-                            
-                            // 检查内容是否包含列表项（以"•"开头的行）
-                            const hasListItems = content.includes('\n•');
-                            
-                            if (hasListItems) {
-                              // 处理包含列表项的内容
-                              const listItems = content.split('\n').filter((line: string) => line.trim().length > 0);
-                              
-                              return (
-                                <div key={idx} className="mb-4">
-                                  <h4 className="text-sm font-semibold text-blue-700 bg-blue-50 py-1 px-2 rounded mb-2">
-                                    {title === "审核要点摘要" ? "项目审查摘要" : title}
-                                  </h4>
-                                  <ul className="pl-1 space-y-1">
-                                    {listItems.map((item: string, itemIdx: number) => (
-                                      <li key={itemIdx} className={`pl-5 relative ${item.startsWith('•') ? 'text-slate-700' : 'text-slate-600'}`}>
-                                        {item.startsWith('•') ? (
-                                          <>
-                                            <span className="absolute left-0 text-blue-500">•</span>
-                                            {item.substring(1).trim()}
-                                          </>
-                                        ) : item}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              );
-                            } else {
-                              return (
-                                <div key={idx} className="mb-3">
-                                  <h4 className="text-sm font-semibold text-blue-700 bg-blue-50 py-1 px-2 rounded mb-1.5">
-                                    {title === "审核要点摘要" ? "项目审查摘要" : title}
-                                  </h4>
-                                  <div className="pl-2">{content}</div>
-                                </div>
-                              );
-                            }
-                          } else if (paragraph.includes('\n•')) {
-                            // 处理不包含标题但包含列表项的段落
-                            const lines = paragraph.split('\n').filter((line: string) => line.trim().length > 0);
-                            return (
-                              <div key={idx} className="mb-3">
-                                <ul className="pl-1 space-y-1">
-                                  {lines.map((line: string, lineIdx: number) => (
-                                    <li key={lineIdx} className={`pl-5 relative ${line.startsWith('•') ? 'text-slate-700' : 'text-slate-600'}`}>
-                                      {line.startsWith('•') ? (
-                                        <>
-                                          <span className="absolute left-0 text-blue-500">•</span>
-                                          {line.substring(1).trim()}
-                                        </>
-                                      ) : line}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            );
-                          } else {
-                            return (
-                              <p key={idx} className="mb-3">
-                                {paragraph}
-                              </p>
-                            );
-                          }
-                        })}
+                        {generateProjectSummary()}
                       </p>
                       <div className="flex items-start gap-4 my-3 py-2">
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">

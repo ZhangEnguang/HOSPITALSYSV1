@@ -25,7 +25,8 @@ import {
   PieChart,
   LineChart,
   LayoutGrid,
-  StarIcon
+  StarIcon,
+  Sparkles
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -182,6 +183,26 @@ export default function TrackReportOverviewTab({
     }
   }
 
+  // 生成简化的项目审查摘要（一段话总结）
+  const generateProjectSummary = () => {
+    const isAnimal = project.projectType === "动物"
+    const title = project.title || "该伦理项目"
+    const leader = project.leader || "项目负责人"
+    const department = project.department || "相关科室"
+    const status = project.status || "审核中"
+    
+    if (isAnimal) {
+      const animalType = project.animalType || "实验动物"
+      const animalCount = project.animalCount || "若干只"
+      
+      return `${title}是一项由${department}${leader}主导的动物实验伦理研究项目，使用${animalType}${animalCount}进行研究。该项目已通过伦理委员会初步审查，实验设计符合3R原则要求，动物福利保障措施完善，实验方案科学合理。项目在动物痛苦控制、环境丰容、人道终点设置等方面制定了详细的操作规程，整体伦理风险可控，建议继续执行并定期接受监督检查。`
+    } else {
+      const participantInfo = project.participantCount ? `预计招募${project.participantCount}名受试者` : "涉及人体受试者研究"
+      
+      return `${title}是一项由${department}${leader}主导的人体研究伦理项目，${participantInfo}。该项目已完成伦理审查申请，知情同意流程规范，受试者保护措施到位，研究方案设计合理。项目在数据隐私保护、风险获益评估、不良事件处理等方面建立了完善的管理制度，符合人体研究伦理规范要求，整体实施风险较低，建议批准实施并加强过程监管。`
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* AI智能摘要区域 */}
@@ -191,8 +212,8 @@ export default function TrackReportOverviewTab({
         <CardHeader className="pb-1 relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="relative w-10 h-10">
-                <Image src="/ai-icon.png" alt="AI摘要" width={40} height={40} className="object-contain" />
+              <div className="relative w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+                <Sparkles className="h-6 w-6 text-white" />
               </div>
               <div>
                 <CardTitle className="text-lg font-semibold flex items-center gap-2">
@@ -296,78 +317,12 @@ export default function TrackReportOverviewTab({
                         <LayoutGrid className="h-4 w-4" />
                         <span className="font-medium">最新分析已更新 - 检测到项目进度变更</span>
                       </div>
-                      <p className="whitespace-pre-line">
-                        {aiSummaryContent.split('\n\n').map((paragraph: string, idx: number) => {
-                          // 检查段落是否包含【】标题
-                          if (paragraph.includes('【') && paragraph.includes('】')) {
-                            const titleMatch = paragraph.match(/【(.+?)】/);
-                            const title = titleMatch ? titleMatch[1] : '';
-                            const content = paragraph.replace(/【(.+?)】/, '');
-                            
-                            // 检查内容是否包含列表项（以"•"开头的行）
-                            const hasListItems = content.includes('\n•');
-                            
-                            if (hasListItems) {
-                              // 处理包含列表项的内容
-                              const listItems = content.split('\n').filter((line: string) => line.trim().length > 0);
-                              
-                              return (
-                                <div key={idx} className="mb-4">
-                                  <h4 className="text-sm font-semibold text-blue-700 bg-blue-50 py-1 px-2 rounded mb-2">
-                                    {title === "审核要点摘要" ? "项目审查摘要" : title}
-                                  </h4>
-                                  <ul className="pl-1 space-y-1">
-                                    {listItems.map((item: string, itemIdx: number) => (
-                                      <li key={itemIdx} className={`pl-5 relative ${item.startsWith('•') ? 'text-slate-700' : 'text-slate-600'}`}>
-                                        {item.startsWith('•') ? (
-                                          <>
-                                            <span className="absolute left-0 text-blue-500">•</span>
-                                            {item.substring(1).trim()}
-                                          </>
-                                        ) : item}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              );
-                            } else {
-                              return (
-                                <div key={idx} className="mb-3">
-                                  <h4 className="text-sm font-semibold text-blue-700 bg-blue-50 py-1 px-2 rounded mb-1.5">
-                                    {title === "审核要点摘要" ? "项目审查摘要" : title}
-                                  </h4>
-                                  <div className="pl-2">{content}</div>
-                                </div>
-                              );
-                            }
-                          } else if (paragraph.includes('\n•')) {
-                            // 处理不包含标题但包含列表项的段落
-                            const lines = paragraph.split('\n').filter((line: string) => line.trim().length > 0);
-                            return (
-                              <div key={idx} className="mb-3">
-                                <ul className="pl-1 space-y-1">
-                                  {lines.map((line: string, lineIdx: number) => (
-                                    <li key={lineIdx} className={`pl-5 relative ${line.startsWith('•') ? 'text-slate-700' : 'text-slate-600'}`}>
-                                      {line.startsWith('•') ? (
-                                        <>
-                                          <span className="absolute left-0 text-blue-500">•</span>
-                                          {line.substring(1).trim()}
-                                        </>
-                                      ) : line}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            );
-                          } else {
-                            return (
-                              <p key={idx} className="mb-3">
-                                {paragraph}
-                              </p>
-                            );
-                          }
-                        })}
-                      </p>
+                      {/* 简化的AI摘要显示 - 只显示一段话总结 */}
+                      <div className="mb-4">
+                        <p className="text-slate-700 leading-relaxed">
+                          {generateProjectSummary()}
+                        </p>
+                      </div>
                       <div className="flex items-start gap-4 my-3 py-2">
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                           <BarChart3 className="h-4 w-4 text-blue-600" />
@@ -406,78 +361,12 @@ export default function TrackReportOverviewTab({
                     </>
                   ) : (
                     <>
-                      <p className="whitespace-pre-line">
-                        {aiSummaryContent.split('\n\n').map((paragraph: string, idx: number) => {
-                          // 检查段落是否包含【】标题
-                          if (paragraph.includes('【') && paragraph.includes('】')) {
-                            const titleMatch = paragraph.match(/【(.+?)】/);
-                            const title = titleMatch ? titleMatch[1] : '';
-                            const content = paragraph.replace(/【(.+?)】/, '');
-                            
-                            // 检查内容是否包含列表项（以"•"开头的行）
-                            const hasListItems = content.includes('\n•');
-                            
-                            if (hasListItems) {
-                              // 处理包含列表项的内容
-                              const listItems = content.split('\n').filter((line: string) => line.trim().length > 0);
-                              
-                              return (
-                                <div key={idx} className="mb-4">
-                                  <h4 className="text-sm font-semibold text-blue-700 bg-blue-50 py-1 px-2 rounded mb-2">
-                                    {title === "审核要点摘要" ? "项目审查摘要" : title}
-                                  </h4>
-                                  <ul className="pl-1 space-y-1">
-                                    {listItems.map((item: string, itemIdx: number) => (
-                                      <li key={itemIdx} className={`pl-5 relative ${item.startsWith('•') ? 'text-slate-700' : 'text-slate-600'}`}>
-                                        {item.startsWith('•') ? (
-                                          <>
-                                            <span className="absolute left-0 text-blue-500">•</span>
-                                            {item.substring(1).trim()}
-                                          </>
-                                        ) : item}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              );
-                            } else {
-                              return (
-                                <div key={idx} className="mb-3">
-                                  <h4 className="text-sm font-semibold text-blue-700 bg-blue-50 py-1 px-2 rounded mb-1.5">
-                                    {title === "审核要点摘要" ? "项目审查摘要" : title}
-                                  </h4>
-                                  <div className="pl-2">{content}</div>
-                                </div>
-                              );
-                            }
-                          } else if (paragraph.includes('\n•')) {
-                            // 处理不包含标题但包含列表项的段落
-                            const lines = paragraph.split('\n').filter((line: string) => line.trim().length > 0);
-                            return (
-                              <div key={idx} className="mb-3">
-                                <ul className="pl-1 space-y-1">
-                                  {lines.map((line: string, lineIdx: number) => (
-                                    <li key={lineIdx} className={`pl-5 relative ${line.startsWith('•') ? 'text-slate-700' : 'text-slate-600'}`}>
-                                      {line.startsWith('•') ? (
-                                        <>
-                                          <span className="absolute left-0 text-blue-500">•</span>
-                                          {line.substring(1).trim()}
-                                        </>
-                                      ) : line}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            );
-                          } else {
-                            return (
-                              <p key={idx} className="mb-3">
-                                {paragraph}
-                              </p>
-                            );
-                          }
-                        })}
-                      </p>
+                      {/* 简化的AI摘要显示 - 只显示一段话总结 */}
+                      <div className="mb-4">
+                        <p className="text-slate-700 leading-relaxed">
+                          {generateProjectSummary()}
+                        </p>
+                      </div>
                       <div className="flex items-start gap-4 my-3 py-2">
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                           <BarChart3 className="h-4 w-4 text-blue-600" />

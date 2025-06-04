@@ -66,35 +66,35 @@ function getStatusBadge(status: string) {
   switch (status) {
     case "已审核":
       return (
-        <Badge className="bg-green-50 text-green-700 border-green-200 flex items-center gap-1">
+        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100 flex items-center gap-1">
           <CheckCircle2 className="h-3 w-3" />
           <span>已审核</span>
         </Badge>
       )
     case "待审核":
       return (
-        <Badge className="bg-amber-50 text-amber-700 border-amber-200 flex items-center gap-1">
+        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 flex items-center gap-1">
           <Clock className="h-3 w-3" />
           <span>待审核</span>
         </Badge>
       )
     case "需修改":
       return (
-        <Badge className="bg-red-50 text-red-700 border-red-200 flex items-center gap-1">
+        <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 hover:bg-red-100 flex items-center gap-1">
           <XCircle className="h-3 w-3" />
           <span>需修改</span>
         </Badge>
       )
     case "已生成":
       return (
-        <Badge className="bg-blue-50 text-blue-700 border-blue-200 flex items-center gap-1">
+        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 flex items-center gap-1">
           <Check className="h-3 w-3" />
           <span>已生成</span>
         </Badge>
       )
     default:
       return (
-        <Badge className="bg-gray-50 text-gray-700 border-gray-200 flex items-center gap-1">
+        <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 flex items-center gap-1">
           <AlertCircle className="h-3 w-3" />
           <span>{status}</span>
         </Badge>
@@ -112,7 +112,13 @@ function getFileTypeName(fileType: string) {
     "review": "审查意见",
     "handbook": "研究者手册",
     "report": "报告表",
-    "prescription": "处方设计"
+    "prescription": "处方设计",
+    "security": "安全方案",
+    "assessment": "评估报告",
+    "recruitment": "招募计划",
+    "technical": "技术规范",
+    "sop": "标准操作程序",
+    "quality": "质量控制"
   }
   
   return typeMap[fileType] || "其他文件"
@@ -128,8 +134,96 @@ export default function ReviewFilesTab({
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false)
   const [selectedFile, setSelectedFile] = useState<any>(null)
   
-  // 文件列表
-  const files = project.files || []
+  // 根据项目审查类型生成增强的文件列表
+  const generateEnhancedFiles = () => {
+    const baseFiles = project.files || []
+    const reviewType = project.reviewType || "初始审查"
+    const projectType = project.projectType || "人体"
+    const projectSubType = project.projectSubType || "人体"
+    const enhancedFiles = [...baseFiles]
+    
+    // 根据审查类型添加特定文件
+    switch (reviewType) {
+      case "初始审查":
+        if (projectSubType === "动物") {
+          enhancedFiles.push(
+            { id: `${project.id}-init-1`, name: "动物实验设计方案.pdf", type: "protocol", size: "3.2MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+            { id: `${project.id}-init-2`, name: "3R原则声明书.pdf", type: "declaration", size: "0.8MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+            { id: `${project.id}-init-3`, name: "动物福利监督计划.docx", type: "protocol", size: "1.5MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+            { id: `${project.id}-init-4`, name: "实验动物使用许可证.pdf", type: "declaration", size: "0.6MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+            { id: `${project.id}-init-5`, name: "麻醉和安乐死标准操作程序.pdf", type: "protocol", size: "2.1MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+            { id: `${project.id}-init-6`, name: "实验人员资质证明.pdf", type: "declaration", size: "1.2MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" }
+          )
+        } else {
+          enhancedFiles.push(
+            { id: `${project.id}-init-1`, name: "临床研究设计方案.pdf", type: "protocol", size: "4.1MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+            { id: `${project.id}-init-2`, name: "受试者招募广告.pdf", type: "consent", size: "0.9MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+            { id: `${project.id}-init-3`, name: "数据安全管理计划.docx", type: "protocol", size: "1.8MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+            { id: `${project.id}-init-4`, name: "不良事件报告流程.pdf", type: "protocol", size: "1.3MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+            { id: `${project.id}-init-5`, name: "研究者简历及资质.pdf", type: "declaration", size: "2.4MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" }
+          )
+        }
+        break
+        
+      case "人遗采集审批":
+        enhancedFiles.push(
+          { id: `${project.id}-genetic-1`, name: "人类遗传资源采集申请书.pdf", type: "application", size: "3.5MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-genetic-2`, name: "采集标准操作程序.pdf", type: "protocol", size: "2.8MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-genetic-3`, name: "样本保存方案.docx", type: "protocol", size: "1.6MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-genetic-4`, name: "知情同意书（遗传检测专用）.pdf", type: "consent", size: "2.2MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-genetic-5`, name: "遗传信息保护方案.pdf", type: "protocol", size: "1.9MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-genetic-6`, name: "采集点设施条件证明.pdf", type: "declaration", size: "1.1MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-genetic-7`, name: "样本运输安全协议.pdf", type: "protocol", size: "0.9MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" }
+        )
+        break
+        
+      case "修正案审查":
+        enhancedFiles.push(
+          { id: `${project.id}-amend-1`, name: "修正案申请书.pdf", type: "application", size: "2.1MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-amend-2`, name: "原始研究方案.pdf", type: "protocol", size: "3.8MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-amend-3`, name: "修改内容对比表.xlsx", type: "report", size: "1.2MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-amend-4`, name: "修改风险评估报告.pdf", type: "report", size: "2.5MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-amend-5`, name: "更新后的知情同意书.pdf", type: "consent", size: "2.0MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-amend-6`, name: "现有受试者重新同意方案.docx", type: "consent", size: "1.4MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" }
+        )
+        break
+        
+      case "国际合作科学研究审批":
+        enhancedFiles.push(
+          { id: `${project.id}-intl-1`, name: "国际合作协议书.pdf", type: "application", size: "4.2MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-intl-2`, name: "数据传输安全协议.pdf", type: "protocol", size: "2.3MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-intl-3`, name: "多国伦理标准对比分析.docx", type: "report", size: "3.1MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-intl-4`, name: "知识产权保护协议.pdf", type: "declaration", size: "1.8MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-intl-5`, name: "跨境数据传输许可申请.pdf", type: "application", size: "2.6MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-intl-6`, name: "合作方伦理委员会证明.pdf", type: "declaration", size: "1.5MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-intl-7`, name: "数据安全监管方案.pdf", type: "protocol", size: "2.0MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" }
+        )
+        break
+        
+      case "复审":
+        enhancedFiles.push(
+          { id: `${project.id}-rerev-1`, name: "复审申请书.pdf", type: "application", size: "1.9MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-rerev-2`, name: "前期审查意见回复.pdf", type: "report", size: "2.7MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-rerev-3`, name: "改进措施实施报告.docx", type: "report", size: "2.1MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-rerev-4`, name: "质量控制检查表.xlsx", type: "report", size: "0.8MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-rerev-5`, name: "持续改进机制说明.pdf", type: "protocol", size: "1.6MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-rerev-6`, name: "监督检查记录.pdf", type: "report", size: "1.3MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" }
+        )
+        break
+        
+      default:
+        // 为其他审查类型添加通用文件
+        enhancedFiles.push(
+          { id: `${project.id}-common-1`, name: "补充材料清单.pdf", type: "report", size: "0.7MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" },
+          { id: `${project.id}-common-2`, name: "伦理培训证书.pdf", type: "declaration", size: "1.0MB", uploadedAt: project.submittedAt || "2024-01-28", status: "已审核" }
+        )
+    }
+    
+    return enhancedFiles
+  }
+  
+  // 文件列表 - 使用增强后的文件列表
+  const files = generateEnhancedFiles()
   
   // 处理文件预览
   const handlePreview = (file: any) => {
@@ -196,7 +290,7 @@ export default function ReviewFilesTab({
                   <TableHead className="w-[15%] text-gray-700">类型</TableHead>
                   <TableHead className="w-[10%] text-gray-700">大小</TableHead>
                   <TableHead className="w-[15%] text-gray-700">上传时间</TableHead>
-                  <TableHead className="w-[10%] text-gray-700">状态</TableHead>
+                  <TableHead className="w-[10%] text-gray-700">AI形审状态</TableHead>
                   <TableHead className="w-[10%] text-right text-gray-700">操作</TableHead>
                 </TableRow>
               </TableHeader>

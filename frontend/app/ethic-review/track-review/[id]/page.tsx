@@ -599,16 +599,16 @@ export default function TrackReportDetail({ params }: { params: { id: string } }
           component: <TrackReportOverviewTab project={currentProject} />,
         },
         {
-          id: "riskAnalysis",
-          label: "风险分析",
-          icon: <AlertTriangle className="h-4 w-4" />,
-          component: <TrackReportRiskTab project={currentProject} />,
-        },
-        {
           id: "reviewFiles",
           label: "送审文件",
           icon: <FileText className="h-4 w-4" />,
           component: <TrackReportFilesTab project={currentProject} />,
+        },
+        {
+          id: "riskAnalysis",
+          label: "风险分析",
+          icon: <AlertTriangle className="h-4 w-4" />,
+          component: <TrackReportRiskTab project={currentProject} />,
         }
       ]}
     />

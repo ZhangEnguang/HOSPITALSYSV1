@@ -190,6 +190,66 @@ export default function EthicReviewDetail({ params }: { params: { id: string } }
     const searchId = params.id;
     console.log("正在查找项目，搜索ID:", searchId);
     
+    // 为项目qr-2024-001添加特殊处理
+    if (searchId === "qr-2024-001") {
+      console.log("检测到项目qr-2024-001，应用特殊处理");
+      try {
+        const { quickReviewItems } = require("../data/quick-review-demo-data");
+        const project1 = quickReviewItems.find((p: any) => p.id === "qr-2024-001");
+        
+        if (project1) {
+          console.log("项目qr-2024-001数据:", project1);
+          // 为项目qr-2024-001构建完整详情数据
+          return {
+            id: "qr-2024-001",
+            title: project1.name,
+            status: "审核通过",
+            statusLabel: "审核通过",
+            reviewType: project1.reviewType,
+            projectType: "人体",
+            participantCount: "500人",
+            geneticTestType: "全外显子测序",
+            ethicsCommittee: project1.ethicsCommittee,
+            department: project1.department,
+            leader: project1.projectLeader?.name || "张华",
+            createdAt: "2024-04-01",
+            deadline: "2024-04-15",
+            submittedAt: "2024-04-01",
+            approvedAt: "2024-04-05",
+            reviewNumber: project1.projectId,
+            progress: project1.reviewProgress || 92,
+            description: project1.description || "建立适用于罕见遗传病的快速基因诊断流程，缩短诊断时间，提高诊断准确率。",
+            aiSummary: "【审核要点摘要】\n• 基因诊断流程设计科学合理\n• 知情同意程序完善规范\n• 遗传数据保护措施充分\n• 诊断结果告知流程适当\n\n建议：项目符合伦理要求，可以立即实施",
+            aiModelName: "EthicGPT 2024",
+            aiModelVersion: "v3.1",
+            risk: {
+              level: "中低",
+              analysis: "该项目为罕见遗传病基因诊断项目，主要风险集中在遗传信息隐私保护和心理风险告知方面。项目设计合理，风险控制措施完善。",
+              suggestions: [
+                "加强遗传咨询团队的专业培训",
+                "完善基因数据脱敏和加密存储机制",
+                "建立标准化的诊断结果告知流程"
+              ]
+            },
+            files: [
+              { id: "qr1-1", name: "项目申请书.pdf", type: "application", size: "2.8MB", uploadedAt: "2024-04-01", status: "已审核" },
+              { id: "qr1-2", name: "研究方案.docx", type: "protocol", size: "3.2MB", uploadedAt: "2024-04-01", status: "已审核" },
+              { id: "qr1-3", name: "知情同意书.pdf", type: "consent", size: "1.5MB", uploadedAt: "2024-04-01", status: "已审核" },
+              { id: "qr1-4", name: "基因检测技术规范.pdf", type: "protocol", size: "2.1MB", uploadedAt: "2024-04-01", status: "已审核" },
+              { id: "qr1-5", name: "遗传咨询流程.docx", type: "protocol", size: "1.8MB", uploadedAt: "2024-04-01", status: "已审核" },
+              { id: "qr1-6", name: "数据安全保护方案.pdf", type: "security", size: "1.3MB", uploadedAt: "2024-04-01", status: "已审核" },
+              { id: "qr1-7", name: "伦理风险评估报告.pdf", type: "assessment", size: "2.0MB", uploadedAt: "2024-04-01", status: "已审核" },
+              { id: "qr1-8", name: "受试者招募计划.docx", type: "recruitment", size: "1.1MB", uploadedAt: "2024-04-01", status: "已审核" },
+              { id: "qr1-9", name: "质量控制标准.pdf", type: "protocol", size: "1.6MB", uploadedAt: "2024-04-01", status: "已审核" },
+              { id: "qr1-10", name: "伦理审查意见书.pdf", type: "review", size: "1.4MB", uploadedAt: "2024-04-05", status: "已生成" }
+            ]
+          };
+        }
+      } catch (error) {
+        console.error("处理项目qr-2024-001时发生错误:", error);
+      }
+    }
+    
     // 为项目4添加特殊处理
     if (searchId === "4") {
       console.log("检测到项目4，应用特殊处理");
@@ -241,6 +301,268 @@ export default function EthicReviewDetail({ params }: { params: { id: string } }
         }
       } catch (error) {
         console.error("处理项目4时发生错误:", error);
+      }
+    }
+    
+    // 为项目qr-2024-002添加特殊处理
+    if (searchId === "qr-2024-002") {
+      try {
+        const { quickReviewItems } = require("../data/quick-review-demo-data");
+        const project = quickReviewItems.find((p: any) => p.id === "qr-2024-002");
+        
+        if (project) {
+          return {
+            id: "qr-2024-002",
+            title: project.name,
+            status: "审核中",
+            statusLabel: "审核中",
+            reviewType: project.reviewType,
+            projectType: "人体",
+            participantCount: "300人",
+            ethicsCommittee: project.ethicsCommittee,
+            department: project.department,
+            leader: project.projectLeader?.name || "李明",
+            createdAt: "2024-04-05",
+            deadline: "2024-04-25",
+            submittedAt: "2024-04-05",
+            reviewNumber: project.projectId,
+            progress: project.reviewProgress || 71,
+            description: project.description,
+            aiSummary: "【审核要点摘要】\n• 紧急测序流程设计合理\n• 儿科患者特殊保护措施充分\n• 样本采集和保存规范完善\n• 数据安全和隐私保护措施到位\n\n建议：继续完善知情同意书的儿童版本",
+            aiModelName: "EthicGPT 2024",
+            aiModelVersion: "v3.1",
+            risk: {
+              level: "中",
+              analysis: "该人遗采集审批项目涉及儿科遗传病紧急测序，主要风险在于儿童受试者的特殊保护和紧急情况下的知情同意处理。",
+              suggestions: [
+                "建立儿童患者专用的知情同意流程",
+                "完善紧急情况下的伦理审查快速通道",
+                "加强儿科遗传咨询师的专业培训"
+              ]
+            },
+            files: [
+              { id: "qr2-1", name: "人遗采集申请书.pdf", type: "application", size: "3.1MB", uploadedAt: "2024-04-05", status: "已审核" },
+              { id: "qr2-2", name: "紧急测序方案.docx", type: "protocol", size: "2.8MB", uploadedAt: "2024-04-05", status: "已审核" },
+              { id: "qr2-3", name: "儿童知情同意书.pdf", type: "consent", size: "1.7MB", uploadedAt: "2024-04-05", status: "待审核" },
+              { id: "qr2-4", name: "样本采集标准.pdf", type: "protocol", size: "2.2MB", uploadedAt: "2024-04-05", status: "已审核" },
+              { id: "qr2-5", name: "遗传咨询流程.docx", type: "protocol", size: "1.9MB", uploadedAt: "2024-04-05", status: "已审核" },
+              { id: "qr2-6", name: "数据安全管理方案.pdf", type: "security", size: "1.6MB", uploadedAt: "2024-04-05", status: "已审核" },
+              { id: "qr2-7", name: "紧急流程伦理评估.pdf", type: "assessment", size: "2.4MB", uploadedAt: "2024-04-05", status: "待审核" }
+            ]
+          };
+        }
+      } catch (error) {
+        console.error("处理项目qr-2024-002时发生错误:", error);
+      }
+    }
+    
+    // 为项目qr-2024-003添加特殊处理
+    if (searchId === "qr-2024-003") {
+      try {
+        const { quickReviewItems } = require("../data/quick-review-demo-data");
+        const project = quickReviewItems.find((p: any) => p.id === "qr-2024-003");
+        
+        if (project) {
+          return {
+            id: "qr-2024-003",
+            title: project.name,
+            status: "待审核",
+            statusLabel: "待审核",
+            reviewType: project.reviewType,
+            projectType: "动物",
+            animalType: "实验小鼠",
+            animalCount: "200只",
+            ethicsCommittee: project.ethicsCommittee,
+            department: project.department,
+            leader: project.projectLeader?.name || "王强",
+            createdAt: "2024-04-07",
+            deadline: "2024-04-27",
+            submittedAt: "2024-04-07",
+            reviewNumber: project.projectId,
+            progress: project.reviewProgress || 0,
+            description: project.description,
+            aiSummary: "【审核要点摘要】\n• CRISPR基因编辑方案设计合理\n• 动物福利保障措施需要完善\n• 3R原则应用需要进一步说明\n• 基因编辑安全性评估充分\n\n建议：补充详细的动物痛苦评估和控制方案",
+            aiModelName: "EthicGPT 2024",
+            aiModelVersion: "v3.1",
+            risk: {
+              level: "中高",
+              analysis: "该初始审查项目涉及CRISPR基因编辑技术，存在一定的技术风险和动物福利风险，需要严格的安全性评估。",
+              suggestions: [
+                "完善基因编辑的安全性和有效性验证",
+                "建立转基因动物的特殊饲养和监护标准",
+                "制定详细的痛苦评估标准和人道终点"
+              ]
+            },
+            files: [
+              { id: "qr3-1", name: "项目申请书.pdf", type: "application", size: "3.5MB", uploadedAt: "2024-04-07", status: "待审核" },
+              { id: "qr3-2", name: "基因编辑实验方案.docx", type: "protocol", size: "4.2MB", uploadedAt: "2024-04-07", status: "待审核" },
+              { id: "qr3-3", name: "动物使用和管理计划.pdf", type: "protocol", size: "2.8MB", uploadedAt: "2024-04-07", status: "待审核" },
+              { id: "qr3-4", name: "3R原则实施方案.pdf", type: "declaration", size: "1.4MB", uploadedAt: "2024-04-07", status: "待审核" },
+              { id: "qr3-5", name: "基因编辑安全性评估.pdf", type: "assessment", size: "3.1MB", uploadedAt: "2024-04-07", status: "待审核" },
+              { id: "qr3-6", name: "动物福利监测计划.docx", type: "protocol", size: "2.0MB", uploadedAt: "2024-04-07", status: "待审核" },
+              { id: "qr3-7", name: "实验室安全管理制度.pdf", type: "sop", size: "2.3MB", uploadedAt: "2024-04-07", status: "待审核" }
+            ]
+          };
+        }
+      } catch (error) {
+        console.error("处理项目qr-2024-003时发生错误:", error);
+      }
+    }
+    
+    // 为项目qr-2024-004添加特殊处理
+    if (searchId === "qr-2024-004") {
+      try {
+        const { quickReviewItems } = require("../data/quick-review-demo-data");
+        const project = quickReviewItems.find((p: any) => p.id === "qr-2024-004");
+        
+        if (project) {
+          return {
+            id: "qr-2024-004",
+            title: project.name,
+            status: "审核通过",
+            statusLabel: "审核通过",
+            reviewType: project.reviewType,
+            projectType: "人体",
+            participantCount: "1000人",
+            ethicsCommittee: project.ethicsCommittee,
+            department: project.department,
+            leader: project.projectLeader?.name || "陈丽",
+            createdAt: "2024-04-10",
+            deadline: "2024-04-30",
+            submittedAt: "2024-04-10",
+            approvedAt: "2024-04-15",
+            reviewNumber: project.projectId,
+            progress: project.reviewProgress || 90,
+            description: project.description,
+            aiSummary: "【审核要点摘要】\n• 修正案内容合理可行\n• 信息采集系统设计规范\n• 数据隐私保护措施完善\n• 知情同意修正内容适当\n\n建议：按修正案要求实施，注意数据安全管理",
+            aiModelName: "EthicGPT 2024",
+            aiModelVersion: "v3.1",
+            risk: {
+              level: "低",
+              analysis: "该修正案审查项目主要涉及信息系统优化，伦理风险较低，但需要关注数据隐私保护的完善性。",
+              suggestions: [
+                "确保系统修正后的数据安全性",
+                "完善知情同意书的相关条款",
+                "建立数据访问权限管理机制"
+              ]
+            },
+            files: [
+              { id: "qr4-1", name: "修正案申请书.pdf", type: "application", size: "2.6MB", uploadedAt: "2024-04-10", status: "已审核" },
+              { id: "qr4-2", name: "系统修正方案.docx", type: "protocol", size: "3.4MB", uploadedAt: "2024-04-10", status: "已审核" },
+              { id: "qr4-3", name: "修正版知情同意书.pdf", type: "consent", size: "1.8MB", uploadedAt: "2024-04-10", status: "已审核" },
+              { id: "qr4-4", name: "数据保护影响评估.pdf", type: "assessment", size: "2.9MB", uploadedAt: "2024-04-10", status: "已审核" },
+              { id: "qr4-5", name: "系统安全技术方案.pdf", type: "security", size: "2.1MB", uploadedAt: "2024-04-10", status: "已审核" },
+              { id: "qr4-6", name: "修正案伦理审查意见.pdf", type: "review", size: "1.5MB", uploadedAt: "2024-04-15", status: "已生成" }
+            ]
+          };
+        }
+      } catch (error) {
+        console.error("处理项目qr-2024-004时发生错误:", error);
+      }
+    }
+    
+    // 为项目qr-2024-005添加特殊处理
+    if (searchId === "qr-2024-005") {
+      try {
+        const { quickReviewItems } = require("../data/quick-review-demo-data");
+        const project = quickReviewItems.find((p: any) => p.id === "qr-2024-005");
+        
+        if (project) {
+          return {
+            id: "qr-2024-005",
+            title: project.name,
+            status: "已退回",
+            statusLabel: "已退回",
+            reviewType: project.reviewType,
+            projectType: "人体",
+            participantCount: "2000人",
+            ethicsCommittee: project.ethicsCommittee,
+            department: project.department,
+            leader: project.projectLeader?.name || "刘军",
+            createdAt: "2024-04-12",
+            deadline: "2024-05-02",
+            submittedAt: "2024-04-12",
+            returnedAt: "2024-04-18",
+            reviewNumber: project.projectId,
+            progress: project.reviewProgress || 33,
+            description: project.description,
+            aiSummary: "【退回原因分析】\n• 国际合作数据共享协议不完善\n• 跨境数据传输安全保障不足\n• 各国伦理审查标准差异未充分考虑\n• 知识产权保护条款需要完善\n\n建议：修订协议后重新提交审查",
+            aiModelName: "EthicGPT 2024",
+            aiModelVersion: "v3.1",
+            risk: {
+              level: "高",
+              analysis: "该国际合作项目涉及跨境数据传输和多国法规合规，伦理风险较高，需要完善各项保障措施。",
+              suggestions: [
+                "完善跨境数据传输的安全保障机制",
+                "建立多国伦理审查协调机制",
+                "明确知识产权和数据所有权条款"
+              ]
+            },
+            files: [
+              { id: "qr5-1", name: "国际合作申请书.pdf", type: "application", size: "4.2MB", uploadedAt: "2024-04-12", status: "需修改" },
+              { id: "qr5-2", name: "合作协议草案.pdf", type: "protocol", size: "3.8MB", uploadedAt: "2024-04-12", status: "需修改" },
+              { id: "qr5-3", name: "数据共享方案.docx", type: "protocol", size: "2.7MB", uploadedAt: "2024-04-12", status: "需修改" },
+              { id: "qr5-4", name: "跨境数据传输评估.pdf", type: "assessment", size: "3.1MB", uploadedAt: "2024-04-12", status: "需修改" },
+              { id: "qr5-5", name: "各国法规符合性分析.pdf", type: "assessment", size: "4.5MB", uploadedAt: "2024-04-12", status: "需修改" },
+              { id: "qr5-6", name: "知识产权保护方案.pdf", type: "protocol", size: "2.3MB", uploadedAt: "2024-04-12", status: "需修改" },
+              { id: "qr5-7", name: "退回意见书.pdf", type: "review", size: "1.8MB", uploadedAt: "2024-04-18", status: "已生成" }
+            ]
+          };
+        }
+      } catch (error) {
+        console.error("处理项目qr-2024-005时发生错误:", error);
+      }
+    }
+    
+    // 为项目qr-2024-006添加特殊处理
+    if (searchId === "qr-2024-006") {
+      try {
+        const { quickReviewItems } = require("../data/quick-review-demo-data");
+        const project = quickReviewItems.find((p: any) => p.id === "qr-2024-006");
+        
+        if (project) {
+          return {
+            id: "qr-2024-006",
+            title: project.name,
+            status: "审核中",
+            statusLabel: "审核中",
+            reviewType: project.reviewType,
+            projectType: "动物",
+            animalType: "转基因小鼠",
+            animalCount: "500只",
+            ethicsCommittee: project.ethicsCommittee,
+            department: project.department,
+            leader: project.projectLeader?.name || "张华",
+            createdAt: "2024-04-15",
+            deadline: "2024-05-05",
+            submittedAt: "2024-04-15",
+            reviewNumber: project.projectId,
+            progress: project.reviewProgress || 45,
+            description: project.description,
+            aiSummary: "【审核要点摘要】\n• 复审材料相对完整\n• 转基因小鼠繁育计划合理\n• 动物福利保障措施有所改善\n• 质量控制体系需要强化\n\n建议：继续完善繁育质量监测方案",
+            aiModelName: "EthicGPT 2024",
+            aiModelVersion: "v3.1",
+            risk: {
+              level: "中",
+              analysis: "该复审项目针对转基因小鼠繁育，相比初审风险有所降低，但仍需关注繁育过程中的动物福利保障。",
+              suggestions: [
+                "完善转基因小鼠的遗传质量监测",
+                "建立繁育过程中的福利评估制度",
+                "优化繁育环境和饲养条件"
+              ]
+            },
+            files: [
+              { id: "qr6-1", name: "复审申请书.pdf", type: "application", size: "3.0MB", uploadedAt: "2024-04-15", status: "已审核" },
+              { id: "qr6-2", name: "繁育计划修正版.docx", type: "protocol", size: "3.6MB", uploadedAt: "2024-04-15", status: "待审核" },
+              { id: "qr6-3", name: "动物福利改进方案.pdf", type: "protocol", size: "2.4MB", uploadedAt: "2024-04-15", status: "已审核" },
+              { id: "qr6-4", name: "遗传质量监测方案.pdf", type: "quality", size: "2.8MB", uploadedAt: "2024-04-15", status: "待审核" },
+              { id: "qr6-5", name: "繁育环境评估报告.pdf", type: "assessment", size: "2.1MB", uploadedAt: "2024-04-15", status: "已审核" },
+              { id: "qr6-6", name: "前期审查意见回复.docx", type: "review", size: "1.7MB", uploadedAt: "2024-04-15", status: "已审核" }
+            ]
+          };
+        }
+      } catch (error) {
+        console.error("处理项目qr-2024-006时发生错误:", error);
       }
     }
     
@@ -542,16 +864,16 @@ export default function EthicReviewDetail({ params }: { params: { id: string } }
           component: <EthicProjectOverviewTab project={currentProject} />,
         },
         {
-          id: "riskAnalysis",
-          label: "风险分析",
-          icon: <AlertTriangle className="h-4 w-4" />,
-          component: <RiskAnalysisTab project={currentProject} />,
-        },
-        {
           id: "reviewFiles",
           label: "送审文件",
           icon: <FileText className="h-4 w-4" />,
           component: <ReviewFilesTab project={currentProject} />,
+        },
+        {
+          id: "riskAnalysis",
+          label: "风险分析",
+          icon: <AlertTriangle className="h-4 w-4" />,
+          component: <RiskAnalysisTab project={currentProject} />,
         },
       ]}
     />

@@ -72,53 +72,74 @@ function getFileIcon(fileType: string) {
 // 获取文件状态徽章
 function getStatusBadge(status: string) {
   switch (status) {
+    case "未审核":
+      return (
+        <Badge className="bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-50 flex items-center gap-1 shadow-sm px-2 py-0.5 text-xs font-medium h-6 w-fit">
+          <Clock className="h-2.5 w-2.5" />
+          <span>未审核</span>
+        </Badge>
+      )
+    case "审核通过":
+      return (
+        <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50 flex items-center gap-1 shadow-sm px-2 py-0.5 text-xs font-medium h-6 w-fit">
+          <CheckCircle2 className="h-2.5 w-2.5" />
+          <span>审核通过</span>
+        </Badge>
+      )
+    case "存在问题":
+      return (
+        <Badge className="bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-50 flex items-center gap-1 shadow-sm px-2 py-0.5 text-xs font-medium h-6 w-fit">
+          <XCircle className="h-2.5 w-2.5" />
+          <span>存在问题</span>
+        </Badge>
+      )
     case "已审核":
       return (
-        <Badge className="bg-green-50 text-green-700 border-green-200 flex items-center gap-1">
-          <CheckCircle2 className="h-3 w-3" />
+        <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50 flex items-center gap-1 shadow-sm px-2 py-0.5 text-xs font-medium h-6 w-fit">
+          <CheckCircle2 className="h-2.5 w-2.5" />
           <span>已审核</span>
         </Badge>
       )
     case "审核中":
       return (
-        <Badge className="bg-blue-50 text-blue-700 border-blue-200 flex items-center gap-1">
-          <Clock className="h-3 w-3" />
+        <Badge className="bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-50 flex items-center gap-1 shadow-sm px-2 py-0.5 text-xs font-medium h-6 w-fit">
+          <Clock className="h-2.5 w-2.5" />
           <span>审核中</span>
         </Badge>
       )
     case "已拒绝":
       return (
-        <Badge className="bg-red-50 text-red-700 border-red-200 flex items-center gap-1">
-          <XCircle className="h-3 w-3" />
+        <Badge className="bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-50 flex items-center gap-1 shadow-sm px-2 py-0.5 text-xs font-medium h-6 w-fit">
+          <XCircle className="h-2.5 w-2.5" />
           <span>已拒绝</span>
         </Badge>
       )
     case "待提交":
     case "待审核":
       return (
-        <Badge className="bg-amber-50 text-amber-700 border-amber-200 flex items-center gap-1">
-          <Clock className="h-3 w-3" />
+        <Badge className="bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-50 flex items-center gap-1 shadow-sm px-2 py-0.5 text-xs font-medium h-6 w-fit">
+          <Clock className="h-2.5 w-2.5" />
           <span>待审核</span>
         </Badge>
       )
     case "已生成":
       return (
-        <Badge className="bg-blue-50 text-blue-700 border-blue-200 flex items-center gap-1">
-          <Check className="h-3 w-3" />
+        <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50 flex items-center gap-1 shadow-sm px-2 py-0.5 text-xs font-medium h-6 w-fit">
+          <CheckCircle2 className="h-2.5 w-2.5" />
           <span>已生成</span>
         </Badge>
       )
     case "需修改":
       return (
-        <Badge className="bg-red-50 text-red-700 border-red-200 flex items-center gap-1">
-          <RotateCw className="h-3 w-3" />
+        <Badge className="bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-50 flex items-center gap-1 shadow-sm px-2 py-0.5 text-xs font-medium h-6 w-fit">
+          <XCircle className="h-2.5 w-2.5" />
           <span>需修改</span>
         </Badge>
       )
     default:
       return (
-        <Badge className="bg-gray-50 text-gray-700 border-gray-200 flex items-center gap-1">
-          <AlertCircle className="h-3 w-3" />
+        <Badge className="bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-50 flex items-center gap-1 shadow-sm px-2 py-0.5 text-xs font-medium h-6 w-fit">
+          <AlertCircle className="h-2.5 w-2.5" />
           <span>{status}</span>
         </Badge>
       )
@@ -182,13 +203,13 @@ export default function TrackReportFilesTab({
   const getFiles = () => {
     if (project.id === "ETH-TRK-2024-001") {
       return [
-        { id: "trk1", name: "跟踪报告表.pdf", type: "report", size: "3.2MB", uploadedAt: "2024-04-10", status: "已审核" },
-        { id: "trk2", name: "入组进度说明.docx", type: "progress", size: "1.5MB", uploadedAt: "2024-04-10", status: "已审核" },
-        { id: "trk3", name: "安全性监测报告.pdf", type: "safety", size: "2.8MB", uploadedAt: "2024-04-10", status: "已审核" },
-        { id: "trk4", name: "方案优化说明.pdf", type: "protocol", size: "1.7MB", uploadedAt: "2024-04-10", status: "已审核" },
-        { id: "trk5", name: "知情同意书(更新版).docx", type: "consent", size: "1.3MB", uploadedAt: "2024-04-10", status: "已审核" },
-        { id: "trk6", name: "不良事件报告.pdf", type: "safety", size: "1.2MB", uploadedAt: "2024-04-10", status: "已审核" },
-        { id: "trk7", name: "数据管理计划.pdf", type: "protocol", size: "0.9MB", uploadedAt: "2024-04-10", status: "已审核" },
+        { id: "trk1", name: "跟踪报告表.pdf", type: "report", size: "3.2MB", uploadedAt: "2024-04-10", status: "审核通过" },
+        { id: "trk2", name: "入组进度说明.docx", type: "progress", size: "1.5MB", uploadedAt: "2024-04-10", status: "审核通过" },
+        { id: "trk3", name: "安全性监测报告.pdf", type: "safety", size: "2.8MB", uploadedAt: "2024-04-10", status: "审核通过" },
+        { id: "trk4", name: "方案优化说明.pdf", type: "protocol", size: "1.7MB", uploadedAt: "2024-04-10", status: "审核通过" },
+        { id: "trk5", name: "知情同意书(更新版).docx", type: "consent", size: "1.3MB", uploadedAt: "2024-04-10", status: "审核通过" },
+        { id: "trk6", name: "不良事件报告.pdf", type: "safety", size: "1.2MB", uploadedAt: "2024-04-10", status: "审核通过" },
+        { id: "trk7", name: "数据管理计划.pdf", type: "protocol", size: "0.9MB", uploadedAt: "2024-04-10", status: "审核通过" },
         { id: "trk8", name: "审查意见书.pdf", type: "review", size: "1.1MB", uploadedAt: "2024-05-18", status: "已生成" }
       ];
     }
@@ -233,7 +254,7 @@ export default function TrackReportFilesTab({
                   <TableHead className="w-[15%] text-gray-700">类型</TableHead>
                   <TableHead className="w-[10%] text-gray-700">大小</TableHead>
                   <TableHead className="w-[15%] text-gray-700">上传时间</TableHead>
-                  <TableHead className="w-[10%] text-gray-700">状态</TableHead>
+                  <TableHead className="w-[10%] text-gray-700">AI形审状态</TableHead>
                   <TableHead className="w-[10%] text-right text-gray-700">操作</TableHead>
                 </TableRow>
               </TableHeader>

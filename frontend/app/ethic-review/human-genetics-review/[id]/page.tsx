@@ -574,28 +574,10 @@ export default function EthicReviewDetail({ params }: { params: { id: string } }
         label: "负责人",
         value: currentProject.leader || "未指定",
         icon: <User className="h-4 w-4 text-gray-400" />,
-      },
-      {
-        id: "department",
-        label: "所属院系",
-        value: currentProject.department || "未指定",
-        icon: <Building2 className="h-4 w-4 text-gray-400" />,
-      },
-      {
-        id: "committee",
-        label: "伦理委员会",
-        value: currentProject.ethicsCommittee || "未指定",
-        icon: <Users className="h-4 w-4 text-gray-400" />,
-      },
-      {
-        id: "submittedAt",
-        label: "提交时间",
-        value: currentProject.submittedAt || "未提交",
-        icon: <Calendar className="h-4 w-4 text-gray-400" />,
       }
     ];
     
-    // 添加人遗资源特有的字段
+    // 添加人遗资源特有的重要字段
     if (currentProject.projectType === "人遗") {
       baseFields.push(
         {
@@ -611,18 +593,6 @@ export default function EthicReviewDetail({ params }: { params: { id: string } }
             ? `${currentProject.sampleSize}份` 
             : (currentProject.sampleSize || "未指定"),
           icon: <BriefcaseMedical className="h-4 w-4 text-gray-400" />,
-        },
-        {
-          id: "geneticTest",
-          label: "遗传测试方法",
-          value: currentProject.geneticTest || "未指定",
-          icon: <BriefcaseMedical className="h-4 w-4 text-gray-400" />,
-        },
-        {
-          id: "dataProtection",
-          label: "数据保护措施",
-          value: currentProject.dataProtection || "未指定",
-          icon: <CheckCircle2 className="h-4 w-4 text-gray-400" />,
         }
       );
     }
@@ -650,16 +620,16 @@ export default function EthicReviewDetail({ params }: { params: { id: string } }
           component: <EthicProjectOverviewTab project={currentProject} />,
         },
         {
-          id: "riskAnalysis",
-          label: "风险分析",
-          icon: <AlertTriangle className="h-4 w-4" />,
-          component: <RiskAnalysisTab project={currentProject} />,
-        },
-        {
           id: "reviewFiles",
           label: "送审文件",
           icon: <FileText className="h-4 w-4" />,
           component: <ReviewFilesTab project={currentProject} />,
+        },
+        {
+          id: "riskAnalysis",
+          label: "风险分析",
+          icon: <AlertTriangle className="h-4 w-4" />,
+          component: <RiskAnalysisTab project={currentProject} />,
         },
       ]}
     />

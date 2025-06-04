@@ -25,7 +25,8 @@ import {
   PieChart,
   LineChart,
   LayoutGrid,
-  StarIcon
+  StarIcon,
+  Sparkles
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -151,6 +152,67 @@ export default function EthicProjectOverviewTab({
     }
   }
 
+  // 生成项目简化摘要
+  const generateProjectSummary = () => {
+    const reviewType = project.reviewType || "初始审查"
+    
+    switch (reviewType) {
+      case "初始审查":
+        if (project.projectType === "动物") {
+          if (project.title?.includes("转基因")) {
+            return "该项目采用转基因动物模型进行研究，实验设计科学合理，动物福利保障措施完善，已通过初步审查。项目符合3R原则要求，预计能够为相关疾病研究提供重要支撑。"
+          } else if (project.title?.includes("基因编辑")) {
+            return "该项目采用CRISPR基因编辑技术构建动物模型，技术方案相对成熟，但需要严格评估基因编辑的安全性和有效性。动物福利保障措施需要进一步完善。"
+          } else {
+            return "该项目为动物实验研究，实验设计遵循3R原则，动物福利保障措施完善，风险控制方案合理，已通过形式审查阶段，整体符合伦理审查要求。"
+          }
+        } else if (project.projectType === "人体") {
+          if (project.title?.includes("临床试验")) {
+            return "该项目为人体临床试验研究，知情同意流程规范，受试者保护措施完善，数据安全保障合理，已通过初步审查。项目设计科学，预期能够为临床治疗提供重要依据。"
+          } else if (project.title?.includes("基因") || project.title?.includes("遗传")) {
+            return "该项目涉及基因检测和遗传信息研究，知情同意程序规范，遗传咨询支持完善，数据保护措施到位。项目设计合理，符合遗传研究伦理要求，预期能够提高疾病诊断效率。"
+          } else {
+            return "该项目为人体研究，知情同意程序规范，隐私保护措施完善，研究设计合理，已通过形式审查。项目风险较低，符合人体研究伦理基本要求。"
+          }
+        }
+        break;
+        
+      case "人遗采集审批":
+        if (project.title?.includes("儿科") || project.title?.includes("儿童")) {
+          return "该项目为儿科遗传病样本采集审批，建立了专门的儿童知情同意程序，紧急采集流程设计合理，样本保存规范完善。项目充分考虑了儿童受试者的特殊保护需求。"
+        } else if (project.title?.includes("家族性")) {
+          return "该项目为家族性遗传病样本采集审批，建立了完善的家族成员知情同意协调机制，样本采集标准规范，遗传信息保护措施充分，符合人遗资源管理要求。"
+        } else {
+          return "该项目为人遗采集审批，建立了标准化的样本采集和保存流程，知情同意程序完善，遗传信息保护措施到位，符合相关法规要求。"
+        }
+        break;
+        
+      case "修正案审查":
+        if (project.title?.includes("系统") || project.title?.includes("信息")) {
+          return "该修正案主要涉及信息系统的优化升级，修正内容合理可行，数据安全保护措施进一步完善，对受试者权益无不良影响。修正案符合伦理要求，建议按计划实施。"
+        } else {
+          return "该修正案内容经过充分论证，变更具有科学依据和实际必要性，不会增加受试者风险或损害其权益。修正后的研究方案仍符合伦理要求，可以批准实施。"
+        }
+        break;
+        
+      case "国际合作科学研究审批":
+        return "该国际合作项目涉及多国研究机构协作，但跨境数据传输安全保障措施不足，各国伦理审查标准差异需要进一步协调。建议完善数据共享协议和知识产权保护条款后重新审查。"
+        
+      case "复审":
+        if (project.title?.includes("繁育")) {
+          return "该复审项目针对转基因动物繁育计划，前期审查意见得到较好回应，动物福利保障措施有所改善，但繁育质量监测方案仍需进一步完善。整体改进效果良好。"
+        } else {
+          return "该复审项目对前期审查意见进行了认真回应，提出的改进措施具有针对性和可行性。质量控制体系得到完善，符合复审要求，建议通过审查。"
+        }
+        break;
+        
+      default:
+        return "该项目已通过初步审查，研究设计合理，伦理风险控制措施适当，符合相关审查标准和伦理要求，建议进入下一审查阶段。"
+    }
+    
+    return "该项目已通过初步审查，研究设计合理，伦理风险控制措施适当，符合相关审查标准和伦理要求。"
+  }
+
   return (
     <div className="space-y-6">
       {/* AI智能摘要区域 */}
@@ -160,8 +222,8 @@ export default function EthicProjectOverviewTab({
         <CardHeader className="pb-1 relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="relative w-10 h-10">
-                <Image src="/ai-icon.png" alt="AI摘要" width={40} height={40} className="object-contain" />
+              <div className="relative w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+                <Sparkles className="h-6 w-6 text-white" />
               </div>
               <div>
                 <CardTitle className="text-lg font-semibold flex items-center gap-2">
@@ -265,118 +327,12 @@ export default function EthicProjectOverviewTab({
                         <LayoutGrid className="h-4 w-4" />
                         <span className="font-medium">最新分析已更新 - 检测到项目进度变更</span>
                       </div>
-                      <p className="whitespace-pre-line">
-                        {aiSummaryContent.split('\n\n').map((paragraph: string, idx: number) => {
-                          // 检查段落是否包含【】标题
-                          if (paragraph.includes('【') && paragraph.includes('】')) {
-                            const titleMatch = paragraph.match(/【(.+?)】/);
-                            const title = titleMatch ? titleMatch[1] : '';
-                            const content = paragraph.replace(/【(.+?)】/, '');
-                            
-                            // 检查内容是否包含列表项（以"•"开头的行）
-                            const hasListItems = content.includes('\n•');
-                            
-                            if (hasListItems) {
-                              // 处理包含列表项的内容
-                              const listItems = content.split('\n').filter((line: string) => line.trim().length > 0);
-                              
-                              return (
-                                <div key={idx} className="mb-4">
-                                  <h4 className="text-sm font-semibold text-blue-700 bg-blue-50 py-1 px-2 rounded mb-2">
-                                    {title === "审核要点摘要" ? "项目审查摘要" : title}
-                                  </h4>
-                                  <ul className="pl-1 space-y-1">
-                                    {listItems.map((item: string, itemIdx: number) => (
-                                      <li key={itemIdx} className={`pl-5 relative ${item.startsWith('•') ? 'text-slate-700' : 'text-slate-600'}`}>
-                                        {item.startsWith('•') ? (
-                                          <>
-                                            <span className="absolute left-0 text-blue-500">•</span>
-                                            {item.substring(1).trim()}
-                                          </>
-                                        ) : item}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              );
-                            } else {
-                              return (
-                                <div key={idx} className="mb-3">
-                                  <h4 className="text-sm font-semibold text-blue-700 bg-blue-50 py-1 px-2 rounded mb-1.5">
-                                    {title === "审核要点摘要" ? "项目审查摘要" : title}
-                                  </h4>
-                                  <div className="pl-2">{content}</div>
-                                </div>
-                              );
-                            }
-                          } else if (paragraph.includes('\n•')) {
-                            // 处理不包含标题但包含列表项的段落
-                            const lines = paragraph.split('\n').filter((line: string) => line.trim().length > 0);
-                            return (
-                              <div key={idx} className="mb-3">
-                                <ul className="pl-1 space-y-1">
-                                  {lines.map((line: string, lineIdx: number) => (
-                                    <li key={lineIdx} className={`pl-5 relative ${line.startsWith('•') ? 'text-slate-700' : 'text-slate-600'}`}>
-                                      {line.startsWith('•') ? (
-                                        <>
-                                          <span className="absolute left-0 text-blue-500">•</span>
-                                          {line.substring(1).trim()}
-                                        </>
-                                      ) : line}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            );
-                          } else {
-                            // 处理普通段落，包含(1)、(2)、(3)格式的内容需要转换为列表形式
-                            const text = paragraph;
-                            if (text.includes('(1)') && text.includes('(2)') && text.includes('(3)')) {
-                              // 找到建议部分的起始位置
-                              const startPos = text.indexOf('(1)');
-                              // 将起始部分作为普通段落
-                              const introText = text.substring(0, startPos).trim();
-                              // 提取建议点并转换为数组
-                              const suggestions = [
-                                text.substring(text.indexOf('(1)'), text.indexOf('(2)')).trim(),
-                                text.substring(text.indexOf('(2)'), text.indexOf('(3)')).trim(),
-                                text.substring(text.indexOf('(3)')).trim()
-                              ];
-                              
-                              // 提取最后一条建议后的内容（如果有）
-                              let endText = '';
-                              const lastSuggestion = suggestions[2];
-                              if (lastSuggestion.includes('。')) {
-                                const endPos = lastSuggestion.indexOf('。') + 1;
-                                endText = lastSuggestion.substring(endPos).trim();
-                                suggestions[2] = lastSuggestion.substring(0, endPos).trim();
-                              }
-                              
-                              return (
-                                <div key={idx}>
-                                  <p className="mb-2">{introText}</p>
-                                  <div className="pl-2 space-y-2 mb-2">
-                                    {suggestions.map((suggestion, i) => (
-                                      <div key={i} className="flex items-start">
-                                        <span className="mr-2 flex-shrink-0">{suggestion.substring(0, 3)}</span>
-                                        <span>{suggestion.substring(3)}</span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                  {endText && <p className="mt-2">{endText}</p>}
-                                </div>
-                              );
-                            } else {
-                              // 处理普通段落
-                              return (
-                                <p key={idx} className="mb-3">
-                                  {paragraph}
-                                </p>
-                              );
-                            }
-                          }
-                        })}
-                      </p>
+                      {/* 简化的AI摘要显示 - 只显示一段话总结 */}
+                      <div className="mb-4">
+                        <p className="text-slate-700 leading-relaxed">
+                          {generateProjectSummary()}
+                        </p>
+                      </div>
                       <div className="flex items-start gap-4 my-3 py-2">
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                           <BarChart3 className="h-4 w-4 text-blue-600" />
@@ -404,130 +360,23 @@ export default function EthicProjectOverviewTab({
                       </div>
                       <p className="mt-2 text-slate-600 border-t border-slate-100 pt-2">
                         <span className="font-medium text-primary">AI建议：</span>
-                        <div className="mt-2">
-                          {aiSuggestions.map((suggestion: string, index: number) => (
-                            <div key={index} className="flex items-start gap-1.5 mt-1.5">
-                              <ChevronRight className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
-                              <span className="text-sm">{suggestion}</span>
-                            </div>
-                          ))}
-                        </div>
+                        {aiSuggestions.map((suggestion: string, index: number) => (
+                          <span key={index} className="inline-flex items-center gap-1.5 mt-1">
+                            <ChevronRight className="h-3.5 w-3.5 text-primary" />
+                            <span>{suggestion}</span>
+                            {index < aiSuggestions.length - 1 && <br />}
+                          </span>
+                        ))}
                       </p>
                     </>
                   ) : (
                     <>
-                      <p className="whitespace-pre-line">
-                        {aiSummaryContent.split('\n\n').map((paragraph: string, idx: number) => {
-                          // 检查段落是否包含【】标题
-                          if (paragraph.includes('【') && paragraph.includes('】')) {
-                            const titleMatch = paragraph.match(/【(.+?)】/);
-                            const title = titleMatch ? titleMatch[1] : '';
-                            const content = paragraph.replace(/【(.+?)】/, '');
-                            
-                            // 检查内容是否包含列表项（以"•"开头的行）
-                            const hasListItems = content.includes('\n•');
-                            
-                            if (hasListItems) {
-                              // 处理包含列表项的内容
-                              const listItems = content.split('\n').filter((line: string) => line.trim().length > 0);
-                              
-                              return (
-                                <div key={idx} className="mb-4">
-                                  <h4 className="text-sm font-semibold text-blue-700 bg-blue-50 py-1 px-2 rounded mb-2">
-                                    {title === "审核要点摘要" ? "项目审查摘要" : title}
-                                  </h4>
-                                  <ul className="pl-1 space-y-1">
-                                    {listItems.map((item: string, itemIdx: number) => (
-                                      <li key={itemIdx} className={`pl-5 relative ${item.startsWith('•') ? 'text-slate-700' : 'text-slate-600'}`}>
-                                        {item.startsWith('•') ? (
-                                          <>
-                                            <span className="absolute left-0 text-blue-500">•</span>
-                                            {item.substring(1).trim()}
-                                          </>
-                                        ) : item}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              );
-                            } else {
-                              return (
-                                <div key={idx} className="mb-3">
-                                  <h4 className="text-sm font-semibold text-blue-700 bg-blue-50 py-1 px-2 rounded mb-1.5">
-                                    {title === "审核要点摘要" ? "项目审查摘要" : title}
-                                  </h4>
-                                  <div className="pl-2">{content}</div>
-                                </div>
-                              );
-                            }
-                          } else if (paragraph.includes('\n•')) {
-                            // 处理不包含标题但包含列表项的段落
-                            const lines = paragraph.split('\n').filter((line: string) => line.trim().length > 0);
-                            return (
-                              <div key={idx} className="mb-3">
-                                <ul className="pl-1 space-y-1">
-                                  {lines.map((line: string, lineIdx: number) => (
-                                    <li key={lineIdx} className={`pl-5 relative ${line.startsWith('•') ? 'text-slate-700' : 'text-slate-600'}`}>
-                                      {line.startsWith('•') ? (
-                                        <>
-                                          <span className="absolute left-0 text-blue-500">•</span>
-                                          {line.substring(1).trim()}
-                                        </>
-                                      ) : line}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            );
-                          } else {
-                            // 处理普通段落，包含(1)、(2)、(3)格式的内容需要转换为列表形式
-                            const text = paragraph;
-                            if (text.includes('(1)') && text.includes('(2)') && text.includes('(3)')) {
-                              // 找到建议部分的起始位置
-                              const startPos = text.indexOf('(1)');
-                              // 将起始部分作为普通段落
-                              const introText = text.substring(0, startPos).trim();
-                              // 提取建议点并转换为数组
-                              const suggestions = [
-                                text.substring(text.indexOf('(1)'), text.indexOf('(2)')).trim(),
-                                text.substring(text.indexOf('(2)'), text.indexOf('(3)')).trim(),
-                                text.substring(text.indexOf('(3)')).trim()
-                              ];
-                              
-                              // 提取最后一条建议后的内容（如果有）
-                              let endText = '';
-                              const lastSuggestion = suggestions[2];
-                              if (lastSuggestion.includes('。')) {
-                                const endPos = lastSuggestion.indexOf('。') + 1;
-                                endText = lastSuggestion.substring(endPos).trim();
-                                suggestions[2] = lastSuggestion.substring(0, endPos).trim();
-                              }
-                              
-                              return (
-                                <div key={idx}>
-                                  <p className="mb-2">{introText}</p>
-                                  <div className="pl-2 space-y-2 mb-2">
-                                    {suggestions.map((suggestion, i) => (
-                                      <div key={i} className="flex items-start">
-                                        <span className="mr-2 flex-shrink-0">{suggestion.substring(0, 3)}</span>
-                                        <span>{suggestion.substring(3)}</span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                  {endText && <p className="mt-2">{endText}</p>}
-                                </div>
-                              );
-                            } else {
-                              // 处理普通段落
-                              return (
-                                <p key={idx} className="mb-3">
-                                  {paragraph}
-                                </p>
-                              );
-                            }
-                          }
-                        })}
-                      </p>
+                      {/* 简化的AI摘要显示 - 只显示一段话总结 */}
+                      <div className="mb-4">
+                        <p className="text-slate-700 leading-relaxed">
+                          {generateProjectSummary()}
+                        </p>
+                      </div>
                       <div className="flex items-start gap-4 my-3 py-2">
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                           <BarChart3 className="h-4 w-4 text-blue-600" />
@@ -553,14 +402,13 @@ export default function EthicProjectOverviewTab({
                       </div>
                       <p className="mt-2 text-slate-600 border-t border-slate-100 pt-2">
                         <span className="font-medium text-primary">AI建议：</span>
-                        <div className="mt-2">
-                          {aiSuggestions.map((suggestion: string, index: number) => (
-                            <div key={index} className="flex items-start gap-1.5 mt-1.5">
-                              <ChevronRight className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
-                              <span className="text-sm">{suggestion}</span>
-                            </div>
-                          ))}
-                        </div>
+                        {aiSuggestions.map((suggestion: string, index: number) => (
+                          <span key={index} className="inline-flex items-center gap-1.5 mt-1">
+                            <ChevronRight className="h-3.5 w-3.5 text-primary" />
+                            <span>{suggestion}</span>
+                            {index < aiSuggestions.length - 1 && <br />}
+                          </span>
+                        ))}
                       </p>
                     </>
                   )}

@@ -66,36 +66,36 @@ function getStatusBadge(status: string) {
   switch (status) {
     case "已审核":
       return (
-        <Badge className="bg-green-50 text-green-700 border-green-200 flex items-center gap-1">
-          <CheckCircle2 className="h-3 w-3" />
+        <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 flex items-center gap-1 shadow-sm px-2 py-0.5">
+          <CheckCircle2 className="h-2.5 w-2.5" />
           <span>已审核</span>
         </Badge>
       )
     case "待审核":
       return (
-        <Badge className="bg-amber-50 text-amber-700 border-amber-200 flex items-center gap-1">
-          <Clock className="h-3 w-3" />
+        <Badge className="bg-slate-50 text-slate-700 border-slate-200 flex items-center gap-1 shadow-sm px-2 py-0.5">
+          <Clock className="h-2.5 w-2.5" />
           <span>待审核</span>
         </Badge>
       )
     case "需修改":
       return (
-        <Badge className="bg-red-50 text-red-700 border-red-200 flex items-center gap-1">
-          <XCircle className="h-3 w-3" />
+        <Badge className="bg-rose-50 text-rose-700 border-rose-200 flex items-center gap-1 shadow-sm px-2 py-0.5">
+          <XCircle className="h-2.5 w-2.5" />
           <span>需修改</span>
         </Badge>
       )
     case "已生成":
       return (
-        <Badge className="bg-blue-50 text-blue-700 border-blue-200 flex items-center gap-1">
-          <Check className="h-3 w-3" />
+        <Badge className="bg-slate-50 text-slate-700 border-slate-200 flex items-center gap-1 shadow-sm px-2 py-0.5">
+          <Check className="h-2.5 w-2.5" />
           <span>已生成</span>
         </Badge>
       )
     default:
       return (
-        <Badge className="bg-gray-50 text-gray-700 border-gray-200 flex items-center gap-1">
-          <AlertCircle className="h-3 w-3" />
+        <Badge className="bg-slate-50 text-slate-700 border-slate-200 flex items-center gap-1 shadow-sm px-2 py-0.5">
+          <AlertCircle className="h-2.5 w-2.5" />
           <span>{status}</span>
         </Badge>
       )
@@ -106,13 +106,19 @@ function getStatusBadge(status: string) {
 function getFileTypeName(fileType: string) {
   const typeMap: Record<string, string> = {
     "application": "项目申请书",
-    "protocol": "实验方案",
+    "protocol": "研究方案",
     "consent": "知情同意书",
     "declaration": "声明文件",
     "review": "审查意见",
     "handbook": "研究者手册",
     "report": "报告表",
-    "prescription": "处方设计"
+    "prescription": "处方设计",
+    "security": "数据安全方案",
+    "assessment": "风险评估报告",
+    "recruitment": "受试者招募计划",
+    "technical": "技术规范",
+    "sop": "标准操作程序",
+    "quality": "质量控制文件"
   }
   
   return typeMap[fileType] || "其他文件"
@@ -196,7 +202,7 @@ export default function ReviewFilesTab({
                   <TableHead className="w-[15%] text-gray-700">类型</TableHead>
                   <TableHead className="w-[10%] text-gray-700">大小</TableHead>
                   <TableHead className="w-[15%] text-gray-700">上传时间</TableHead>
-                  <TableHead className="w-[10%] text-gray-700">状态</TableHead>
+                  <TableHead className="w-[10%] text-gray-700">AI形审状态</TableHead>
                   <TableHead className="w-[10%] text-right text-gray-700">操作</TableHead>
                 </TableRow>
               </TableHeader>

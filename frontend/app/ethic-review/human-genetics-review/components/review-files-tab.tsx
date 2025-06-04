@@ -64,38 +64,48 @@ function getFileIcon(fileType: string) {
 // 文件状态到Badge的映射
 function getStatusBadge(status: string) {
   switch (status) {
+    case "未审核":
+      return (
+        <Badge className="bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-50 flex items-center gap-1 shadow-sm px-2 py-0.5 text-xs font-medium h-6 w-fit">
+          <Clock className="h-2.5 w-2.5" />
+          <span>未审核</span>
+        </Badge>
+      )
+    case "审核通过":
     case "已审核":
       return (
-        <Badge className="bg-green-50 text-green-700 border-green-200 flex items-center gap-1">
-          <CheckCircle2 className="h-3 w-3" />
-          <span>已审核</span>
+        <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50 flex items-center gap-1 shadow-sm px-2 py-0.5 text-xs font-medium h-6 w-fit">
+          <CheckCircle2 className="h-2.5 w-2.5" />
+          <span>审核通过</span>
         </Badge>
       )
-    case "待审核":
-      return (
-        <Badge className="bg-amber-50 text-amber-700 border-amber-200 flex items-center gap-1">
-          <Clock className="h-3 w-3" />
-          <span>待审核</span>
-        </Badge>
-      )
+    case "存在问题":
     case "需修改":
       return (
-        <Badge className="bg-red-50 text-red-700 border-red-200 flex items-center gap-1">
-          <XCircle className="h-3 w-3" />
-          <span>需修改</span>
+        <Badge className="bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-50 flex items-center gap-1 shadow-sm px-2 py-0.5 text-xs font-medium h-6 w-fit">
+          <XCircle className="h-2.5 w-2.5" />
+          <span>存在问题</span>
+        </Badge>
+      )
+    case "审核中":
+    case "待审核":
+      return (
+        <Badge className="bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-50 flex items-center gap-1 shadow-sm px-2 py-0.5 text-xs font-medium h-6 w-fit">
+          <Clock className="h-2.5 w-2.5" />
+          <span>待审核</span>
         </Badge>
       )
     case "已生成":
       return (
-        <Badge className="bg-blue-50 text-blue-700 border-blue-200 flex items-center gap-1">
-          <Check className="h-3 w-3" />
+        <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50 flex items-center gap-1 shadow-sm px-2 py-0.5 text-xs font-medium h-6 w-fit">
+          <CheckCircle2 className="h-2.5 w-2.5" />
           <span>已生成</span>
         </Badge>
       )
     default:
       return (
-        <Badge className="bg-gray-50 text-gray-700 border-gray-200 flex items-center gap-1">
-          <AlertCircle className="h-3 w-3" />
+        <Badge className="bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-50 flex items-center gap-1 shadow-sm px-2 py-0.5 text-xs font-medium h-6 w-fit">
+          <AlertCircle className="h-2.5 w-2.5" />
           <span>{status}</span>
         </Badge>
       )
@@ -196,7 +206,7 @@ export default function ReviewFilesTab({
                   <TableHead className="w-[15%] text-gray-700">类型</TableHead>
                   <TableHead className="w-[10%] text-gray-700">大小</TableHead>
                   <TableHead className="w-[15%] text-gray-700">上传时间</TableHead>
-                  <TableHead className="w-[10%] text-gray-700">状态</TableHead>
+                  <TableHead className="w-[10%] text-gray-700">AI形审状态</TableHead>
                   <TableHead className="w-[10%] text-right text-gray-700">操作</TableHead>
                 </TableRow>
               </TableHeader>
