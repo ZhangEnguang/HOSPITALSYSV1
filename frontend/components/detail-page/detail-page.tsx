@@ -204,7 +204,7 @@ export default function DetailPage({
   return (
     <div className="flex min-h-0 overflow-hidden">
       {/* 左侧主内容区域 */}
-      <div className={`flex-1 overflow-auto pb-8 ${showSidebar ? "pr-[346px]" : "pr-6"}`}>
+      <div className={`flex-1 overflow-auto pb-8 ${showSidebar ? "pr-[350px]" : "pr-6"}`}>
         {/* 头部区域 */}
         <div className="flex flex-col md:flex-row md:items-start justify-between mb-2">
           <div className="flex flex-col">
@@ -325,7 +325,7 @@ export default function DetailPage({
 
       {/* 审核信息侧边栏 - 调整位置紧贴标签栏 */}
       {showSidebar && (
-        <div className="fixed right-0 w-[360px] top-[112px] bottom-0 border-l bg-background overflow-hidden z-10">
+        <div className="fixed right-0 w-[350px] top-[112px] bottom-0 border-l bg-background overflow-hidden z-10">
           {reviewSidebar}
         </div>
       )}
