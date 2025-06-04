@@ -1,6 +1,10 @@
 // 移除外部导入，使用本地用户数据
 // import { users } from "@/app/progress/config/progress-config"
 
+// 受理号格式规则说明：ETH-两位字母-年份-三位流水号
+// ETH-IN-YYYY-NNN  - 初始审查 (Initial)
+// ETH-RE-YYYY-NNN  - 复审 (Review)
+
 // 本地用户数据
 const localUsers = [
   {
@@ -58,7 +62,7 @@ export const REVIEW_TYPE_OPTIONS = [
 export const initialReviewItems = [
   {
     id: "1",
-    projectId: "ETH-A-2024-001",
+    projectId: "ETH-IN-2024-001", // 初始审查
     reviewType: "初始审查",
     name: "转基因小鼠模型在神经退行性疾病中的应用",
     description: "审查项目研究方案、研究计划和预期目标，评估项目可行性",
@@ -77,7 +81,7 @@ export const initialReviewItems = [
   },
   {
     id: "2",
-    projectId: "ETH-H-2024-008",
+    projectId: "ETH-RE-2024-001", // 复审
     reviewType: "复审",
     name: "新型靶向生物药物在晚期肿瘤患者中的临床试验",
     description: "审查项目伦理问题、实验风险和安全措施，确保符合伦理规范",
@@ -96,7 +100,7 @@ export const initialReviewItems = [
   },
   {
     id: "3",
-    projectId: "ETH-H-2024-012",
+    projectId: "ETH-IN-2024-002", // 初始审查
     reviewType: "初始审查",
     name: "高血压患者运动干预效果及安全性评估",
     description: "评估项目立项必要性、研究内容创新性和预期成果价值",
@@ -115,7 +119,7 @@ export const initialReviewItems = [
   },
   {
     id: "4",
-    projectId: "ETH-A-2024-003",
+    projectId: "ETH-RE-2024-002", // 复审
     reviewType: "复审",
     name: "啮齿类动物模型在药物代谢研究中的应用",
     description: "审查项目预算合理性、资金使用计划和经费管理措施",
@@ -134,7 +138,7 @@ export const initialReviewItems = [
   },
   {
     id: "5",
-    projectId: "ETH-H-2024-015",
+    projectId: "ETH-IN-2024-003", // 初始审查
     reviewType: "初始审查",
     name: "免疫治疗对不同年龄段肿瘤患者生活质量影响",
     description: "检查项目知识产权状况、成果转化可行性和产权保护措施",
@@ -153,7 +157,7 @@ export const initialReviewItems = [
   },
   {
     id: "6",
-    projectId: "ETH-A-2024-006",
+    projectId: "ETH-IN-2024-004", // 初始审查
     reviewType: "初始审查",
     name: "非人灵长类动物在神经递质调控研究中的应用",
     description: "评估基于动物模型的肿瘤微环境研究的伦理合规性及实验设计安全性",
@@ -179,7 +183,7 @@ export const initialReviewItems = [
   },
   {
     id: "7",
-    projectId: "ETH-H-2024-019",
+    projectId: "ETH-RE-2024-003", // 复审
     reviewType: "复审",
     name: "针对重度抑郁症患者的认知行为疗法有效性研究",
     description: "评估心理干预方案在人体实验中的伦理问题和隐私保护措施",
@@ -205,7 +209,7 @@ export const initialReviewItems = [
   },
   {
     id: "8",
-    projectId: "ETH-A-2024-009",
+    projectId: "ETH-IN-2024-005", // 初始审查
     reviewType: "初始审查",
     name: "转基因猪模型在器官移植安全性评估中的应用",
     description: "审查基因编辑农作物研究的伦理问题和生物安全风险评估",

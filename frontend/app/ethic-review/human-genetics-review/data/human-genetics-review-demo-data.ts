@@ -1,3 +1,12 @@
+// 受理号格式规则说明：ETH-两位字母-年份-三位流水号
+// ETH-HC-YYYY-NNN  - 人遗采集审批 (Human Collection)
+// ETH-HP-YYYY-NNN  - 人遗保藏审批 (Human Preservation)
+// ETH-IC-YYYY-NNN  - 国际合作科学研究审批 (International Cooperation)
+// ETH-EX-YYYY-NNN  - 材料出境审批 (Export)
+// ETH-CT-YYYY-NNN  - 国际合作临床试验备案 (Clinical Trial)
+// ETH-OP-YYYY-NNN  - 对外提供或开放使用备案 (Open Provision)
+// ETH-FR-YYYY-NNN  - 重要遗传家系和特定地区人遗资源 (Family Resource)
+
 // 本地用户数据
 const localUsers = [
   {
@@ -94,7 +103,7 @@ export const APPROVAL_TYPE_OPTIONS = [
 export const humanGeneticsReviewItems = [
   {
     id: "ETH-HG-2024-001",
-    projectId: "GEN-2024-001",
+    projectId: "ETH-HC-2024-001", // 人遗采集审批
     reviewType: "遗传学研究",
     approvalType: "人遗采集审批",
     name: "中国汉族人群BRCA1/2基因致病变异筛查",
@@ -118,7 +127,7 @@ export const humanGeneticsReviewItems = [
   },
   {
     id: "ETH-HG-2024-002",
-    projectId: "GEN-2024-008",
+    projectId: "ETH-HP-2024-001", // 人遗保藏审批
     reviewType: "诊断性测序",
     approvalType: "人遗保藏审批",
     name: "单基因遗传病快速诊断测序技术评估",
@@ -142,7 +151,7 @@ export const humanGeneticsReviewItems = [
   },
   {
     id: "ETH-HG-2024-003",
-    projectId: "GEN-2024-012",
+    projectId: "ETH-IC-2024-001", // 国际合作科学研究审批
     reviewType: "遗传咨询研究",
     approvalType: "国际合作科研审批",
     name: "遗传性肿瘤高风险家系咨询模式研究",
@@ -166,7 +175,7 @@ export const humanGeneticsReviewItems = [
   },
   {
     id: "ETH-HG-2024-004",
-    projectId: "GEN-2024-015",
+    projectId: "ETH-EX-2024-001", // 材料出境审批
     reviewType: "基因组学研究",
     approvalType: "材料出境审批",
     name: "中国人群基因组变异数据库构建",
@@ -190,7 +199,7 @@ export const humanGeneticsReviewItems = [
   },
   {
     id: "ETH-HG-2024-005",
-    projectId: "GEN-2024-019",
+    projectId: "ETH-CT-2024-001", // 国际合作临床试验备案
     reviewType: "遗传病筛查",
     approvalType: "国际合作临床试验",
     name: "新生儿遗传代谢病筛查方案评估",
@@ -214,7 +223,7 @@ export const humanGeneticsReviewItems = [
   },
   {
     id: "ETH-HG-2024-006",
-    projectId: "GEN-2024-022",
+    projectId: "ETH-OP-2024-001", // 对外提供或开放使用备案
     reviewType: "遗传学研究",
     approvalType: "对外提供使用备案",
     name: "帕金森病相关基因变异功能验证",
@@ -238,7 +247,7 @@ export const humanGeneticsReviewItems = [
   },
   {
     id: "ETH-HG-2024-007",
-    projectId: "GEN-2024-025",
+    projectId: "ETH-FR-2024-001", // 重要遗传家系和特定地区人遗资源
     reviewType: "诊断性测序",
     approvalType: "重要家系资源备案",
     name: "罕见遗传病无创产前诊断研究",
@@ -262,7 +271,7 @@ export const humanGeneticsReviewItems = [
   },
   {
     id: "ETH-HG-2024-008",
-    projectId: "GEN-2024-030",
+    projectId: "ETH-OP-2024-002", // 对外提供或开放使用备案
     reviewType: "基因组学研究",
     approvalType: "人遗采集审批",
     name: "肿瘤液体活检基因谱分析",

@@ -1,5 +1,22 @@
 import { users } from "../config/meeting-review-config"
 
+// 受理号格式规则说明：ETH-两位字母-年份-三位流水号
+// ETH-IN-YYYY-NNN  - 初始审查 (Initial)
+// ETH-AM-YYYY-NNN  - 修正案审查 (Amendment)
+// ETH-PE-YYYY-NNN  - 年度/定期审查 (Periodical)
+// ETH-SA-YYYY-NNN  - 安全性审查 (Safety)
+// ETH-DE-YYYY-NNN  - 偏离方案报告 (Deviation)
+// ETH-TE-YYYY-NNN  - 暂停/终止研究报告 (Termination)
+// ETH-CO-YYYY-NNN  - 研究完成报告 (Completion)
+// ETH-HC-YYYY-NNN  - 人遗采集审批 (Human Collection)
+// ETH-HP-YYYY-NNN  - 人遗保藏审批 (Human Preservation)
+// ETH-IC-YYYY-NNN  - 国际合作科学研究审批 (International Cooperation)
+// ETH-EX-YYYY-NNN  - 材料出境审批 (Export)
+// ETH-CT-YYYY-NNN  - 国际合作临床试验备案 (Clinical Trial)
+// ETH-OP-YYYY-NNN  - 对外提供或开放使用备案 (Open Provision)
+// ETH-FR-YYYY-NNN  - 重要遗传家系和特定地区人遗资源 (Family Resource)
+// ETH-RE-YYYY-NNN  - 复审 (Review)
+
 // 审查类型选项
 export const REVIEW_TYPE_OPTIONS = [
   "初始审查",
@@ -68,7 +85,8 @@ export const DEPARTMENTS = [
 // 随机生成的会议审查数据
 export const meetingReviewItems = [
   {
-    id: "mr-2024-001",
+    id: "ETH-IN-2024-001",
+    acceptanceNumber: "ETH-IN-2024-001",
     name: "罕见遗传病快速基因诊断体系建立",
     reviewType: "初始审查",
     projectType: "诊断性测序",
@@ -90,7 +108,8 @@ export const meetingReviewItems = [
     reviewComments: "项目符合伦理要求，可以立即实施。",
   },
   {
-    id: "mr-2024-002",
+    id: "ETH-HC-2024-001",
+    acceptanceNumber: "ETH-HC-2024-001",
     name: "儿科遗传病紧急测序分析流程",
     reviewType: "人遗采集审批",
     projectType: "诊断性测序",
@@ -112,7 +131,8 @@ export const meetingReviewItems = [
     reviewComments: "",
   },
   {
-    id: "mr-2024-003",
+    id: "ETH-IN-2024-002",
+    acceptanceNumber: "ETH-IN-2024-002",
     name: "实验动物基因编辑模型构建",
     reviewType: "初始审查",
     projectType: "诊断性测序",
@@ -134,7 +154,8 @@ export const meetingReviewItems = [
     reviewComments: "",
   },
   {
-    id: "mr-2024-004",
+    id: "ETH-AM-2024-001",
+    acceptanceNumber: "ETH-AM-2024-001",
     name: "遗传咨询样本临床信息采集系统",
     reviewType: "修正案审查",
     projectType: "数据分析",
@@ -156,7 +177,8 @@ export const meetingReviewItems = [
     reviewComments: "项目满足伦理要求，但需完善知情同意书内容后方可实施。",
   },
   {
-    id: "mr-2024-005",
+    id: "ETH-IC-2024-001",
+    acceptanceNumber: "ETH-IC-2024-001",
     name: "国际多中心罕见病基因研究合作协议",
     reviewType: "国际合作科学研究审批",
     projectType: "国际合作",
@@ -178,7 +200,8 @@ export const meetingReviewItems = [
     reviewComments: "数据共享协议不完善，需要修订后重新提交。",
   },
   {
-    id: "mr-2024-006",
+    id: "ETH-RE-2024-001",
+    acceptanceNumber: "ETH-RE-2024-001",
     name: "转基因小鼠繁育计划",
     reviewType: "复审",
     projectType: "数据分析",
@@ -200,7 +223,8 @@ export const meetingReviewItems = [
     reviewComments: "",
   },
   {
-    id: "mr-2024-007",
+    id: "ETH-CO-2024-001",
+    acceptanceNumber: "ETH-CO-2024-001",
     name: "家族性遗传病样本收集与保存",
     reviewType: "人遗保藏审批",
     projectType: "诊断性测序",
@@ -222,7 +246,8 @@ export const meetingReviewItems = [
     reviewComments: "方案合理可行，符合伦理要求。",
   },
   {
-    id: "mr-2024-008",
+    id: "ETH-DE-2024-001",
+    acceptanceNumber: "ETH-DE-2024-001",
     name: "实验动物行为学研究模型",
     reviewType: "初始审查",
     projectType: "数据分析",
@@ -244,7 +269,8 @@ export const meetingReviewItems = [
     reviewComments: "",
   },
   {
-    id: "mr-2024-009",
+    id: "ETH-PE-2024-001",
+    acceptanceNumber: "ETH-PE-2024-001",
     name: "儿童肿瘤基因检测研究项目",
     reviewType: "年度/定期审查",
     projectType: "诊断性测序",
@@ -266,7 +292,8 @@ export const meetingReviewItems = [
     reviewComments: "项目具有重要临床价值，建议尽快实施。",
   },
   {
-    id: "mr-2024-010",
+    id: "ETH-EX-2024-001",
+    acceptanceNumber: "ETH-EX-2024-001",
     name: "国内特有基因资源材料出境申请",
     reviewType: "材料出境审批",
     projectType: "材料出库",

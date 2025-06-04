@@ -1,5 +1,22 @@
 import { users } from "../config/quick-review-config"
 
+// 受理号格式规则说明：ETH-两位字母-年份-三位流水号
+// ETH-IN-YYYY-NNN  - 初始审查 (Initial)
+// ETH-AM-YYYY-NNN  - 修正案审查 (Amendment)
+// ETH-PE-YYYY-NNN  - 年度/定期审查 (Periodical)
+// ETH-SA-YYYY-NNN  - 安全性审查 (Safety)
+// ETH-DE-YYYY-NNN  - 偏离方案报告 (Deviation)
+// ETH-TE-YYYY-NNN  - 暂停/终止研究报告 (Termination)
+// ETH-CO-YYYY-NNN  - 研究完成报告 (Completion)
+// ETH-HC-YYYY-NNN  - 人遗采集审批 (Human Collection)
+// ETH-HP-YYYY-NNN  - 人遗保藏审批 (Human Preservation)
+// ETH-IC-YYYY-NNN  - 国际合作科学研究审批 (International Cooperation)
+// ETH-EX-YYYY-NNN  - 材料出境审批 (Export)
+// ETH-CT-YYYY-NNN  - 国际合作临床试验备案 (Clinical Trial)
+// ETH-OP-YYYY-NNN  - 对外提供或开放使用备案 (Open Provision)
+// ETH-FR-YYYY-NNN  - 重要遗传家系和特定地区人遗资源 (Family Resource)
+// ETH-RE-YYYY-NNN  - 复审 (Review)
+
 // 审查类型选项
 export const REVIEW_TYPE_OPTIONS = [
   "初始审查",
@@ -69,6 +86,7 @@ export const DEPARTMENTS = [
 export const quickReviewItems = [
   {
     id: "qr-2024-001",
+    acceptanceNumber: "ETH-IN-2024-001", // 初始审查
     name: "罕见遗传病快速基因诊断体系建立",
     reviewType: "初始审查",
     projectType: "诊断性测序",
@@ -90,6 +108,7 @@ export const quickReviewItems = [
   },
   {
     id: "qr-2024-002",
+    acceptanceNumber: "ETH-HC-2024-001", // 人遗采集审批
     name: "儿科遗传病紧急测序分析流程",
     reviewType: "人遗采集审批",
     projectType: "诊断性测序",
@@ -111,6 +130,7 @@ export const quickReviewItems = [
   },
   {
     id: "qr-2024-003",
+    acceptanceNumber: "ETH-IN-2024-002", // 初始审查
     name: "实验动物基因编辑模型构建",
     reviewType: "初始审查",
     projectType: "诊断性测序",
@@ -132,6 +152,7 @@ export const quickReviewItems = [
   },
   {
     id: "qr-2024-004",
+    acceptanceNumber: "ETH-AM-2024-001", // 修正案审查
     name: "遗传咨询样本临床信息采集系统",
     reviewType: "修正案审查",
     projectType: "数据分析",
@@ -153,6 +174,7 @@ export const quickReviewItems = [
   },
   {
     id: "qr-2024-005",
+    acceptanceNumber: "ETH-IC-2024-001", // 国际合作科学研究审批
     name: "国际多中心罕见病基因研究合作协议",
     reviewType: "国际合作科学研究审批",
     projectType: "国际合作",
@@ -174,6 +196,7 @@ export const quickReviewItems = [
   },
   {
     id: "qr-2024-006",
+    acceptanceNumber: "ETH-RE-2024-001", // 复审
     name: "转基因小鼠繁育计划",
     reviewType: "复审",
     projectType: "数据分析",
@@ -195,6 +218,7 @@ export const quickReviewItems = [
   },
   {
     id: "qr-2024-007",
+    acceptanceNumber: "ETH-HP-2024-001", // 人遗保藏审批
     name: "家族性遗传病样本收集与保存",
     reviewType: "人遗保藏审批",
     projectType: "诊断性测序",
@@ -216,6 +240,7 @@ export const quickReviewItems = [
   },
   {
     id: "qr-2024-008",
+    acceptanceNumber: "ETH-IN-2024-003", // 初始审查
     name: "实验动物行为学研究模型",
     reviewType: "初始审查",
     projectType: "数据分析",
@@ -237,6 +262,7 @@ export const quickReviewItems = [
   },
   {
     id: "qr-2024-009",
+    acceptanceNumber: "ETH-PE-2024-001", // 年度/定期审查
     name: "儿童肿瘤基因检测研究项目",
     reviewType: "年度/定期审查",
     projectType: "诊断性测序",
@@ -258,6 +284,7 @@ export const quickReviewItems = [
   },
   {
     id: "qr-2024-010",
+    acceptanceNumber: "ETH-EX-2024-001", // 材料出境审批
     name: "国内特有基因资源材料出境申请",
     reviewType: "材料出境审批",
     projectType: "材料出库",
@@ -276,5 +303,159 @@ export const quickReviewItems = [
     description: "申请将国内特有基因资源材料提供给国外研究机构，用于合作研究项目。",
     reviewDate: "2024-04-30",
     reviewComments: "材料出境目的和用途描述不清晰，需要补充详细说明后重新提交。",
+  },
+  {
+    id: "qr-2024-011",
+    acceptanceNumber: "ETH-SA-2024-001", // 安全性审查
+    name: "新型基因治疗药物临床前安全性评估",
+    reviewType: "安全性审查",
+    projectType: "诊断性测序",
+    projectSubType: "人体",
+    projectId: "GEN-2024-QR-011",
+    projectLeader: users[0],
+    department: DEPARTMENTS[1],
+    mainReviewers: [users[1], users[3]],
+    ethicsCommittee: ETHICS_COMMITTEES[1],
+    status: "审查中",
+    reviewProgress: 55,
+    reviewResult: "",
+    projectStatus: "未立项",
+    createdAt: "2024-04-28T09:15:00Z",
+    submissionDate: "2024-04-28",
+    description: "对新型基因治疗药物进行临床前安全性评估，确保临床试验安全性。",
+    reviewDate: "2024-05-05",
+    reviewComments: "",
+  },
+  {
+    id: "qr-2024-012",
+    acceptanceNumber: "ETH-DE-2024-001", // 偏离方案报告
+    name: "基因测序研究方案调整报告",
+    reviewType: "偏离方案报告",
+    projectType: "数据分析",
+    projectSubType: "人体",
+    projectId: "GEN-2024-QR-012",
+    projectLeader: users[2],
+    department: DEPARTMENTS[0],
+    mainReviewers: [users[4]],
+    ethicsCommittee: ETHICS_COMMITTEES[0],
+    status: "通过",
+    reviewProgress: 100,
+    reviewResult: "审查通过",
+    projectStatus: "已立项",
+    createdAt: "2024-05-01T14:20:00Z",
+    submissionDate: "2024-05-01",
+    description: "因技术升级需要调整基因测序研究的实验方案和数据分析流程。",
+    reviewDate: "2024-05-03",
+    reviewComments: "方案调整合理，符合伦理要求。",
+  },
+  {
+    id: "qr-2024-013",
+    acceptanceNumber: "ETH-TE-2024-001", // 暂停/终止研究报告
+    name: "遗传病队列研究项目终止申请",
+    reviewType: "暂停/终止研究报告",
+    projectType: "数据分析",
+    projectSubType: "人体",
+    projectId: "GEN-2024-QR-013",
+    projectLeader: users[1],
+    department: DEPARTMENTS[2],
+    mainReviewers: [users[0], users[3]],
+    ethicsCommittee: ETHICS_COMMITTEES[2],
+    status: "通过",
+    reviewProgress: 100,
+    reviewResult: "审查通过",
+    projectStatus: "已终止",
+    createdAt: "2024-05-05T11:30:00Z",
+    submissionDate: "2024-05-05",
+    description: "由于资金不足和研究目标调整，申请终止遗传病队列研究项目。",
+    reviewDate: "2024-05-08",
+    reviewComments: "终止理由充分，数据处理方案合理。",
+  },
+  {
+    id: "qr-2024-014",
+    acceptanceNumber: "ETH-CO-2024-001", // 研究完成报告
+    name: "罕见病基因筛查项目结题报告",
+    reviewType: "研究完成报告",
+    projectType: "诊断性测序",
+    projectSubType: "人体",
+    projectId: "GEN-2024-QR-014",
+    projectLeader: users[3],
+    department: DEPARTMENTS[3],
+    mainReviewers: [users[2], users[4]],
+    ethicsCommittee: ETHICS_COMMITTEES[1],
+    status: "通过",
+    reviewProgress: 100,
+    reviewResult: "审查通过",
+    projectStatus: "已完成",
+    createdAt: "2024-05-08T16:45:00Z",
+    submissionDate: "2024-05-08",
+    description: "罕见病基因筛查项目已按计划完成，提交最终研究报告和数据分析结果。",
+    reviewDate: "2024-05-10",
+    reviewComments: "项目完成度高，研究成果显著。",
+  },
+  {
+    id: "qr-2024-015",
+    acceptanceNumber: "ETH-CT-2024-001", // 国际合作临床试验备案
+    name: "国际多中心基因治疗临床试验备案",
+    reviewType: "国际合作临床试验备案",
+    projectType: "国际合作",
+    projectSubType: "人体",
+    projectId: "GEN-2024-QR-015",
+    projectLeader: users[4],
+    department: DEPARTMENTS[1],
+    mainReviewers: [users[0], users[2]],
+    ethicsCommittee: ETHICS_COMMITTEES[0],
+    status: "待审查",
+    reviewProgress: 25,
+    reviewResult: "",
+    projectStatus: "未立项",
+    createdAt: "2024-05-12T10:00:00Z",
+    submissionDate: "2024-05-12",
+    description: "与国际研究机构合作开展基因治疗临床试验，需要进行备案审查。",
+    reviewDate: "",
+    reviewComments: "",
+  },
+  {
+    id: "qr-2024-016",
+    acceptanceNumber: "ETH-OP-2024-001", // 对外提供或开放使用备案
+    name: "基因数据库对外开放使用备案",
+    reviewType: "对外提供或开放使用备案",
+    projectType: "数据分析",
+    projectSubType: "人体",
+    projectId: "GEN-2024-QR-016",
+    projectLeader: users[0],
+    department: DEPARTMENTS[3],
+    mainReviewers: [users[1]],
+    ethicsCommittee: ETHICS_COMMITTEES[2],
+    status: "审查中",
+    reviewProgress: 40,
+    reviewResult: "",
+    projectStatus: "未立项",
+    createdAt: "2024-05-15T13:30:00Z",
+    submissionDate: "2024-05-15",
+    description: "申请将内部基因数据库向合作研究机构开放，用于学术研究。",
+    reviewDate: "2024-05-20",
+    reviewComments: "",
+  },
+  {
+    id: "qr-2024-017",
+    acceptanceNumber: "ETH-FR-2024-001", // 重要遗传家系和特定地区人遗资源
+    name: "重要遗传家系资源收集备案",
+    reviewType: "重要遗传家系和特定地区人遗资源",
+    projectType: "诊断性测序",
+    projectSubType: "人体",
+    projectId: "GEN-2024-QR-017",
+    projectLeader: users[2],
+    department: DEPARTMENTS[0],
+    mainReviewers: [users[3], users[4]],
+    ethicsCommittee: ETHICS_COMMITTEES[0],
+    status: "驳回",
+    reviewProgress: 75,
+    reviewResult: "不同意",
+    projectStatus: "未立项",
+    createdAt: "2024-05-18T08:45:00Z",
+    submissionDate: "2024-05-18",
+    description: "收集具有重要研究价值的遗传家系资源，建立专门的资源库。",
+    reviewDate: "2024-05-22",
+    reviewComments: "家系同意书收集不完整，需要补充相关材料。",
   },
 ] 

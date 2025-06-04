@@ -110,46 +110,31 @@ export const getStatusName = (status: string) => {
 // 表格列配置
 export const tableColumns = [
   {
-    id: "projectSubType",
-    header: "项目类型",
-    accessorKey: "projectSubType",
-    className: "w-[90px]",
-    cell: (item: any) => {
-      const subType = item.projectSubType || "-";
-      let badgeClass = "bg-gray-100 text-gray-700 border-gray-300";
-      
-      if (subType === "人体") {
-        badgeClass = "bg-blue-100 text-blue-700 border-blue-300";
-      } else if (subType === "动物") {
-        badgeClass = "bg-amber-100 text-amber-700 border-amber-300";
-      }
-      
-      return (
-        <Badge variant="outline" className={cn("px-2 py-0.5 border", badgeClass)}>
-          {subType}
-        </Badge>
-      );
-    },
-  },
-  {
     id: "name",
     header: "项目名称",
     accessorKey: "name",
-    className: "w-[280px]",
-    cell: (item: any) => <div className="font-medium truncate">{item.name}</div>,
+    className: "w-[255px]",
+    cell: (item: any) => (
+      <div className="space-y-1">
+        <div className="font-medium text-gray-900 leading-5">{item.name}</div>
+        <div className="text-sm text-gray-500 leading-4">
+          {item.acceptanceNumber || item.id || "-"} · {item.projectSubType || "-"}
+        </div>
+      </div>
+    ),
   },
   {
     id: "reviewType",
     header: "审查类型",
     accessorKey: "reviewType",
-    className: "w-[130px]",
+    className: "w-[115px]",
     cell: (item: any) => <div className="truncate">{item.reviewType || "-"}</div>,
   },
   {
     id: "projectLeader",
     header: "项目负责人",
     accessorKey: "projectLeader",
-    className: "w-[120px]",
+    className: "w-[130px]",
     cell: (item: any) => (
       <div className="flex items-center gap-2">
         <Avatar className="h-8 w-8">
@@ -164,14 +149,14 @@ export const tableColumns = [
     id: "department",
     header: "所属科室",
     accessorKey: "department",
-    className: "w-[120px]",
+    className: "w-[130px]",
     cell: (item: any) => <div className="truncate">{item.department || "-"}</div>,
   },
   {
     id: "mainReviewer",
     header: "主审委员",
     accessorKey: "mainReviewer",
-    className: "w-[120px]",
+    className: "w-[130px]",
     cell: (item: any) => {
       const mainReviewers = Array.isArray(item.mainReviewers) ? item.mainReviewers : [item.mainReviewer].filter(Boolean);
       
@@ -197,7 +182,7 @@ export const tableColumns = [
     id: "reviewProgress",
     header: "审查进度",
     accessorKey: "reviewProgress",
-    className: "w-[120px]",
+    className: "w-[110px]",
     cell: (item: any) => {
       // 计算审查进度百分比
       const progress = item.reviewProgress || 0;
@@ -221,7 +206,7 @@ export const tableColumns = [
     id: "reviewResult",
     header: "审查结果",
     accessorKey: "reviewResult",
-    className: "w-[120px]",
+    className: "w-[120px] text-center",
     cell: (item: any) => {
       const result = item.reviewResult;
       const variant = result ? 
@@ -229,9 +214,13 @@ export const tableColumns = [
         { color: "bg-gray-100 text-gray-700 border-gray-300" };
       
       return (
-        <Badge variant="outline" className={cn("px-2 py-0.5 border max-w-full truncate", variant.color)}>
-          {result || "未出结果"}
-        </Badge>
+        <div className="flex justify-center">
+          <div className="w-20">
+            <Badge variant="outline" className={cn("px-2 py-0.5 border text-xs inline-block", variant.color)}>
+              {result || "未出结果"}
+            </Badge>
+          </div>
+        </div>
       );
     },
   },
@@ -291,6 +280,11 @@ export const tableColumns = [
 
 // 卡片字段配置
 export const cardFields = [
+  {
+    id: "acceptanceNumber",
+    label: "受理号",
+    value: (item: any) => item.acceptanceNumber || item.id || "-",
+  },
   {
     id: "projectSubType",
     label: "项目类型",

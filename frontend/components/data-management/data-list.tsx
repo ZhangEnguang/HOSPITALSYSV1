@@ -345,6 +345,12 @@ export default function DataList({
 
   const totalPages = Math.ceil(totalItems / pageSize)
 
+  // 计算当前页要显示的数据
+  const currentPageData = localData.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  )
+
   const handleAdvancedFilter = (filters: Record<string, any>) => {
     console.log('Advanced filters:', filters);
 
@@ -365,14 +371,14 @@ export default function DataList({
   const renderCardView = () => {
     return (
       <div className={cn("grid", gridClassName || "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4")}>
-        {localData.length === 0 ? (
+        {currentPageData.length === 0 ? (
           <div className="col-span-3 h-[300px] flex items-center justify-center">
             <div className="text-center">
               <p className="text-muted-foreground">{noResultsText || "暂无数据"}</p>
             </div>
           </div>
         ) : (
-          localData.map((item) => {
+          currentPageData.map((item) => {
             // 如果提供了customCardRenderer，则使用自定义卡片渲染函数
             if (customCardRenderer) {
               return (
@@ -510,7 +516,7 @@ export default function DataList({
         <div className="bg-white rounded-md w-full">
           <div className="p-2">
             <DataListTable
-              data={localData}
+              data={currentPageData}
               columns={tableColumns}
               actions={tableActions}
               visibleColumns={visibleColumns}
