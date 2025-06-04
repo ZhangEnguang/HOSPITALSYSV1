@@ -31,114 +31,338 @@ import ReviewFilesTab from "@/app/ethic-review/human-genetics-review/components/
 // 模拟数据 - 审查项目
 const mockReviewProjects = [
   {
-    id: "1",
-    title: "转基因小鼠模型在神经退行性疾病中的应用",
-    status: "审核通过",
-    statusLabel: "审核通过",
-    reviewType: "初始审查",
-    projectType: "动物",
-    animalType: "小鼠",
-    animalCount: "85只",
-    ethicsCommittee: "动物实验伦理委员会",
-    department: "神经科学研究院",
+    id: "ETH-HG-2024-001",
+    title: "中国汉族人群BRCA1/2基因致病变异筛查",
+    status: "形审通过",
+    statusLabel: "形审通过",
+    reviewType: "遗传学研究",
+    approvalType: "人遗采集审批",
+    projectType: "人遗",
+    department: "遗传学研究所",
+    ethicsCommittee: "人类遗传学伦理委员会",
     leader: "张三", 
-    createdAt: "2024-05-15",
-    deadline: "2024-06-15",
-    submittedAt: "2024-05-18",
-    approvedAt: "2024-06-02",
-    reviewNumber: "ETH-A-2024-001",
+    projectLeader: { name: "张三" },
+    createdAt: "2024-03-15",
+    deadline: "2024-03-15",
+    submittedAt: "2024-03-10",
+    approvedAt: "2024-03-10",
+    reviewNumber: "GEN-2024-001",
+    projectId: "GEN-2024-001",
     progress: 100,
-    description: "本项目旨在建立转基因小鼠模型，用于研究神经退行性疾病的发病机制与潜在治疗靶点。",
-    aiSummary: "【审核要点摘要】\n• 已完全符合3R原则要求\n• 实验设计科学合理\n• 动物福利保障措施完善\n• 安乐死方案符合规范\n\n建议：作为标准案例纳入伦理培训教材",
+    description: "针对中国汉族女性人群进行BRCA1/2基因致病变异筛查，评估乳腺癌和卵巢癌的遗传风险",
+    geneticMaterial: "血液样本",
+    sampleSize: 2000,
+    geneticTest: "全外显子组测序",
+    dataProtection: "符合GDPR与中国遗传资源管理规定",
+    aiSummary: "【审核要点摘要】\n• 研究设计科学合理\n• 遗传资源采集符合规范\n• 数据保护措施完善\n• 知情同意过程规范\n\n建议：可作为标准案例推广",
     aiModelName: "EthicGPT 2024",
     aiModelVersion: "v3.1",
     risk: {
       level: "低",
-      analysis: "该项目使用已成熟的转基因技术，动物痛苦程度低，实验过程中有完善的痛苦控制措施。",
+      analysis: "该项目采集流程规范，数据保护措施完善，风险可控。",
       suggestions: [
-        "定期检查动物健康状况",
-        "严格执行麻醉和安乐死规程",
-        "保持实验环境稳定"
+        "严格执行知情同意流程",
+        "加强数据安全管理",
+        "定期评估数据使用情况"
       ]
     },
     files: [
-      { id: "1", name: "项目申请书.pdf", type: "application", size: "2.4MB", uploadedAt: "2024-05-18", status: "已审核" },
-      { id: "2", name: "实验方案.docx", type: "protocol", size: "1.8MB", uploadedAt: "2024-05-18", status: "已审核" },
-      { id: "3", name: "3R声明.pdf", type: "declaration", size: "0.5MB", uploadedAt: "2024-05-18", status: "已审核" },
-      { id: "4", name: "伦理审查意见.pdf", type: "review", size: "1.2MB", uploadedAt: "2024-06-02", status: "已生成" }
+      { id: "1", name: "项目申请书.pdf", type: "application", size: "2.4MB", uploadedAt: "2024-03-10", status: "审核通过" },
+      { id: "2", name: "遗传资源采集方案.docx", type: "protocol", size: "1.8MB", uploadedAt: "2024-03-10", status: "审核通过" },
+      { id: "3", name: "知情同意书.pdf", type: "consent", size: "0.5MB", uploadedAt: "2024-03-10", status: "审核通过" },
+      { id: "4", name: "数据保护方案.pdf", type: "protection", size: "1.2MB", uploadedAt: "2024-03-10", status: "审核通过" }
     ]
   },
   {
-    id: "2",
-    title: "新型靶向生物药物在晚期肿瘤患者中的临床试验",
-    status: "待审核",
-    statusLabel: "待审核",
-    reviewType: "初始审查",
-    projectType: "人体",
-    participantCount: "120人",
-    ethicsCommittee: "医学伦理委员会",
-    department: "肿瘤医学中心",
+    id: "ETH-HG-2024-002",
+    title: "单基因遗传病快速诊断测序技术评估",
+    status: "已提交",
+    statusLabel: "已提交",
+    reviewType: "诊断性测序",
+    approvalType: "人遗保藏审批",
+    projectType: "人遗",
+    department: "基因组学中心",
+    ethicsCommittee: "人类遗传学伦理委员会",
     leader: "李四",
+    projectLeader: { name: "李四" },
     createdAt: "2024-05-20",
-    deadline: "2024-06-20",
-    submittedAt: "2024-05-22",
-    reviewNumber: "ETH-H-2024-002",
-    progress: 25,
-    description: "本项目旨在评估新型靶向生物药物在晚期肿瘤患者中的安全性和有效性，通过I期临床试验筛选最佳给药剂量和方案。",
-    aiSummary: "【审核要点摘要】\n• 知情同意书内容全面但表述复杂\n• 受试者招募计划合理但筛选标准较严格\n• 数据安全监测计划完善\n• 不良反应报告与处置流程规范\n\n建议：简化知情同意书语言，使一般受试者更易理解",
+    deadline: "2024-05-20",
+    submittedAt: "2024-05-20",
+    reviewNumber: "GEN-2024-008",
+    projectId: "GEN-2024-008",
+    progress: 60,
+    description: "评估快速全外显子组测序技术在罕见单基因遗传病诊断中的准确性和临床应用价值",
+    geneticMaterial: "血液、口腔拭子",
+    sampleSize: 100,
+    geneticTest: "全外显子组测序、靶向基因panel测序",
+    dataProtection: "符合临床遗传信息保护规范",
+    aiSummary: "【审核要点摘要】\n• 技术方案需要进一步评估\n• 临床应用价值有待验证\n• 数据保护措施需要完善\n• 伦理风险控制合理\n\n建议：重点关注技术准确性验证",
     aiModelName: "EthicGPT 2024",
     aiModelVersion: "v3.1",
     risk: {
       level: "中",
-      analysis: "该试验为I期临床试验，存在药物不良反应风险，但有完善的受试者监测与紧急处置措施。",
+      analysis: "技术评估项目存在一定不确定性，需要加强质量控制。",
       suggestions: [
-        "强化受试者筛查标准执行",
-        "增加初期剂量组监测频率",
-        "设立独立的数据安全监测委员会"
+        "建立完善的质量控制体系",
+        "加强技术验证和比对",
+        "完善临床数据收集"
       ]
     },
     files: [
-      { id: "5", name: "临床研究方案.pdf", type: "protocol", size: "3.8MB", uploadedAt: "2024-05-22", status: "待审核" },
-      { id: "6", name: "知情同意书.pdf", type: "consent", size: "2.1MB", uploadedAt: "2024-05-22", status: "待审核" },
-      { id: "7", name: "研究者手册.pdf", type: "handbook", size: "4.5MB", uploadedAt: "2024-05-22", status: "待审核" },
-      { id: "8", name: "病例报告表.docx", type: "report", size: "1.6MB", uploadedAt: "2024-05-22", status: "待审核" }
+      { id: "5", name: "技术评估方案.pdf", type: "protocol", size: "3.8MB", uploadedAt: "2024-05-20", status: "待审核" },
+      { id: "6", name: "临床应用计划.pdf", type: "plan", size: "2.1MB", uploadedAt: "2024-05-20", status: "待审核" },
+      { id: "7", name: "质量控制方案.pdf", type: "quality", size: "1.5MB", uploadedAt: "2024-05-20", status: "待审核" }
     ]
   },
   {
-    id: "3",
-    title: "高血压患者运动干预效果及安全性评估",
-    status: "已退回",
-    statusLabel: "已退回",
-    reviewType: "初始审查",
-    projectType: "人体",
-    participantCount: "150人",
-    ethicsCommittee: "医学伦理委员会",
-    department: "运动医学科学院",
+    id: "ETH-HG-2024-003", 
+    title: "遗传性肿瘤高风险家系咨询模式研究",
+    status: "已提交",
+    statusLabel: "已提交",
+    reviewType: "遗传咨询研究",
+    approvalType: "国际合作科研审批",
+    projectType: "人遗",
+    department: "遗传咨询科",
+    ethicsCommittee: "人类遗传学伦理委员会",
+    leader: "钱七",
+    projectLeader: { name: "钱七" },
+    createdAt: "2024-06-15",
+    deadline: "2024-06-15",
+    submittedAt: "2024-06-15",
+    reviewNumber: "GEN-2024-012",
+    projectId: "GEN-2024-012",
+    progress: 30,
+    description: "研究针对遗传性肿瘤高风险家系的遗传咨询模式，评估心理干预效果",
+    geneticMaterial: "问卷数据、家系图",
+    sampleSize: 50,
+    geneticTest: "无实验室测试",
+    dataProtection: "符合医学伦理与心理健康数据保护规范",
+    aiSummary: "【审核要点摘要】\n• 研究设计较为完善\n• 心理干预方案需要细化\n• 数据收集流程合理\n• 伦理保护措施到位\n\n建议：加强心理干预专业性",
+    aiModelName: "EthicGPT 2024",
+    aiModelVersion: "v3.1",
+    risk: {
+      level: "中",
+      analysis: "心理干预研究涉及敏感信息，需要专业的心理保护措施。",
+      suggestions: [
+        "配备专业心理咨询师",
+        "建立心理危机干预机制",
+        "加强隐私保护措施"
+      ]
+    },
+    files: [
+      { id: "8", name: "研究方案.pdf", type: "protocol", size: "2.7MB", uploadedAt: "2024-06-15", status: "待审核" },
+      { id: "9", name: "心理干预计划.pdf", type: "intervention", size: "1.8MB", uploadedAt: "2024-06-15", status: "待审核" },
+      { id: "10", name: "家系数据收集方案.docx", type: "collection", size: "1.4MB", uploadedAt: "2024-06-15", status: "待审核" }
+    ]
+  },
+  {
+    id: "ETH-HG-2024-004",
+    title: "中国人群基因组变异数据库构建", 
+    status: "形审退回",
+    statusLabel: "形审退回",
+    reviewType: "基因组学研究",
+    approvalType: "材料出境审批",
+    projectType: "人遗",
+    department: "生物信息学院",
+    ethicsCommittee: "人类遗传学伦理委员会",
+    leader: "赵六",
+    projectLeader: { name: "赵六" },
+    createdAt: "2024-04-25",
+    deadline: "2024-04-25",
+    submittedAt: "2024-04-25",
+    returnedAt: "2024-04-25",
+    reviewNumber: "GEN-2024-015",
+    projectId: "GEN-2024-015",
+    progress: 70,
+    description: "构建中国人群基因组变异数据库，为遗传病诊断和个体化医疗提供参考数据",
+    geneticMaterial: "全基因组数据",
+    sampleSize: 10000,
+    geneticTest: "全基因组测序",
+    dataProtection: "符合国家人类遗传资源管理条例，数据库访问受限",
+    aiSummary: "【退回原因分析】\n• 数据出境申请材料不完整\n• 国际合作协议需要完善\n• 数据安全保护措施需要加强\n• 知识产权保护条款缺失\n\n建议：补充完善上述材料后重新提交",
+    aiModelName: "EthicGPT 2024",
+    aiModelVersion: "v3.1",
+    risk: {
+      level: "高",
+      analysis: "大规模基因组数据涉及国家安全和个人隐私，需要严格管控。",
+      suggestions: [
+        "完善数据出境审批流程",
+        "加强国际合作监管",
+        "建立数据追踪机制"
+      ]
+    },
+    files: [
+      { id: "11", name: "数据库构建方案.pdf", type: "protocol", size: "4.2MB", uploadedAt: "2024-04-25", status: "需修改" },
+      { id: "12", name: "国际合作协议.pdf", type: "agreement", size: "2.8MB", uploadedAt: "2024-04-25", status: "需修改" },
+      { id: "13", name: "数据安全方案.pdf", type: "security", size: "3.1MB", uploadedAt: "2024-04-25", status: "需修改" },
+      { id: "14", name: "退回意见书.pdf", type: "review", size: "0.8MB", uploadedAt: "2024-04-25", status: "已生成" }
+    ]
+  },
+  {
+    id: "ETH-HG-2024-005",
+    title: "新生儿遗传代谢病筛查方案评估",
+    status: "形审通过",
+    statusLabel: "形审通过", 
+    reviewType: "遗传病筛查",
+    approvalType: "国际合作临床试验",
+    projectType: "人遗",
+    department: "临床遗传科",
+    ethicsCommittee: "人类遗传学伦理委员会",
     leader: "王五",
-    createdAt: "2024-05-10",
-    deadline: "2024-06-10",
-    submittedAt: "2024-05-12",
-    returnedAt: "2024-05-25",
-    reviewNumber: "ETH-H-2024-003",
-    progress: 40,
-    description: "本项目旨在评估不同强度有氧运动对高血压患者血压控制、心血管功能及生活质量的影响，确定最佳运动处方。",
-    aiSummary: "【退回原因分析】\n• 未充分说明高风险人群的排除标准\n• 缺乏运动中止标准的明确界定\n• 应急处置流程不够详细\n• 数据收集表单设计不完善\n\n建议：补充完善上述内容后重新提交",
+    projectLeader: { name: "王五" },
+    createdAt: "2024-03-30",
+    deadline: "2024-03-30",
+    submittedAt: "2024-03-25",
+    approvedAt: "2024-03-25",
+    reviewNumber: "GEN-2024-019",
+    projectId: "GEN-2024-019",
+    progress: 100,
+    description: "评估扩展性新生儿遗传代谢病筛查方案的可行性和临床价值",
+    geneticMaterial: "滤纸血片",
+    sampleSize: 5000,
+    geneticTest: "质谱分析、基因检测",
+    dataProtection: "符合新生儿筛查数据保护规范",
+    aiSummary: "【审核通过要点】\n• 筛查方案科学合理\n• 临床价值明确\n• 数据保护措施完善\n• 家长知情同意规范\n\n建议：可推广应用",
+    aiModelName: "EthicGPT 2024",
+    aiModelVersion: "v3.1",
+    risk: {
+      level: "低",
+      analysis: "新生儿筛查为临床常规项目，风险可控。",
+      suggestions: [
+        "加强筛查结果沟通",
+        "完善后续随访机制",
+        "保护新生儿隐私"
+      ]
+    },
+    files: [
+      { id: "15", name: "筛查方案.pdf", type: "protocol", size: "3.2MB", uploadedAt: "2024-03-25", status: "审核通过" },
+      { id: "16", name: "临床评估计划.pdf", type: "assessment", size: "2.0MB", uploadedAt: "2024-03-25", status: "审核通过" },
+      { id: "17", name: "家长知情同意书.pdf", type: "consent", size: "1.1MB", uploadedAt: "2024-03-25", status: "审核通过" }
+    ]
+  },
+  {
+    id: "ETH-HG-2024-006",
+    title: "帕金森病相关基因变异功能验证",
+    status: "形审退回",
+    statusLabel: "形审退回",
+    reviewType: "遗传学研究",
+    approvalType: "对外提供使用备案",
+    projectType: "人遗",
+    department: "遗传学研究所",
+    ethicsCommittee: "人类遗传学伦理委员会",
+    leader: "张三",
+    projectLeader: { name: "张三" },
+    createdAt: "2024-02-28",
+    deadline: "2024-02-28",
+    submittedAt: "2024-02-25",
+    returnedAt: "2024-02-25",
+    reviewNumber: "GEN-2024-022",
+    projectId: "GEN-2024-022",
+    progress: 100,
+    description: "对帕金森病相关基因变异进行功能验证和致病性评估",
+    geneticMaterial: "口腔拭子、外周血",
+    sampleSize: 200,
+    geneticTest: "靶向基因测序、功能验证实验",
+    dataProtection: "数据保护措施不完善，需重新制定",
+    aiSummary: "【退回原因分析】\n• 对外提供使用方案不明确\n• 数据保护措施不完善\n• 合作方资质需要验证\n• 使用监管机制缺失\n\n建议：完善合作管理体系",
+    aiModelName: "EthicGPT 2024",
+    aiModelVersion: "v3.1",
+    risk: {
+      level: "高",
+      analysis: "对外提供遗传资源涉及监管合规，需要严格审核。",
+      suggestions: [
+        "完善合作方资质审查",
+        "建立使用监管机制",
+        "加强数据流向追踪"
+      ]
+    },
+    files: [
+      { id: "18", name: "功能验证方案.pdf", type: "protocol", size: "2.8MB", uploadedAt: "2024-02-25", status: "需修改" },
+      { id: "19", name: "对外提供协议.pdf", type: "agreement", size: "1.9MB", uploadedAt: "2024-02-25", status: "需修改" },
+      { id: "20", name: "数据保护方案.pdf", type: "protection", size: "1.5MB", uploadedAt: "2024-02-25", status: "需修改" },
+      { id: "21", name: "退回意见书.pdf", type: "review", size: "0.9MB", uploadedAt: "2024-02-25", status: "已生成" }
+    ]
+  },
+  {
+    id: "ETH-HG-2024-007",
+    title: "罕见遗传病无创产前诊断研究",
+    status: "已提交",
+    statusLabel: "已提交",
+    reviewType: "诊断性测序",
+    approvalType: "重要家系资源备案",
+    projectType: "人遗",
+    department: "基因组学中心",
+    ethicsCommittee: "人类遗传学伦理委员会",
+    leader: "李四",
+    projectLeader: { name: "李四" },
+    createdAt: "2024-07-15",
+    deadline: "2024-07-15",
+    submittedAt: "2024-07-15",
+    reviewNumber: "GEN-2024-025",
+    projectId: "GEN-2024-025",
+    progress: 20,
+    description: "研究无创产前诊断技术在罕见单基因遗传病诊断中的应用",
+    geneticMaterial: "母体外周血",
+    sampleSize: 300,
+    geneticTest: "无创产前检测技术",
+    dataProtection: "符合产前诊断数据特殊保护规范",
+    aiSummary: "【审核要点摘要】\n• 技术创新性较强\n• 临床应用前景良好\n• 产前诊断伦理需要重点关注\n• 家系资源保护需要加强\n\n建议：重点评估伦理风险",
     aiModelName: "EthicGPT 2024", 
     aiModelVersion: "v3.1",
     risk: {
       level: "中高",
-      analysis: "高血压患者进行运动干预存在心血管事件风险，需要严格的筛查标准和监测措施。现有方案中的风险控制措施不够完善。",
+      analysis: "产前诊断涉及敏感的生育决策，需要谨慎处理伦理问题。",
       suggestions: [
-        "制定详细的高危人群排除标准",
-        "明确运动中止指标和应急预案",
-        "配备专业医护人员现场监督"
+        "加强遗传咨询服务",
+        "完善知情同意流程",
+        "建立心理支持机制"
       ]
     },
     files: [
-      { id: "9", name: "研究方案.pdf", type: "protocol", size: "2.7MB", uploadedAt: "2024-05-12", status: "需修改" },
-      { id: "10", name: "知情同意书.pdf", type: "consent", size: "1.8MB", uploadedAt: "2024-05-12", status: "需修改" },
-      { id: "11", name: "运动处方设计.docx", type: "prescription", size: "1.4MB", uploadedAt: "2024-05-12", status: "需修改" },
-      { id: "12", name: "退回意见书.pdf", type: "review", size: "0.8MB", uploadedAt: "2024-05-25", status: "已生成" }
+      { id: "22", name: "无创诊断方案.pdf", type: "protocol", size: "3.5MB", uploadedAt: "2024-07-15", status: "待审核" },
+      { id: "23", name: "家系资源管理方案.pdf", type: "management", size: "2.2MB", uploadedAt: "2024-07-15", status: "待审核" },
+      { id: "24", name: "产前咨询方案.pdf", type: "counseling", size: "1.8MB", uploadedAt: "2024-07-15", status: "待审核" }
+    ]
+  },
+  {
+    id: "ETH-HG-2024-008",
+    title: "肿瘤液体活检基因谱分析",
+    status: "已提交",
+    statusLabel: "已提交",
+    reviewType: "基因组学研究",
+    approvalType: "人遗采集审批",
+    projectType: "人遗",
+    department: "基因组学中心",
+    ethicsCommittee: "人类遗传学伦理委员会",
+    leader: "李四",
+    projectLeader: { name: "李四" },
+    createdAt: "2024-06-20",
+    deadline: "2024-06-20", 
+    submittedAt: "2024-06-20",
+    reviewNumber: "GEN-2024-030",
+    projectId: "GEN-2024-030",
+    progress: 50,
+    description: "基于循环肿瘤DNA的液体活检基因谱分析技术评估",
+    geneticMaterial: "外周血、血浆",
+    sampleSize: 150,
+    geneticTest: "靶向基因测序、液体活检技术",
+    dataProtection: "符合肿瘤患者遗传信息特殊保护规范",
+    aiSummary: "【审核要点摘要】\n• 液体活检技术具有临床价值\n• 肿瘤患者特殊保护需要关注\n• 基因谱分析方案合理\n• 数据安全措施需要加强\n\n建议：重点关注患者权益保护",
+    aiModelName: "EthicGPT 2024",
+    aiModelVersion: "v3.1",
+    risk: {
+      level: "中",
+      analysis: "肿瘤患者群体较为脆弱，需要特殊的伦理保护措施。",
+      suggestions: [
+        "加强患者知情同意",
+        "完善数据安全保护",
+        "建立患者权益保障机制"
+      ]
+    },
+    files: [
+      { id: "25", name: "液体活检方案.pdf", type: "protocol", size: "4.1MB", uploadedAt: "2024-06-20", status: "待审核" },
+      { id: "26", name: "基因谱分析计划.pdf", type: "analysis", size: "3.2MB", uploadedAt: "2024-06-20", status: "待审核" },
+      { id: "27", name: "患者保护方案.pdf", type: "protection", size: "2.1MB", uploadedAt: "2024-06-20", status: "待审核" }
     ]
   }
 ];
@@ -190,9 +414,15 @@ export default function EthicReviewDetail({ params }: { params: { id: string } }
     const searchId = params.id;
     console.log("正在查找项目，搜索ID:", searchId);
     
-    // 查找项目
+    // 首先尝试从mockReviewProjects中查找
+    let project = mockReviewProjects.find((p) => p.id === searchId);
+    if (project) {
+      console.log("在mockReviewProjects中找到项目:", project.id, project.title);
+      return project;
+    }
+    
+    // 如果在mockReviewProjects中没找到，再从演示数据中查找
     try {
-      // 先尝试从演示数据中查找
       const { humanGeneticsReviewItems } = require("../data/human-genetics-review-demo-data");
       
       // 先检查是否直接匹配ID
@@ -222,10 +452,12 @@ export default function EthicReviewDetail({ params }: { params: { id: string } }
           ethicsCommittee: listProject.ethicsCommittee,
           department: listProject.department,
           leader: listProject.projectLeader?.name || "未指定",
+          projectLeader: listProject.projectLeader,
           createdAt: listProject.dueDate || "未指定",
           deadline: listProject.dueDate || "未指定",
           submittedAt: listProject.actualDate || listProject.dueDate || "未指定",
           reviewNumber: listProject.projectId,
+          projectId: listProject.projectId,
           progress: listProject.completion || 0,
           description: listProject.description || "暂无描述",
           // 构建基于项目特性的AI审核摘要
@@ -257,7 +489,7 @@ export default function EthicReviewDetail({ params }: { params: { id: string } }
     // 根据项目ID或审批类型提供不同的AI摘要
     switch(project.id) {
       case "ETH-HG-2024-001":
-        return "【审核要点摘要】\n• 知情同意流程完整规范\n• 基因数据加密存储方案可行\n• 符合人类遗传资源保护条例\n• 遗传咨询方案完善\n\n建议：加强数据脱敏与隐私保护措施";
+        return "【审核要点摘要】\n• 研究设计科学合理\n• 遗传资源采集符合规范\n• 数据保护措施完善\n• 知情同意过程规范\n\n建议：可作为标准案例推广";
       case "ETH-HG-2024-004":
         return "【退回原因分析】\n• 数据库共享机制不符合人遗办规定\n• 跨境数据传输协议不完善\n• 未明确说明遗传资源出境目的\n• 未提供足够的数据安全保障措施\n\n建议：补充完善上述内容后重新提交";
       case "ETH-HG-2024-006":
@@ -265,7 +497,7 @@ export default function EthicReviewDetail({ params }: { params: { id: string } }
       default:
         // 根据审批类型提供通用摘要
         if (project.approvalType === "人遗采集审批") {
-          return "【审核要点摘要】\n• 知情同意流程基本合规\n• 样本采集方法符合规范\n• 遗传资源保护措施适当\n• 样本运输与储存计划合理\n\n建议：进一步完善数据安全保障措施";
+          return "【审核要点摘要】\n• 研究设计科学合理\n• 遗传资源采集符合规范\n• 数据保护措施完善\n• 知情同意过程规范\n\n建议：可作为标准案例推广";
         } else if (project.approvalType === "材料出境审批") {
           return "【审核要点摘要】\n• 出境目的说明清晰\n• 合作方资质审核通过\n• 数据共享协议基本合规\n• 知识产权保护条款完善\n\n建议：明确数据使用期限与范围限制";
         } else {
@@ -556,46 +788,46 @@ export default function EthicReviewDetail({ params }: { params: { id: string } }
       return [];
     }
     
+    // 添加调试日志
+    console.log("当前项目数据:", {
+      id: currentProject.id,
+      title: currentProject.title,
+      reviewType: currentProject.reviewType,
+      approvalType: currentProject.approvalType
+    });
+    
     const baseFields = [
       {
         id: "reviewNumber",
         label: "受理号",
-        value: currentProject.reviewNumber || "未分配",
+        value: currentProject.reviewNumber || currentProject.projectId || "未分配",
         icon: <FileSignature className="h-4 w-4 text-gray-400" />,
       },
       {
         id: "approvalType",
-        label: "审批类型",
+        label: "审查类型",
         value: currentProject.approvalType || "未指定",
         icon: <FileCheck className="h-4 w-4 text-gray-400" />,
       },
       {
         id: "leader",
         label: "负责人",
-        value: currentProject.leader || "未指定",
+        value: currentProject.leader || (currentProject.projectLeader && currentProject.projectLeader.name) || "未指定",
         icon: <User className="h-4 w-4 text-gray-400" />,
-      }
-    ];
-    
-    // 添加人遗资源特有的重要字段
-    if (currentProject.projectType === "人遗") {
-      baseFields.push(
-        {
-          id: "geneticMaterial",
-          label: "遗传物质类型",
-          value: currentProject.geneticMaterial || "未指定",
-          icon: <FileText className="h-4 w-4 text-gray-400" />,
+      },
+      {
+        id: "department",
+        label: "所属院系",
+        value: currentProject.department || "未指定",
+        icon: <Building2 className="h-4 w-4 text-gray-400" />,
         },
         {
-          id: "sampleSize",
-          label: "样本量",
-          value: typeof currentProject.sampleSize === 'number' 
-            ? `${currentProject.sampleSize}份` 
-            : (currentProject.sampleSize || "未指定"),
-          icon: <BriefcaseMedical className="h-4 w-4 text-gray-400" />,
+        id: "committee",
+        label: "伦理委员会",
+        value: currentProject.ethicsCommittee || "未指定",
+        icon: <Users className="h-4 w-4 text-gray-400" />,
         }
-      );
-    }
+    ];
     
     return baseFields;
   };

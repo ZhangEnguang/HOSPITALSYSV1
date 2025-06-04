@@ -442,7 +442,7 @@ export default function EthicProjectOverviewTab({
             </div>
             <div>
               <div className="text-sm text-muted-foreground">审查类型</div>
-              <div className="font-medium">{project.reviewType || "初始审查"}</div>
+              <div className="font-medium">{project.approvalType || "未指定"}</div>
             </div>
             <div>
               <div className="text-sm text-muted-foreground">伦理委员会</div>
