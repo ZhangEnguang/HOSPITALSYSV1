@@ -19,8 +19,8 @@ const DEFAULT_PROJECT_DATA = {
   ethicsCommittee: "医学院伦理审查委员会"
 }
 
-// 动物伦理初始审查表单组件
-export function AnimalInitialReview({
+// 动物伦理复审表单组件
+export function AnimalRecheckReview({
   projectData: initialProjectData = DEFAULT_PROJECT_DATA
 }) {
   const router = useRouter()
@@ -36,6 +36,7 @@ export function AnimalInitialReview({
       const animalType = searchParams.get('animalType')
       const animalCount = searchParams.get('animalCount')
       const facilityUnit = searchParams.get('facilityUnit')
+      const ethicsCommittee = searchParams.get('ethicsCommittee')
       
       if (projectId) {
         // 更新项目数据
@@ -46,6 +47,7 @@ export function AnimalInitialReview({
           ...(animalType && { animalType: decodeURIComponent(animalType) }),
           ...(animalCount && { animalCount: decodeURIComponent(animalCount) }),
           ...(facilityUnit && { facilityUnit: decodeURIComponent(facilityUnit) }),
+          ...(ethicsCommittee && { ethicsCommittee: decodeURIComponent(ethicsCommittee) }),
         }))
       }
     }
@@ -62,11 +64,11 @@ export function AnimalInitialReview({
     { key: "ethicsCommittee", label: "伦理委员会", value: projectData.ethicsCommittee, disabled: true, span: "half" }
   ]
 
-  // 动物伦理初始审查的送审文件清单
-  const initialReviewFiles: ReviewFileItem[] = [
+  // 动物伦理复审的送审文件清单
+  const recheckReviewFiles: ReviewFileItem[] = [
     {
       id: 1,
-      fileName: "动物伦理审查申请表",
+      fileName: "动物伦理复审申请表",
       format: "PDF/Word",
       required: true,
       quantity: "1",
@@ -75,41 +77,15 @@ export function AnimalInitialReview({
       versionDate: "",
       versionNumber: "",
       hasTemplate: true,
-      templateUrl: "/templates/animal-ethics-application-form.docx"
+      templateUrl: "/templates/animal-ethics-recheck-form.docx"
     },
     {
       id: 2,
-      fileName: "项目研究方案",
+      fileName: "原始审查决定书",
       format: "PDF/Word",
       required: true,
       quantity: "1",
-      fileType: "研究方案",
-      files: [],
-      versionDate: "",
-      versionNumber: "",
-      hasTemplate: true,
-      templateUrl: "/templates/research-protocol-template.docx"
-    },
-    {
-      id: 3,
-      fileName: "知情同意书",
-      format: "PDF/Word",
-      required: true,
-      quantity: "1",
-      fileType: "知情同意",
-      files: [],
-      versionDate: "",
-      versionNumber: "",
-      hasTemplate: true,
-      templateUrl: "/templates/informed-consent-template.docx"
-    },
-    {
-      id: 4,
-      fileName: "调查问卷",
-      format: "PDF/Word/Excel",
-      required: false,
-      quantity: "不限制",
-      fileType: "调查问卷",
+      fileType: "审查决定",
       files: [],
       versionDate: "",
       versionNumber: "",
@@ -117,7 +93,46 @@ export function AnimalInitialReview({
       templateUrl: ""
     },
     {
+      id: 3,
+      fileName: "复审说明报告",
+      format: "PDF/Word",
+      required: true,
+      quantity: "1",
+      fileType: "复审报告",
+      files: [],
+      versionDate: "",
+      versionNumber: "",
+      hasTemplate: true,
+      templateUrl: "/templates/recheck-report-template.docx"
+    },
+    {
+      id: 4,
+      fileName: "项目进展报告",
+      format: "PDF/Word",
+      required: true,
+      quantity: "1",
+      fileType: "进展报告",
+      files: [],
+      versionDate: "",
+      versionNumber: "",
+      hasTemplate: true,
+      templateUrl: "/templates/progress-report-template.docx"
+    },
+    {
       id: 5,
+      fileName: "修订的研究方案（如有）",
+      format: "PDF/Word",
+      required: false,
+      quantity: "不限制",
+      fileType: "研究方案",
+      files: [],
+      versionDate: "",
+      versionNumber: "",
+      hasTemplate: false,
+      templateUrl: ""
+    },
+    {
+      id: 6,
       fileName: "其他支持性文件",
       format: "PDF/Word/Excel",
       required: false,
@@ -132,20 +147,20 @@ export function AnimalInitialReview({
   ]
 
   // 管理送审文件清单状态
-  const [reviewFiles, setReviewFiles] = useState(initialReviewFiles)
+  const [reviewFiles, setReviewFiles] = useState(recheckReviewFiles)
 
   // 处理表单提交
   const handleSubmit = (data: any) => {
-    console.log("提交动物伦理初始审查表单:", data)
+    console.log("提交动物伦理复审表单:", data)
     toast({
       title: "提交成功",
-      description: "动物伦理初始审查表单已提交成功"
+      description: "动物伦理复审表单已提交成功"
     })
   }
 
   return (
     <ReviewFormBase
-      title="新增初始审查"
+      title="新增复审"
       returnPath="/ethic-projects/animal"
       projectInfo={projectData}
       fileList={reviewFiles}

@@ -47,6 +47,7 @@ const ReviewTypeSelect: React.FC<ReviewTypeSelectProps> = ({ value, onValueChang
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="initial">初始审查</SelectItem>
+        <SelectItem value="recheck">复审</SelectItem>
       </SelectContent>
     </Select>
   );
@@ -102,11 +103,21 @@ export function CreateAnimalReviewDialog({
     // 准备项目信息参数
     const projectParams = `projectId=${encodeURIComponent(projectTitle)}`;
     
+    // 如果有伦理委员会信息，添加到参数中
+    const ethicsCommitteeParam = ethicsCommittee ? `&ethicsCommittee=${encodeURIComponent(ethicsCommittee)}` : '';
+    
     // 使用较长的延迟确保对话框完全关闭后再导航
     // 这样可以避免闪烁问题
     setTimeout(() => {
-      // 首先导航到目标页面，同时传递项目信息
-      router.push(`/ethic-projects/review/animal?${projectParams}`);
+      // 根据审查类型导航到不同页面
+      if (reviewType === "recheck") {
+        console.log("导航到动物伦理复审页面");
+        router.push(`/ethic-projects/review/animal/recheck?${projectParams}${ethicsCommitteeParam}`);
+      } else {
+        // 默认为初始审查
+        console.log("导航到动物伦理初始审查页面");
+        router.push(`/ethic-projects/review/animal?${projectParams}${ethicsCommitteeParam}`);
+      }
       
       // 然后执行onSubmit回调
       setTimeout(onSubmit, 100);
@@ -128,13 +139,12 @@ export function CreateAnimalReviewDialog({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="reviewType">
-                审查类型
-                <RequiredMark />
+                审查类型（<span className="text-blue-600 font-medium">必填</span>）
               </Label>
               <ReviewTypeSelect value={reviewType} onValueChange={setReviewType} />
               <div className="mt-1.5 text-xs text-amber-600 flex items-center">
                 <AlertTriangle className="h-3.5 w-3.5 mr-1" />
-                <span>动物伦理项目仅支持初始审查</span>
+                <span>动物伦理项目仅支持初始审查、复审</span>
               </div>
             </div>
             

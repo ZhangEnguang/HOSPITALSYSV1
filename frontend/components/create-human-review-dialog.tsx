@@ -99,6 +99,11 @@ const ReviewTypeSelect: React.FC<ReviewTypeSelectProps> = ({ value, onValueChang
         { id: "external_use", label: "对外提供或开放使用备案" },
         { id: "important_resource", label: "重要遗传家系和特定地区人遗资源" }
       ]
+    },
+    {
+      id: "recheck",
+      label: "复审",
+      items: []
     }
   ];
 
@@ -253,7 +258,7 @@ const ReviewTypeSelect: React.FC<ReviewTypeSelectProps> = ({ value, onValueChang
             {getFilteredOptions().map((group) => (
               <div key={group.id} className="mb-1">
                 {/* 组标题 */}
-                {group.id === "initial" ? (
+                {(group.id === "initial" || group.id === "recheck") ? (
                   <div 
                     className={`flex items-center px-3 py-2 text-sm cursor-pointer transition-colors rounded-md ${value === group.id ? 'bg-blue-50 text-blue-700 font-medium' : 'hover:bg-gray-100'}`}
                     onClick={() => handleSelect(group.id)}
@@ -353,6 +358,12 @@ export function CreateHumanReviewDialog({
     if (reviewType === "initial") {
       console.log("导航到人体伦理初始审查页面");
       router.push(`/ethic-projects/review/human?${projectParams}${ethicsCommitteeParam}`);
+      handleClose();
+    }
+    // 如果选择了复审，导航到新增人体伦理复审页面
+    else if (reviewType === "recheck") {
+      console.log("导航到人体伦理复审页面");
+      router.push(`/ethic-projects/review/human/recheck?${projectParams}${ethicsCommitteeParam}`);
       handleClose();
     } 
     // 如果选择了修正案审查，导航到新增人体伦理修正案审查页面
@@ -512,8 +523,7 @@ export function CreateHumanReviewDialog({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="reviewType">
-                审查类型
-                <RequiredMark />
+                审查类型（<span className="text-blue-600 font-medium">必填</span>）
               </Label>
               <ReviewTypeSelect value={reviewType} onValueChange={setReviewType} />
             </div>
