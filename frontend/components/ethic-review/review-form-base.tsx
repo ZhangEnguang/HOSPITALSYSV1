@@ -29,6 +29,7 @@ export function ReviewFormBase({
   children, // 自定义内容区域
   amendmentDescription, // 修改说明（可选，仅用于修改审查）
   customSubmitButton, // 自定义提交按钮
+  isSubmitting = false, // 是否正在提交
 }: {
   title: string
   returnPath: string
@@ -38,6 +39,7 @@ export function ReviewFormBase({
   children?: React.ReactNode
   amendmentDescription?: string
   customSubmitButton?: React.ReactNode
+  isSubmitting?: boolean
 }) {
   const router = useRouter()
   
@@ -218,9 +220,10 @@ export function ReviewFormBase({
             <Button 
               type="button" 
               onClick={handleSubmit} 
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-md h-10 px-4 py-2 transition-colors focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+              disabled={isSubmitting}
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-md h-10 px-4 py-2 transition-colors focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              确认
+              {isSubmitting ? "提交中..." : "确认"}
             </Button>
           )}
         </div>

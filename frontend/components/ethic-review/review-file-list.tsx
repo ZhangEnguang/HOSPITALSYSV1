@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { FileTextIcon, UploadIcon, FileText, Trash2 } from "lucide-react"
+import { FileTextIcon, UploadIcon, FileText, Trash2, Download } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -65,12 +65,16 @@ export function ReviewFileList({
   title = "送审文件信息",
   fileList,
   onChange,
-  onAIReview
+  onAIReview,
+  relatedProject,
+  onDownloadOriginal
 }: {
   title?: string;
   fileList: ReviewFileItem[];
   onChange?: (newFileList: ReviewFileItem[]) => void;
   onAIReview?: () => void;
+  relatedProject?: any;
+  onDownloadOriginal?: (fileName: string) => void;
 }) {
   // 文件预览状态
   const [previewFile, setPreviewFile] = useState<FilePreview>(null);
@@ -254,15 +258,18 @@ export function ReviewFileList({
               {/* 表头 */}
               <thead>
                 <tr className="bg-gray-50">
-                  <th className="py-2 px-4 text-left font-medium text-slate-700 border-b border-gray-200 min-w-[200px] w-[20%]">文件名称</th>
-                  <th className="py-2 px-3 text-left font-medium text-slate-700 border-b border-gray-200 w-[10%]">格式</th>
-                  <th className="py-2 px-3 text-center font-medium text-slate-700 border-b border-gray-200 w-[8%]">必填</th>
-                  <th className="py-2 px-3 text-center font-medium text-slate-700 border-b border-gray-200 w-[8%]">数量</th>
-                  <th className="py-2 px-3 text-left font-medium text-slate-700 border-b border-gray-200 w-[10%]">文件类型</th>
-                  <th className="py-2 px-3 text-center font-medium text-slate-700 border-b border-gray-200 w-[10%]">模板</th>
+                  <th className="py-2 px-4 text-left font-medium text-slate-700 border-b border-gray-200 min-w-[200px] w-[18%]">文件名称</th>
+                  <th className="py-2 px-3 text-left font-medium text-slate-700 border-b border-gray-200 w-[8%]">格式</th>
+                  <th className="py-2 px-3 text-center font-medium text-slate-700 border-b border-gray-200 w-[6%]">必填</th>
+                  <th className="py-2 px-3 text-center font-medium text-slate-700 border-b border-gray-200 w-[6%]">数量</th>
+                  <th className="py-2 px-3 text-left font-medium text-slate-700 border-b border-gray-200 w-[8%]">文件类型</th>
+                  {relatedProject && (
+                    <th className="py-2 px-3 text-center font-medium text-slate-700 border-b border-gray-200 w-[12%]">原文件</th>
+                  )}
+                  <th className="py-2 px-3 text-center font-medium text-slate-700 border-b border-gray-200 w-[8%]">模板</th>
                   <th className="py-2 px-3 text-center font-medium text-slate-700 border-b border-gray-200 w-[10%]">上传</th>
-                  <th className="py-2 px-3 text-center font-medium text-slate-700 border-b border-gray-200 w-[12%]">版本日期</th>
-                  <th className="py-2 px-3 text-center font-medium text-slate-700 border-b border-gray-200 w-[12%]">版本号</th>
+                  <th className="py-2 px-3 text-center font-medium text-slate-700 border-b border-gray-200 w-[10%]">版本日期</th>
+                  <th className="py-2 px-3 text-center font-medium text-slate-700 border-b border-gray-200 w-[10%]">版本号</th>
                 </tr>
               </thead>
               
@@ -335,6 +342,37 @@ export function ReviewFileList({
                     </td>
                     <td className="py-3 px-3 text-center text-slate-600 border-b border-gray-200">{item.quantity}</td>
                     <td className="py-3 px-3 text-slate-600 border-b border-gray-200 whitespace-nowrap">{item.fileType}</td>
+                    
+                    {/* 原文件信息 - 仅在复审时显示 */}
+                    {relatedProject && (
+                      <td className="py-3 px-3 text-center border-b border-gray-200">
+                        {(() => {
+                          const originalFile = relatedProject.originalFiles?.find((orig: any) => orig.id === item.id);
+                          if (originalFile) {
+                            return (
+                              <div className="space-y-1">
+                                <div className="text-xs text-gray-600">
+                                  {originalFile.versionNumber}
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 text-xs text-amber-600 hover:text-amber-800 hover:bg-amber-50 px-2"
+                                  onClick={() => onDownloadOriginal && onDownloadOriginal(originalFile.fileName)}
+                                >
+                                  <FileText className="h-3 w-3 mr-1" />
+                                  下载
+                                </Button>
+                              </div>
+                            );
+                          }
+                          return (
+                            <span className="text-slate-400 text-xs">无原文件</span>
+                          );
+                        })()}
+                      </td>
+                    )}
                     
                     {/* 模板下载 */}
                     <td className="py-3 px-3 text-center border-b border-gray-200">
