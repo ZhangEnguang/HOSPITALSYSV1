@@ -13,7 +13,19 @@ export enum ReviewType {
   HUMAN_AMENDMENT = "human_amendment",
   HUMAN_CONTINUING = "human_continuing",
   HUMAN_SAE = "human_sae", // 严重不良事件
-  HUMAN_FINAL = "human_final"
+  HUMAN_FINAL = "human_final",
+  
+  // 人类遗传资源审查类型
+  HUMAN_GENETICS_COLLECTION = "human_genetics_collection", // 人遗采集审批
+  HUMAN_GENETICS_PRESERVATION = "human_genetics_preservation", // 人遗保藏审批
+  HUMAN_GENETICS_INTERNATIONAL = "human_genetics_international", // 国际合作科学研究审批
+  HUMAN_GENETICS_EXPORT = "human_genetics_export", // 材料出境审批
+  HUMAN_GENETICS_CLINICAL_TRIAL = "human_genetics_clinical_trial", // 国际合作临床试验备案
+  HUMAN_GENETICS_PROVISION = "human_genetics_provision", // 对外提供或开放使用备案
+  HUMAN_GENETICS_FAMILY_RESOURCE = "human_genetics_family_resource", // 重要遗传家系和特定地区人遗资源
+  
+  // 复审类型
+  RECHECK = "recheck" // 复审
 }
 
 // 审查类型基础配置
@@ -92,6 +104,66 @@ export const reviewTypeConfigs: Record<ReviewType, ReviewTypeConfig> = {
     description: "人体研究伦理项目完成后的结题报告",
     path: "/ethic-projects/review/human/final",
     returnPath: "/ethic-projects/human"
+  },
+  
+  // 人类遗传资源审查类型配置
+  [ReviewType.HUMAN_GENETICS_COLLECTION]: {
+    type: ReviewType.HUMAN_GENETICS_COLLECTION,
+    title: "人类遗传资源采集审批",
+    description: "审批人类遗传资源的采集",
+    path: "/ethic-projects/review/human/genetics/collection",
+    returnPath: "/ethic-projects/human"
+  },
+  [ReviewType.HUMAN_GENETICS_PRESERVATION]: {
+    type: ReviewType.HUMAN_GENETICS_PRESERVATION,
+    title: "人类遗传资源保藏审批",
+    description: "审批人类遗传资源的保藏",
+    path: "/ethic-projects/review/human/genetics/preservation",
+    returnPath: "/ethic-projects/human"
+  },
+  [ReviewType.HUMAN_GENETICS_INTERNATIONAL]: {
+    type: ReviewType.HUMAN_GENETICS_INTERNATIONAL,
+    title: "国际合作科学研究审批",
+    description: "审批国际合作科学研究",
+    path: "/ethic-projects/review/human/genetics/international",
+    returnPath: "/ethic-projects/human"
+  },
+  [ReviewType.HUMAN_GENETICS_EXPORT]: {
+    type: ReviewType.HUMAN_GENETICS_EXPORT,
+    title: "材料出境审批",
+    description: "审批人类遗传资源材料出境",
+    path: "/ethic-projects/review/human/genetics/export",
+    returnPath: "/ethic-projects/human"
+  },
+  [ReviewType.HUMAN_GENETICS_CLINICAL_TRIAL]: {
+    type: ReviewType.HUMAN_GENETICS_CLINICAL_TRIAL,
+    title: "国际合作临床试验备案",
+    description: "备案国际合作临床试验",
+    path: "/ethic-projects/review/human/genetics/clinical-trial",
+    returnPath: "/ethic-projects/human"
+  },
+  [ReviewType.HUMAN_GENETICS_PROVISION]: {
+    type: ReviewType.HUMAN_GENETICS_PROVISION,
+    title: "对外提供或开放使用备案",
+    description: "备案对外提供或开放使用人类遗传资源",
+    path: "/ethic-projects/review/human/genetics/provision",
+    returnPath: "/ethic-projects/human"
+  },
+  [ReviewType.HUMAN_GENETICS_FAMILY_RESOURCE]: {
+    type: ReviewType.HUMAN_GENETICS_FAMILY_RESOURCE,
+    title: "重要遗传家系和特定地区人遗资源",
+    description: "重要遗传家系和特定地区人遗资源",
+    path: "/ethic-projects/review/human/genetics/family-resource",
+    returnPath: "/ethic-projects/human"
+  },
+  
+  // 复审类型配置
+  [ReviewType.RECHECK]: {
+    type: ReviewType.RECHECK,
+    title: "复审",
+    description: "复审",
+    path: "/ethic-projects/review/recheck",
+    returnPath: "/ethic-projects/review"
   }
 };
 

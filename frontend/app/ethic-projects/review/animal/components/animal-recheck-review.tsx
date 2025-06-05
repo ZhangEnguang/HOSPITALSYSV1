@@ -44,14 +44,14 @@ const DEFAULT_PROJECT_DATA = {
 }
 
 // 模拟该项目的历史审查记录（可用于复审的记录）
-const MOCK_REVIEW_RECORDS: ReviewRecord[] = [
+const getMockReviewRecords = (projectTitle: string): ReviewRecord[] => [
   {
     id: "review-001",
-    projectTitle: "实验性大鼠药代动力学研究", // 项目名称固定
+    projectTitle: projectTitle, // 项目名称动态获取
     reviewType: "初始审查",
     reviewResult: "conditional",
     reviewResultText: "必要的修改后同意",
-    reviewComments: "研究方案中的动物数量需要重新评估，建议减少到60只。知情同意书需要增加更详细的风险说明。请在修改后重新提交复审。",
+    reviewComments: "研究方案中的动物数量需要重新评估，建议减少到60只。动物福利保护措施需要进一步完善。请在修改后重新提交复审。",
     submitDate: "2024-01-15",
     decisionDate: "2024-01-25",
     originalFiles: [
@@ -85,7 +85,7 @@ const MOCK_REVIEW_RECORDS: ReviewRecord[] = [
   },
   {
     id: "review-002",
-    projectTitle: "实验性大鼠药代动力学研究", // 项目名称固定
+    projectTitle: projectTitle, // 项目名称动态获取
     reviewType: "初始审查",
     reviewResult: "negative",
     reviewResultText: "不同意",
@@ -105,6 +105,44 @@ const MOCK_REVIEW_RECORDS: ReviewRecord[] = [
         versionNumber: "V1.0",
         hasTemplate: true,
         templateUrl: "/templates/animal-ethics-application-form.docx"
+      }
+    ]
+  },
+  {
+    id: "review-003",
+    projectTitle: projectTitle, // 项目名称动态获取
+    reviewType: "初始审查",
+    reviewResult: "conditional",
+    reviewResultText: "必要的修改后同意",
+    reviewComments: "动物实验程序需要进一步优化，实验环境条件需要改善。建议提供更详细的动物护理计划和实验操作规程。",
+    submitDate: "2024-02-10",
+    decisionDate: "2024-02-20",
+    originalFiles: [
+      {
+        id: 1,
+        fileName: "动物伦理审查申请表",
+        format: "PDF/Word",
+        required: true,
+        quantity: "1",
+        fileType: "申请表",
+        files: [],
+        versionDate: "2024-02-10",
+        versionNumber: "V1.0",
+        hasTemplate: true,
+        templateUrl: "/templates/animal-ethics-application-form.docx"
+      },
+      {
+        id: 2,
+        fileName: "动物实验操作规程",
+        format: "PDF/Word",
+        required: true,
+        quantity: "1",
+        fileType: "操作规程",
+        files: [],
+        versionDate: "2024-02-10",
+        versionNumber: "V1.0",
+        hasTemplate: true,
+        templateUrl: "/templates/animal-operation-protocol.docx"
       }
     ]
   }
@@ -129,6 +167,8 @@ export function AnimalRecheckReview({
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false)
   const [showSearchHistory, setShowSearchHistory] = useState(false)
   const [searchHistory, setSearchHistory] = useState<string[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize] = useState(5)
   const [filters, setFilters] = useState({
     resultType: 'all', // all, conditional, negative
     timeRange: 'all', // all, recent, lastMonth, lastYear
@@ -137,8 +177,13 @@ export function AnimalRecheckReview({
   // 初始化审查记录列表
   useEffect(() => {
     // 模拟获取该项目的历史审查记录
-    setReviewRecords(MOCK_REVIEW_RECORDS)
-  }, [])
+    setReviewRecords(getMockReviewRecords(projectData.projectTitle))
+  }, [projectData.projectTitle])
+
+  // 重置分页当筛选条件改变时
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchText, filters.resultType, filters.timeRange])
 
   // 点击外部关闭高级筛选
   useEffect(() => {
@@ -437,6 +482,13 @@ export function AnimalRecheckReview({
       record.reviewResultText.toLowerCase().includes(searchText.toLowerCase())
     )
 
+    // 分页逻辑
+    const totalRecords = filteredRecords.length
+    const totalPages = Math.ceil(totalRecords / pageSize)
+    const startIndex = (currentPage - 1) * pageSize
+    const endIndex = startIndex + pageSize
+    const currentPageRecords = filteredRecords.slice(startIndex, endIndex)
+
     // 获取审查结果的显示样式
     const getResultBadge = (result: string, resultText: string, highlightQuery = "") => {
       const content = result === 'conditional' ? '必要的修改后同意' : 
@@ -479,7 +531,7 @@ export function AnimalRecheckReview({
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="搜索项目名称、审查类型..."
+                  placeholder="搜索项目名称、审查类型或审查结果..."
                   className={`
                     px-3 py-2.5 pl-8 pr-10 border border-gray-300 rounded-l-md text-sm 
                     transition-all duration-300 ease-in-out h-10
@@ -636,8 +688,8 @@ export function AnimalRecheckReview({
               </tr>
             </thead>
             <tbody>
-              {filteredRecords.length > 0 ? (
-                filteredRecords.map((record, index) => (
+              {currentPageRecords.length > 0 ? (
+                currentPageRecords.map((record, index) => (
                   <tr 
                     key={record.id}
                     onClick={() => handleReviewSelect(record.id)}
@@ -647,7 +699,7 @@ export function AnimalRecheckReview({
                         ? 'bg-blue-50 border-l-4 border-l-blue-500 shadow-sm' 
                         : 'hover:bg-blue-50 hover:shadow-md hover:border-l-2 hover:border-l-blue-300'
                       }
-                      ${index === filteredRecords.length - 1 ? 'border-b-0' : ''}
+                      ${index === currentPageRecords.length - 1 ? 'border-b-0' : ''}
                     `}
                     role="button"
                     tabIndex={0}
@@ -717,6 +769,56 @@ export function AnimalRecheckReview({
             </tbody>
           </table>
         </div>
+        
+        {/* 分页控件 */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-4 px-2">
+            <div className="text-sm text-gray-600">
+              显示第 {startIndex + 1}-{Math.min(endIndex, totalRecords)} 条，共 {totalRecords} 条记录
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className={`px-3 py-1 text-sm rounded border ${
+                  currentPage === 1 
+                    ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' 
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                上一页
+              </button>
+              
+              <div className="flex items-center space-x-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-1 text-sm rounded ${
+                      currentPage === page
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+              
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className={`px-3 py-1 text-sm rounded border ${
+                  currentPage === totalPages 
+                    ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' 
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                下一页
+              </button>
+            </div>
+          </div>
+        )}
         
         <div className="flex items-start mt-3 p-3 bg-amber-50 rounded-md">
           <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 mr-2 flex-shrink-0" />
