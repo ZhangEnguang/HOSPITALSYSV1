@@ -664,50 +664,68 @@ export default function EthicProjectOverviewTab({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-5">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               {todo.members.map((member: any, index: number) => (
-                <div key={index} className={index > 0 ? "pt-5 border-t border-slate-100" : ""}>
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="flex-shrink-0">
-                      <div className="h-9 w-9 rounded-full bg-slate-100 text-slate-700 font-medium flex items-center justify-center">
+                <div key={index} className="group relative bg-white border border-gray-200 rounded-xl p-3 hover:shadow-lg hover:border-blue-300 transition-all duration-300 hover:-translate-y-1">
+                  {/* 头像和姓名 */}
+                  <div className="flex flex-col items-center text-center">
+                    <div className="relative mb-2">
+                      <div className="h-12 w-12 rounded-full bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500 text-white font-semibold flex items-center justify-center text-lg shadow-lg">
                         {member.name.charAt(0)}
                       </div>
+                      {/* 角色小徽章 */}
+                      {member.role && (
+                        <div className="absolute -bottom-1 -right-1 h-5 w-5 bg-green-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">✓</span>
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <div className="font-medium text-slate-800">{member.name}</div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-slate-500">{member.title}</span>
-                        {member.role && (
-                          <>
-                            <span className="text-xs text-slate-300">|</span>
-                            <span className="text-xs text-slate-500">{member.role}</span>
-                          </>
+                    
+                    {/* 姓名和职称 */}
+                    <div className="w-full">
+                      <h4 className="font-semibold text-gray-900 text-sm truncate mb-0.5">{member.name}</h4>
+                      <p className="text-xs text-gray-500 truncate">{member.title}</p>
+                    </div>
+                    
+                    {/* 角色标签 */}
+                    {member.role && (
+                      <div className="mt-2 mb-2">
+                        <span className="inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-md border border-blue-200">
+                          {member.role}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* 详细信息 - 悬停显示 */}
+                  <div className="mt-3 space-y-1.5">
+                    <div className="flex items-center text-xs">
+                      <span className="text-gray-400 mr-2">🏢</span>
+                      <span className="text-gray-600 truncate flex-1">{member.department}</span>
+                    </div>
+                    <div className="flex items-center text-xs">
+                      <span className="text-gray-400 mr-2">
+                        {member.contact.includes('@') ? '📧' : '📞'}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        {member.contact.includes('@') ? (
+                          <a href={`mailto:${member.contact}`} className="text-blue-600 hover:text-blue-800 truncate block">
+                            {member.contact}
+                          </a>
+                        ) : (
+                          <a href={`tel:${member.contact}`} className="text-blue-600 hover:text-blue-800">
+                            {member.contact}
+                          </a>
                         )}
                       </div>
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-2 pl-12">
-                    <div>
-                      <div className="text-sm text-muted-foreground">所属院系</div>
-                      <div className="font-medium">{member.department}</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">
-                        {member.contact.includes('@') ? '电子邮箱' : '联系电话'}
-                      </div>
-                      <div className="font-medium">
-                        {member.contact.includes('@') ? (
-                          <a href={`mailto:${member.contact}`} className="text-blue-600 hover:underline">
-                            {member.contact}
-                          </a>
-                        ) : (
-                          <a href={`tel:${member.contact}`} className="text-blue-600 hover:underline">
-                            {member.contact}
-                          </a>
-                        )}
-                      </div>
-                    </div>
+                  {/* 悬停时的操作按钮 */}
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <button className="h-6 w-6 bg-white rounded-full shadow-md border border-gray-200 flex items-center justify-center hover:bg-gray-50">
+                      <span className="text-gray-400 text-xs">···</span>
+                    </button>
                   </div>
                 </div>
               ))}

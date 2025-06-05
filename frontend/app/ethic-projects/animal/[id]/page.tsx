@@ -181,57 +181,97 @@ const animalEthicProjects = [
   }
 ];
 
-// 项目AI摘要内容
-const projectAISummaries: { [key: string]: AISummary } = {
-  "1": {
-    content: "【伦理规范执行情况】\n• 已获得IACUC批准（批准号：IACUC-2023-05-15）\n• 动物福利认证评分92/100（优秀）\n\n【3R原则实施情况】\n• 替代：体外细胞模型减少20%动物用量\n• 减少：优化设计减少取样频次\n• 优化：无创检测技术减轻动物痛苦\n\n【动物福利保障措施】\n• 环境丰容设施，温湿度控制\n• 专业兽医监护\n• 人道终点标准",
-    aiModel: "GPT-Scientific 2023",
-    version: "v2.4.1",
-    recommendations: [
-      "加强实验动物行为状态监测",
-      "优化麻醉和镇痛方案"
-    ],
-    confidenceScore: 95,
-    analysisTime: "2024-03-15 10:32",
-    platformScores: {
-      progress: "良好",
-      risk: "中等",
-      achievement: "良好"
+// 生成动态AI摘要的函数
+const generateAISummary = (project: any, reviewData?: any[], uploadData?: any[]): AISummary => {
+  // 获取项目基本信息
+  const projectName = project.name;
+  const projectStatus = project.status;
+  const animalType = project.animalType;
+  const animalCount = project.animalCount;
+  const progress = project.progress;
+  const ethicsCommittee = project.ethicsCommittee;
+  
+  // 模拟审查数据分析
+  const reviewCount = reviewData?.length || Math.floor(Math.random() * 3) + 2;
+  const approvedReviews = Math.floor(reviewCount * 0.8);
+  const pendingReviews = reviewCount - approvedReviews;
+  
+  // 模拟上传数据分析
+  const uploadCount = uploadData?.length || Math.floor(Math.random() * 5) + 3;
+  const dataQualityScore = Math.floor(Math.random() * 20) + 80; // 80-100分
+  
+  // 根据项目状态和进度生成内容
+  let statusDescription = "";
+  let ethicsCompliance = "";
+  let animalWelfare = "";
+  let dataAnalysis = "";
+  let recommendations = [];
+  
+  // 伦理合规分析
+  const complianceScore = Math.floor(Math.random() * 20) + 85;
+  ethicsCompliance = `该项目已通过${ethicsCommittee}审批，伦理合规评分${complianceScore}/100分。`;
+  
+  // 动物福利分析
+  animalWelfare = `项目涉及${animalType}${animalCount}，严格遵循3R原则（替代、减少、优化），建立了完善的动物福利保障体系。`;
+  
+  // 审查进度分析
+  if (approvedReviews > 0) {
+    statusDescription += `已完成${approvedReviews}项伦理审查并获得批准`;
+    if (pendingReviews > 0) {
+      statusDescription += `，另有${pendingReviews}项审查正在进行中`;
     }
-  },
-  "2": {
-    content: "【伦理规范执行情况】\n• 已获批准（批准号：IACUC-2023-08-22）\n• 伦理合规评分88/100（良好）\n\n【3R原则实施情况】\n• 替代：计算机模拟预测减少预实验\n• 减少：统计学优化样本量\n• 优化：微创技术减轻痛苦\n\n项目进度符合启动阶段计划，主要挑战是干细胞纯度控制和分化方向调控。",
-    aiModel: "GPT-Scientific 2023",
-    version: "v2.4.1",
-    recommendations: [
-      "加强实验条件精确控制",
-      "建立质量控制体系"
-    ],
-    confidenceScore: 92,
-    analysisTime: "2024-03-12 15:47",
-    platformScores: {
-      progress: "一般",
-      risk: "中等",
-      achievement: "待提高"
-    }
-  },
-  "3": {
-    content: "【伦理规范执行情况】\n• 伦理委员会批准（批准号：IACUC-2022-11-05）\n• 伦理合规评分96/100（优秀）\n\n【3R原则实施情况】\n• 替代：体外培养替代30%动物实验\n• 减少：比计划减少15%动物用量\n• 优化：先进镇痛与环境丰容提升福利\n\n项目产出5篇高水平论文，发现的神经干细胞促进脊髓损伤修复新机制具有临床转化价值。",
-    aiModel: "GPT-Scientific 2023",
-    version: "v2.4.1",
-    recommendations: [
-      "整理研究数据，形成技术报告",
-      "推进成果申请专利保护"
-    ],
-    confidenceScore: 98,
-    analysisTime: "2024-02-28 09:15",
-    platformScores: {
-      progress: "优秀",
-      risk: "低",
-      achievement: "优秀"
-    }
+    statusDescription += "。";
   }
+  
+  // 数据上传分析
+  if (uploadCount > 0) {
+    dataAnalysis = `项目已上传${uploadCount}批实验数据，数据质量评分${dataQualityScore}分，数据完整性和规范性良好。`;
+  }
+  
+  // 根据进度给出建议
+  if (progress < 30) {
+    recommendations.push("建议加快初期实验准备工作");
+    recommendations.push("完善实验动物饲养环境标准化");
+  } else if (progress < 70) {
+    recommendations.push("持续监控动物健康状态");
+    recommendations.push("及时记录和分析实验数据");
+  } else {
+    recommendations.push("准备项目结题材料和成果总结");
+    recommendations.push("考虑研究成果的转化应用");
+  }
+  
+  // 根据项目状态生成针对性的分析
+  let statusAnalysis = "";
+  if (projectStatus === "进行中") {
+    statusAnalysis = `项目正在有序推进中，已达到${progress}%的完成度。`;
+  } else if (projectStatus === "规划中") {
+    statusAnalysis = `项目处于规划阶段，各项准备工作正在进行中。`;
+  } else if (projectStatus === "已完成") {
+    statusAnalysis = `项目已成功完成，取得了预期的研究成果。`;
+  } else if (projectStatus === "已暂停") {
+    statusAnalysis = `项目目前处于暂停状态，需要重新评估和调整。`;
+  }
+  
+  // 生成综合摘要
+  const content = `${ethicsCompliance}${animalWelfare}${statusDescription}${dataAnalysis}${statusAnalysis}在动物伦理规范执行、实验数据管理和研究进展监控等方面均符合相关标准要求，体现了良好的科研伦理素养和规范的项目管理水平。`;
+  
+  return {
+    content,
+    aiModel: "GPT-Scientific 2023",
+    version: "v2.4.1",
+    recommendations,
+    confidenceScore: Math.floor(Math.random() * 10) + 90,
+    analysisTime: new Date().toISOString().slice(0, 16).replace('T', ' '),
+    platformScores: {
+      progress: progress > 70 ? "优秀" : progress > 40 ? "良好" : "一般",
+      risk: complianceScore > 90 ? "低" : "中等",
+      achievement: dataQualityScore > 90 ? "优秀" : "良好"
+    }
+  };
 };
+
+// 项目AI摘要内容 - 现在使用动态生成
+const projectAISummaries: { [key: string]: AISummary } = {};
 
 // 动物伦理项目详情页面
 export default function AnimalEthicProjectDetailPage({ params }: { params: { id: string } }) {
@@ -269,24 +309,25 @@ export default function AnimalEthicProjectDetailPage({ params }: { params: { id:
     
     console.log("找到动物伦理项目:", project.name);
 
-    // 添加AI摘要数据
-    const aiSummary = projectAISummaries[projectId];
-    if (aiSummary) {
-      return {
-        ...project,
-        aiSummary: aiSummary.content,
-        aiModelName: aiSummary.aiModel,
-        aiModelVersion: aiSummary.version,
-        aiSuggestions: aiSummary.recommendations,
-        progressScore: aiSummary.platformScores.progress,
-        riskScore: aiSummary.platformScores.risk,
-        achievementScore: aiSummary.platformScores.achievement,
-        confidenceScore: aiSummary.confidenceScore,
-        analysisTime: aiSummary.analysisTime,
-      };
-    }
-
-    return project;
+    // 动态生成AI摘要数据
+    // 模拟获取审查数据和上传数据
+    const reviewData = []; // 这里可以从API获取实际的审查数据
+    const uploadData = []; // 这里可以从API获取实际的上传数据
+    
+    const aiSummary = generateAISummary(project, reviewData, uploadData);
+    
+    return {
+      ...project,
+      aiSummary: aiSummary.content,
+      aiModelName: aiSummary.aiModel,
+      aiModelVersion: aiSummary.version,
+      aiSuggestions: aiSummary.recommendations,
+      progressScore: aiSummary.platformScores.progress,
+      riskScore: aiSummary.platformScores.risk,
+      achievementScore: aiSummary.platformScores.achievement,
+      confidenceScore: aiSummary.confidenceScore,
+      analysisTime: aiSummary.analysisTime,
+    };
   };
 
   // 获取优先级颜色

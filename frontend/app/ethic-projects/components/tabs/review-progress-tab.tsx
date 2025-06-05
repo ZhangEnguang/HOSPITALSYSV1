@@ -2,23 +2,15 @@
 
 import React, { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Separator } from "@/components/ui/separator"
-import { Clock, CheckCircle, CircleAlert, FileCheck, Calendar, FilePlus, RotateCcw, ChevronRight, AlertTriangle, ChevronDown, ChevronUp, Check, Bell, AlertCircle, CalendarCheck, Users, MessageSquare, FileText, Clipboard, BarChart3, MessageCircle, CalendarDays, Building, UserRound, Pencil } from "lucide-react"
+
+import { Clock, CheckCircle, ChevronDown, ChevronUp, Bell, AlertCircle, Check, FileCheck, ChevronRight } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 
 // 导入新的自定义组件
 import { ReviewTimelineCard as ReviewCard, AnimationStyles } from "./review-progress-card"
@@ -35,8 +27,8 @@ const ReviewTimelineCard = ({
   getDocumentStatusColor: (status: string) => string,
   index?: number
 }) => {
-  // 默认收起状态，但如果是第一个卡片则默认展开
-  const [expanded, setExpanded] = useState(index === 0);
+  // 默认收起状态
+  const [expanded, setExpanded] = useState(false);
   // 督办提醒状态
   const [hasReminder, setHasReminder] = useState(false);
   // 催办对话框状态
@@ -295,7 +287,7 @@ const ReviewTimelineCard = ({
               {/* 文档列表 */}
               <div className="mt-6 pt-4 border-t">
                 <h4 className="text-sm font-medium mb-3 flex items-center">
-                  <FilePlus className={`h-4 w-4 mr-2 ${type === "progress" ? "text-blue-600" : "text-green-600"}`} />
+                  <FileCheck className={`h-4 w-4 mr-2 ${type === "progress" ? "text-blue-600" : "text-green-600"}`} />
                   审查文档 ({review.documents.length})
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -419,16 +411,6 @@ const ReviewTimelineCard = ({
 
 // 审查进度标签页组件
 export default function ReviewProgressTab({ projectId, projectType = "animal" }: { projectId?: string; projectType?: "animal" | "human" }) {
-  const [activeTab, setActiveTab] = useState("timeline")
-  // 添加审查卡片模式视图状态
-  const [activeView, setActiveView] = useState("progress")
-  const [currentDocumentFilter, setCurrentDocumentFilter] = useState("all")
-  // 添加会议筛选状态
-  const [currentMeetingFilter, setCurrentMeetingFilter] = useState("all")
-  // 添加审查意见筛选状态
-  const [currentCommentFilter, setCurrentCommentFilter] = useState("all")
-  const [showAddReviewDialog, setShowAddReviewDialog] = useState(false)
-  const [reviewNote, setReviewNote] = useState("")
   
   // 模拟正在进行的审查数据
   const inProgressReviews = [
@@ -546,229 +528,7 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
     }
   ]
   
-  // 模拟审查记录数据
-  const reviewTimeline = [
-    {
-      id: "1",
-      date: "2024-01-05",
-      event: "提交初审申请",
-      description: "项目负责人提交了初审申请及相关文件",
-      status: "已完成",
-      actor: "王教授",
-      actorRole: "项目负责人"
-    },
-    {
-      id: "2",
-      date: "2024-01-08",
-      event: "形式审查",
-      description: "伦理办公室对申请材料进行形式审查",
-      status: "已完成",
-      actor: "伦理办公室",
-      actorRole: "审查人员"
-    },
-    {
-      id: "3",
-      date: "2024-01-12",
-      event: "专家审查",
-      description: projectType === "human" ? "3名伦理委员会成员进行专家审查" : "2名动物实验伦理专家进行审查",
-      status: "已完成",
-      actor: "伦理委员会",
-      actorRole: "专家组"
-    },
-    {
-      id: "4",
-      date: "2024-01-15",
-      event: "伦理委员会会议",
-      description: "伦理委员会召开会议讨论项目申请",
-      status: "已完成",
-      actor: "伦理委员会",
-      actorRole: "委员会"
-    },
-    {
-      id: "5",
-      date: "2024-01-20",
-      event: "批准通过",
-      description: "伦理委员会批准项目，发放批准证书",
-      status: "已完成",
-      actor: "伦理委员会主席",
-      actorRole: "主席"
-    },
-    {
-      id: "6",
-      date: "2024-02-10",
-      event: "方案修订",
-      description: projectType === "human" ? "项目组提交了知情同意书修订版本" : "项目组提交了动物使用计划修订版本",
-      status: "已完成",
-      actor: "王教授",
-      actorRole: "项目负责人"
-    },
-    {
-      id: "7",
-      date: "2024-02-15",
-      event: "修订批准",
-      description: "伦理委员会批准了方案修订",
-      status: "已完成",
-      actor: "伦理委员会",
-      actorRole: "快速审查组"
-    },
-    {
-      id: "8",
-      date: "2024-08-05",
-      event: "进度报告提交",
-      description: "项目组将提交中期进度报告",
-      status: "待处理",
-      actor: "王教授",
-      actorRole: "项目负责人"
-    },
-    {
-      id: "9",
-      date: "2025-01-20",
-      event: "年度报告",
-      description: "项目组需提交年度总结报告",
-      status: "待处理",
-      actor: "王教授",
-      actorRole: "项目负责人"
-      }
-    ]
-  
-  // 模拟审查会议记录
-  const reviewMeetings = [
-    {
-      id: "1",
-      date: "2024-01-15",
-      type: "常规会议",
-      reviewType: "动物实验伦理审查",
-      attendees: "12名伦理委员会成员",
-      decision: "批准通过",
-      comments: "委员会认为项目设计合理，" + 
-        (projectType === "human" 
-          ? "知情同意程序完善，风险与受益平衡，建议加强受试者隐私保护措施。" 
-          : "符合动物福利要求，建议加强动物使用过程中的疼痛管理。"),
-      meetingNumber: "EC-2024-01"
-    },
-    {
-      id: "2",
-      date: "2023-12-10",
-      type: "快速审查会议",
-      reviewType: "科研处项目备案审核",
-      attendees: "5名委员",
-      decision: "批准通过",
-      comments: projectType === "human" 
-        ? "项目备案材料完整，研究风险较低，符合快速审查条件。" 
-        : "项目备案材料完整，实验方案规范，符合3R原则，同意备案。",
-      meetingNumber: "EC-2023-52"
-    },
-    {
-      id: "3",
-      date: "2024-02-03",
-      type: "临时会议",
-      reviewType: "方案修订审查",
-      attendees: "8名委员",
-      decision: "有条件通过",
-      comments: projectType === "human" 
-        ? "同意知情同意书的修订，但要求明确说明数据保存期限。" 
-        : "同意减少动物使用数量的修订，但需增加动物福利监测频次。",
-      meetingNumber: "EC-2024-05"
-    },
-    {
-      id: "4",
-      date: "2024-03-12",
-      type: "常规会议",
-      reviewType: "安全性报告审查",
-      attendees: "14名委员",
-      decision: "批准通过",
-      comments: projectType === "human" 
-        ? "审阅了安全性报告，未发现严重不良事件，研究可继续进行。" 
-        : "审阅了动物使用监测报告，动物福利得到良好保障，研究可继续进行。",
-      meetingNumber: "EC-2024-11"
-    },
-    {
-      id: "5",
-      date: "2024-04-28",
-      type: "专题会议",
-      reviewType: "中期进展审查",
-      attendees: "10名委员",
-      decision: "批准通过",
-      comments: projectType === "human" 
-        ? "项目进展顺利，受试者招募达标，数据质量良好，可继续开展。" 
-        : "实验进展符合预期，动物使用符合3R原则，可继续开展。",
-      meetingNumber: "EC-2024-17"
-    }
-  ]
-  
-  // 模拟审查意见记录
-  const reviewComments = [
-    {
-      id: "1",
-      date: "2024-01-13",
-      reviewer: "李委员",
-      reviewType: "动物实验伦理审查",
-      comments: projectType === "human" 
-        ? "知情同意书语言应更通俗易懂，建议修改第三部分关于风险描述的内容。" 
-        : "建议完善动物疼痛评估方案，增加麻醉方案细节。",
-      status: "已修订"
-    },
-    {
-      id: "2",
-      date: "2024-01-13",
-      reviewer: "张委员",
-      reviewType: "动物实验伦理审查",
-      comments: projectType === "human" 
-        ? "样本量计算依据需要进一步说明，建议补充统计学分析方法。" 
-        : "替代方案的考虑不够充分，建议进一步说明为何必须使用活体动物。",
-      status: "已修订"
-    },
-    {
-      id: "3",
-      date: "2024-01-14",
-      reviewer: "赵委员",
-      reviewType: "动物实验伦理审查",
-      comments: projectType === "human" 
-        ? "数据安全保护措施需进一步加强，建议明确数据保存期限和访问权限控制措施。" 
-        : "实验终点的人道处理标准需要明确，建议参考AVMA最新指南。",
-      status: "已修订"
-    },
-    {
-      id: "4",
-      date: "2023-12-15",
-      reviewer: "刘助理",
-      reviewType: "科研处项目备案审核",
-      comments: projectType === "human" 
-        ? "项目预算与工作量匹配性需要优化，建议调整预算分配。" 
-        : "动物来源与品系描述不够清晰，需补充实验动物供应商资质证明。",
-      status: "已修订"
-    },
-    {
-      id: "5",
-      date: "2024-02-05",
-      reviewer: "王专家",
-      reviewType: "方案修订审查",
-      comments: projectType === "human" 
-        ? "修订后的方案应明确说明更改的内容及理由，建议添加修订说明表。" 
-        : "修订后的动物数量减少合理，但应提供更详细的统计学支持。",
-      status: "待修订"
-    },
-    {
-      id: "6",
-      date: "2024-03-15",
-      reviewer: "钱委员",
-      reviewType: "安全性报告审查",
-      comments: projectType === "human" 
-        ? "安全性报告中的轻度不良反应分析不够详细，需补充与试验干预的相关性评估。" 
-        : "动物行为异常记录不够系统，建议采用标准化评分系统。",
-      status: "已回复"
-    },
-    {
-      id: "7",
-      date: "2024-04-30",
-      reviewer: "孙主任",
-      reviewType: "中期进展审查",
-      comments: projectType === "human" 
-        ? "数据收集进度良好，但失访率略高，建议采取措施提高依从性。" 
-        : "实验进展符合预期，动物使用数量控制良好，动物福利监测记录完整。",
-      status: "已确认"
-    }
-  ]
+
   
   // 获取状态样式
   const getStatusStyle = (status: string) => {
@@ -803,18 +563,7 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
     }
   };
 
-  // 处理添加审查意见
-  const handleAddReview = () => {
-    if (!reviewNote.trim()) return;
-    
-    toast({
-      title: "审查意见已添加",
-      description: "您的审查意见已成功添加到当前审查流程",
-    });
-    
-    setShowAddReviewDialog(false);
-    setReviewNote("");
-  };
+
   
   // 获取审核进度摘要数据
   const getProgressSummary = () => {
@@ -829,466 +578,63 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
   
   const progressSummary = getProgressSummary();
   
-  // 计算审查进度
-  const completedSteps = reviewTimeline.filter(item => item.status === "已完成").length
-  const totalSteps = reviewTimeline.length
-  const progressPercentage = Math.round((completedSteps / totalSteps) * 100)
+  // 合并所有审查数据并排序：进行中的在前，已完成的在后，每个分类内按时间倒序
+  const allReviews = [
+    ...inProgressReviews.map(review => ({ ...review, isCompleted: false })),
+    ...completedReviews.map(review => ({ ...review, isCompleted: true }))
+  ].sort((a, b) => {
+    // 首先按完成状态排序：进行中(false)排在前面
+    if (a.isCompleted !== b.isCompleted) {
+      return a.isCompleted ? 1 : -1;
+    }
+    
+    // 在同一状态内，按提交日期倒序排序（最新的在前）
+    const dateA = new Date(a.submittedDate || (a as any).completedDate);
+    const dateB = new Date(b.submittedDate || (b as any).completedDate);
+    return dateB.getTime() - dateA.getTime();
+  });
 
   return (
     <div className="space-y-6">
-      {/* 进度概览卡片 - 合并视图切换按钮 */}
-      <Card className="border-slate-200 shadow-sm overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
-        <CardHeader className="pb-2">
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle className="text-lg text-slate-800 flex items-center gap-2">
-                <FileCheck className="h-5 w-5 text-blue-500" />
-                伦理审查进度
-              </CardTitle>
-              <CardDescription className="text-slate-500">
-                已完成 {completedSteps} 项审查步骤，共 {totalSteps} 项
-              </CardDescription>
-          </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className={activeTab !== "cardview" ? "bg-blue-50 text-blue-600 hover:bg-blue-100" : ""} onClick={() => setActiveTab("timeline")}>
-                <CalendarDays className="h-4 w-4 mr-2" />
-                时间轴视图
-              </Button>
-              <Button variant="outline" size="sm" className={activeTab === "cardview" ? "bg-blue-50 text-blue-600 hover:bg-blue-100" : ""} onClick={() => setActiveTab("cardview")}>
-                <Clipboard className="h-4 w-4 mr-2" />
-                卡片视图
-              </Button>
-              </div>
-            </div>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-slate-700">总体审查进度</span>
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                <CheckCircle className="h-3.5 w-3.5 mr-1" />
-                已获批准
-              </Badge>
-              </div>
-            <Progress value={progressPercentage} className="h-2" />
-            <div className="flex justify-between mt-1 text-xs text-slate-500">
-              <span>提交申请</span>
-              <span>形式审查</span>
-              <span>专家审查</span>
-              <span>委员会审批</span>
-              <span>后续跟踪</span>
-              </div>
-            </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card className="bg-slate-50 border-slate-200">
-              <CardHeader className="pb-1">
-                <CardTitle className="text-sm flex items-center gap-2 text-blue-600">
-                  <CalendarCheck className="h-4 w-4" />
-                  批准日期
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="font-semibold">2024-01-20</div>
-                <div className="text-xs text-slate-500 mt-1">有效期: 1年</div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-slate-50 border-slate-200">
-              <CardHeader className="pb-1">
-                <CardTitle className="text-sm flex items-center gap-2 text-purple-600">
-                  <Building className="h-4 w-4" />
-                  审批单位
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="font-semibold">医学院伦理审查委员会</div>
-                <div className="text-xs text-slate-500 mt-1">批号: EC-2024-001</div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-slate-50 border-slate-200">
-              <CardHeader className="pb-1">
-                <CardTitle className="text-sm flex items-center gap-2 text-amber-600">
-                  <Calendar className="h-4 w-4" />
-                  下次审查
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="font-semibold">2024-08-05</div>
-                <div className="text-xs text-slate-500 mt-1">需提交: 进度报告</div>
-              </CardContent>
-            </Card>
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* 时间轴视图 */}
-      {activeTab !== "cardview" && (
-        <>
-          {/* 审查详情标签页 */}
-          <Tabs defaultValue="timeline" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-3 mb-4">
-              <TabsTrigger value="timeline" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700">
-                <Clock className="h-4 w-4 mr-2" />
-                审查时间线
-              </TabsTrigger>
-              <TabsTrigger value="meetings" className="data-[state=active]:bg-purple-50 data-[state=active]:text-purple-700">
-                <Users className="h-4 w-4 mr-2" />
-                审查会议
-              </TabsTrigger>
-              <TabsTrigger value="comments" className="data-[state=active]:bg-green-50 data-[state=active]:text-green-700">
-                <MessageSquare className="h-4 w-4 mr-2" />
-                审查意见
-              </TabsTrigger>
-            </TabsList>
 
-            {/* 审查时间线标签内容 */}
-            <TabsContent value="timeline" className="mt-0">
-              <Card className="border-slate-200 shadow-sm">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5 text-blue-500" />
-                    审查流程时间线
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="relative pl-6 border-l border-slate-200 space-y-6">
-                    {reviewTimeline.map((item, index) => (
-                      <div key={item.id} className="relative">
-                        <div className="absolute -left-[25px] top-0">
-                          {item.status === "已完成" ? (
-                            <div className="h-4 w-4 rounded-full bg-green-500 ring-4 ring-green-50"></div>
-                          ) : item.status === "进行中" ? (
-                            <div className="h-4 w-4 rounded-full bg-blue-500 ring-4 ring-blue-50"></div>
-                          ) : (
-                            <div className="h-4 w-4 rounded-full bg-slate-300 ring-4 ring-slate-50"></div>
-                          )}
+      
+      {/* 审查流程列表 */}
+      <div className="w-full">
+        <div className="flex items-center gap-2 mb-4">
+          <h3 className="text-lg font-semibold text-slate-800">审查流程</h3>
+          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+            总计: {allReviews.length} 项
+          </Badge>
         </div>
-        
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h3 className="text-sm font-medium">{item.event}</h3>
-                              <Badge variant="outline" className={`text-xs ${getStatusStyle(item.status)}`}>
-                                {item.status === "已完成" ? <CheckCircle className="h-3 w-3 mr-1" /> : null}
-                                {item.status === "进行中" ? <Clock className="h-3 w-3 mr-1" /> : null}
-                                {item.status === "待处理" ? <AlertCircle className="h-3 w-3 mr-1" /> : null}
-                                {item.status}
-                              </Badge>
+                
+        {/* 所有审查流程 */}
+        {allReviews.length > 0 ? (
+          <div className="space-y-4">
+            {allReviews.map((review, index) => (
+              <ReviewTimelineCard 
+                key={review.id} 
+                review={review} 
+                type={review.status === "审核中" ? "progress" : "completed"} 
+                getDocumentStatusColor={getDocumentStatusColor}
+                index={index}
+              />
+            ))}
           </div>
-                            <p className="text-xs text-slate-500 mt-1">{item.description}</p>
+        ) : (
+          <Card className="border-slate-200 shadow-sm">
+            <CardContent className="flex flex-col items-center justify-center py-8">
+              <div className="rounded-full bg-slate-50 p-3 mb-3">
+                <FileCheck className="h-6 w-6 text-slate-500" />
               </div>
-                          <div className="flex flex-col items-start md:items-end gap-1">
-                            <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                              <CalendarDays className="h-3.5 w-3.5" />
-                              <span>{item.date}</span>
-            </div>
-                            <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                              <UserRound className="h-3.5 w-3.5" />
-                              <span>{item.actor} ({item.actorRole})</span>
-              </div>
-              </div>
-            </div>
-          </div>
-                    ))}
-        </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* 审查会议标签内容 */}
-            <TabsContent value="meetings" className="mt-0">
-              <Card className="border-slate-200 shadow-sm">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Users className="h-5 w-5 text-purple-500" />
-                      伦理委员会会议记录
-                    </CardTitle>
-                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                      总计: {reviewMeetings.length}次会议
-                    </Badge>
-          </div>
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className={`text-xs ${currentMeetingFilter === "all" ? 'bg-purple-50 border-purple-200 text-purple-700' : ''}`}
-                      onClick={() => setCurrentMeetingFilter("all")}
-                    >
-                      全部会议
-                    </Button>
-                    {Array.from(new Set(reviewMeetings.map(m => m.reviewType))).map((type) => (
-                      <Button 
-                        key={type as string} 
-                        variant="outline" 
-                        size="sm" 
-                        className={`text-xs ${currentMeetingFilter === type ? 'bg-purple-50 border-purple-200 text-purple-700' : ''}`}
-                        onClick={() => setCurrentMeetingFilter(type as string)}
-                      >
-                        {type as string}
-                      </Button>
-                    ))}
-                </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {reviewMeetings
-                      .filter(meeting => currentMeetingFilter === "all" || meeting.reviewType === currentMeetingFilter)
-                      .map((meeting) => (
-                      <Card key={meeting.id} className="bg-slate-50 border-slate-200">
-                        <CardHeader className="pb-2">
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                            <div className="flex flex-col gap-1">
-                              <div className="flex items-center gap-2">
-                                <h3 className="text-sm font-medium">{meeting.type}</h3>
-                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                                  {meeting.decision}
-                                </Badge>
-              </div>
-                              <Badge variant="outline" className="w-fit bg-purple-50 text-purple-700 border-purple-200">
-                                {meeting.reviewType}
-                              </Badge>
-            </div>
-                            <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                              <Calendar className="h-3.5 w-3.5" />
-                              <span>{meeting.date}</span>
-                              <span className="text-slate-300">|</span>
-                              <span>会议编号: {meeting.meetingNumber}</span>
-              </div>
-              </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="mb-3">
-                            <div className="text-xs text-slate-500 mb-1">与会人员</div>
-                            <div className="text-sm">{meeting.attendees}</div>
-              </div>
-                          <div>
-                            <div className="text-xs text-slate-500 mb-1">会议决议与意见</div>
-                            <div className="text-sm">{meeting.comments}</div>
-            </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                    
-                    {reviewMeetings
-                      .filter(meeting => currentMeetingFilter === "all" || meeting.reviewType === currentMeetingFilter)
-                      .length === 0 && (
-                      <div className="py-8 text-center">
-                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 mb-4">
-                          <Users className="h-6 w-6 text-slate-400" />
-          </div>
-                        <p className="text-sm text-slate-500">暂无会议记录</p>
-        </div>
-                    )}
+              <h3 className="text-lg font-medium mb-1">暂无审查记录</h3>
+              <p className="text-sm text-slate-500 text-center max-w-md">
+                目前没有审查流程记录。当您提交审查申请后，相关进度将显示在这里。
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-      
-            {/* 审查意见标签内容 */}
-            <TabsContent value="comments" className="mt-0">
-              <Card className="border-slate-200 shadow-sm">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <MessageCircle className="h-5 w-5 text-green-500" />
-                      审查意见与反馈
-                    </CardTitle>
-                    <Button variant="outline" size="sm" onClick={() => setShowAddReviewDialog(true)}>
-                      <FilePlus className="h-4 w-4 mr-2" />
-                      添加审查意见
-                    </Button>
-                      </div>
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className={`text-xs ${currentCommentFilter === "all" ? 'bg-green-50 border-green-200 text-green-700' : ''}`}
-                      onClick={() => setCurrentCommentFilter("all")}
-                    >
-                      全部意见
-                    </Button>
-                    {Array.from(new Set(reviewComments.map(c => c.reviewType))).map((type) => (
-                      <Button 
-                        key={type as string} 
-                        variant="outline" 
-                        size="sm" 
-                        className={`text-xs ${currentCommentFilter === type ? 'bg-green-50 border-green-200 text-green-700' : ''}`}
-                        onClick={() => setCurrentCommentFilter(type as string)}
-                      >
-                        {type as string}
-                      </Button>
-                    ))}
-                    </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {reviewComments
-                      .filter(comment => currentCommentFilter === "all" || comment.reviewType === currentCommentFilter)
-                      .map((comment) => (
-                      <div key={comment.id} className="p-4 bg-slate-50 rounded-lg border border-slate-200">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-3">
-                          <div className="flex items-center gap-2">
-                            <div className="bg-white rounded-full h-8 w-8 flex items-center justify-center shadow-sm border border-slate-200">
-                              <UserRound className="h-4 w-4 text-slate-500" />
-                            </div>
-                            <div className="flex flex-col">
-                              <h3 className="text-sm font-medium">{comment.reviewer}</h3>
-                              <Badge variant="outline" className="w-fit mt-1 bg-slate-50 text-slate-700 border-slate-200 text-[10px]">
-                                {comment.reviewType}
-                              </Badge>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                              <Calendar className="h-3.5 w-3.5" />
-                              <span>{comment.date}</span>
-                            </div>
-                            <Badge variant="outline" className={`text-xs ${getStatusStyle(comment.status)}`}>
-                              {comment.status === "已修订" ? <CheckCircle className="h-3 w-3 mr-1" /> : null}
-                              {comment.status === "待修订" ? <Pencil className="h-3 w-3 mr-1" /> : null}
-                              {comment.status}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="pl-10">
-                          <p className="text-sm text-slate-700">{comment.comments}</p>
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {reviewComments
-                      .filter(comment => currentCommentFilter === "all" || comment.reviewType === currentCommentFilter)
-                      .length === 0 && (
-                      <div className="py-8 text-center">
-                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 mb-4">
-                          <MessageSquare className="h-6 w-6 text-slate-400" />
-                      </div>
-                        <p className="text-sm text-slate-500">暂无审查意见</p>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </>
-      )}
-      
-      {/* 卡片视图 */}
-      {activeTab === "cardview" && (
-        <>
-          {/* 审查流程列表 */}
-          <Tabs defaultValue="progress" value={activeView} onValueChange={setActiveView} className="w-full">
-            <div className="flex items-center justify-between mb-4">
-              <TabsList className="grid grid-cols-2 w-[400px]">
-                <TabsTrigger value="progress">
-                  <Clock className="h-4 w-4 mr-2" />
-                  进行中
-                </TabsTrigger>
-                <TabsTrigger value="completed">
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  已完成
-                </TabsTrigger>
-              </TabsList>
-              
-              <Button variant="outline" size="sm" onClick={() => setShowAddReviewDialog(true)}>
-                <FilePlus className="h-4 w-4 mr-2" />
-                添加审查意见
-              </Button>
-                    </div>
-                    
-        {/* 进行中的审查 */}
-            <TabsContent value="progress" className="mt-0">
-              {inProgressReviews.length > 0 ? (
-                <div className="space-y-4">
-                  {inProgressReviews.map((review, index) => (
-                    <ReviewTimelineCard 
-                  key={review.id} 
-                  review={review} 
-                  type="progress" 
-                  getDocumentStatusColor={getDocumentStatusColor}
-                  index={index}
-                />
-                  ))}
-                </div>
-              ) : (
-                <Card className="border-slate-200 shadow-sm">
-                  <CardContent className="flex flex-col items-center justify-center py-8">
-                    <div className="rounded-full bg-blue-50 p-3 mb-3">
-                      <Clock className="h-6 w-6 text-blue-500" />
-              </div>
-                    <h3 className="text-lg font-medium mb-1">没有进行中的审查</h3>
-                    <p className="text-sm text-slate-500 text-center max-w-md">
-                      目前没有正在进行的审查流程。当您提交审查申请后，相关进度将显示在这里。
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-        </TabsContent>
-        
-        {/* 已完成的审查 */}
-        <TabsContent value="completed" className="mt-0">
-              {completedReviews.length > 0 ? (
-                <div className="space-y-4">
-                  {completedReviews.map((review, index) => (
-                    <ReviewTimelineCard 
-                  key={review.id} 
-                  review={review} 
-                  type="completed" 
-                  getDocumentStatusColor={getDocumentStatusColor}
-                  index={index}
-                />
-                  ))}
-                </div>
-            ) : (
-                <Card className="border-slate-200 shadow-sm">
-                  <CardContent className="flex flex-col items-center justify-center py-8">
-                    <div className="rounded-full bg-green-50 p-3 mb-3">
-                      <CheckCircle className="h-6 w-6 text-green-500" />
-              </div>
-                    <h3 className="text-lg font-medium mb-1">尚无已完成审查</h3>
-                    <p className="text-sm text-slate-500 text-center max-w-md">
-                      项目尚未完成任何审查流程。审查完成后，相关记录将显示在这里。
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-        </TabsContent>
-      </Tabs>
-          
-          {/* 添加审查意见对话框 */}
-          <Dialog open={showAddReviewDialog} onOpenChange={setShowAddReviewDialog}>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>添加审查意见</DialogTitle>
-                <DialogDescription>
-                  请填写您对当前审查流程的意见或建议
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="review-note">审查意见</Label>
-                  <Textarea
-                    id="review-note"
-                    placeholder="请输入您的审查意见..."
-                    rows={5}
-                    value={reviewNote}
-                    onChange={(e) => setReviewNote(e.target.value)}
-                  />
-    </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setShowAddReviewDialog(false)}>取消</Button>
-                <Button onClick={handleAddReview}>提交意见</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </>
-      )}
     </div>
   );
 } 
