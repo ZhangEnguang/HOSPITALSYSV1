@@ -26,10 +26,9 @@ import {
 } from "lucide-react"
 import EthicProjectOverviewTab from "../components/overview-tab"
 import ReviewProgressTab from "../../components/tabs/review-progress-tab"
-import ReviewFilesTab from "../../components/tabs/review-files-tab"
 import ExperimentProgressTab from "../components/experiment-progress-tab"
+import ReviewFilesTab from "../components/review-files-tab"
 import RiskAnalysisTab from "../components/risk-analysis-tab"
-import ProjectTeamTab from "../../components/tabs/project-team-tab"
 import "../../styles/ethic-project.css"
 
 // 添加全局样式覆盖
@@ -554,16 +553,16 @@ export default function AnimalEthicProjectDetailPage({ params }: { params: { id:
           component: <ExperimentProgressTab />,
         },
         {
+          id: "reviewFiles",
+          label: "送审文件",
+          icon: <FileText className="h-4 w-4" />,
+          component: <ReviewFilesTab projectId={params.id} />,
+        },
+        {
           id: "riskAnalysis",
           label: "风险与分析",
           icon: <AlertTriangle className="h-4 w-4" />,
           component: <RiskAnalysisTab todo={currentProject} />,
-        },
-        {
-          id: "reviewFiles",
-          label: "送审文件",
-          icon: <FileText className="h-4 w-4" />,
-          component: <ReviewFilesTab />,
         },
       ]}
     />
