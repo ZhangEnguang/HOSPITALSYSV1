@@ -17,7 +17,11 @@ import {
   Database,
   Coins,
   Maximize2,
-  X
+  X,
+  Calendar,
+  ShieldCheck,
+  HeartHandshake,
+  TrendingDown
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -89,13 +93,16 @@ const riskAnalysisData = {
       maximum: 5
     },
     commonIssues: [
-      { issue: "麻醉不足", frequency: 12 },
-      { issue: "终点不明确", frequency: 8 },
       { issue: "样本量问题", frequency: 15 },
+      { issue: "麻醉不足", frequency: 12 },
       { issue: "疼痛评估缺失", frequency: 10 },
+      { issue: "终点不明确", frequency: 8 },
       { issue: "饲养条件", frequency: 6 }
     ],
-    responseTime: 8.5 // 平均回应时间(天)
+    responseTime: 8.5, // 平均回应时间(天)
+    totalProjects: 75,
+    approvalRate: 92,
+    averageReviewTime: 15.2
   },
 
   // 3. 实验动物福利与数据波动风险
@@ -487,6 +494,110 @@ const ProjectProgressDetails = ({ data }: { data: any }) => {
   }
 }
 
+// 高频问题排行榜
+const IssueRankingChart = ({ data }: { data: any[] }) => {
+  const maxFreq = Math.max(...data.map(item => item.frequency))
+  
+  return (
+    <div className="space-y-3">
+      {data.slice(0, 5).map((item, index) => (
+        <div key={index} className="flex items-center gap-3 py-1">
+          <div className="flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-white text-xs font-bold">
+            {index + 1}
+          </div>
+          <span className="text-sm text-gray-700 flex-1">{item.issue}</span>
+          <div className="flex items-center gap-2">
+            <div className="w-12 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className="h-1.5 bg-red-500 rounded-full"
+                style={{ width: `${(item.frequency / maxFreq) * 100}%` }}
+              />
+            </div>
+            <span className="text-xs font-medium text-gray-900 min-w-0">{item.frequency}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// 紧凑的饼图组件
+const CompactPieChart = ({ data }: { data: any[] }) => {
+  const total = data.reduce((sum, item) => sum + item.count, 0)
+  const size = 140
+  const strokeWidth = 20
+  const radius = (size - strokeWidth) / 2
+  const center = size / 2
+  
+  let cumulativePercentage = 0
+  
+  const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444']
+  
+  return (
+    <div className="flex items-center justify-center gap-4">
+      <div className="relative">
+        <svg width={size} height={size} className="transform -rotate-90">
+          {data.map((item, index) => {
+            const percentage = (item.count / total) * 100
+            const circumference = 2 * Math.PI * radius
+            const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`
+            const strokeDashoffset = -((cumulativePercentage / 100) * circumference)
+            
+            const color = colors[index % colors.length]
+            
+            const result = (
+              <circle
+                key={index}
+                cx={center}
+                cy={center}
+                r={radius}
+                fill="none"
+                stroke={color}
+                strokeWidth={strokeWidth}
+                strokeDasharray={strokeDasharray}
+                strokeDashoffset={strokeDashoffset}
+                className="transition-all duration-300"
+              />
+            )
+            
+            cumulativePercentage += percentage
+            return result
+          })}
+        </svg>
+        
+        {/* 中心数字 */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-gray-800">{total}</div>
+            <div className="text-sm text-gray-500">项目</div>
+          </div>
+        </div>
+      </div>
+      
+      {/* 图例 - 右侧 */}
+      <div className="space-y-1">
+        {data.map((item, index) => {
+          const color = colors[index % colors.length]
+          return (
+            <div key={index} className="flex items-center gap-2 text-xs">
+              <div 
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: color }}
+              />
+              <span className="text-gray-600">{item.type}</span>
+              <span className="font-medium text-gray-800">{item.count}</span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+
+
+
+
 // 堆叠柱状图组件
 const StackedBarChart = ({ data }: { data: any[] }) => {
   const total = data.reduce((sum, item) => sum + item.count, 0)
@@ -660,28 +771,44 @@ const CompletenessRadar = ({ data }: { data: any[] }) => {
   )
 }
 
-// 资源效率仪表板
-const ResourceGauge = ({ data }: { data: any[] }) => {
+// 精美的资源效率柱状图
+const ResourceBarChart = ({ data }: { data: any[] }) => {
   return (
-    <div className="space-y-3">
-      {data.map((item, index) => (
-        <div key={index} className="space-y-1">
-          <div className="flex justify-between text-sm">
-            <span>{item.resource}</span>
-            <span className="font-medium">{item.efficiency}%</span>
+    <div className="flex items-end justify-between gap-4 h-20 px-1">
+      {data.map((item, index) => {
+        // 简化颜色方案 - 根据效率值选择单一纯色
+        const getColor = (efficiency: number) => {
+          if (efficiency >= 90) return 'bg-emerald-500'
+          if (efficiency >= 80) return 'bg-blue-500'
+          if (efficiency >= 70) return 'bg-amber-500'
+          return 'bg-red-500'
+        }
+        
+        const color = getColor(item.efficiency)
+        const barHeight = (item.efficiency / 100) * 100 // 基于100%计算高度
+        
+        return (
+          <div key={index} className="flex flex-col items-center gap-2 flex-1">
+            {/* 数值 - 简约标签 */}
+            <div className="text-xs font-semibold text-slate-700">
+              {item.efficiency}%
+            </div>
+            
+            {/* 柱子 - 现代简约风格 */}
+            <div className="w-full max-w-10 h-12 bg-slate-100 rounded-md relative overflow-hidden">
+              <div 
+                className={`absolute bottom-0 w-full ${color} rounded-md transition-all duration-700 ease-out hover:opacity-80`}
+                style={{ height: `${barHeight}%` }}
+              />
+            </div>
+            
+            {/* 标签 - 简洁文字 */}
+            <div className="text-xs text-slate-600 text-center font-medium leading-tight">
+              {item.resource}
+            </div>
           </div>
-          <div className="h-2 bg-gray-200 rounded-full">
-            <div 
-              className={`h-2 rounded-full ${
-                item.efficiency >= 90 ? 'bg-green-500' :
-                item.efficiency >= 80 ? 'bg-blue-500' :
-                item.efficiency >= 70 ? 'bg-yellow-500' : 'bg-red-500'
-              }`}
-              style={{ width: `${item.efficiency}%` }}
-            />
-          </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
@@ -725,30 +852,32 @@ export default function RiskAnalysisTab({ todo }: RiskAnalysisTabProps) {
   return (
     <div className="space-y-6">
       {/* 顶部操作栏 */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="relative w-10 h-10 bg-gradient-to-br from-red-500 to-orange-600 rounded-lg flex items-center justify-center shadow-md">
-            <AlertTriangle className="h-5 w-5 text-white" />
+      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="relative w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+              <AlertTriangle className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-semibold flex items-center gap-2 text-slate-800">
+                动物伦理项目风险分析
+                <Badge variant="outline" className="ml-2 bg-primary/5 text-primary text-[10px] h-5 px-2">
+                  专业分析
+                </Badge>
+              </h1>
+              <p className="text-slate-500">基于五维风险模型的综合风险评估与预警</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-semibold flex items-center gap-2">
-              动物伦理项目风险分析
-              <Badge variant="outline" className="px-2 py-0.5 text-xs border text-orange-600 bg-orange-50 border-orange-200">
-                专业分析
-              </Badge>
-            </h1>
-            <p className="text-sm text-slate-500">基于五维风险模型的综合风险评估与预警</p>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" onClick={handleRefreshData} className="border-slate-300 hover:bg-slate-50">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              刷新数据
+            </Button>
+            <Button size="sm" onClick={handleExportReport} className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-md">
+              <Download className="h-4 w-4 mr-2" />
+              导出报告
+            </Button>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handleRefreshData}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            刷新数据
-          </Button>
-          <Button size="sm" onClick={handleExportReport}>
-            <Download className="h-4 w-4 mr-2" />
-            导出报告
-          </Button>
         </div>
       </div>
 
@@ -764,7 +893,7 @@ export default function RiskAnalysisTab({ todo }: RiskAnalysisTabProps) {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-blue-600" />
+                  <Calendar className="h-4 w-4 text-blue-600" />
                   项目进度与时效性风险
                 </CardTitle>
                 <p className="text-xs text-slate-500 mt-1">
@@ -790,45 +919,129 @@ export default function RiskAnalysisTab({ todo }: RiskAnalysisTabProps) {
         </Card>
 
         {/* 2. 伦理审查结果与合规性风险 */}
-        <Card className="border-slate-200 shadow-sm">
+        <Card className="border-slate-200 shadow-sm bg-gradient-to-br from-green-50/40 to-slate-50/50">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <ShieldCheck className="h-4 w-4 text-green-600" />
               伦理审查结果与合规性风险
             </CardTitle>
             <p className="text-xs text-slate-500">
               评估项目合规能力，识别高频问题和风险项目
             </p>
           </CardHeader>
-          <CardContent>
-            <StackedBarChart data={data.ethicsComplianceRisk.reviewResults} />
-            <div className="mt-4 space-y-2">
-              <div className="text-xs font-medium text-slate-700">高频问题分析</div>
-              <div className="space-y-1">
-                {data.ethicsComplianceRisk.commonIssues.slice(0, 3).map((issue, index) => (
-                  <div key={index} className="flex justify-between items-center text-xs">
-                    <span className="text-slate-600">{issue.issue}</span>
+          <CardContent className="pt-0 space-y-6">
+            {/* 上层：主要统计图表区域 */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* 审查结果图表 */}
+              <div className="py-2">
+                <div className="text-sm font-medium text-slate-700 mb-4">审查结果分布</div>
+                <div className="flex justify-center">
+                  <CompactPieChart data={data.ethicsComplianceRisk.reviewResults} />
+                </div>
+              </div>
+              
+              {/* 高频问题 */}
+              <div className="py-2">
+                <div className="text-sm font-medium text-slate-700 mb-4">高频问题TOP5</div>
+                <IssueRankingChart data={data.ethicsComplianceRisk.commonIssues} />
+              </div>
+            </div>
+            
+            {/* 中层：关键指标卡片 */}
+            <div className="grid grid-cols-4 gap-4 text-xs px-2">
+              <div className="text-center p-3 bg-blue-50 rounded border border-blue-200">
+                <div className="font-medium text-blue-600 mb-1">平均回应时间</div>
+                <div className="text-blue-800 font-bold">{data.ethicsComplianceRisk.responseTime}天</div>
+              </div>
+              <div className="text-center p-3 bg-orange-50 rounded border border-orange-200">
+                <div className="font-medium text-orange-600 mb-1">平均修改次数</div>
+                <div className="text-orange-800 font-bold">{data.ethicsComplianceRisk.modificationFreq.average}次</div>
+              </div>
+              <div className="text-center p-3 bg-green-50 rounded border border-green-200">
+                <div className="font-medium text-green-600 mb-1">一次通过率</div>
+                <div className="text-green-800 font-bold">68%</div>
+              </div>
+              <div className="text-center p-3 bg-purple-50 rounded border border-purple-200">
+                <div className="font-medium text-purple-600 mb-1">合规评分</div>
+                <div className="text-purple-800 font-bold">85分</div>
+              </div>
+            </div>
+            
+            {/* 下层：趋势和风险统计 */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* 近期审查趋势 */}
+              <div className="p-2">
+                <div className="text-sm font-medium text-slate-700 mb-3">近期审查趋势</div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-slate-50 rounded p-3 text-center">
+                    <div className="text-xs text-slate-600 mb-2">本月提交</div>
+                    <div className="text-lg font-bold text-slate-800">23</div>
+                    <div className="text-xs text-green-600 mt-1">↑15%</div>
+                  </div>
+                  <div className="bg-slate-50 rounded p-3 text-center">
+                    <div className="text-xs text-slate-600 mb-2">待审查</div>
+                    <div className="text-lg font-bold text-orange-600">8</div>
+                    <div className="text-xs text-red-600 mt-1">↑2</div>
+                  </div>
+                  <div className="bg-slate-50 rounded p-3 text-center">
+                    <div className="text-xs text-slate-600 mb-2">超时项目</div>
+                    <div className="text-lg font-bold text-red-600">3</div>
+                    <div className="text-xs text-red-600 mt-1">需关注</div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* 风险等级分布 */}
+              <div className="p-2">
+                <div className="text-sm font-medium text-slate-700 mb-3">风险等级分布</div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="w-12 h-1.5 bg-gray-200 rounded-full">
-                        <div 
-                          className="h-1.5 bg-red-500 rounded-full"
-                          style={{ width: `${(issue.frequency / 15) * 100}%` }}
-                        />
+                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                      <span className="text-sm text-slate-600">高风险项目</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="w-1/4 h-2 bg-red-500 rounded-full"></div>
                       </div>
-                      <span className="font-medium">{issue.frequency}</span>
+                      <span className="text-sm font-medium text-slate-800 min-w-0">2</span>
                     </div>
                   </div>
-                ))}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                      <span className="text-sm text-slate-600">中风险项目</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="w-3/5 h-2 bg-yellow-500 rounded-full"></div>
+                      </div>
+                      <span className="text-sm font-medium text-slate-800 min-w-0">12</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <span className="text-sm text-slate-600">低风险项目</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="w-full h-2 bg-green-500 rounded-full"></div>
+                      </div>
+                      <span className="text-sm font-medium text-slate-800 min-w-0">61</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* 3. 实验动物福利与数据波动风险 */}
-        <Card className="border-slate-200 shadow-sm">
+        <Card className="border-slate-200 shadow-sm bg-gradient-to-br from-red-50/40 to-slate-50/50">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Heart className="h-4 w-4 text-red-600" />
+              <HeartHandshake className="h-4 w-4 text-red-600" />
               实验动物福利与数据波动风险
             </CardTitle>
             <p className="text-xs text-slate-500">
@@ -854,72 +1067,53 @@ export default function RiskAnalysisTab({ todo }: RiskAnalysisTabProps) {
           </CardContent>
         </Card>
 
-        {/* 4. 数据质量与完整性风险 */}
-        <Card className="border-slate-200 shadow-sm">
+        {/* 4. 资源与可持续性风险 */}
+        <Card className="border-slate-200 shadow-sm overflow-hidden bg-gradient-to-br from-yellow-50/40 to-slate-50/50">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Database className="h-4 w-4 text-purple-600" />
-              数据质量与完整性风险
-            </CardTitle>
-            <p className="text-xs text-slate-500">
-              确保研究数据可靠性和可追溯性
-            </p>
-          </CardHeader>
-          <CardContent>
-            <CompletenessRadar data={data.dataQualityRisk.submissionCompleteness} />
-            <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
-              <div className="text-center p-2 bg-purple-50 rounded">
-                <div className="font-medium text-purple-600">记录规范性</div>
-                <div className="text-purple-800">{data.dataQualityRisk.recordingCompliance}%</div>
-              </div>
-              <div className="text-center p-2 bg-blue-50 rounded">
-                <div className="font-medium text-blue-600">数据一致性</div>
-                <div className="text-blue-800">{data.dataQualityRisk.dataConsistency}%</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 5. 资源与可持续性风险 */}
-        <Card className="border-slate-200 shadow-sm lg:col-span-2">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Coins className="h-4 w-4 text-yellow-600" />
+              <TrendingDown className="h-4 w-4 text-yellow-600" />
               资源与可持续性风险
             </CardTitle>
             <p className="text-xs text-slate-500">
               评估项目资源消耗，预警资源不足或关键人员流失风险
             </p>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <div className="text-sm font-medium text-slate-700 mb-3">资源效率分析</div>
-                <ResourceGauge data={data.sustainabilityRisk.resourceEfficiency} />
+          <CardContent className="pt-0 pb-4 space-y-4">
+            {/* 资源效率图表 */}
+            <div>
+              <div className="text-sm font-medium text-slate-700 mb-3">资源效率分析</div>
+              <ResourceBarChart data={data.sustainabilityRisk.resourceEfficiency} />
+            </div>
+            
+            {/* 关键指标 */}
+            <div className="grid grid-cols-3 gap-2 text-xs">
+              <div className="text-center p-3 bg-yellow-50 rounded border border-yellow-200">
+                <div className="font-medium text-yellow-600 mb-1">笼位占用率</div>
+                <div className="text-yellow-800 font-bold text-sm">{data.sustainabilityRisk.facilityUsage}%</div>
               </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="text-center p-3 bg-yellow-50 rounded-lg">
-                  <div className="text-2xl font-bold text-yellow-600">
-                    {data.sustainabilityRisk.facilityUsage}%
-                  </div>
-                  <div className="text-xs text-yellow-600 mt-1">笼位占用率</div>
-                </div>
-                <div className="text-center p-3 bg-orange-50 rounded-lg">
-                  <div className="text-2xl font-bold text-orange-600">
-                    {data.sustainabilityRisk.staffTurnover}%
-                  </div>
-                  <div className="text-xs text-orange-600 mt-1">人员变更率</div>
-                </div>
-                <div className="text-center p-3 bg-green-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">
-                    {data.sustainabilityRisk.budgetUtilization}%
-                  </div>
-                  <div className="text-xs text-green-600 mt-1">预算使用率</div>
-                </div>
+              <div className="text-center p-3 bg-orange-50 rounded border border-orange-200">
+                <div className="font-medium text-orange-600 mb-1">人员变更率</div>
+                <div className="text-orange-800 font-bold text-sm">{data.sustainabilityRisk.staffTurnover}%</div>
+              </div>
+              <div className="text-center p-3 bg-green-50 rounded border border-green-200">
+                <div className="font-medium text-green-600 mb-1">预算使用率</div>
+                <div className="text-green-800 font-bold text-sm">{data.sustainabilityRisk.budgetUtilization}%</div>
               </div>
             </div>
+            
+            {/* 风险预警 */}
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-slate-700">风险预警</div>
+              <div className="text-xs text-slate-600 leading-relaxed p-3 bg-slate-50 rounded border border-slate-200">
+                当前资源配置整体稳定，设备利用率保持在92%的优良水平，笼位资源充足能够满足项目需求。但需要重点关注人员变更率达15%，存在一定的人员流失风险。时间管理效率为76%，建议加强项目进度控制和任务分配优化，确保资源的可持续性和项目的顺利推进。
+              </div>
+            </div>
+            
+
           </CardContent>
         </Card>
+
+
 
       </div>
 
@@ -949,6 +1143,8 @@ export default function RiskAnalysisTab({ todo }: RiskAnalysisTabProps) {
           </div>
         </DialogContent>
       </Dialog>
+
+
 
     </div>
   )
