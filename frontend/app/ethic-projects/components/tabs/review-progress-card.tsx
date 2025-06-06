@@ -56,6 +56,9 @@ type Review = {
   documents: ReviewDocument[];
   result?: string;
   remarks?: string;
+  hasLatestUpdate?: boolean;
+  latestUpdateDate?: string;
+  latestUpdateAction?: string;
 }
 
 type ReviewCardProps = {
@@ -234,7 +237,17 @@ export const ReviewTimelineCard = ({
   
   return (
     <>
-      <div className={`bg-white border mt-4 rounded-lg shadow-sm overflow-hidden ${expanded ? 'shadow-md' : 'hover:bg-gray-50'} transition-all duration-300`}>
+      <div className={`bg-white border mt-4 rounded-lg shadow-sm overflow-hidden ${expanded ? 'shadow-md' : 'hover:bg-gray-50'} transition-all duration-300 relative`}>
+        {/* 右上角新进展角标 */}
+        {(review as any).hasLatestUpdate && (
+          <div className="absolute top-2 right-2 z-10">
+            <div className="relative">
+              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+              <div className="absolute inset-0 w-3 h-3 bg-red-500 rounded-full animate-ping opacity-75"></div>
+            </div>
+          </div>
+        )}
+        
         <div className={`border-l-4 ${borderColor} p-4`}>
           <div className="flex justify-between items-center">
             <div className="flex items-center">
@@ -289,18 +302,30 @@ export const ReviewTimelineCard = ({
             </div>
           )}
           
+
+
           {/* 收起状态下显示简单时间线和快速操作 */}
           {!expanded && (
             <div className="flex justify-between items-center mt-3">
-              {latestHistory && (
-                <div className="flex items-center text-sm text-gray-500">
-                  <div className={`w-2 h-2 rounded-full ${type === "progress" ? "bg-blue-500" : "bg-green-500"} mr-2`}></div>
-                  <div>最新进展: {latestHistory.action} ({latestHistory.date})</div>
-                </div>
-              )}
+              {/* 左侧：显示最新进展或占位 */}
+              <div className="flex-1">
+                {latestHistory && !(review as any).hasLatestUpdate && (
+                  <div className="flex items-center text-sm text-gray-500">
+                    <div className={`w-2 h-2 rounded-full ${type === "progress" ? "bg-blue-500" : "bg-green-500"} mr-2`}></div>
+                    <div>最新进展: {latestHistory.action} ({latestHistory.date})</div>
+                  </div>
+                )}
+                {(review as any).hasLatestUpdate && (
+                  <div className="flex items-center text-sm text-gray-500">
+                    <div className="w-2 h-2 rounded-full bg-red-500 mr-2"></div>
+                    <div>最新进展: {(review as any).latestUpdateAction} ({(review as any).latestUpdateDate})</div>
+                  </div>
+                )}
+              </div>
               
+              {/* 右侧：操作按钮 */}
               {type === "progress" && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 ml-4">
                   <button 
                     onClick={handleReminderClick}
                     className={`flex items-center text-xs px-2 py-1 rounded border transition-colors ${
