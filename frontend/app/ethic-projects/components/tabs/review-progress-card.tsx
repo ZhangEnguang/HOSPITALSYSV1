@@ -10,7 +10,11 @@ import {
   FileCheck, 
   Bell, 
   ChevronRight, 
-  AlertCircle 
+  AlertCircle,
+  User,
+  Users,
+  Plus,
+  Settings
 } from "lucide-react"
 import {
   Dialog,
@@ -79,19 +83,15 @@ export const ReviewTimelineCard = ({
   // 催办/督办备注
   const [operationNote, setOperationNote] = useState("");
   // 督办提醒日期
-  const [reminderDate, setReminderDate] = useState<string>(() => {
-    if (type === "progress" && review.expectedCompletionDate) {
-      const date = new Date(review.expectedCompletionDate);
-      date.setDate(date.getDate() - 3);
-      return date.toISOString().split('T')[0];
-    }
-    return new Date().toISOString().split('T')[0];
-  });
+  const [reminderDate, setReminderDate] = useState<string>("");
   const [reminderNote, setReminderNote] = useState("");
   const [reminderType, setReminderType] = useState<"self" | "others">("self");
   const [reminderRecipients, setReminderRecipients] = useState<string[]>([]);
   const [reminderPriority, setReminderPriority] = useState<"normal" | "high">("normal");
   const [reminderFrequency, setReminderFrequency] = useState<"once" | "daily" | "weekly">("once");
+  
+  // 催办原因选择状态
+  const [selectedUrgeReason, setSelectedUrgeReason] = useState<string>("");
   
   // 添加项目团队成员列表
   const [teamMembers, setTeamMembers] = useState([
@@ -135,6 +135,25 @@ export const ReviewTimelineCard = ({
   
   // 确认设置督办提醒
   const confirmReminder = () => {
+    // 验证必填字段
+    if (!reminderDate) {
+      toast({
+        title: "请选择提醒时间",
+        description: "提醒时间为必填项，请选择一个日期",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (reminderType === "others" && reminderRecipients.length === 0) {
+      toast({
+        title: "请选择接收人",
+        description: "督办通知模式下必须选择至少一个接收人",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setHasReminder(true);
     setIsReminderDialogOpen(false);
     
@@ -161,12 +180,18 @@ export const ReviewTimelineCard = ({
       variant: "default"
     });
     
-    // 重置备注
+    // 重置所有状态
+    setReminderDate("");
+    setReminderNote("");
+    setReminderRecipients([]);
+    setSelectedUrgeReason("");
     setOperationNote("");
   };
   
   // 处理催办点击
   const handleUrgeClick = () => {
+    setSelectedUrgeReason(""); // 重置催办原因选择
+    setOperationNote(""); // 重置说明内容
     setIsUrgeDialogOpen(true);
   };
   
@@ -241,19 +266,25 @@ export const ReviewTimelineCard = ({
           </div>
           
           {type === "progress" && review.progress !== undefined && (
-            <div className="my-3">
-              <div className="flex justify-between items-center text-sm mb-1">
-                <span className="font-medium">当前步骤: <span className={titleColor}>{review.currentStep}</span></span>
-                <span className={titleColor}>{review.progress}%</span>
-              </div>
-              <div className="h-2 bg-gray-100 rounded-full overflow-hidden relative">
-                <div className={`h-full ${type === "progress" ? "bg-blue-500" : "bg-green-500"} rounded-full animate-pulse-slow`} 
-                  style={{width: `${review.progress}%`}}></div>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-200/30 to-transparent animate-shimmer"></div>
-              </div>
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>已用时间: {elapsedDays} 天</span>
-                <span>总计: {totalDays} 天</span>
+            <div className="my-2">
+              <div className="flex justify-between items-center text-sm">
+                <div className="flex items-center gap-3">
+                  <span className="font-medium">当前步骤: <span className={titleColor}>{review.currentStep}</span></span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500">进度:</span>
+                    <div className="flex items-center gap-1">
+                      <div className={`w-16 h-1 bg-gray-100 rounded-full overflow-hidden`}>
+                        <div className={`h-full ${type === "progress" ? "bg-blue-500" : "bg-green-500"} rounded-full transition-all duration-300`} 
+                          style={{width: `${review.progress}%`}}></div>
+                      </div>
+                      <span className={`text-xs font-medium ${titleColor}`}>{review.progress}%</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 text-xs text-gray-500">
+                  <span>已用时间: {elapsedDays}天</span>
+                  <span>总计: {totalDays}天</span>
+                </div>
               </div>
             </div>
           )}
@@ -395,9 +426,6 @@ export const ReviewTimelineCard = ({
                     </svg>
                     导出记录
                   </button>
-                  <button className={`text-xs ${type === "progress" ? "text-blue-600 hover:text-blue-700" : "text-green-600 hover:text-green-700"} flex items-center`}>
-                    {type === "progress" ? "查看详情" : "查看审查报告"} <ChevronRight className="h-3.5 w-3.5 ml-1" />
-                  </button>
                 </div>
               </div>
             </div>
@@ -407,197 +435,489 @@ export const ReviewTimelineCard = ({
       
       {/* 督办提醒对话框 */}
       <Dialog open={isReminderDialogOpen} onOpenChange={setIsReminderDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>设置督办提醒</DialogTitle>
+        <DialogContent className="sm:max-w-[600px] max-h-[85vh] p-0 flex flex-col">
+          {/* 固定顶部 */}
+          <DialogHeader className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-blue-600" />
+              设置督办提醒
+            </DialogTitle>
             <DialogDescription>
-              设置提醒日期，系统将在指定日期发送督办提醒通知
+              根据项目进度和审查要求，设置合理的督办提醒策略
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="reminderDate" className="text-right">
-                提醒日期 <span className="text-red-500">*</span>
+          
+          {/* 滚动内容区域 */}
+          <div className="flex-1 overflow-y-auto px-6 py-4">
+            <div className="grid gap-6">
+            {/* 基本信息 */}
+            <div className="grid grid-cols-12 gap-4">
+              <div className="col-span-4 text-sm font-medium text-gray-700">
+                当前审查环节
+              </div>
+              <div className="col-span-8 text-sm text-gray-600">
+                {review.currentStep}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-12 gap-4">
+              <div className="col-span-4 text-sm font-medium text-gray-700">
+                预计完成时间
+              </div>
+              <div className="col-span-8 text-sm text-gray-600">
+                {review.expectedCompletionDate}
+              </div>
+            </div>
+
+            <hr className="border-gray-200" />
+
+            {/* 提醒类型选择 */}
+            <div className="space-y-4">
+              <Label className="text-sm font-medium text-gray-700">提醒类型</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div 
+                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                    reminderType === "self" 
+                      ? "border-blue-500 bg-blue-50" 
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                  onClick={() => setReminderType("self")}
+                >
+                  <div className="flex items-center mb-2">
+                    <User className="h-4 w-4 mr-2 text-blue-600" />
+                    <span className="font-medium text-sm">自我提醒</span>
+                  </div>
+                  <p className="text-xs text-gray-600">仅向自己发送提醒通知，用于个人工作安排</p>
+                </div>
+                
+                <div 
+                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                    reminderType === "others" 
+                      ? "border-blue-500 bg-blue-50" 
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                  onClick={() => setReminderType("others")}
+                >
+                  <div className="flex items-center mb-2">
+                    <Users className="h-4 w-4 mr-2 text-orange-600" />
+                    <span className="font-medium text-sm">督办通知</span>
+                  </div>
+                  <p className="text-xs text-gray-600">向相关人员发送督办通知，推进审查进度</p>
+                </div>
+              </div>
+            </div>
+
+            {/* 提醒时间设置 */}
+            <div className="grid grid-cols-12 gap-4">
+              <Label className="col-span-4 text-sm font-medium text-gray-700 mt-2">
+                提醒时间 <span className="text-red-500">*</span>
               </Label>
-              <div className="col-span-3 relative">
+              <div className="col-span-8 space-y-3">
                 <input
-                  id="reminderDate"
                   type="date"
                   value={reminderDate}
                   onChange={(e) => setReminderDate(e.target.value)}
-                  className="w-full p-2 border rounded-md pr-8"
+                  className="w-full p-2 border rounded-md"
                   min={new Date().toISOString().split('T')[0]}
                   max={review.expectedCompletionDate}
                 />
-                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="3" y="6" width="18" height="15" rx="2" stroke="currentColor" strokeWidth="2" />
-                    <path d="M3 10H21" stroke="currentColor" strokeWidth="2" />
-                    <path d="M8 3V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    <path d="M16 3V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    <rect x="6" y="14" width="3" height="3" rx="0.5" fill="currentColor" />
-                    <rect x="10.5" y="14" width="3" height="3" rx="0.5" fill="currentColor" />
-                    <rect x="15" y="14" width="3" height="3" rx="0.5" fill="currentColor" />
-                  </svg>
+                
+                {/* 快捷时间选择 */}
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { label: "明天", days: 1 },
+                    { label: "3天后", days: 3 },
+                    { label: "1周后", days: 7 },
+                    { label: "截止前3天", days: -3, fromEnd: true }
+                  ].map((preset) => (
+                    <button
+                      key={preset.label}
+                      type="button"
+                                             onClick={() => {
+                         const date = preset.fromEnd 
+                           ? new Date(review.expectedCompletionDate || new Date())
+                           : new Date();
+                         date.setDate(date.getDate() + preset.days);
+                         setReminderDate(date.toISOString().split('T')[0]);
+                       }}
+                      className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded border text-gray-700"
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
-            
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="reminderType" className="text-right mt-2">
-                提醒类型
+
+            {/* 优先级和频率 */}
+            <div className="grid grid-cols-12 gap-4">
+              <Label className="col-span-4 text-sm font-medium text-gray-700 mt-2">
+                提醒设置
               </Label>
-              <div className="col-span-3 flex flex-col gap-3">
-                <div className="flex items-center gap-2">
-                  <input 
-                    type="radio" 
-                    id="reminderTypeSelf" 
-                    checked={reminderType === "self"} 
-                    onChange={() => setReminderType("self")}
-                    className="w-4 h-4 text-blue-600"
-                  />
-                  <Label htmlFor="reminderTypeSelf" className="font-normal">
-                    自我提醒（仅提醒自己）
-                  </Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input 
-                    type="radio" 
-                    id="reminderTypeOthers" 
-                    checked={reminderType === "others"} 
-                    onChange={() => setReminderType("others")}
-                    className="w-4 h-4 text-blue-600"
-                  />
-                  <Label htmlFor="reminderTypeOthers" className="font-normal">
-                    督办通知（通知相关人员）
-                  </Label>
+              <div className="col-span-8 space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs text-gray-600 mb-1 block">优先级</Label>
+                    <select 
+                      value={reminderPriority}
+                      onChange={(e) => setReminderPriority(e.target.value as any)}
+                      className="w-full p-2 border rounded-md text-sm"
+                    >
+                      <option value="normal">普通</option>
+                      <option value="high">紧急</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-600 mb-1 block">提醒频率</Label>
+                    <select 
+                      value={reminderFrequency}
+                      onChange={(e) => setReminderFrequency(e.target.value as any)}
+                      className="w-full p-2 border rounded-md text-sm"
+                    >
+                      <option value="once">单次提醒</option>
+                      <option value="daily">每日提醒</option>
+                      <option value="weekly">每周提醒</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
-            
+
+            {/* 接收人选择 - 仅在督办通知模式下显示 */}
             {reminderType === "others" && (
-              <div className="grid grid-cols-4 items-start gap-4">
-                <Label htmlFor="reminderRecipients" className="text-right mt-2">
-                  接收人 <span className="text-red-500">*</span>
-                </Label>
-                <div className="col-span-3">
-                  <div className="p-2 border rounded-md min-h-[80px] bg-gray-50 flex flex-wrap gap-2">
-                    {reminderRecipients.length > 0 ? (
-                      reminderRecipients.map((recipient, index) => (
-                        <div key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-sm flex items-center">
+              <div className="space-y-4 bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <Users className="h-4 w-4 text-orange-600" />
+                    督办接收人设置 <span className="text-red-500">*</span>
+                  </Label>
+                  <button 
+                    onClick={() => setIsTeamSelectorOpen(true)}
+                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1 px-2 py-1 rounded border border-blue-200 hover:bg-blue-50"
+                  >
+                    <Plus className="h-3 w-3" />
+                    添加成员
+                  </button>
+                </div>
+                
+                {/* 快捷选择 */}
+                <div className="space-y-2">
+                  <div className="text-xs text-gray-600">常用接收人：</div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { label: "项目负责人", value: "王教授", icon: "👨‍🏫" },
+                      { label: "审查委员", value: "赵专家", icon: "👨‍⚕️" },
+                      { label: "行政人员", value: "张秘书", icon: "👩‍💼" },
+                      { label: "安全专员", value: "刘安全员", icon: "🛡️" }
+                    ].map((person) => (
+                      <button
+                        key={person.value}
+                        type="button"
+                        onClick={() => {
+                          if (!reminderRecipients.includes(person.value)) {
+                            setReminderRecipients(prev => [...prev, person.value]);
+                          }
+                        }}
+                        disabled={reminderRecipients.includes(person.value)}
+                        className={`flex items-center gap-2 p-2 text-xs rounded border text-left transition-all ${
+                          reminderRecipients.includes(person.value)
+                            ? "bg-blue-100 text-blue-800 border-blue-300 cursor-not-allowed"
+                            : "bg-white hover:bg-blue-50 border-gray-200 text-gray-700 hover:border-blue-300"
+                        }`}
+                      >
+                        <span>{person.icon}</span>
+                        <span className="flex-1">{person.label}</span>
+                        {reminderRecipients.includes(person.value) && (
+                          <CheckCircle className="h-3 w-3 text-blue-600" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 已选择的接收人 */}
+                {reminderRecipients.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="text-xs text-gray-600">已选择接收人：</div>
+                    <div className="flex flex-wrap gap-2">
+                      {reminderRecipients.map((recipient, index) => (
+                        <div key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-1">
                           <span>{recipient}</span>
                           <button 
                             onClick={() => setReminderRecipients(prev => prev.filter((_, i) => i !== index))}
-                            className="ml-1 text-blue-600 hover:text-blue-800"
+                            className="text-blue-600 hover:text-blue-800 font-bold"
                           >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                            </svg>
+                            ×
                           </button>
                         </div>
-                      ))
-                    ) : (
-                      <div className="text-gray-400 text-sm">点击下方"添加接收人"按钮选择接收督办通知的项目团队成员</div>
-                    )}
+                      ))}
+                    </div>
                   </div>
-                  <button 
-                    onClick={() => setIsTeamSelectorOpen(true)}
-                    className="mt-2 text-xs text-blue-600 hover:text-blue-800 flex items-center"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="mr-1" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
-                    添加接收人
-                  </button>
-                </div>
+                )}
+
+                {reminderRecipients.length === 0 && (
+                  <div className="text-center py-4 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-lg">
+                    请选择督办通知的接收人
+                  </div>
+                )}
               </div>
             )}
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="reminderPriority" className="text-right">
-                提醒优先级
+
+            {/* 提醒内容 */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700">
+                {reminderType === "self" ? "个人备注" : "督办内容"}
+                {reminderType === "others" && <span className="text-orange-600 ml-1">（推荐填写）</span>}
               </Label>
-              <div className="col-span-3">
-                <select 
-                  id="reminderPriority"
-                  value={reminderPriority}
-                  onChange={(e) => setReminderPriority(e.target.value as any)}
-                  className="w-full p-2 border rounded-md"
-                >
-                  <option value="normal">普通</option>
-                  <option value="high">紧急</option>
-                </select>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="reminderFrequency" className="text-right">
-                提醒频率
-              </Label>
-              <div className="col-span-3">
-                <select 
-                  id="reminderFrequency"
-                  value={reminderFrequency}
-                  onChange={(e) => setReminderFrequency(e.target.value as any)}
-                  className="w-full p-2 border rounded-md"
-                >
-                  <option value="once">单次提醒</option>
-                  <option value="daily">每日提醒</option>
-                  <option value="weekly">每周提醒</option>
-                </select>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="reminderNote" className="text-right mt-2">
-                提醒备注
-              </Label>
+              
+              {/* 模板选择 - 仅在督办通知模式下显示 */}
+              {reminderType === "others" && (
+                <div className="space-y-2">
+                  <div className="text-xs text-gray-600">快速模板：</div>
+                  <div className="grid grid-cols-1 gap-1">
+                    {[
+                      "项目审查进度较慢，请加快处理进度以确保按时完成。",
+                      "距离预计完成时间较近，请优先处理此项审查。",
+                      "该项目具有一定紧急性，请尽快安排审查时间。"
+                    ].map((template, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => setReminderNote(template)}
+                        className="text-left px-3 py-2 text-xs bg-gray-50 hover:bg-blue-50 rounded border border-gray-200 hover:border-blue-300 text-gray-700 hover:text-blue-700 transition-colors"
+                      >
+                        {template}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               <Textarea
-                id="reminderNote"
-                placeholder="添加督办提醒备注（可选）"
+                placeholder={reminderType === "self" 
+                  ? "添加个人提醒备注（可选）" 
+                  : "请填写督办理由和具体要求..."
+                }
                 value={reminderNote}
                 onChange={(e) => setReminderNote(e.target.value)}
-                className="col-span-3 min-h-[80px]"
+                className="min-h-[80px]"
               />
             </div>
+
+            {/* 自动规则设置 */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center mb-2">
+                <Settings className="h-4 w-4 mr-2 text-blue-600" />
+                <span className="text-sm font-medium text-blue-800">智能提醒规则</span>
+              </div>
+              <div className="space-y-2 text-xs text-blue-700">
+                <div className="flex items-center">
+                  <CheckCircle className="h-3 w-3 mr-2" />
+                  距离截止日期7天时自动发送第一次提醒
+                </div>
+                <div className="flex items-center">
+                  <CheckCircle className="h-3 w-3 mr-2" />
+                  距离截止日期3天时自动发送紧急提醒
+                </div>
+                <div className="flex items-center">
+                  <CheckCircle className="h-3 w-3 mr-2" />
+                  超过截止日期时自动标记为逾期并通知上级
+                </div>
+              </div>
+            </div>
+            </div>
           </div>
-          <DialogFooter>
+          
+          {/* 固定底部 */}
+          <DialogFooter className="px-6 py-4 border-t border-gray-200 flex-shrink-0 space-x-2">
             <Button variant="outline" onClick={() => setIsReminderDialogOpen(false)}>
               取消
             </Button>
-            <Button onClick={confirmReminder}>确认</Button>
+            <Button 
+              onClick={confirmReminder}
+              disabled={!reminderDate || (reminderType === "others" && reminderRecipients.length === 0)}
+            >
+              {reminderType === "self" ? "设置提醒" : "发送督办"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
       
       {/* 催办对话框 */}
       <Dialog open={isUrgeDialogOpen} onOpenChange={setIsUrgeDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>审查催办</DialogTitle>
+        <DialogContent className="sm:max-w-[500px] max-h-[85vh] p-0 flex flex-col">
+          {/* 固定顶部 */}
+          <DialogHeader className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-orange-600" />
+              审查催办
+            </DialogTitle>
             <DialogDescription>
-              向当前负责"{ review.currentStep }"的相关人员发送催办通知
+              向当前负责"{review.currentStep}"的相关人员发送催办通知
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="urgeNote" className="text-right">
+          
+          {/* 滚动内容区域 */}
+          <div className="flex-1 overflow-y-auto px-6 py-4">
+            <div className="grid gap-4">
+            {/* 当前状态信息 */}
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-orange-700 font-medium">当前环节：</span>
+                  <div className="text-orange-600">{review.currentStep}</div>
+                </div>
+                <div>
+                  <span className="text-orange-700 font-medium">已耗时：</span>
+                  <div className="text-orange-600">
+                    {Math.ceil((new Date().getTime() - new Date(review.submittedDate).getTime()) / (1000 * 60 * 60 * 24))} 天
+                  </div>
+                </div>
+                <div>
+                  <span className="text-orange-700 font-medium">预计完成：</span>
+                  <div className="text-orange-600">{review.expectedCompletionDate}</div>
+                </div>
+                <div>
+                  <span className="text-orange-700 font-medium">剩余时间：</span>
+                  <div className={`font-medium ${
+                    review.expectedCompletionDate && new Date(review.expectedCompletionDate) < new Date()
+                      ? 'text-red-600' 
+                      : 'text-orange-600'
+                  }`}>
+                    {review.expectedCompletionDate 
+                      ? Math.ceil((new Date(review.expectedCompletionDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) 
+                      : 0
+                    } 天
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 催办原因选择 */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700">催办原因</Label>
+              <div className="space-y-2">
+                {[
+                  { id: "slow", label: "审查进度缓慢", description: "当前审查进度明显低于预期" },
+                  { id: "urgent", label: "项目紧急", description: "项目具有紧急性，需要优先处理" },
+                  { id: "deadline", label: "临近截止", description: "距离截止日期较近，需要加快进度" },
+                  { id: "other", label: "其他原因", description: "其他需要催办的特殊情况" }
+                ].map((reason) => {
+                  const isSelected = selectedUrgeReason === reason.id;
+                  return (
+                    <div 
+                      key={reason.id} 
+                      className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                        isSelected 
+                          ? 'border-orange-500 bg-orange-50' 
+                          : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50'
+                      }`}
+                      onClick={() => {
+                        setSelectedUrgeReason(reason.id);
+                        const templates = {
+                          slow: "当前审查进度较慢，希望能够加快处理速度，确保项目按时推进。",
+                          urgent: "该项目具有紧急性，请优先安排审查，尽快完成相关环节。",
+                          deadline: "距离预计完成时间较近，请尽快处理以避免延期。",
+                          other: ""
+                        };
+                        setOperationNote(templates[reason.id as keyof typeof templates]);
+                      }}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`w-4 h-4 rounded-full border-2 mt-0.5 flex items-center justify-center ${
+                          isSelected 
+                            ? 'border-orange-500 bg-orange-500' 
+                            : 'border-orange-300'
+                        }`}>
+                          {isSelected && <div className="w-1.5 h-1.5 bg-white rounded-full"></div>}
+                        </div>
+                        <div className="flex-1">
+                          <div className={`font-medium text-sm ${
+                            isSelected ? 'text-orange-900' : 'text-gray-900'
+                          }`}>{reason.label}</div>
+                          <div className={`text-xs mt-1 ${
+                            isSelected ? 'text-orange-700' : 'text-gray-600'
+                          }`}>{reason.description}</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 催办说明 */}
+            <div className="space-y-2">
+              <Label htmlFor="urgeNote" className="text-sm font-medium text-gray-700">
                 催办说明
               </Label>
               <Textarea
                 id="urgeNote"
-                placeholder="请填写催办原因（可选）"
+                placeholder="请详细说明催办原因和具体要求..."
                 value={operationNote}
                 onChange={(e) => setOperationNote(e.target.value)}
-                className="col-span-3"
+                className="min-h-[100px]"
               />
+              <div className="text-xs text-gray-500">
+                详细的催办说明有助于相关人员了解情况并及时处理
+              </div>
+            </div>
+
+            {/* 催办方式 */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700">通知方式</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex items-center space-x-2">
+                  <input type="checkbox" id="notifySystem" defaultChecked className="rounded" />
+                  <Label htmlFor="notifySystem" className="text-sm">系统通知</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input type="checkbox" id="notifyEmail" defaultChecked className="rounded" />
+                  <Label htmlFor="notifyEmail" className="text-sm">邮件通知</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input type="checkbox" id="notifySms" className="rounded" />
+                  <Label htmlFor="notifySms" className="text-sm">短信通知</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input type="checkbox" id="notifyPhone" className="rounded" />
+                  <Label htmlFor="notifyPhone" className="text-sm">电话提醒</Label>
+                </div>
+              </div>
+            </div>
+
+            {/* 智能建议 */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="flex items-center mb-2">
+                <Settings className="h-4 w-4 mr-2 text-blue-600" />
+                <span className="text-sm font-medium text-blue-800">智能建议</span>
+              </div>
+              <div className="space-y-2 text-xs text-blue-700">
+                <div className="flex items-center">
+                  <CheckCircle className="h-3 w-3 mr-2" />
+                  建议同时抄送给项目负责人和部门主管
+                </div>
+                <div className="flex items-center">
+                  <CheckCircle className="h-3 w-3 mr-2" />
+                  如48小时内无响应，系统将自动升级催办等级
+                </div>
+                <div className="flex items-center">
+                  <CheckCircle className="h-3 w-3 mr-2" />
+                  催办记录将记入项目进度档案
+                </div>
+              </div>
+            </div>
             </div>
           </div>
-          <DialogFooter>
+          
+          {/* 固定底部 */}
+          <DialogFooter className="px-6 py-4 border-t border-gray-200 flex-shrink-0 space-x-2">
             <Button variant="outline" onClick={() => setIsUrgeDialogOpen(false)}>
               取消
             </Button>
-            <Button onClick={confirmUrge}>确认催办</Button>
+            <Button onClick={confirmUrge} className="bg-orange-600 hover:bg-orange-700">
+              发送催办
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -606,92 +926,75 @@ export const ReviewTimelineCard = ({
       <Dialog open={isTeamSelectorOpen} onOpenChange={setIsTeamSelectorOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>选择接收人</DialogTitle>
+            <DialogTitle>选择团队成员</DialogTitle>
             <DialogDescription>
               从项目团队成员中选择接收督办通知的人员
             </DialogDescription>
           </DialogHeader>
+          
           <div className="py-4">
-            <div className="mb-4 relative">
+            {/* 搜索框 */}
+            <div className="mb-4">
               <input
                 type="text"
-                placeholder="搜索成员（姓名、角色或部门）"
+                placeholder="搜索团队成员..."
                 value={teamSearchQuery}
                 onChange={(e) => setTeamSearchQuery(e.target.value)}
-                className="w-full p-2 pl-8 border rounded-md"
+                className="w-full p-2 border rounded-md"
               />
-              <svg 
-                className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" 
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
             </div>
             
-            <div className="max-h-[300px] overflow-y-auto border rounded-md">
-              <table className="w-full">
-                <thead className="bg-gray-50 sticky top-0">
-                  <tr>
-                    <th className="p-2 text-left text-xs font-medium text-gray-500 tracking-wider">选择</th>
-                    <th className="p-2 text-left text-xs font-medium text-gray-500 tracking-wider">姓名</th>
-                    <th className="p-2 text-left text-xs font-medium text-gray-500 tracking-wider">角色</th>
-                    <th className="p-2 text-left text-xs font-medium text-gray-500 tracking-wider">部门</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {filteredTeamMembers.map(member => {
-                    const isSelected = reminderRecipients.includes(member.name);
-                    return (
-                      <tr 
-                        key={member.id}
-                        className={`${isSelected ? 'bg-blue-50' : 'bg-white'} hover:bg-gray-50`}
-                        onClick={() => {
-                          if (isSelected) {
-                            setReminderRecipients(prev => prev.filter(name => name !== member.name));
-                          } else {
-                            setReminderRecipients(prev => [...prev, member.name]);
-                          }
-                        }}
-                      >
-                        <td className="p-2">
-                          <input 
-                            type="checkbox" 
-                            checked={isSelected}
-                            onChange={() => {}} // 点击行时就会触发更改，这里只是为了展示复选框状态
-                            className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                          />
-                        </td>
-                        <td className="p-2 text-sm">{member.name}</td>
-                        <td className="p-2 text-sm">{member.role}</td>
-                        <td className="p-2 text-sm">{member.department}</td>
-                      </tr>
-                    );
-                  })}
-                  {filteredTeamMembers.length === 0 && (
-                    <tr>
-                      <td colSpan={4} className="p-4 text-center text-gray-500">
-                        未找到匹配的成员
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-            
-            <div className="mt-2 text-sm text-gray-500">
-              已选择 {reminderRecipients.length} 名成员
+            {/* 成员列表 */}
+            <div className="max-h-[300px] overflow-y-auto space-y-2">
+              {filteredTeamMembers.length === 0 && (
+                <div className="text-center text-gray-500 py-8">
+                  没有找到匹配的团队成员
+                </div>
+              )}
+              
+              {filteredTeamMembers.map(member => {
+                const isSelected = reminderRecipients.includes(member.name);
+                return (
+                  <div
+                    key={member.id}
+                    className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                      isSelected 
+                        ? 'border-blue-300 bg-blue-50' 
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                    }`}
+                    onClick={() => {
+                      if (isSelected) {
+                        setReminderRecipients(prev => prev.filter(name => name !== member.name));
+                      } else {
+                        setReminderRecipients(prev => [...prev, member.name]);
+                      }
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                          isSelected ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
+                        }`}>
+                          {isSelected && <Check className="h-3 w-3 text-white" />}
+                        </div>
+                        <div>
+                          <div className="font-medium text-sm">{member.name}</div>
+                          <div className="text-xs text-gray-500">{member.role} · {member.department}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
+          
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsTeamSelectorOpen(false)}>
               取消
             </Button>
             <Button onClick={() => setIsTeamSelectorOpen(false)}>
-              确认
+              确认选择 ({reminderRecipients.length})
             </Button>
           </DialogFooter>
         </DialogContent>

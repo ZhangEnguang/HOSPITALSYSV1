@@ -117,10 +117,54 @@ const animalEthicProjects = [
     projectNumber: "动伦2025001",
     department: "基础医学院",
     members: [
-      { name: "李助理", title: "研究助理", department: "基础医学院", role: "实验操作", contact: "li@example.com" },
-      { name: "张技术员", title: "高级技术员", department: "基础医学院", role: "数据分析", contact: "zhang@example.com" },
-      { name: "刘研究员", title: "副研究员", department: "药理学系", role: "实验设计", contact: "13800000003" },
-      { name: "赵博士", title: "博士后", department: "基础医学院", role: "实验监督", contact: "zhao@example.com" }
+      { 
+        name: "李助理", 
+        title: "研究助理", 
+        department: "基础医学院", 
+        role: "实验操作", 
+        email: "li@example.com", 
+        phone: "13800000010",
+        workYears: 3,
+        specialty: "动物实验操作",
+        education: "硕士",
+        joinDate: "2022-03-15"
+      },
+      { 
+        name: "张技术员", 
+        title: "高级技术员", 
+        department: "基础医学院", 
+        role: "数据分析", 
+        email: "zhang@example.com", 
+        phone: "13800000011",
+        workYears: 8,
+        specialty: "生物统计分析",
+        education: "本科",
+        joinDate: "2019-07-20"
+      },
+      { 
+        name: "刘研究员", 
+        title: "副研究员", 
+        department: "药理学系", 
+        role: "实验设计", 
+        email: "liu@example.com", 
+        phone: "13800000003",
+        workYears: 12,
+        specialty: "药物药理学",
+        education: "博士",
+        joinDate: "2018-09-01"
+      },
+      { 
+        name: "赵博士", 
+        title: "博士后", 
+        department: "基础医学院", 
+        role: "实验监督", 
+        email: "zhao@example.com", 
+        phone: "13800000012",
+        workYears: 5,
+        specialty: "细胞分子生物学",
+        education: "博士",
+        joinDate: "2021-11-10"
+      }
     ]
   },
   {
@@ -146,9 +190,42 @@ const animalEthicProjects = [
     projectNumber: "动伦2025002",
     department: "临床医学院",
     members: [
-      { name: "陈博士", title: "博士后", department: "临床医学院", role: "项目协调", contact: "chen@example.com" },
-      { name: "吴老师", title: "讲师", department: "临床医学院", role: "实验设计", contact: "wu@example.com" },
-      { name: "周技术员", title: "技术员", department: "免疫学实验中心", role: "实验操作", contact: "13800000005" }
+      { 
+        name: "陈博士", 
+        title: "博士后", 
+        department: "临床医学院", 
+        role: "项目协调", 
+        email: "chen@example.com", 
+        phone: "13800000020",
+        workYears: 4,
+        specialty: "造血干细胞研究",
+        education: "博士",
+        joinDate: "2021-08-15"
+      },
+      { 
+        name: "吴老师", 
+        title: "讲师", 
+        department: "临床医学院", 
+        role: "实验设计", 
+        email: "wu@example.com", 
+        phone: "13800000021",
+        workYears: 6,
+        specialty: "免疫学研究",
+        education: "博士",
+        joinDate: "2020-03-01"
+      },
+      { 
+        name: "周技术员", 
+        title: "技术员", 
+        department: "免疫学实验中心", 
+        role: "实验操作", 
+        email: "zhou@example.com", 
+        phone: "13800000005",
+        workYears: 2,
+        specialty: "实验技术操作",
+        education: "本科",
+        joinDate: "2023-01-10"
+      }
     ]
   },
   {
@@ -174,9 +251,42 @@ const animalEthicProjects = [
     projectNumber: "动伦2025003",
     department: "神经科学学院",
     members: [
-      { name: "孙医生", title: "主治医师", department: "附属医院", role: "临床指导", contact: "sun@example.com" },
-      { name: "钱技术员", title: "高级技术员", department: "神经科学实验中心", role: "实验操作", contact: "13800000007" },
-      { name: "郑博士", title: "博士研究生", department: "神经科学学院", role: "数据分析", contact: "zheng@example.com" }
+      { 
+        name: "孙医生", 
+        title: "主治医师", 
+        department: "附属医院", 
+        role: "临床指导", 
+        email: "sun@example.com", 
+        phone: "13800000030",
+        workYears: 10,
+        specialty: "神经外科医学",
+        education: "博士",
+        joinDate: "2019-05-20"
+      },
+      { 
+        name: "钱技术员", 
+        title: "高级技术员", 
+        department: "神经科学实验中心", 
+        role: "实验操作", 
+        email: "qian@example.com", 
+        phone: "13800000007",
+        workYears: 7,
+        specialty: "神经电生理技术",
+        education: "硕士",
+        joinDate: "2020-09-01"
+      },
+      { 
+        name: "郑博士", 
+        title: "博士研究生", 
+        department: "神经科学学院", 
+        role: "数据分析", 
+        email: "zheng@example.com", 
+        phone: "13800000031",
+        workYears: 3,
+        specialty: "生物信息学分析",
+        education: "博士在读",
+        joinDate: "2022-09-01"
+      }
     ]
   }
 ];

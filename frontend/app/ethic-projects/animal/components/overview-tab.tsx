@@ -17,6 +17,8 @@ import {
   Mail,
   Phone,
   Users,
+  ExternalLink,
+  Sparkles,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -24,7 +26,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "@/components/ui/use-toast"
-import Image from "next/image"
 import { formatDateToString } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -167,8 +168,8 @@ export default function EthicProjectOverviewTab({
         <CardHeader className="pb-1 relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="relative w-10 h-10">
-                <Image src="/ai-icon.png" alt="AI摘要" width={40} height={40} className="object-contain" />
+              <div className="relative w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+                <Sparkles className="h-5 w-5 text-white" />
               </div>
               <div>
                 <CardTitle className="text-lg font-semibold flex items-center gap-2">
@@ -659,73 +660,56 @@ export default function EthicProjectOverviewTab({
       {todo.members && todo.members.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg flex items-center">
-              项目团队成员
-            </CardTitle>
+            <CardTitle className="text-lg">项目团队成员</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {todo.members.map((member: any, index: number) => (
-                <div key={index} className="group relative bg-white border border-gray-200 rounded-xl p-3 hover:shadow-lg hover:border-blue-300 transition-all duration-300 hover:-translate-y-1">
-                  {/* 头像和姓名 */}
-                  <div className="flex flex-col items-center text-center">
-                    <div className="relative mb-2">
-                      <div className="h-12 w-12 rounded-full bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500 text-white font-semibold flex items-center justify-center text-lg shadow-lg">
-                        {member.name.charAt(0)}
-                      </div>
-                      {/* 角色小徽章 */}
-                      {member.role && (
-                        <div className="absolute -bottom-1 -right-1 h-5 w-5 bg-green-500 rounded-full flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">✓</span>
-                        </div>
-                      )}
+                <div key={index} className="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
+                  {/* 头像和基本信息 */}
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold flex items-center justify-center text-sm flex-shrink-0">
+                      {member.name ? member.name.charAt(0) : '?'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-gray-900 text-sm truncate">{member.name || '未知'}</h4>
+                      <p className="text-xs text-muted-foreground truncate">{member.title || '未设置'}</p>
+                    </div>
+                  </div>
+                  
+                  {/* 角色标签 */}
+                  {member.role && (
+                    <div className="mb-3">
+                      <Badge variant="outline" className="text-xs">
+                        {member.role}
+                      </Badge>
+                    </div>
+                  )}
+                  
+                  {/* 详细信息 */}
+                  <div className="space-y-2 text-xs">
+                    <div>
+                      <span className="text-muted-foreground">部门：</span>
+                      <span className="font-medium">{member.department || '未设置'}</span>
                     </div>
                     
-                    {/* 姓名和职称 */}
-                    <div className="w-full">
-                      <h4 className="font-semibold text-gray-900 text-sm truncate mb-0.5">{member.name}</h4>
-                      <p className="text-xs text-gray-500 truncate">{member.title}</p>
-                    </div>
-                    
-                    {/* 角色标签 */}
-                    {member.role && (
-                      <div className="mt-2 mb-2">
-                        <span className="inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-md border border-blue-200">
-                          {member.role}
-                        </span>
+                    {member.email && (
+                      <div>
+                        <span className="text-muted-foreground">邮箱：</span>
+                        <a href={`mailto:${member.email}`} className="font-medium text-blue-600 hover:text-blue-800 break-all">
+                          {member.email}
+                        </a>
                       </div>
                     )}
-                  </div>
-                  
-                  {/* 详细信息 - 悬停显示 */}
-                  <div className="mt-3 space-y-1.5">
-                    <div className="flex items-center text-xs">
-                      <span className="text-gray-400 mr-2">🏢</span>
-                      <span className="text-gray-600 truncate flex-1">{member.department}</span>
-                    </div>
-                    <div className="flex items-center text-xs">
-                      <span className="text-gray-400 mr-2">
-                        {member.contact.includes('@') ? '📧' : '📞'}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        {member.contact.includes('@') ? (
-                          <a href={`mailto:${member.contact}`} className="text-blue-600 hover:text-blue-800 truncate block">
-                            {member.contact}
-                          </a>
-                        ) : (
-                          <a href={`tel:${member.contact}`} className="text-blue-600 hover:text-blue-800">
-                            {member.contact}
-                          </a>
-                        )}
+                    
+                    {member.phone && (
+                      <div>
+                        <span className="text-muted-foreground">电话：</span>
+                        <a href={`tel:${member.phone}`} className="font-medium text-blue-600 hover:text-blue-800">
+                          {member.phone}
+                        </a>
                       </div>
-                    </div>
-                  </div>
-                  
-                  {/* 悬停时的操作按钮 */}
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <button className="h-6 w-6 bg-white rounded-full shadow-md border border-gray-200 flex items-center justify-center hover:bg-gray-50">
-                      <span className="text-gray-400 text-xs">···</span>
-                    </button>
+                    )}
                   </div>
                 </div>
               ))}
