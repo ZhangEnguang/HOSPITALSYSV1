@@ -549,7 +549,7 @@ export default function AnimalEthicProjectDetailPage({ params }: { params: { id:
         },
         {
           id: "experimentProgress",
-          label: "实验进度与结果",
+          label: "实验数据",
           icon: <BarChart3 className="h-4 w-4" />,
           component: <ExperimentProgressTab />,
         },

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-// 实验进度与结果标签页组件
+// 实验数据标签页组件
 export default function ExperimentProgressTab() {
   // 定义实验阶段数据
   const experimentStages = [

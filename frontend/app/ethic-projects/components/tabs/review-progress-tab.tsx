@@ -3,9 +3,33 @@
 import React, { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Clock, CheckCircle, ChevronDown, ChevronUp, Bell, AlertCircle, Check, FileCheck, ChevronRight } from "lucide-react"
-import { toast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Progress } from "@/components/ui/progress"
+import { 
+  Clock, 
+  CheckCircle, 
+  ChevronDown, 
+  ChevronUp, 
+  Bell, 
+  AlertCircle, 
+  Check, 
+  FileCheck, 
+  ChevronRight,
+  Search,
+  Download,
+  Eye,
+  User,
+  Calendar,
+  MapPin,
+  BarChart3,
+  ClipboardList,
+  CheckCircle2,
+  FileText,
+  Filter
+} from "lucide-react"
+import { toast } from "@/components/ui/use-toast"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -38,6 +62,10 @@ const ReviewTimelineCard = ({
 
 export default function ReviewProgressTab({ projectId, projectType = "animal" }: { projectId?: string; projectType?: "animal" | "human" }) {
   
+  const [searchTerm, setSearchTerm] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
+  const [typeFilter, setTypeFilter] = useState("all")
+
   // 模拟审查流程数据 - 扩展为5条数据，并按优先级排序
   const [reviewData] = useState([
     // 第一条：有最新进展，审核中，排在最前面
@@ -53,6 +81,7 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
       hasLatestUpdate: true, // 有最新进展
       latestUpdateDate: "2024-02-05", // 最新进展日期
       latestUpdateAction: "专家评审中", // 最新进展内容
+      documentsCount: 4,
       reviewHistory: [
         {
           date: "2024-01-20",
@@ -91,6 +120,7 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
       currentStep: "材料补充",
       progress: 45,
       hasLatestUpdate: false,
+      documentsCount: 3,
       reviewHistory: [
         {
           date: "2024-01-15",
@@ -128,6 +158,7 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
       currentStep: "形式审查",
       progress: 25,
       hasLatestUpdate: false,
+      documentsCount: 3,
       reviewHistory: [
         {
           date: "2024-01-28",
@@ -161,6 +192,7 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
       result: "备案批准",
       remarks: "经审核，该科研试验项目符合相关规定和伦理要求，予以备案批准。请严格按照备案内容执行，如有变更需及时报告。",
       hasLatestUpdate: false,
+      documentsCount: 3,
       reviewHistory: [
         {
           date: "2023-12-10",
@@ -200,6 +232,7 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
       result: "检查通过",
       remarks: "年度检查结果良好，实验操作规范，动物福利保障到位，建议继续按计划执行。",
       hasLatestUpdate: false,
+      documentsCount: 4,
       reviewHistory: [
         {
           date: "2023-11-15",
@@ -235,6 +268,26 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
     }
   ]);
 
+  // 过滤数据
+  const filteredData = reviewData.filter(item => {
+    const matchesSearch = searchTerm === "" || 
+      item.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.submittedBy.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.currentStep.toLowerCase().includes(searchTerm.toLowerCase())
+    
+    const matchesStatus = statusFilter === "all" || item.status === statusFilter
+    const matchesType = typeFilter === "all" || item.type.includes(typeFilter)
+    
+    return matchesSearch && matchesStatus && matchesType
+  })
+
+  // 统计信息
+  const totalReviews = reviewData.length
+  const inProgressReviews = reviewData.filter(item => item.status === "审核中").length
+  const completedReviews = reviewData.filter(item => item.status === "已完成").length
+  const avgProgress = Math.round(reviewData.reduce((sum, item) => sum + item.progress, 0) / reviewData.length)
+  const hasUpdates = reviewData.filter(item => item.hasLatestUpdate).length
+
   const getStatusStyle = (status: string) => {
     switch (status) {
       case "审核中":
@@ -261,49 +314,181 @@ export default function ReviewProgressTab({ projectId, projectType = "animal" }:
     }
   };
 
+  // 处理查看详情
+  const handleViewDetail = (review: any) => {
+    toast({
+      title: "查看审查详情",
+      description: `正在查看${review.type}的详细信息`
+    })
+  }
 
+  // 处理导出数据
+  const handleExportData = () => {
+    toast({
+      title: "导出数据",
+      description: "正在准备审查进度数据导出..."
+    })
+  }
+
+  // 处理创建审查
+  const handleCreateReview = () => {
+    toast({
+      title: "创建审查",
+      description: "正在跳转到审查申请页面..."
+    })
+  }
 
   return (
     <div className="space-y-6">
       {/* 添加全局动画样式 */}
       <AnimationStyles />
       
+      {/* 审查数据概览统计卡片 */}
+      <Card className="border-slate-200 shadow-sm overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="relative w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+                <ClipboardList className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                  审查进度概览
+                  <Badge variant="outline" className="ml-2 bg-primary/5 text-primary text-[10px] h-5 px-2">
+                    {totalReviews}项审查
+                  </Badge>
+                </CardTitle>
+                <CardDescription className="text-slate-500">
+                  项目审查流程统计与进度跟踪
+                </CardDescription>
+              </div>
+            </div>
+            <Button 
+              onClick={() => handleCreateReview()}
+              className="h-8 gap-1 bg-blue-600 hover:bg-blue-700"
+              size="sm"
+            >
+              <FileCheck className="h-3.5 w-3.5" />
+              创建审查
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="text-center p-2 rounded-md bg-slate-50 border border-slate-100">
+              <div className="text-lg font-semibold text-slate-700">{inProgressReviews}</div>
+              <div className="text-xs text-slate-500 mt-0.5">审核中</div>
+            </div>
+            <div className="text-center p-2 rounded-md bg-slate-50 border border-slate-100">
+              <div className="text-lg font-semibold text-slate-700">{completedReviews}</div>
+              <div className="text-xs text-slate-500 mt-0.5">已完成</div>
+            </div>
+            <div className="text-center p-2 rounded-md bg-slate-50 border border-slate-100">
+              <div className="text-lg font-semibold text-slate-700">{hasUpdates}</div>
+              <div className="text-xs text-slate-500 mt-0.5">有新进展</div>
+            </div>
+            <div className="text-center p-2 rounded-md bg-slate-50 border border-slate-100">
+              <div className="text-lg font-semibold text-slate-700">{avgProgress}%</div>
+              <div className="text-xs text-slate-500 mt-0.5">平均进度</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 搜索和筛选 */}
+      <Card className="border-slate-200 shadow-sm">
+        <CardContent className="pt-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  placeholder="搜索审查项目..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full md:w-32">
+                <SelectValue placeholder="状态" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部状态</SelectItem>
+                <SelectItem value="审核中">审核中</SelectItem>
+                <SelectItem value="已完成">已完成</SelectItem>
+                <SelectItem value="已拒绝">已拒绝</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-full md:w-40">
+                <SelectValue placeholder="审查类型" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部类型</SelectItem>
+                <SelectItem value="初始审查">初始审查</SelectItem>
+                <SelectItem value="变更申请">变更申请</SelectItem>
+                <SelectItem value="终止报告">终止报告</SelectItem>
+                <SelectItem value="备案审核">备案审核</SelectItem>
+                <SelectItem value="年度检查">年度检查</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button 
+              variant="outline" 
+              onClick={handleExportData}
+              className="w-full md:w-auto"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              导出
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+      
       {/* 审查流程时间线 */}
       <div className="space-y-1">
-        {reviewData
-          .sort((a, b) => {
-            // 排序规则：
-            // 1. 有最新进展的排在最前面
-            // 2. 审核中的排在已完成的前面
-            // 3. 按提交日期降序
-            if (a.hasLatestUpdate && !b.hasLatestUpdate) return -1;
-            if (!a.hasLatestUpdate && b.hasLatestUpdate) return 1;
-            if (a.status === "审核中" && b.status === "已完成") return -1;
-            if (a.status === "已完成" && b.status === "审核中") return 1;
-            return new Date(b.submittedDate).getTime() - new Date(a.submittedDate).getTime();
-          })
-          .map((review, index) => (
-            <ReviewTimelineCard 
-              key={review.id} 
-              review={review} 
-              type={review.status === "审核中" ? "progress" : "completed"}
-              getDocumentStatusColor={getDocumentStatusColor}
-              index={index}
-            />
-          ))}
+        {filteredData.length === 0 ? (
+          <Card className="border-slate-200 shadow-sm">
+            <CardContent className="py-12 text-center">
+              <div className="flex flex-col items-center gap-4 text-slate-500">
+                <ClipboardList className="h-12 w-12" />
+                <div>
+                  <h3 className="font-medium">暂无审查记录</h3>
+                  <p className="text-sm mt-1">
+                    {searchTerm || statusFilter !== "all" || typeFilter !== "all" 
+                      ? "没有找到符合条件的审查记录" 
+                      : "还没有提交任何审查申请"}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          filteredData
+            .sort((a, b) => {
+              // 排序规则：
+              // 1. 有最新进展的排在最前面
+              // 2. 审核中的排在已完成的前面
+              // 3. 按提交日期降序
+              if (a.hasLatestUpdate && !b.hasLatestUpdate) return -1;
+              if (!a.hasLatestUpdate && b.hasLatestUpdate) return 1;
+              if (a.status === "审核中" && b.status === "已完成") return -1;
+              if (a.status === "已完成" && b.status === "审核中") return 1;
+              return new Date(b.submittedDate).getTime() - new Date(a.submittedDate).getTime();
+            })
+            .map((review, index) => (
+              <ReviewTimelineCard 
+                key={review.id} 
+                review={review} 
+                type={review.status === "审核中" ? "progress" : "completed"}
+                getDocumentStatusColor={getDocumentStatusColor}
+                index={index}
+              />
+            ))
+        )}
       </div>
-
-      {reviewData.length === 0 && (
-        <Card>
-                  <CardContent className="flex flex-col items-center justify-center py-8">
-            <Clock className="h-12 w-12 text-gray-400 mb-4" />
-            <p className="text-gray-500 text-center">暂无审查流程记录</p>
-            <p className="text-sm text-gray-400 text-center mt-1">
-              提交审查申请后，相关记录将在此处显示
-                    </p>
-                  </CardContent>
-                </Card>
-      )}
     </div>
   );
 } 
