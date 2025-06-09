@@ -1,370 +1,578 @@
 "use client"
 
-import { useState } from "react"
-import {
-  FileText,
-  Download,
-  Eye,
+import React, { useState, useEffect } from "react"
+import { 
+  FileText, 
+  Upload, 
+  Download, 
+  Eye, 
+  Trash2, 
+  Plus, 
+  Calendar,
   Clock,
-  Check,
-  XCircle,
+  User,
+  CheckCircle,
   AlertCircle,
-  RotateCw,
-  Upload,
-  PlusCircle,
-  FileIcon,
-  FileSearch,
+  XCircle,
+  FileCheck,
+  RefreshCw,
+  Search,
+  Filter,
+  MoreHorizontal,
+  MapPin,
   CheckCircle2,
-  File
+  ChevronDown,
+  ChevronRight,
+  BarChart3
 } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useToast } from "@/components/ui/use-toast"
+import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { toast } from "@/components/ui/use-toast"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { cn } from "@/lib/utils"
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu"
 
-// 文件类型到图标的映射
-function getFileIcon(fileType: string) {
-  // 使用统一的蓝色
-  const iconColor = "text-blue-600";
+// 文件状态定义
+const fileStatusConfig = {
+  pending: { 
+    label: "待审核", 
+    color: "bg-yellow-100 text-yellow-800 border border-yellow-200", 
+    icon: <Clock className="h-3.5 w-3.5" />,
+    bgColor: "bg-yellow-50"
+  },
+  approved: { 
+    label: "已通过", 
+    color: "bg-green-100 text-green-800 border border-green-200", 
+    icon: <CheckCircle2 className="h-3.5 w-3.5" />,
+    bgColor: "bg-green-50"
+  },
+  rejected: { 
+    label: "已退回", 
+    color: "bg-red-100 text-red-800 border border-red-200", 
+    icon: <XCircle className="h-3.5 w-3.5" />,
+    bgColor: "bg-red-50"
+  },
+  reviewing: { 
+    label: "审核中", 
+    color: "bg-blue-100 text-blue-800 border border-blue-200", 
+    icon: <RefreshCw className="h-3.5 w-3.5" />,
+    bgColor: "bg-blue-50"
+  }
+}
+
+// 初始审查文件类型定义（仅包含初始审查相关的文件类型）
+const fileTypeConfig = {
+  application: { label: "申请表", icon: <FileText className="h-4 w-4" /> },
+  protocol: { label: "研究方案", icon: <FileCheck className="h-4 w-4" /> },
+  consent: { label: "知情同意书", icon: <FileText className="h-4 w-4" /> },
+  handbook: { label: "研究者手册", icon: <FileText className="h-4 w-4" /> },
+  report: { label: "病例报告表", icon: <FileText className="h-4 w-4" /> },
+  declaration: { label: "伦理声明", icon: <FileCheck className="h-4 w-4" /> },
+  review: { label: "审查意见", icon: <FileText className="h-4 w-4" /> },
+  statistics: { label: "统计分析计划", icon: <BarChart3 className="h-4 w-4" /> },
+  welfare: { label: "动物福利", icon: <FileText className="h-4 w-4" /> },
+  certificate: { label: "资质证明", icon: <FileCheck className="h-4 w-4" /> },
+  other: { label: "其他文件", icon: <FileText className="h-4 w-4" /> }
+}
+
+// 文件数据类型
+interface ReviewFile {
+  id: string
+  fileName: string
+  fileType: string
+  uploadDate: string
+  uploadUser: string
+  fileSize: string
+  status: 'pending' | 'approved' | 'rejected' | 'reviewing'
+  version: string
+  reviewComments: string
+  reviewDate: string
+  description: string
+}
+
+interface ReviewFilesTabProps {
+  project?: any
+}
+
+export default function ReviewFilesTab({ project }: ReviewFilesTabProps) {
+  const { toast } = useToast()
   
-  switch (fileType) {
-    case "application":
-      return <FileSearch className={`h-4 w-4 ${iconColor}`} />
-    case "protocol":
-      return <FileText className={`h-4 w-4 ${iconColor}`} />
-    case "consent":
-      return <FileText className={`h-4 w-4 ${iconColor}`} />
-    case "declaration":
-      return <FileText className={`h-4 w-4 ${iconColor}`} />
-    case "review":
-      return <FileText className={`h-4 w-4 ${iconColor}`} />
-    case "handbook":
-      return <FileText className={`h-4 w-4 ${iconColor}`} />
-    case "report":
-      return <FileText className={`h-4 w-4 ${iconColor}`} />
-    case "prescription":
-      return <FileText className={`h-4 w-4 ${iconColor}`} />
-    default:
-      return <FileIcon className={`h-4 w-4 ${iconColor}`} />
-  }
-}
-
-// 文件状态到Badge的映射
-function getStatusBadge(status: string) {
-  switch (status) {
-    case "已审核":
-      return (
-        <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 flex items-center gap-1 shadow-sm px-2 py-0.5">
-          <CheckCircle2 className="h-2.5 w-2.5" />
-          <span>已审核</span>
-        </Badge>
-      )
-    case "待审核":
-      return (
-        <Badge className="bg-slate-50 text-slate-700 border-slate-200 flex items-center gap-1 shadow-sm px-2 py-0.5">
-          <Clock className="h-2.5 w-2.5" />
-          <span>待审核</span>
-        </Badge>
-      )
-    case "需修改":
-      return (
-        <Badge className="bg-rose-50 text-rose-700 border-rose-200 flex items-center gap-1 shadow-sm px-2 py-0.5">
-          <XCircle className="h-2.5 w-2.5" />
-          <span>需修改</span>
-        </Badge>
-      )
-    case "已生成":
-      return (
-        <Badge className="bg-slate-50 text-slate-700 border-slate-200 flex items-center gap-1 shadow-sm px-2 py-0.5">
-          <Check className="h-2.5 w-2.5" />
-          <span>已生成</span>
-        </Badge>
-      )
-    default:
-      return (
-        <Badge className="bg-slate-50 text-slate-700 border-slate-200 flex items-center gap-1 shadow-sm px-2 py-0.5">
-          <AlertCircle className="h-2.5 w-2.5" />
-          <span>{status}</span>
-        </Badge>
-      )
-  }
-}
-
-// 获取文件类型名称
-function getFileTypeName(fileType: string) {
-  const typeMap: Record<string, string> = {
-    "application": "项目申请书",
-    "protocol": "研究方案",
-    "consent": "知情同意书",
-    "declaration": "声明文件",
-    "review": "审查意见",
-    "handbook": "研究者手册",
-    "report": "报告表",
-    "prescription": "处方设计",
-    "security": "数据安全方案",
-    "assessment": "风险评估报告",
-    "recruitment": "受试者招募计划",
-    "technical": "技术规范",
-    "sop": "标准操作程序",
-    "quality": "质量控制文件"
+  // 根据项目信息生成文件数据
+  const generateProjectFiles = (): ReviewFile[] => {
+    if (!project || !project.files) return []
+    
+    return project.files.map((file: any, index: number) => ({
+      id: file.id || index.toString(),
+      fileName: file.name,
+      fileType: file.type || "other",
+      uploadDate: file.uploadedAt?.split('T')[0] || file.uploadedAt,
+      uploadUser: project.leader || "项目负责人",
+      fileSize: file.size,
+      status: file.status === "审核通过" ? "approved" as const : 
+              file.status === "待审核" ? "pending" as const :
+              file.status === "需修改" ? "rejected" as const : "pending" as const,
+      version: "1.0",
+      reviewComments: file.status === "审核通过" ? "文件审核通过，符合要求" : 
+                     file.status === "需修改" ? "文件需要修改，请按意见完善" : "",
+      reviewDate: file.status === "审核通过" ? project.approvedAt?.split('T')[0] || "" : "",
+      description: `${project.projectType}伦理审查相关文件`
+    }))
   }
   
-  return typeMap[fileType] || "其他文件"
-}
-
-// 送审文件标签页组件
-export default function ReviewFilesTab({
-  project
-}: { 
-  project: any 
-}) {
+  const [files, setFiles] = useState<ReviewFile[]>(generateProjectFiles())
+  const [searchTerm, setSearchTerm] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false)
-  const [selectedFile, setSelectedFile] = useState<any>(null)
-  
-  // 文件列表
-  const files = project.files || []
-  
+  const [selectedFile, setSelectedFile] = useState<ReviewFile | null>(null)
+  const [uploadForm, setUploadForm] = useState({
+    fileType: "",
+    fileName: "",
+    description: ""
+  })
+
+  // 过滤文件
+  const filteredFiles = files.filter((file: ReviewFile) => {
+    const matchesSearch = file.fileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         file.uploadUser.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = statusFilter === "all" || file.status === statusFilter
+    return matchesSearch && matchesStatus
+  })
+
+  // 统计信息
+  const totalFiles = files.length
+  const approvedFiles = files.filter((f: ReviewFile) => f.status === 'approved').length
+  const pendingFiles = files.filter((f: ReviewFile) => f.status === 'pending').length
+  const reviewingFiles = files.filter((f: ReviewFile) => f.status === 'reviewing').length
+
+  // 处理文件上传
+  const handleFileUpload = () => {
+    if (!uploadForm.fileType || !uploadForm.fileName) {
+      toast({
+        title: "请填写完整信息",
+        description: "请填写所有必填字段",
+        variant: "destructive"
+      })
+      return
+    }
+
+    const newFile: ReviewFile = {
+      id: Date.now().toString(),
+      fileName: uploadForm.fileName,
+      fileType: uploadForm.fileType,
+      uploadDate: new Date().toISOString().split('T')[0],
+      uploadUser: project?.leader || "当前用户",
+      fileSize: "0MB",
+      status: "pending",
+      version: "1.0",
+      reviewComments: "",
+      reviewDate: "",
+      description: uploadForm.description
+    }
+
+    setFiles((prev: ReviewFile[]) => [...prev, newFile])
+    setUploadDialogOpen(false)
+    setUploadForm({ fileType: "", fileName: "", description: "" })
+    
+    toast({
+      title: "文件上传成功",
+      description: "文件已成功上传，等待审核"
+    })
+  }
+
+  // 处理文件下载
+  const handleFileDownload = (file: ReviewFile) => {
+    toast({
+      title: "开始下载",
+      description: `正在下载 ${file.fileName}`
+    })
+  }
+
   // 处理文件预览
-  const handlePreview = (file: any) => {
+  const handleFilePreview = (file: ReviewFile) => {
     setSelectedFile(file)
     setPreviewDialogOpen(true)
   }
-  
-  // 处理文件下载
-  const handleDownload = (file: any) => {
+
+  // 处理文件删除
+  const handleFileDelete = (fileId: string) => {
+    setFiles((prev: ReviewFile[]) => prev.filter((f: ReviewFile) => f.id !== fileId))
     toast({
-      title: "开始下载",
-      description: `正在下载 ${file.name}`,
-      duration: 3000,
+      title: "文件已删除",
+      description: "文件已成功删除"
     })
-  }
-  
-  // 处理文件上传
-  const handleUpload = () => {
-    setUploadDialogOpen(true)
-  }
-  
-  // 处理文件更新
-  const handleUpdateFile = (file: any) => {
-    toast({
-      title: "文件更新",
-      description: `请上传新版本的 ${file.name}`,
-      duration: 3000,
-    })
-    setUploadDialogOpen(true)
   }
 
   return (
     <div className="space-y-6">
-      {/* 送审文件卡片 */}
-      <Card className="border-t-4 border-t-blue-500 shadow-sm">
+      {/* 总览统计卡片 */}
+      <Card className="border-slate-200 shadow-sm overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="relative w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+              <FileText className="h-5 w-5 text-white" />
+            </div>
             <div>
-              <CardTitle className="text-lg font-semibold">送审文件</CardTitle>
-              <CardDescription>
-                项目审查相关文件
+              <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                送审文件管理
+                <Badge variant="outline" className="ml-2 bg-primary/5 text-primary text-[10px] h-5 px-2">
+                  {totalFiles}个文件
+                </Badge>
+              </CardTitle>
+              <CardDescription className="text-slate-500">
+                管理初始审查阶段的送审文件，跟踪文件审核状态
               </CardDescription>
             </div>
-            {/* 项目状态为已退回时，显示上传按钮 */}
-            {project.status === "已退回" && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 gap-1 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-800"
-                onClick={handleUpload}
-              >
-                <Upload className="h-3.5 w-3.5" />
-                <span>上传文件</span>
-              </Button>
-            )}
           </div>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border border-gray-100 overflow-hidden">
-            <Table>
-              <TableHeader className="bg-gray-50">
-                <TableRow className="hover:bg-gray-50">
-                  <TableHead className="w-[40%] text-gray-700">文件名称</TableHead>
-                  <TableHead className="w-[15%] text-gray-700">类型</TableHead>
-                  <TableHead className="w-[10%] text-gray-700">大小</TableHead>
-                  <TableHead className="w-[15%] text-gray-700">上传时间</TableHead>
-                  <TableHead className="w-[10%] text-gray-700">AI形审状态</TableHead>
-                  <TableHead className="w-[10%] text-right text-gray-700">操作</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {files.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                      暂无送审文件
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  files.map((file: any) => (
-                    <TableRow key={file.id} className="hover:bg-gray-50">
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          <div className="bg-blue-50 p-1 rounded-md flex-shrink-0">
-                            {getFileIcon(file.type)}
-                          </div>
-                          <span className="text-gray-700">{file.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-gray-600">{getFileTypeName(file.type)}</TableCell>
-                      <TableCell className="text-gray-600">{file.size}</TableCell>
-                      <TableCell className="text-gray-600">{file.uploadedAt}</TableCell>
-                      <TableCell>{getStatusBadge(file.status)}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50" onClick={() => handlePreview(file)}>
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50" onClick={() => handleDownload(file)}>
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          {project.status === "已退回" && file.status === "需修改" && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50" onClick={() => handleUpdateFile(file)}>
-                              <RotateCw className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="text-center p-2 rounded-md bg-slate-50 border border-slate-100">
+              <div className="text-lg font-semibold text-slate-700">{approvedFiles}</div>
+              <div className="text-xs text-slate-500 mt-0.5">已通过审核</div>
+            </div>
+            <div className="text-center p-2 rounded-md bg-slate-50 border border-slate-100">
+              <div className="text-lg font-semibold text-slate-700">{reviewingFiles}</div>
+              <div className="text-xs text-slate-500 mt-0.5">审核中</div>
+            </div>
+            <div className="text-center p-2 rounded-md bg-slate-50 border border-slate-100">
+              <div className="text-lg font-semibold text-slate-700">{pendingFiles}</div>
+              <div className="text-xs text-slate-500 mt-0.5">待审核</div>
+            </div>
+            <div className="text-center p-2 rounded-md bg-slate-50 border border-slate-100">
+              <div className="text-lg font-semibold text-slate-700">{totalFiles > 0 ? ((approvedFiles / totalFiles) * 100).toFixed(1) : '0'}%</div>
+              <div className="text-xs text-slate-500 mt-0.5">通过率</div>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* 文件上传区说明 */}
-      {project.status === "已退回" && (
-        <Card className="border border-dashed border-gray-200 shadow-sm">
-          <CardContent className="p-6">
-            <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-              <div className="bg-blue-50 p-3 rounded-full">
-                <Upload className="h-6 w-6 text-blue-600" />
+      {/* 搜索和筛选 */}
+      <Card className="border-slate-200 shadow-sm">
+        <CardContent className="pt-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  placeholder="搜索文件名或上传者..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
               </div>
-              <h3 className="mt-4 text-lg font-semibold text-gray-800">上传修改后的文件</h3>
-              <p className="mt-2 text-sm text-gray-600">
-                请上传修改后的送审文件，系统将自动跟踪文件更新记录。
-              </p>
-              <Button
-                variant="outline"
-                className="mt-4 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-800"
-                onClick={handleUpload}
-              >
-                <PlusCircle className="mr-2 h-4 w-4" />
-                选择文件
-              </Button>
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* 文件预览对话框 */}
-      <Dialog open={previewDialogOpen} onOpenChange={setPreviewDialogOpen}>
-        <DialogContent className="sm:max-w-[700px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <div className="bg-blue-50 p-1 rounded-md">
-                {selectedFile && getFileIcon(selectedFile.type)}
-              </div>
-              <span>{selectedFile?.name}</span>
-            </DialogTitle>
-            <DialogDescription>
-              {selectedFile?.uploadedAt} · {selectedFile?.size}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="bg-gray-50 p-6 rounded-md min-h-[300px] flex items-center justify-center border border-gray-100">
-            <div className="text-center">
-              <div className="bg-white p-4 rounded-lg shadow-sm mx-auto mb-3 inline-flex">
-                <File className="h-12 w-12 text-blue-400" />
-              </div>
-              <p className="text-sm text-gray-600">文件预览功能正在开发中</p>
-            </div>
-          </div>
-          <div className="flex justify-between">
-            <Button variant="outline" onClick={() => setPreviewDialogOpen(false)}>
-              关闭
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full md:w-32">
+                <SelectValue placeholder="状态" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部状态</SelectItem>
+                <SelectItem value="approved">已通过</SelectItem>
+                <SelectItem value="reviewing">审核中</SelectItem>
+                <SelectItem value="pending">待审核</SelectItem>
+                <SelectItem value="rejected">已退回</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button onClick={() => setUploadDialogOpen(true)} className="w-full md:w-auto">
+              <Plus className="h-4 w-4 mr-2" />
+              添加文件
             </Button>
-            <Button 
-              className="bg-blue-600 hover:bg-blue-700"
-              onClick={() => selectedFile && handleDownload(selectedFile)}
-            >
-              <Download className="mr-2 h-4 w-4" />
-              下载
+            <Button variant="outline" className="w-full md:w-auto">
+              <Download className="h-4 w-4 mr-2" />
+              导出
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        </CardContent>
+      </Card>
 
-      {/* 文件上传对话框 */}
+      {/* 文件列表 */}
+      <Card className="border-slate-200 shadow-sm">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-blue-100">
+                <FileCheck className="h-4 w-4 text-blue-600" />
+              </div>
+              <div>
+                <CardTitle className="text-base font-semibold">初始审查文件</CardTitle>
+                <CardDescription className="text-slate-500 text-sm">
+                  首次申请审查，包含项目申请表、实验方案等基础文件
+                </CardDescription>
+              </div>
+            </div>
+            <Badge variant="outline" className="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 border-blue-200">
+              {filteredFiles.length} 个文件
+            </Badge>
+          </div>
+        </CardHeader>
+        
+        <CardContent className="pt-0">
+          {filteredFiles.length === 0 ? (
+            <div className="text-center py-8 text-slate-500">
+              <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p className="font-medium">暂无初始审查文件</p>
+              <p className="text-sm mt-1">点击上方"添加文件"按钮上传相关文件</p>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {/* 文件列表表头 */}
+              <div className="grid grid-cols-12 gap-4 px-3 py-2 text-xs font-medium text-slate-500 bg-slate-50 rounded-md">
+                <div className="col-span-4">文件信息</div>
+                <div className="col-span-2">上传者</div>
+                <div className="col-span-2">上传时间</div>
+                <div className="col-span-2">状态</div>
+                <div className="col-span-2 text-right">操作</div>
+              </div>
+              
+              {/* 文件列表项 */}
+              {filteredFiles.map((file, index) => (
+                <div
+                  key={file.id}
+                  className={`grid grid-cols-12 gap-4 px-3 py-3 text-sm border-b border-slate-100 hover:bg-slate-50 transition-colors ${
+                    index === filteredFiles.length - 1 ? 'border-b-0' : ''
+                  }`}
+                >
+                  {/* 文件信息 */}
+                  <div className="col-span-4 flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-md flex items-center justify-center ${fileStatusConfig[file.status].bgColor}`}>
+                      {fileTypeConfig[file.fileType as keyof typeof fileTypeConfig]?.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium truncate text-slate-800">{file.fileName}</p>
+                        <Badge variant="outline" className="text-xs shrink-0">
+                          v{file.version}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <span>{fileTypeConfig[file.fileType as keyof typeof fileTypeConfig]?.label}</span>
+                        <span>•</span>
+                        <span>{file.fileSize}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* 上传者 */}
+                  <div className="col-span-2 flex items-center">
+                    <div className="flex items-center gap-1">
+                      <User className="h-3 w-3 text-slate-400" />
+                      <span className="text-slate-600">{file.uploadUser}</span>
+                    </div>
+                  </div>
+                  
+                  {/* 上传时间 */}
+                  <div className="col-span-2 flex items-center">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3 text-slate-400" />
+                      <span className="text-slate-600">{file.uploadDate}</span>
+                    </div>
+                  </div>
+                  
+                  {/* 状态 */}
+                  <div className="col-span-2 flex items-center">
+                    <Badge className={fileStatusConfig[file.status].color}>
+                      {fileStatusConfig[file.status].icon}
+                      <span className="ml-1">
+                        {fileStatusConfig[file.status].label}
+                      </span>
+                    </Badge>
+                  </div>
+                  
+                  {/* 操作 */}
+                  <div className="col-span-2 flex items-center justify-end">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleFilePreview(file)}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          查看详情
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleFileDownload(file)}>
+                          <Download className="h-4 w-4 mr-2" />
+                          下载文件
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleFileDelete(file.id)}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          删除文件
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 上传文件对话框 */}
       <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>上传送审文件</DialogTitle>
-            <DialogDescription>
-              请选择要上传的文件，支持PDF、Word、Excel等格式
-            </DialogDescription>
           </DialogHeader>
-          <div className="rounded-lg border border-dashed border-gray-200 p-6 text-center bg-gray-50">
-            <div className="flex flex-col items-center justify-center gap-3">
-              <div className="bg-white p-3 rounded-full shadow-sm">
-                <Upload className="h-6 w-6 text-blue-500" />
-              </div>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="fileType">文件类型 *</Label>
+              <Select value={uploadForm.fileType} onValueChange={(value) => 
+                setUploadForm(prev => ({ ...prev, fileType: value }))
+              }>
+                <SelectTrigger>
+                  <SelectValue placeholder="选择文件类型" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(fileTypeConfig).map(([key, config]) => (
+                    <SelectItem key={key} value={key}>
+                      {config.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="fileName">文件名称 *</Label>
+              <Input
+                id="fileName"
+                value={uploadForm.fileName}
+                onChange={(e) => setUploadForm(prev => ({ ...prev, fileName: e.target.value }))}
+                placeholder="请输入文件名称"
+              />
+            </div>
+            <div>
+              <Label htmlFor="description">文件描述</Label>
+              <Textarea
+                id="description"
+                value={uploadForm.description}
+                onChange={(e) => setUploadForm(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="请输入文件描述（可选）"
+                rows={3}
+              />
+            </div>
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+              <Upload className="h-12 w-12 mx-auto mb-4 text-gray-400" />
               <p className="text-sm text-gray-600">
-                拖放文件到此处，或点击选择文件
+                点击上传文件或拖拽文件到此处
               </p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-blue-200 text-blue-700 hover:bg-blue-50"
-                onClick={() => {
-                  toast({
-                    title: "文件选择",
-                    description: "文件选择功能模拟中...",
-                    duration: 3000,
-                  })
-                }}
-              >
-                选择文件
-              </Button>
+              <p className="text-xs text-gray-500 mt-2">
+                支持 PDF、DOC、DOCX 格式，文件大小不超过 10MB
+              </p>
             </div>
           </div>
-          <div className="flex justify-end gap-3">
+          <DialogFooter>
             <Button variant="outline" onClick={() => setUploadDialogOpen(false)}>
               取消
             </Button>
-            <Button 
-              className="bg-blue-600 hover:bg-blue-700"
-              onClick={() => {
-                toast({
-                  title: "文件上传",
-                  description: "文件上传成功",
-                  duration: 3000,
-                })
-                setUploadDialogOpen(false)
-              }}
-            >
-              上传
+            <Button onClick={handleFileUpload}>
+              上传文件
             </Button>
-          </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 文件预览对话框 */}
+      <Dialog open={previewDialogOpen} onOpenChange={setPreviewDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>文件详情</DialogTitle>
+          </DialogHeader>
+          {selectedFile && (
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                {fileTypeConfig[selectedFile.fileType as keyof typeof fileTypeConfig]?.icon}
+                <div>
+                  <h4 className="font-medium">{selectedFile.fileName}</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {fileTypeConfig[selectedFile.fileType as keyof typeof fileTypeConfig]?.label} • {selectedFile.fileSize}
+                  </p>
+                </div>
+              </div>
+              <Separator />
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-muted-foreground">审查类型</p>
+                  <p>初始审查</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">上传时间</p>
+                  <p>{selectedFile.uploadDate}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">上传人</p>
+                  <p>{selectedFile.uploadUser}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">文件版本</p>
+                  <p>v{selectedFile.version}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-muted-foreground">审核状态</p>
+                  <Badge className={fileStatusConfig[selectedFile.status].color}>
+                    {fileStatusConfig[selectedFile.status].icon}
+                    <span className="ml-1">
+                      {fileStatusConfig[selectedFile.status].label}
+                    </span>
+                  </Badge>
+                </div>
+              </div>
+              {selectedFile.description && (
+                <>
+                  <Separator />
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">文件描述</p>
+                    <p className="text-sm bg-gray-50 p-3 rounded-md">
+                      {selectedFile.description}
+                    </p>
+                  </div>
+                </>
+              )}
+              {selectedFile.reviewComments && (
+                <>
+                  <Separator />
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">审核意见</p>
+                    <p className="text-sm bg-gray-50 p-3 rounded-md">
+                      {selectedFile.reviewComments}
+                    </p>
+                    {selectedFile.reviewDate && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        审核时间：{selectedFile.reviewDate}
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPreviewDialogOpen(false)}>
+              关闭
+            </Button>
+            <Button onClick={() => selectedFile && handleFileDownload(selectedFile)}>
+              <Download className="h-4 w-4 mr-2" />
+              下载文件
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

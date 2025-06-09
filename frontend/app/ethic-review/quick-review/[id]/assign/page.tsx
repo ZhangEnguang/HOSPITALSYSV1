@@ -40,7 +40,6 @@ import { Button } from "@/components/ui/button"
 
 // 复用快速审查组件
 import EthicProjectOverviewTab from "@/app/ethic-review/quick-review/components/overview-tab"
-import RiskAnalysisTab from "@/app/ethic-review/quick-review/components/risk-analysis-tab"
 import ReviewFilesTab from "@/app/ethic-review/quick-review/components/review-files-tab"
 
 // 导入AI推荐面板组件
@@ -237,6 +236,12 @@ export default function AssignExpertsPage({ params }: { params: { id: string } }
           },
           files: [
             { id: "temp1", name: "项目申请书.pdf", type: "application", size: "未知", uploadedAt: listProject.submissionDate || "未知", status: "待审核" }
+          ],
+          members: [
+            { id: "m1", name: "李助理", title: "研究助理", department: "神经科学研究院", email: "li@example.com", phone: "13800000010" },
+            { id: "m2", name: "张技术员", title: "高级技术员", department: "神经科学研究院", email: "zhang@example.com", phone: "13800000011" },
+            { id: "m3", name: "刘研究员", title: "副研究员", department: "药学院", email: "liu@example.com", phone: "13800000012" },
+            { id: "m4", name: "赵博士", title: "博士后", department: "神经科学研究院", email: "zhao@example.com", phone: "13800000012" }
           ]
         };
         
@@ -516,17 +521,6 @@ export default function AssignExpertsPage({ params }: { params: { id: string } }
               <>
                 <InfoHeader />
                 <EthicProjectOverviewTab project={currentProject} />
-              </>
-            )
-          },
-          {
-            id: "riskAnalysis",
-            label: "风险分析",
-            icon: <AlertTriangle className="h-4 w-4" />,
-            component: (
-              <>
-                <InfoHeader />
-                <RiskAnalysisTab project={currentProject} />
               </>
             )
           },
