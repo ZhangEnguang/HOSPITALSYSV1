@@ -6,7 +6,6 @@ import { toast } from "@/components/ui/use-toast"
 import DetailPage from "@/components/detail-page/detail-page"
 import {
   FileIcon,
-  AlertTriangle,
   FileText,
   Building2,
   Calendar,
@@ -23,7 +22,6 @@ import { useLoading } from "@/hooks/use-loading"
 
 // 导入我们创建的组件
 import TrackReportOverviewTab from "@/app/ethic-review/track-review/components/overview-tab"
-import TrackReportRiskTab from "@/app/ethic-review/track-review/components/risk-analysis-tab"
 import TrackReportFilesTab from "@/app/ethic-review/track-review/components/review-files-tab"
 import ReviewSidebar from "@/app/components/review-sidebar"
 
@@ -46,9 +44,35 @@ const mockReviewProjects = [
     reviewNumber: "ETH-H-2024-001",
     progress: 100,
     description: "审查治疗方案修改内容的合理性和伦理合规性",
-    aiSummary: "【修正案审查摘要】\n• 治疗方案修改合理，符合伦理要求\n• 受试者安全保障措施完善\n• 知情同意过程规范\n• 风险效益比例适当\n\n建议：通过审核，可实施修正案",
-    aiModelName: "EthicGPT 2024",
-    aiModelVersion: "v3.1",
+    aiSummary: "该人体细胞治疗方案修正案跟踪审查进展顺利，当前执行进度为100%，审查结果良好。治疗方案修改合理，符合伦理要求，受试者安全保障措施完善。知情同意流程执行规范，风险效益比例适当。项目整体风险可控，建议通过审核，可实施修正案。",
+    aiModelName: "EthicTracker Pro 2024",
+    aiModelVersion: "v3.1.2",
+    members: [
+      {
+        name: "张三",
+        title: "主任医师",
+        department: "免疫学科研中心",
+        role: "主要研究者",
+        email: "zhangsan@hospital.com",
+        phone: "13800138001"
+      },
+      {
+        name: "李雷",
+        title: "副主任医师", 
+        department: "免疫学科研中心",
+        role: "协同研究者",
+        email: "lilei@hospital.com",
+        phone: "13800138002"
+      },
+      {
+        name: "韩梅梅",
+        title: "主管护师",
+        department: "免疫学科研中心", 
+        role: "研究护士",
+        email: "hanmeimei@hospital.com",
+        phone: "13800138003"
+      }
+    ],
     risk: {
       level: "中",
       analysis: "细胞治疗方案修正涉及给药剂量和随访周期调整，存在一定风险但在可控范围内。",
@@ -100,9 +124,43 @@ const mockReviewProjects = [
     reviewNumber: "ETH-H-2024-008",
     progress: 60,
     description: "对临床试验中出现的严重不良反应进行审查评估，并制定相应干预措施",
-    aiSummary: "【安全性审查摘要】\n• 共发生12例不良反应，其中2例为严重不良反应\n• 不良反应发生率为10%，在预期范围内\n• 已制定完善的应急处置方案\n• 建议加强高风险受试者监测频率",
-    aiModelName: "EthicGPT 2024",
-    aiModelVersion: "v3.1",
+    aiSummary: "该新型靶向生物药物临床试验不良反应跟踪审查进展顺利，当前执行进度为60%，安全性监测良好。共发生12例不良反应，其中2例为严重不良反应，不良反应发生率为10%，在预期范围内。已制定完善的应急处置方案，建议加强高风险受试者监测频率。项目整体风险可控，安全性管理到位。",
+    aiModelName: "EthicTracker Pro 2024",
+    aiModelVersion: "v3.1.2",
+    members: [
+      {
+        name: "李四",
+        title: "主任医师",
+        department: "肿瘤医学中心",
+        role: "主要研究者",
+        email: "lisi@hospital.com",
+        phone: "13800138004"
+      },
+      {
+        name: "王明",
+        title: "副主任医师",
+        department: "肿瘤医学中心",
+        role: "协同研究者", 
+        email: "wangming@hospital.com",
+        phone: "13800138005"
+      },
+      {
+        name: "刘红",
+        title: "主管药师",
+        department: "药剂科",
+        role: "药物管理员",
+        email: "liuhong@hospital.com",
+        phone: "13800138006"
+      },
+      {
+        name: "陈小婷",
+        title: "主管护师",
+        department: "肿瘤医学中心",
+        role: "研究护士",
+        email: "chenxiaoting@hospital.com", 
+        phone: "13800138007"
+      }
+    ],
     risk: {
       level: "中高",
       analysis: "试验药物存在潜在的严重不良反应风险，需要加强监测和应急处置。",
@@ -154,9 +212,35 @@ const mockReviewProjects = [
     reviewNumber: "ETH-H-2024-012",
     progress: 30,
     description: "对研究项目进行年度评估，审查研究进展情况和是否符合伦理要求",
-    aiSummary: "【年度评估摘要】\n• 入组进度良好，已完成86例入组（目标150例）\n• 无严重不良事件发生\n• 初步数据显示干预效果明显\n• 建议继续按计划进行",
-    aiModelName: "EthicGPT 2024",
-    aiModelVersion: "v3.1",
+    aiSummary: "该高血压患者运动干预效果年度跟踪审查进展良好，当前执行进度为30%，研究计划执行顺利。入组进度良好，已完成86例入组（目标150例），无严重不良事件发生。初步数据显示干预效果明显，受试者依从性良好。项目整体风险较低，建议继续按计划进行，加强受试者随访管理。",
+    aiModelName: "EthicTracker Pro 2024",
+    aiModelVersion: "v3.1.2",
+    members: [
+      {
+        name: "王五",
+        title: "主任医师",
+        department: "运动医学科学院",
+        role: "主要研究者",
+        email: "wangwu@hospital.com",
+        phone: "13800138008"
+      },
+      {
+        name: "张伟",
+        title: "副教授",
+        department: "运动医学科学院",
+        role: "协同研究者",
+        email: "zhangwei@hospital.com",
+        phone: "13800138009"
+      },
+      {
+        name: "李娜",
+        title: "康复治疗师",
+        department: "康复医学科",
+        role: "运动指导员",
+        email: "lina@hospital.com",
+        phone: "13800138010"
+      }
+    ],
     risk: {
       level: "低",
       analysis: "运动干预项目风险较低，受试者安全得到充分保障，研究进展顺利。",
@@ -202,9 +286,35 @@ const mockReviewProjects = [
     reviewNumber: "ETH-H-2024-023",
     progress: 100,
     description: "报告临床研究中偏离原方案的情况及原因，评估对受试者的影响",
-    aiSummary: "【偏离方案审查结果】\n• 偏离原因合理，属于医疗必要性调整\n• 对受试者安全无不良影响\n• 数据完整性未受影响\n• 建议完善偏离记录流程",
-    aiModelName: "EthicGPT 2024",
-    aiModelVersion: "v3.1",
+    aiSummary: "该脑卒中康复治疗方案偏离跟踪审查进展顺利，当前执行进度为100%，审查结果良好。偏离原因合理，属于医疗必要性调整，对受试者安全无不良影响。数据完整性未受影响，处理过程规范。项目整体风险较低，建议完善偏离记录流程，加强研究人员培训。",
+    aiModelName: "EthicTracker Pro 2024",
+    aiModelVersion: "v3.1.2",
+    members: [
+      {
+        name: "孙七",
+        title: "主任医师",
+        department: "神经内科学系",
+        role: "主要研究者",
+        email: "sunqi@hospital.com",
+        phone: "13800138011"
+      },
+      {
+        name: "赵刚",
+        title: "主治医师",
+        department: "神经内科学系",
+        role: "协同研究者",
+        email: "zhaogang@hospital.com",
+        phone: "13800138012"
+      },
+      {
+        name: "钱小花",
+        title: "康复治疗师",
+        department: "康复医学科",
+        role: "康复指导员",
+        email: "qianxiaohua@hospital.com",
+        phone: "13800138013"
+      }
+    ],
     risk: {
       level: "低",
       analysis: "方案偏离属于医疗必要性调整，对研究结果和受试者安全影响极小。",
@@ -264,9 +374,35 @@ const mockReviewProjects = [
     reviewNumber: "ETH-H-2024-019",
     progress: 100,
     description: "由于招募困难，申请终止研究项目并汇报相关情况",
-    aiSummary: "【终止研究审查结果】\n• 终止原因合理，确实存在招募困难\n• 已入组受试者处理方案妥当\n• 数据处理和保存符合规范\n• 建议完善研究终止流程",
-    aiModelName: "EthicGPT 2024",
-    aiModelVersion: "v3.1",
+    aiSummary: "该认知行为疗法研究终止跟踪审查进展顺利，当前执行进度为100%，审查结果良好。终止原因合理，确实存在招募困难，已入组受试者处理方案妥当。数据处理和保存符合规范，项目整体风险较低。建议完善研究终止流程，总结经验教训以供后续研究参考。",
+    aiModelName: "EthicTracker Pro 2024",
+    aiModelVersion: "v3.1.2",
+    members: [
+      {
+        name: "周八",
+        title: "教授",
+        department: "心理学院",
+        role: "主要研究者",
+        email: "zhouba@hospital.com",
+        phone: "13800138014"
+      },
+      {
+        name: "吴敏",
+        title: "副教授",
+        department: "心理学院",
+        role: "协同研究者",
+        email: "wumin@hospital.com",
+        phone: "13800138015"
+      },
+      {
+        name: "郑芳",
+        title: "心理治疗师",
+        department: "心理咨询中心",
+        role: "心理评估师",
+        email: "zhengfang@hospital.com",
+        phone: "13800138016"
+      }
+    ],
     risk: {
       level: "低",
       analysis: "研究终止风险较低，已入组受试者得到妥善安排，数据处理规范。",
@@ -319,9 +455,35 @@ const mockReviewProjects = [
     reviewNumber: "ETH-H-2024-003",
     progress: 100,
     description: "对已完成的临床研究结果和过程进行最终审查",
-    aiSummary: "【退回原因分析】\n• 研究完成报告数据不完整\n• 缺少部分安全性评估数据\n• 统计分析方法需要补充说明\n• 结论与数据支持不够充分\n\n建议：补充完善上述内容后重新提交",
-    aiModelName: "EthicGPT 2024",
-    aiModelVersion: "v3.1",
+    aiSummary: "该人类代谢相关药物临床研究完成报告跟踪审查已完成，但审查结果为退回修改。主要问题包括：研究完成报告数据不完整，缺少部分安全性评估数据，统计分析方法需要补充说明，结论与数据支持不够充分。建议项目团队按照审查意见逐一完善上述内容后重新提交，确保报告质量符合要求。",
+    aiModelName: "EthicTracker Pro 2024",
+    aiModelVersion: "v3.1.2",
+    members: [
+      {
+        name: "赵六",
+        title: "主任医师",
+        department: "临床药理学研究中心",
+        role: "主要研究者",
+        email: "zhaoliu@hospital.com",
+        phone: "13800138018"
+      },
+      {
+        name: "孙大伟",
+        title: "副主任医师",
+        department: "临床药理学研究中心",
+        role: "协同研究者",
+        email: "sundawei@hospital.com",
+        phone: "13800138019"
+      },
+      {
+        name: "李小红",
+        title: "主管药师",
+        department: "药学部",
+        role: "药物监测员",
+        email: "lixiaohong@hospital.com",
+        phone: "13800138020"
+      }
+    ],
     risk: {
       level: "中",
       analysis: "研究完成报告存在数据完整性问题，可能影响研究结论的可靠性。",
@@ -373,9 +535,43 @@ const mockReviewProjects = [
     reviewNumber: "ETH-H-2024-015",
     progress: 20,
     description: "对之前已审查研究方案中未明确部分进行再次审查",
-    aiSummary: "【复审要点摘要】\n• 原方案存在部分不明确的表述\n• 需要补充免疫治疗的风险控制措施\n• 知情同意书需要完善\n• 数据监测计划需要细化",
-    aiModelName: "EthicGPT 2024",
-    aiModelVersion: "v3.1",
+    aiSummary: "该免疫治疗安全性评估方案复审跟踪审查正在进行中，当前执行进度为20%，审查处于初期阶段。复审要点包括：原方案存在部分不明确的表述，需要补充免疫治疗的风险控制措施，知情同意书需要完善，数据监测计划需要细化。建议项目团队重点关注上述问题，及时提供补充材料，确保方案的科学性和安全性。",
+    aiModelName: "EthicTracker Pro 2024",
+    aiModelVersion: "v3.1.2",
+    members: [
+      {
+        name: "钱七",
+        title: "主任医师",
+        department: "肿瘤医学中心",
+        role: "主要研究者",
+        email: "qianqi@hospital.com",
+        phone: "13800138021"
+      },
+      {
+        name: "刘小丽",
+        title: "副主任医师",
+        department: "肿瘤医学中心",
+        role: "协同研究者",
+        email: "liuxiaoli@hospital.com",
+        phone: "13800138022"
+      },
+      {
+        name: "陈威",
+        title: "主管护师",
+        department: "肿瘤医学中心",
+        role: "研究护士",
+        email: "chenwei@hospital.com",
+        phone: "13800138023"
+      },
+      {
+        name: "张医生",
+        title: "免疫科医师",
+        department: "免疫科",
+        role: "免疫治疗专家",
+        email: "zhangyisheng@hospital.com",
+        phone: "13800138024"
+      }
+    ],
     risk: {
       level: "中高",
       analysis: "免疫治疗存在较高的安全风险，需要完善的安全监测和应急处置方案。",
@@ -417,12 +613,46 @@ const mockReviewProjects = [
     createdAt: "2024-05-20",
     deadline: "2024-05-25",
     submittedAt: "2024-05-22",
-    reviewNumber: "ETH-H-2024-001",
+    reviewNumber: "ETH-H-2024-002",
     progress: 50,
     description: "审查受试者入选标准修改的合理性和伦理合规性",
-    aiSummary: "【修正案审查摘要】\n• 受试者标准修正具有科学依据\n• 新标准有助于提高研究质量\n• 对现有受试者影响较小\n• 需要完善知情同意过程",
-    aiModelName: "EthicGPT 2024",
-    aiModelVersion: "v3.1",
+    aiSummary: "该人体细胞治疗受试者标准修正跟踪审查正在进行中，当前执行进度为50%，初步审查结果良好。受试者标准修正具有科学依据，新标准有助于提高研究质量，对现有受试者影响较小。建议完善知情同意过程，确保受试者充分了解标准变更的意义和影响。项目整体风险可控，建议加强过渡期管理。",
+    aiModelName: "EthicTracker Pro 2024",
+    aiModelVersion: "v3.1.2",
+    members: [
+      {
+        name: "张三",
+        title: "主任医师",
+        department: "免疫学科研中心",
+        role: "主要研究者",
+        email: "zhangsan@hospital.com",
+        phone: "13800138001"
+      },
+      {
+        name: "李雷",
+        title: "副主任医师", 
+        department: "免疫学科研中心",
+        role: "协同研究者",
+        email: "lilei@hospital.com",
+        phone: "13800138002"
+      },
+      {
+        name: "韩梅梅",
+        title: "主管护师",
+        department: "免疫学科研中心", 
+        role: "研究护士",
+        email: "hanmeimei@hospital.com",
+        phone: "13800138003"
+      },
+      {
+        name: "王小明",
+        title: "统计师",
+        department: "生物统计中心",
+        role: "数据分析师",
+        email: "wangxiaoming@hospital.com",
+        phone: "13800138017"
+      }
+    ],
     risk: {
       level: "中",
       analysis: "受试者标准修正可能影响研究的连续性，需要评估对已入组受试者的影响。",
@@ -736,12 +966,6 @@ export default function TrackReportReview({ params }: { params: { id: string } }
           icon: <FileText className="h-4 w-4" />,
           component: <TrackReportFilesTab project={currentProject} />,
         },
-        {
-          id: "riskAnalysis",
-          label: "风险分析",
-          icon: <AlertTriangle className="h-4 w-4" />,
-          component: <TrackReportRiskTab project={currentProject} />,
-        }
       ]}
     />
   );

@@ -1,48 +1,43 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   Calendar,
   Clock,
-  FileText,
+  Award,
   RefreshCw,
   Copy,
   ChevronRight,
-  Building,
-  User,
-  PawPrint,
-  Users,
-  FileCheck,
-  Tag,
-  BadgeCheck,
-  Info,
-  Heart,
-  Beaker,
-  Microscope,
-  Brain,
-  Hourglass,
   BarChart3,
   PieChart,
   LineChart,
   LayoutGrid,
   StarIcon,
-  Sparkles
+  Building,
+  Mail,
+  Phone,
+  Users,
+  ExternalLink,
+  Sparkles,
+  FileText,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { motion, AnimatePresence } from "framer-motion"
-import Image from "next/image"
 import { toast } from "@/components/ui/use-toast"
+import { formatDateToString } from "@/lib/utils"
 import { cn } from "@/lib/utils"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-// 跟踪报告概要标签页组件
-export default function TrackReportOverviewTab({
-  project
+// 初始审查项目概览标签组件
+export default function EthicProjectOverviewTab({
+  project,
+  getPriorityColor,
 }: { 
-  project: any 
+  project: any; 
+  getPriorityColor?: (priority: string) => string 
 }) {
   // 折线图动画的引用
   const chartRef = useRef<SVGPathElement>(null)
@@ -55,52 +50,40 @@ export default function TrackReportOverviewTab({
   const [hasAiWritten, setHasAiWritten] = useState(false)
   const [aiInputValue, setAiInputValue] = useState("")
 
-  // 从project对象获取AI摘要内容
-  const aiSummaryContent = project.aiSummary || ""
-  const aiModelName = project.aiModelName || "EthicGPT 2024"
-  const aiModelVersion = project.aiModelVersion || "v3.1"
-  
-  // 根据项目类型获取AI建议
-  const getAiSuggestions = () => {
-    // 如果是跟踪审查类型项目
-    if (project.reviewType === "跟踪审查") {
-      if (project.id === "ETH-TRK-2024-001") {
-        return [
-          "扩大受试者招募范围，建议增加2-3个招募中心",
-          "优化随访流程，建议在第8周和第16周增加中期评估点",
-          "加强不良反应监测频率，对既往出现轻度反应的受试者增加监测频次"
-        ];
-      }
-      return [
-        "加强项目进度监测，确保按计划完成研究目标",
-        "优化受试者管理流程，减少脱落率",
-        "完善安全性监测措施，及时应对潜在风险"
-      ];
+  // 从project对象获取AI摘要内容，根据项目类型提供不同的默认内容
+  const getDefaultAiSummary = () => {
+    if (project.projectType === "动物") {
+      return "该动物实验项目跟踪审查进展良好，当前执行进度为85%，符合预期计划安排。动物福利保障措施执行到位，未发现严重不良事件。实验方案按原计划执行，动物使用数量在批准范围内。项目整体合规性良好，建议继续保持现有监督频率，加强实验终点的人道处置监管。"
+    } else {
+      return "该人体研究项目跟踪审查进展顺利，当前执行进度为78%，受试者入组情况良好。安全性监测数据显示未发现预期外的严重不良事件，受试者依从性高达92%。知情同意流程执行规范，数据质量管理符合GCP要求。项目整体风险可控，建议继续加强受试者随访管理，确保试验数据的完整性和可靠性。"
     }
-    
-    // 默认建议
+  }
+
+  const getDefaultAiSuggestions = () => {
     if (project.projectType === "动物") {
       return [
-        "完善动物实验中的3R原则应用文档",
-        "加强实验设计的伦理标准执行",
-        "详细记录动物福利保障措施"
-      ];
+        "加强动物实验过程中的福利监测，确保3R原则的严格执行",
+        "重点关注实验终点评估，及时进行人道处置",
+        "定期检查实验设备运行状态，保证实验环境稳定"
+      ]
     } else {
       return [
-        "优化知情同意流程，提高受试者理解度",
-        "加强数据安全保护措施",
-        "完善不良事件报告与处置机制"
-      ];
+        "加强受试者安全性监测，建立不良事件快速上报机制",
+        "重点关注受试者随访依从性，确保数据收集完整",
+        "持续评估风险效益比，适时调整研究策略"
+      ]
     }
-  };
-  
-  const aiSuggestions: string[] = project.aiSuggestions || getAiSuggestions();
-  
-  const progressScore = project.progressScore || "良好"
+  }
+
+  const aiSummaryContent = project.aiSummary || getDefaultAiSummary()
+  const aiModelName = project.aiModelName || "EthicTracker Pro 2024"
+  const aiModelVersion = project.aiModelVersion || "v3.1.2"
+  const aiSuggestions: string[] = project.aiSuggestions || getDefaultAiSuggestions()
+  const progressScore = project.progressScore || "优秀"
   const riskScore = project.riskScore || "低"
-  const achievementScore = project.achievementScore || "良好"
-  const confidenceScore = project.confidenceScore || 95
-  const analysisTime = project.analysisTime || "2024-05-18 14:30"
+  const achievementScore = project.achievementScore || "合规"
+  const confidenceScore = project.confidenceScore || 92
+  const analysisTime = project.analysisTime || "2024-12-18 15:45"
 
   // 处理更新分析
   const handleUpdateAnalysis = () => {
@@ -153,7 +136,7 @@ export default function TrackReportOverviewTab({
 
     observer.observe(chartContainerRef.current)
 
-    // 添加进度条动画样式
+    // 添加进度条动画样式 - 移除了animation-delay-200类，避免闪动
     const style = document.createElement("style")
     style.textContent = `
   @keyframes progress {
@@ -174,34 +157,30 @@ export default function TrackReportOverviewTab({
     }
   }, [])
 
-  // 获取项目类型图标
-  const getProjectTypeIcon = () => {
-    if (project.projectType === "动物") {
-      return <PawPrint className="h-4 w-4 text-blue-500 mr-2" />
-    } else {
-      return <User className="h-4 w-4 text-blue-500 mr-2" />
+  const formatDate = (dateString: string) => {
+    try {
+      return formatDateToString(new Date(dateString));
+    } catch (error) {
+      return dateString;
     }
-  }
+  };
 
-  // 生成简化的项目审查摘要（一段话总结）
-  const generateProjectSummary = () => {
-    const isAnimal = project.projectType === "动物"
-    const title = project.title || "该伦理项目"
-    const leader = project.leader || "项目负责人"
-    const department = project.department || "相关科室"
-    const status = project.status || "审核中"
+  const getPriorityBadge = (priority: string) => {
+    if (!priority) return null;
     
-    if (isAnimal) {
-      const animalType = project.animalType || "实验动物"
-      const animalCount = project.animalCount || "若干只"
-      
-      return `${title}是一项由${department}${leader}主导的动物实验伦理研究项目，使用${animalType}${animalCount}进行研究。该项目已通过伦理委员会初步审查，实验设计符合3R原则要求，动物福利保障措施完善，实验方案科学合理。项目在动物痛苦控制、环境丰容、人道终点设置等方面制定了详细的操作规程，整体伦理风险可控，建议继续执行并定期接受监督检查。`
-    } else {
-      const participantInfo = project.participantCount ? `预计招募${project.participantCount}名受试者` : "涉及人体受试者研究"
-      
-      return `${title}是一项由${department}${leader}主导的人体研究伦理项目，${participantInfo}。该项目已完成伦理审查申请，知情同意流程规范，受试者保护措施到位，研究方案设计合理。项目在数据隐私保护、风险获益评估、不良事件处理等方面建立了完善的管理制度，符合人体研究伦理规范要求，整体实施风险较低，建议批准实施并加强过程监管。`
-    }
-  }
+    const colorMap: Record<string, string> = {
+      "高": "bg-red-100 text-red-700 hover:bg-red-100",
+      "中": "bg-yellow-100 text-yellow-700 hover:bg-yellow-100",
+      "低": "bg-green-100 text-green-700 hover:bg-green-100",
+    };
+
+    return (
+      <Badge className={cn("font-normal py-0.5", colorMap[priority] || "bg-gray-100 text-gray-700")}>
+        <StarIcon className="h-3 w-3 mr-1" />
+        {priority}级
+      </Badge>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -212,8 +191,8 @@ export default function TrackReportOverviewTab({
         <CardHeader className="pb-1 relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="relative w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center shadow-sm">
-                <Sparkles className="h-6 w-6 text-white" />
+              <div className="relative w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+                <Sparkles className="h-5 w-5 text-white" />
               </div>
               <div>
                 <CardTitle className="text-lg font-semibold flex items-center gap-2">
@@ -317,12 +296,9 @@ export default function TrackReportOverviewTab({
                         <LayoutGrid className="h-4 w-4" />
                         <span className="font-medium">最新分析已更新 - 检测到项目进度变更</span>
                       </div>
-                      {/* 简化的AI摘要显示 - 只显示一段话总结 */}
-                      <div className="mb-4">
-                        <p className="text-slate-700 leading-relaxed">
-                          {generateProjectSummary()}
-                        </p>
-                      </div>
+                      <p className="text-slate-700 leading-relaxed">
+                        {aiSummaryContent}
+                      </p>
                       <div className="flex items-start gap-4 my-3 py-2">
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                           <BarChart3 className="h-4 w-4 text-blue-600" />
@@ -361,12 +337,9 @@ export default function TrackReportOverviewTab({
                     </>
                   ) : (
                     <>
-                      {/* 简化的AI摘要显示 - 只显示一段话总结 */}
-                      <div className="mb-4">
-                        <p className="text-slate-700 leading-relaxed">
-                          {generateProjectSummary()}
-                        </p>
-                      </div>
+                      <p className="text-slate-700 leading-relaxed">
+                        {aiSummaryContent}
+                      </p>
                       <div className="flex items-start gap-4 my-3 py-2">
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                           <BarChart3 className="h-4 w-4 text-blue-600" />
@@ -410,7 +383,7 @@ export default function TrackReportOverviewTab({
                 <div className="inline-flex h-5 items-center rounded-full border border-slate-200 bg-white px-2 text-xs font-semibold text-slate-900">
                   可信度 {confidenceScore}%
                 </div>
-                <span>分析时间: {isAnalysisUpdated ? "2024-05-18 15:25" : analysisTime}</span>
+                <span>分析时间: {isAnalysisUpdated ? "2024-05-08 14:52" : analysisTime}</span>
               </div>
               <div className="flex items-center">
                 <Button
@@ -419,7 +392,11 @@ export default function TrackReportOverviewTab({
                   className="h-6 gap-1 text-slate-500 hover:text-slate-900"
                   onClick={() => {
                     // 复制文本到剪贴板
-                    navigator.clipboard.writeText(aiSummaryContent)
+                    navigator.clipboard.writeText(
+                      isAnalysisUpdated
+                        ? `该科研项目当前进度为35%，符合预期计划。项目经费使用率为31.2%（↑2.7%），整体于计划进度内。项目已产出3篇研究论文，包括实验设计方案、动物伦理规范与代谢机制初步分析。成果转化进展良好，已有2家制药企业表达合作意向，高于同类项目平均水平25%。`
+                        : aiSummaryContent,
+                    )
                     toast({
                       title: "已复制到剪贴板",
                       description: "AI智能摘要内容已复制",
@@ -460,7 +437,7 @@ export default function TrackReportOverviewTab({
         }}
       />
 
-      {/* 项目基本信息区域 */}
+      {/* 基本信息卡片 */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">基本信息</CardTitle>
@@ -469,34 +446,13 @@ export default function TrackReportOverviewTab({
           <div className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div>
               <div className="text-sm text-muted-foreground">项目名称</div>
-              <div className="font-medium">{project.title}</div>
+              <div className="font-medium">{project.title || project.name || (project.projectType === "动物" ? "新型抗癌药物动物安全性评价研究" : "心血管疾病预防干预临床试验")}</div>
             </div>
             <div>
               <div className="text-sm text-muted-foreground">项目编号</div>
-              <div className="font-medium">{project.reviewNumber || "未设置"}</div>
+              <div className="font-medium">{project.projectNumber || project.reviewNumber || "系统自动生成或手动输入"}</div>
             </div>
-            <div>
-              <div className="text-sm text-muted-foreground">审查类型</div>
-              <div className="font-medium">{project.reviewType || "初始审查"}</div>
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground">伦理委员会</div>
-              <div className="font-medium">{project.ethicsCommittee}</div>
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground">项目类型</div>
-              <div className="font-medium">{project.projectType}伦理</div>
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground">负责人</div>
-              <div className="font-medium">{project.leader}</div>
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground">所属院系</div>
-              <div className="font-medium">{project.department}</div>
-            </div>
-            
-            {project.projectType === "动物" && (
+            {project.projectType === "动物" ? (
               <>
                 <div>
                   <div className="text-sm text-muted-foreground">动物种系</div>
@@ -506,170 +462,165 @@ export default function TrackReportOverviewTab({
                   <div className="text-sm text-muted-foreground">动物数量</div>
                   <div className="font-medium">{project.animalCount}</div>
                 </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">动物实施设备单位</div>
+                  <div className="font-medium">{project.facilityUnit}</div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <div className="text-sm text-muted-foreground">项目类型</div>
+                  <div className="font-medium">{project.projectType || "临床干预研究"}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">参与人数</div>
+                  <div className="font-medium">{project.participantCount || "120人"}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">研究实施单位</div>
+                  <div className="font-medium">{project.researchUnit || "临床研究中心"}</div>
+                </div>
               </>
             )}
-            
-            {project.projectType === "人体" && (
-              <div>
-                <div className="text-sm text-muted-foreground">参与人数</div>
-                <div className="font-medium">{project.participantCount}</div>
-              </div>
-            )}
-            
             <div className="col-span-2">
-              <div className="text-sm text-muted-foreground">审核期限</div>
+              <div className="text-sm text-muted-foreground">项目周期</div>
               <div className="font-medium">
-                {project.submittedAt || "2024-05-18"} 至 {project.deadline || "2024-06-15"}
+                {formatDate(project.startDate || "2024-01-01")} 至 {formatDate(project.endDate || "2026-12-31")}
               </div>
             </div>
-            
+            <div>
+              <div className="text-sm text-muted-foreground">项目预算</div>
+              <div className="font-medium">{project.budget ? `${project.budget} 元` : "未设置"}</div>
+            </div>
             <div>
               <div className="text-sm text-muted-foreground">项目状态</div>
-              <div className="font-medium">{project.status || "审核中"}</div>
+              <div className="font-medium">{project.status || "进行中"}</div>
             </div>
           </div>
 
           <div className="mt-6">
             <div className="text-sm text-muted-foreground mb-1">项目描述</div>
-            <div className="text-sm">{project.description}</div>
+            <div className="text-sm">{project.description || (project.projectType === "动物" ? "通过动物实验评价新型抗癌化合物的安全性和有效性，为临床试验提供科学依据" : "评估生活方式干预措施对心血管疾病高危人群预防效果的多中心随机对照研究")}</div>
           </div>
         </CardContent>
       </Card>
-      
-      {/* 项目进度情况 - 仅跟踪审查项目显示 */}
-      {project.reviewType === "跟踪审查" && (
+
+      {/* 研究信息卡片 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">研究信息</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <div className="text-sm text-muted-foreground mb-1">研究目的</div>
+              <div className="text-sm">{project.researchPurpose || project.description}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground mb-1">研究方法</div>
+              <div className="text-sm">{project.researchMethod || "暂无研究方法信息"}</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 主要研究者信息卡片 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">主要研究者信息</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+            <div>
+              <div className="text-sm text-muted-foreground">负责人姓名</div>
+              <div className="font-medium">{project.leader?.name || project.leader}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">职称/职务</div>
+              <div className="font-medium">{project.leader?.title || "未设置"}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">所属院系</div>
+              <div className="font-medium">{project.department || "未设置"}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">电子邮箱</div>
+              <div className="font-medium">{project.leader?.email}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">联系电话</div>
+              <div className="font-medium">{project.leader?.phone || "未设置"}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">联系地址</div>
+              <div className="font-medium">{project.address || "未设置"}</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 项目团队成员卡片 */}
+      {project.members && project.members.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">进度情况</CardTitle>
-            <CardDescription>当前项目执行进度与安全性监测情况</CardDescription>
+            <CardTitle className="text-lg">项目团队成员</CardTitle>
           </CardHeader>
-          
-          <CardContent className="space-y-6">
-            {/* 入组情况进度卡片 */}
-            {project.projectType === "人体" && project.enrollment && (
-              <div className="bg-white p-4 rounded-md border shadow-sm">
-                <h3 className="text-sm font-medium flex items-center text-gray-700 mb-3">
-                  <Users className="h-4 w-4 text-blue-500 mr-2" />
-                  入组情况
-                </h3>
-                
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-600">计划入组：{project.enrollment.planned}人</span>
-                    <span className="font-medium">当前入组：{project.enrollment.current}人</span>
-                    <Badge className="bg-blue-50 text-blue-700">{project.enrollment.completion}% 完成</Badge>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {project.members.map((member: any, index: number) => (
+                <div key={index} className="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
+                  {/* 头像和基本信息 */}
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold flex items-center justify-center text-sm flex-shrink-0">
+                      {member.name ? member.name.charAt(0) : '?'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-gray-900 text-sm truncate">{member.name || '未知'}</h4>
+                      <p className="text-xs text-muted-foreground truncate">{member.title || '未设置'}</p>
+                    </div>
                   </div>
                   
-                  <Progress value={project.enrollment.completion} className="h-2" />
+                  {/* 角色标签 */}
+                  {member.role && (
+                    <div className="mb-3">
+                      <Badge variant="outline" className="text-xs">
+                        {member.role}
+                      </Badge>
+                    </div>
+                  )}
                   
-                  <div className="grid grid-cols-3 gap-4 pt-2">
-                    <div className="bg-slate-50 p-2 rounded text-center">
-                      <div className="text-xs text-slate-500">脱落率</div>
-                      <div className="font-medium">{project.enrollment.dropoutRate}%</div>
+                  {/* 详细信息 */}
+                  <div className="space-y-2 text-xs">
+                    <div>
+                      <span className="text-muted-foreground">部门：</span>
+                      <span className="font-medium">{member.department || '未设置'}</span>
                     </div>
-                    <div className="bg-slate-50 p-2 rounded text-center">
-                      <div className="text-xs text-slate-500">预期完成</div>
-                      <div className="font-medium">{project.enrollment.expectedCompletion}</div>
-                    </div>
-                    <div className="bg-slate-50 p-2 rounded text-center">
-                      <div className="text-xs text-slate-500">数据完整率</div>
-                      <div className="font-medium">96.4%</div>
-                    </div>
+                    
+                    {member.email && (
+                      <div>
+                        <span className="text-muted-foreground">邮箱：</span>
+                        <a href={`mailto:${member.email}`} className="font-medium text-blue-600 hover:text-blue-800 break-all">
+                          {member.email}
+                        </a>
+                      </div>
+                    )}
+                    
+                    {member.phone && (
+                      <div>
+                        <span className="text-muted-foreground">电话：</span>
+                        <a href={`tel:${member.phone}`} className="font-medium text-blue-600 hover:text-blue-800">
+                          {member.phone}
+                        </a>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            )}
-            
-            {/* 安全监测数据 */}
-            {project.safetyData && (
-              <div className="bg-white p-4 rounded-md border shadow-sm">
-                <h3 className="text-sm font-medium flex items-center text-gray-700 mb-3">
-                  <FileCheck className="h-4 w-4 text-green-500 mr-2" />
-                  安全监测数据
-                </h3>
-                
-                <div className="grid grid-cols-4 gap-4 mb-4">
-                  <div className="bg-slate-50 p-3 rounded">
-                    <div className="text-xs text-slate-500">不良事件</div>
-                    <div className="font-medium text-blue-600">{project.safetyData.adverseEvents}例</div>
-                  </div>
-                  <div className="bg-slate-50 p-3 rounded">
-                    <div className="text-xs text-slate-500">严重不良事件</div>
-                    <div className="font-medium text-amber-600">{project.safetyData.severeAdverseEvents}例</div>
-                  </div>
-                  <div className="bg-slate-50 p-3 rounded">
-                    <div className="text-xs text-slate-500">不良事件发生率</div>
-                    <div className="font-medium">{project.safetyData.adverseEventRate}%</div>
-                  </div>
-                  <div className="bg-slate-50 p-3 rounded">
-                    <div className="text-xs text-slate-500">早期终止</div>
-                    <div className="font-medium">0例</div>
-                  </div>
-                </div>
-                
-                {project.safetyData.mostCommonEvents && (
-                  <div className="mt-2">
-                    <div className="text-xs text-slate-500 mb-2">常见不良事件</div>
-                    <div className="flex flex-wrap gap-2">
-                      {project.safetyData.mostCommonEvents.map((event: string, index: number) => (
-                        <Badge key={index} variant="outline" className="bg-slate-50">
-                          {event}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {/* 项目时间进度 */}
-            <div className="bg-white p-4 rounded-md border shadow-sm">
-              <h3 className="text-sm font-medium flex items-center text-gray-700 mb-3">
-                <Calendar className="h-4 w-4 text-violet-500 mr-2" />
-                时间进度
-              </h3>
-              
-              <div className="space-y-3">
-                <div className="relative pl-6 pb-6">
-                  <div className="absolute top-0 left-2 h-full w-[1px] bg-blue-200"></div>
-                  <div className="absolute top-0 left-0 h-4 w-4 rounded-full bg-blue-500 border-2 border-white shadow-sm"></div>
-                  <div className="ml-2">
-                    <div className="text-sm font-medium">项目启动</div>
-                    <div className="text-xs text-slate-500">2024-01-15</div>
-                  </div>
-                </div>
-                
-                <div className="relative pl-6 pb-6">
-                  <div className="absolute top-0 left-2 h-full w-[1px] bg-blue-200"></div>
-                  <div className="absolute top-0 left-0 h-4 w-4 rounded-full bg-green-500 border-2 border-white shadow-sm"></div>
-                  <div className="ml-2">
-                    <div className="text-sm font-medium">首批入组</div>
-                    <div className="text-xs text-slate-500">2024-02-05</div>
-                  </div>
-                </div>
-                
-                <div className="relative pl-6 pb-6">
-                  <div className="absolute top-0 left-2 h-full w-[1px] bg-blue-200"></div>
-                  <div className="absolute top-0 left-0 h-4 w-4 rounded-full bg-green-500 border-2 border-white shadow-sm"></div>
-                  <div className="ml-2">
-                    <div className="text-sm font-medium">中期数据分析</div>
-                    <div className="text-xs text-slate-500">2024-04-10（当前跟踪点）</div>
-                  </div>
-                </div>
-                
-                <div className="relative pl-6">
-                  <div className="absolute top-0 left-0 h-4 w-4 rounded-full bg-slate-300 border-2 border-white shadow-sm"></div>
-                  <div className="ml-2">
-                    <div className="text-sm font-medium text-slate-500">项目完成</div>
-                    <div className="text-xs text-slate-400">预计 2024-08-15</div>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </CardContent>
         </Card>
       )}
-    
     </div>
   )
 } 
