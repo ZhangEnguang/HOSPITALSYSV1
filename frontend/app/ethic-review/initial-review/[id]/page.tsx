@@ -1,31 +1,25 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "@/components/ui/use-toast"
 import DetailPage from "@/components/detail-page/detail-page"
 import {
   FileIcon,
-  AlertTriangle,
   FileText,
   Building2,
-  Calendar,
-  CheckCircle2,
-  FileCheck,
   PenSquare,
   Trash2,
   RotateCw,
   User,
   FileSignature,
   BriefcaseMedical,
-  PawPrint,
   Users
 } from "lucide-react"
 import { useLoading } from "@/hooks/use-loading"
 
 // 导入我们创建的组件
 import EthicProjectOverviewTab from "@/app/ethic-review/initial-review/components/overview-tab"
-import RiskAnalysisTab from "@/app/ethic-review/initial-review/components/risk-analysis-tab"
 import ReviewFilesTab from "@/app/ethic-review/initial-review/components/review-files-tab"
 
 // 模拟数据 - 审查项目
@@ -49,7 +43,7 @@ const mockReviewProjects = [
     reviewNumber: "ETH-A-2024-001",
     progress: 100,
     description: "本项目旨在建立转基因小鼠模型，用于研究神经退行性疾病的发病机制与潜在治疗靶点。",
-    aiSummary: "【审核要点摘要】\n• 已完全符合3R原则要求\n• 实验设计科学合理\n• 动物福利保障措施完善\n• 安乐死方案符合规范\n\n建议：作为标准案例纳入伦理培训教材",
+    aiSummary: "经AI智能分析，该转基因小鼠模型研究项目设计科学合理，完全符合3R原则要求。实验方案中的动物福利保障措施完善，安乐死方案符合相关规范标准。项目实验设计清晰，预期目标明确，研究团队具备充足的专业经验。建议作为标准案例纳入伦理培训教材，为后续同类项目提供参考。",
     aiModelName: "EthicGPT 2024",
     aiModelVersion: "v3.1",
     risk: {
@@ -66,6 +60,12 @@ const mockReviewProjects = [
       { id: "2", name: "实验方案.docx", type: "protocol", size: "1.8MB", uploadedAt: "2024-01-15", status: "审核通过" },
       { id: "3", name: "3R声明.pdf", type: "declaration", size: "0.5MB", uploadedAt: "2024-01-15", status: "审核通过" },
       { id: "4", name: "伦理审查意见.pdf", type: "review", size: "1.2MB", uploadedAt: "2024-01-18", status: "审核通过" }
+    ],
+    members: [
+      { name: "李勤理", title: "副教授", department: "基础医学院", role: "副教授", email: "li@example.com", phone: "13800000010" },
+      { name: "张技术员", title: "高级技术员", department: "基础医学院", role: "数据分析", email: "zhang@example.com", phone: "13800000011" },
+      { name: "刘制研员", title: "副研究员", department: "药学院", role: "实验设计", email: "liu@example.com", phone: "13800000012" },
+      { name: "赵博士", title: "博士后", department: "基础医学院", role: "实验监督", email: "zhao@example.com", phone: "13800000012" }
     ]
   },
   {
@@ -85,7 +85,7 @@ const mockReviewProjects = [
     reviewNumber: "ETH-H-2024-008",
     progress: 40,
     description: "本项目旨在评估新型靶向生物药物在晚期肿瘤患者中的安全性和有效性，通过I期临床试验筛选最佳给药剂量和方案。",
-    aiSummary: "【审核要点摘要】\n• 知情同意书内容全面但表述复杂\n• 受试者招募计划合理但筛选标准较严格\n• 数据安全监测计划完善\n• 不良反应报告与处置流程规范\n\n建议：简化知情同意书语言，使一般受试者更易理解",
+    aiSummary: "经AI智能分析，该新型靶向生物药物临床试验研究方案整体设计合理，数据安全监测计划完善，不良反应报告与处置流程规范。知情同意书内容全面但表述略显复杂，受试者招募计划合理但筛选标准较为严格。建议简化知情同意书语言表述，使一般受试者更易理解，同时保持筛选标准的科学性。",
     aiModelName: "EthicGPT 2024",
     aiModelVersion: "v3.1",
     risk: {
@@ -102,6 +102,11 @@ const mockReviewProjects = [
       { id: "6", name: "知情同意书.pdf", type: "consent", size: "2.1MB", uploadedAt: "2024-03-05", status: "待审核" },
       { id: "7", name: "研究者手册.pdf", type: "handbook", size: "4.5MB", uploadedAt: "2024-03-05", status: "待审核" },
       { id: "8", name: "病例报告表.docx", type: "report", size: "1.6MB", uploadedAt: "2024-03-05", status: "待审核" }
+    ],
+    members: [
+      { name: "陈医生", title: "主治医师", department: "肿瘤医学中心", role: "临床监测", email: "chen@example.com", phone: "13800000020" },
+      { name: "王护士", title: "主管护师", department: "肿瘤医学中心", role: "患者护理", email: "wang@example.com", phone: "13800000021" },
+      { name: "李药师", title: "药师", department: "药剂科", role: "药物配制", email: "li@example.com", phone: "13800000022" }
     ]
   },
   {
@@ -122,7 +127,7 @@ const mockReviewProjects = [
     reviewNumber: "ETH-H-2024-012",
     progress: 60,
     description: "本项目旨在评估不同强度有氧运动对高血压患者血压控制、心血管功能及生活质量的影响，确定最佳运动处方。",
-    aiSummary: "【退回原因分析】\n• 未充分说明高风险人群的排除标准\n• 缺乏运动中止标准的明确界定\n• 应急处置流程不够详细\n• 数据收集表单设计不完善\n\n建议：补充完善上述内容后重新提交",
+    aiSummary: "经AI智能分析，该高血压患者运动干预研究存在一些需要完善的问题。研究方案未充分说明高风险人群的排除标准，缺乏运动中止标准的明确界定，应急处置流程描述不够详细，数据收集表单设计还需进一步完善。建议申请者补充完善上述关键内容，特别是强化安全保障措施，再重新提交审查申请。",
     aiModelName: "EthicGPT 2024", 
     aiModelVersion: "v3.1",
     risk: {
@@ -139,6 +144,11 @@ const mockReviewProjects = [
       { id: "10", name: "知情同意书.pdf", type: "consent", size: "1.8MB", uploadedAt: "2024-02-20", status: "需修改" },
       { id: "11", name: "运动处方设计.docx", type: "prescription", size: "1.4MB", uploadedAt: "2024-02-20", status: "需修改" },
       { id: "12", name: "退回意见书.pdf", type: "review", size: "0.8MB", uploadedAt: "2024-02-23", status: "已生成" }
+    ],
+    members: [
+      { name: "孙教练", title: "运动指导师", department: "运动医学科学院", role: "运动指导", email: "sun@example.com", phone: "13800000030" },
+      { name: "马医生", title: "心内科医师", department: "心内科", role: "健康监测", email: "ma@example.com", phone: "13800000031" },
+      { name: "朱护士", title: "护师", department: "运动医学科学院", role: "患者护理", email: "zhu@example.com", phone: "13800000032" }
     ]
   },
   {
@@ -160,7 +170,7 @@ const mockReviewProjects = [
     reviewNumber: "ETH-A-2024-003",
     progress: 100,
     description: "本项目旨在评估各类啮齿动物模型在药物代谢研究中的适用性和有效性，为新药开发提供更精准的前临床评估体系。",
-    aiSummary: "【退回原因分析】\n• 实验方案中动物使用数量未充分论证\n• 痛苦程度评估不完善\n• 麻醉和安乐死方案需细化\n• 实验观察指标设置不够合理\n\n建议：补充完善上述内容后重新提交",
+    aiSummary: "经AI智能分析，该啮齿类动物模型药物代谢研究项目存在几个需要完善的问题。实验方案中动物使用数量的论证依据不够充分，痛苦程度评估体系不够完善，麻醉和安乐死实施方案需要进一步细化，实验观察指标的设置还不够合理。建议申请者针对上述问题进行补充完善，确保实验的科学性和动物福利保障，再重新提交审查申请。",
     aiModelName: "EthicGPT 2024",
     aiModelVersion: "v3.1",
     risk: {
@@ -177,6 +187,11 @@ const mockReviewProjects = [
       { id: "p4-2", name: "实验方案.docx", type: "protocol", size: "1.7MB", uploadedAt: "2024-01-28", status: "需修改" },
       { id: "p4-3", name: "3R声明.pdf", type: "declaration", size: "0.6MB", uploadedAt: "2024-01-28", status: "需修改" },
       { id: "p4-4", name: "退回意见书.pdf", type: "review", size: "0.9MB", uploadedAt: "2024-01-29", status: "已生成" }
+    ],
+    members: [
+      { name: "田研究员", title: "助理研究员", department: "药学院", role: "实验操作", email: "tian@example.com", phone: "13800000040" },
+      { name: "徐技术员", title: "实验技术员", department: "药学院", role: "动物照料", email: "xu@example.com", phone: "13800000041" },
+      { name: "何兽医", title: "兽医师", department: "动物中心", role: "动物健康", email: "he@example.com", phone: "13800000042" }
     ]
   },
   {
@@ -196,7 +211,7 @@ const mockReviewProjects = [
     reviewNumber: "ETH-H-2024-015",
     progress: 20,
     description: "本项目旨在评估免疫治疗对不同年龄段肿瘤患者生活质量的长期影响，为个体化治疗方案制定提供依据。",
-    aiSummary: "【审核要点摘要】\n• 研究设计较为完善\n• 样本量计算合理\n• 知情同意过程需要细化\n• 长期随访计划需要完善\n\n建议：重点关注患者隐私保护和数据安全",
+    aiSummary: "经AI智能分析，该免疫治疗对肿瘤患者生活质量影响的研究设计较为完善，样本量计算合理，具有良好的科学研究基础。知情同意过程需要进一步细化，长期随访计划还需要完善。建议重点关注患者隐私保护和数据安全管理，确保研究过程中的伦理合规性和受试者权益保障。",
     aiModelName: "EthicGPT 2024",
     aiModelVersion: "v3.1",
     risk: {
@@ -213,6 +228,11 @@ const mockReviewProjects = [
       { id: "p5-2", name: "知情同意书.pdf", type: "consent", size: "1.9MB", uploadedAt: "2024-04-10", status: "待审核" },
       { id: "p5-3", name: "病例报告表.docx", type: "report", size: "2.1MB", uploadedAt: "2024-04-10", status: "待审核" },
       { id: "p5-4", name: "统计分析计划.pdf", type: "statistics", size: "1.3MB", uploadedAt: "2024-04-10", status: "待审核" }
+    ],
+    members: [
+      { name: "黄主任", title: "科主任", department: "肿瘤医学中心", role: "项目指导", email: "huang@example.com", phone: "13800000050" },
+      { name: "宋研究员", title: "研究员", department: "肿瘤医学中心", role: "数据统计", email: "song@example.com", phone: "13800000051" },
+      { name: "曹护士", title: "主管护师", department: "肿瘤医学中心", role: "随访管理", email: "cao@example.com", phone: "13800000052" }
     ]
   },
   {
@@ -251,6 +271,11 @@ const mockReviewProjects = [
       { id: "p6-2", name: "实验方案.docx", type: "protocol", size: "2.2MB", uploadedAt: "2024-02-05", status: "审核通过" },
       { id: "p6-3", name: "3R声明.pdf", type: "declaration", size: "0.7MB", uploadedAt: "2024-02-05", status: "审核通过" },
       { id: "p6-4", name: "审查意见书.pdf", type: "review", size: "1.1MB", uploadedAt: "2024-02-08", status: "已生成" }
+    ],
+    members: [
+      { name: "邓教授", title: "教授", department: "神经科学研究院", role: "理论指导", email: "deng@example.com", phone: "13800000060" },
+      { name: "钟博士", title: "博士后", department: "神经科学研究院", role: "行为测试", email: "zhong@example.com", phone: "13800000061" },
+      { name: "韩技师", title: "动物技师", department: "神经科学研究院", role: "动物训练", email: "han@example.com", phone: "13800000062" }
     ]
   },
   {
@@ -329,21 +354,25 @@ const mockReviewProjects = [
 ];
 
 // 伦理项目审查详情页
-export default function EthicReviewDetail({ params }: { params: { id: string } }) {
+export default function EthicReviewDetail({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { isLoading, startLoading, stopLoading } = useLoading();
+  
+  // 解包 params Promise
+  const resolvedParams = React.use(params);
+  
   const [projectTitle, setProjectTitle] = useState("");
   const [currentProject, setCurrentProject] = useState<any>(null);
 
   // 调试信息
   useEffect(() => {
-    console.log("当前参数ID:", params.id);
-  }, [params.id]);
+    console.log("当前参数ID:", resolvedParams.id);
+  }, [resolvedParams.id]);
 
   // 模拟获取项目详情数据
   useEffect(() => {
     try {
-      console.log("开始加载项目详情，ID:", params.id);
+      console.log("开始加载项目详情，ID:", resolvedParams.id);
       const projectDetail = getProjectDetail();
       
       if (projectDetail) {
@@ -354,7 +383,7 @@ export default function EthicReviewDetail({ params }: { params: { id: string } }
         console.error("项目详情未找到");
         toast({
           title: "未找到项目",
-          description: `无法找到ID为${params.id}的审查项目详情`,
+          description: `无法找到ID为${resolvedParams.id}的审查项目详情`,
           variant: "destructive",
         });
         router.push("/ethic-review/initial-review");
@@ -368,11 +397,11 @@ export default function EthicReviewDetail({ params }: { params: { id: string } }
       });
       router.push("/ethic-review/initial-review");
     }
-  }, [params.id, router]);
+  }, [resolvedParams.id, router, toast]);
 
   // 获取项目详情 - 根据多个属性查找
   const getProjectDetail = () => {
-    const searchId = params.id;
+    const searchId = resolvedParams.id;
     console.log("正在查找项目，搜索ID:", searchId);
     
     // 为项目4添加特殊处理
@@ -595,7 +624,7 @@ export default function EthicReviewDetail({ params }: { params: { id: string } }
           <div className="w-10 h-10 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
         </div>
         <div className="text-lg font-medium">加载中...</div>
-        <div className="text-sm text-gray-500 mt-2">正在加载项目ID: {params.id} 的详情数据</div>
+        <div className="text-sm text-gray-500 mt-2">正在加载项目ID: {resolvedParams.id} 的详情数据</div>
       </div>
     );
   }
@@ -693,10 +722,10 @@ export default function EthicReviewDetail({ params }: { params: { id: string } }
     return baseFields;
   };
 
-  return (
-    <DetailPage
-      id={params.id}
-      title={projectTitle || currentProject.title || `项目 ${params.id}`}
+      return (
+      <DetailPage
+        id={resolvedParams.id}
+        title={projectTitle || currentProject.title || `项目 ${resolvedParams.id}`}
       status={currentProject.status || "未知状态"}
       statusLabel={currentProject.statusLabel || currentProject.status || "未知状态"}
       onTitleEdit={handleTitleEdit}
@@ -717,12 +746,6 @@ export default function EthicReviewDetail({ params }: { params: { id: string } }
           label: "送审文件",
           icon: <FileText className="h-4 w-4" />,
           component: <ReviewFilesTab project={currentProject} />,
-        },
-        {
-          id: "riskAnalysis",
-          label: "风险分析",
-          icon: <AlertTriangle className="h-4 w-4" />,
-          component: <RiskAnalysisTab project={currentProject} />,
         },
       ]}
     />
