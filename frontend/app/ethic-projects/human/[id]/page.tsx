@@ -4,34 +4,25 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "@/components/ui/use-toast"
 import DetailPage from "@/components/detail-page/detail-page"
-import { adaptEthicProjectForDetail } from "../../../../lib/adapters/ethic-project-adapter"
+
 import {
   FileIcon,
-  GitBranch,
   AlertTriangle,
-  ClipboardList,
   PenSquare,
   Trash2,
   User,
-  Users,
   FileText,
   Building2,
   FileCheck,
   BarChart3,
-  Mail,
-  Phone,
-  ExternalLink,
+  Users,
   Tag,
-  Bookmark,
-  Stethoscope
 } from "lucide-react"
 import EthicProjectOverviewTab from "../components/overview-tab"
-import ReviewProgressTab from "../components/tabs/review-progress-tab"
-import ReviewFilesTab from "../components/tabs/review-files-tab"
+import ReviewProgressTab from "../../components/tabs/review-progress-tab"
 import ExperimentProgressTab from "../components/experiment-progress-tab"
-// @ts-ignore - 文件存在但类型可能有问题
+import ReviewFilesTab from "../components/review-files-tab"
 import RiskAnalysisTab from "../components/risk-analysis-tab"
-import ProjectTeamTab from "../../components/tabs/project-team-tab"
 import "../../styles/ethic-project.css"
 import React from "react"
 
@@ -270,105 +261,60 @@ const humanEthicProjects = [
   }
 ];
 
-// 项目AI摘要内容
-const projectAISummaries: { [key: string]: AISummary } = {
-  "2": {
-    content: "【伦理规范执行情况】\n• 已提交伦理委员会申请（流程号：IRB-2024-02-18）\n• 试验方案评分92/100（优秀）\n\n【患者保护措施】\n• 全面的安全监测计划\n• 明确的受试者退出标准\n• 完善的数据保密措施\n\n【研究准备】\n• 研究者培训已完成\n• 试验药物准备就绪",
-    aiModel: "GPT-Scientific 2023",
-    version: "v2.4.1",
-    recommendations: [
-      "完善受试者筛选标准",
-      "增加中期安全性评估节点"
-    ],
-    confidenceScore: 92,
-    analysisTime: "2024-02-20 15:47",
-    platformScores: {
-      progress: "一般",
-      risk: "中等",
-      achievement: "待评估"
-    }
-  },
-  "3": {
-    content: "【伦理规范执行情况】\n• 已获得伦理委员会批准（批准号：IRB-2024-01-20）\n• 知情同意实施评分90/100（良好）\n\n【样本采集保障】\n• 严格的隐私保护措施\n• 完善的知情同意流程\n• 样本编码匿名化处理\n\n【研究现状】\n• 已完成30%样本采集\n• 初步数据分析显示种族间基因差异明显",
-    aiModel: "GPT-Scientific 2023",
-    version: "v2.4.1",
-    recommendations: [
-      "增加少数民族样本比例",
-      "完善数据安全存储方案"
-    ],
-    confidenceScore: 93,
-    analysisTime: "2024-03-10 09:45",
-    platformScores: {
-      progress: "良好",
-      risk: "中等",
-      achievement: "良好"
-    }
-  },
-  "5": {
-    content: "【伦理规范执行情况】\n• 伦理委员会审核中（流程号：IRB-2024-02-15）\n• 方案设计评分94/100（优秀）\n\n【患者保护措施】\n• 新生儿安全防护机制完善\n• 家长全程知情同意流程\n• 样本保存符合国家标准\n\n【研究进展】\n• 技术团队培训已完成\n• 初步实验结果显示干细胞活性良好",
-    aiModel: "GPT-Scientific 2023",
-    version: "v2.4.1",
-    recommendations: [
-      "优化干细胞提取步骤",
-      "增加长期保存稳定性评估"
-    ],
-    confidenceScore: 91,
-    analysisTime: "2024-03-12 14:22",
-    platformScores: {
-      progress: "良好",
-      risk: "低",
-      achievement: "待评估"
-    }
-  },
-  "7": {
-    content: "【伦理规范执行情况】\n• 已获得伦理委员会批准（批准号：IRB-2024-01-10）\n• 知情同意实施评分93/100（优秀）\n\n【患者保护措施】\n• 认知障碍患者知情同意特殊流程\n• 家属全程参与决策机制\n• 严格的不良反应监测系统\n\n【研究进展】\n• 已完成首批患者筛选入组\n• 初步安全性数据显示良好耐受性",
-    aiModel: "GPT-Scientific 2023",
-    version: "v2.4.1",
-    recommendations: [
-      "加强长期随访管理",
-      "细化认知能力评估工具"
-    ],
-    confidenceScore: 94,
-    analysisTime: "2024-03-05 11:20",
-    platformScores: {
-      progress: "良好",
-      risk: "中等",
-      achievement: "待评估"
-    }
-  },
-  "9": {
-    content: "【伦理规范准备情况】\n• 伦理委员会申请准备中（预计流程号：IRB-2024-06-25）\n• 方案设计评分91/100（良好）\n\n【患者保护措施规划】\n• 孕妇与胎儿双重安全保障措施\n• 详尽的风险评估与应对预案\n• 特殊人群知情同意强化流程\n\n【前期准备】\n• 技术团队已完成培训\n• 安全性预评估完成",
-    aiModel: "GPT-Scientific 2023",
-    version: "v2.4.1",
-    recommendations: [
-      "增强心理支持服务体系",
-      "建立胎儿安全实时监测机制"
-    ],
-    confidenceScore: 90,
-    analysisTime: "2024-06-15 09:30",
-    platformScores: {
-      progress: "待启动",
-      risk: "中等",
-      achievement: "待评估"
-    }
-  },
-  "11": {
-    content: "【伦理规范执行情况】\n• 伦理委员会审核中（流程号：IRB-2024-03-30）\n• 方案设计评分95/100（优秀）\n\n【患者保护措施】\n• 干细胞来源严格审核\n• 移植过程安全保障体系\n• 全程副作用监测机制\n\n【研究进展】\n• 已完成干细胞制备与鉴定\n• 患者筛选标准确立",
-    aiModel: "GPT-Scientific 2023",
-    version: "v2.4.1",
-    recommendations: [
-      "完善长期预后评估体系",
-      "增加免疫排斥反应监测频率"
-    ],
-    confidenceScore: 92,
-    analysisTime: "2024-04-10 15:35",
-    platformScores: {
-      progress: "初期",
-      risk: "较高",
-      achievement: "待评估"
-    }
+// 动态生成AI摘要的函数
+const generateAISummary = (project: any, reviewData?: any[], uploadData?: any[]): AISummary => {
+  const progress = project.progress || 0;
+  const status = project.status || "未知";
+  const priority = project.priority || "中";
+  
+  // 基于项目数据生成智能摘要
+  const summaryParts = [
+    `这项${project.type === "人体伦理" ? "人体" : "动物"}伦理项目已通过${project.ethicsCommittee}审批，当前项目状态为${status}。`,
+    `项目涉及${project.type === "人体伦理" ? `${project.participantCount}受试者，类型为${project.projectType}` : `${project.animalCount}实验${project.animalType}`}，进度完成${progress}%。`,
+    `数据质量评分为${Math.floor(Math.random() * 10) + 85}分（良好），样本采集覆盖率达${Math.floor(Math.random() * 20) + 80}%。`,
+  ];
+  
+  const riskFactors = [];
+  if (progress < 30) riskFactors.push("进度偏慢");
+  if (priority === "高") riskFactors.push("高优先级项目");
+  if (status === "待审核") riskFactors.push("待审核状态");
+  
+  if (riskFactors.length > 0) {
+    summaryParts.push(`当前识别到的风险因素包括：${riskFactors.join("、")}。`);
   }
+  
+  // 生成建议
+  const recommendations = [];
+  if (progress < 50) {
+    recommendations.push("建议加快项目执行进度，确保按时完成各阶段目标");
+  }
+  if (priority === "高") {
+    recommendations.push("作为高优先级项目，建议增加资源投入和监督频率");
+  }
+  recommendations.push("定期进行伦理合规性检查，确保研究过程符合伦理要求");
+  recommendations.push("加强数据质量控制和样本管理，提高研究结果可靠性");
+  
+  // 计算合规评分
+  const complianceScore = Math.floor(Math.random() * 15) + 85;
+  const dataQualityScore = Math.floor(Math.random() * 10) + 85;
+  
+  return {
+    content: summaryParts.join(" "),
+    aiModel: "GPT-Scientific 2023",
+    version: "v2.4.1",
+    recommendations,
+    confidenceScore: Math.floor(Math.random() * 10) + 90,
+    analysisTime: new Date().toISOString().slice(0, 16).replace('T', ' '),
+    platformScores: {
+      progress: progress > 70 ? "优秀" : progress > 40 ? "良好" : "一般",
+      risk: complianceScore > 90 ? "低" : "中等",
+      achievement: dataQualityScore > 90 ? "优秀" : "良好"
+    }
+  };
 };
+
+// 项目AI摘要内容 - 现在使用动态生成
+const projectAISummaries: { [key: string]: AISummary } = {};
 
 // 接口定义
 interface Params {
@@ -377,10 +323,6 @@ interface Params {
 
 // 人体伦理项目详情页面
 export default function HumanEthicProjectDetailPage({ params }: { params: { id: string } }) {
-  // 使用解构处理
-  const { id } = params;
-  const projectId = id;
-  
   const router = useRouter();
   const [projectTitle, setProjectTitle] = useState("");
   const [currentProject, setCurrentProject] = useState<any>(null);
@@ -399,45 +341,41 @@ export default function HumanEthicProjectDetailPage({ params }: { params: { id: 
       });
       router.push("/ethic-projects/human");
     }
-  }, [projectId, router]);
+  }, [params.id, router]);
 
   // 获取项目详情
   const getProjectDetail = () => {
-    // 使用projectId查找项目
-    console.log("正在查找人体伦理项目ID:", projectId, "类型:", typeof projectId);
-    console.log("数据库中所有ID:", humanEthicProjects.map(p => ({id: p.id, type: typeof p.id})));
+    // 确保使用正确的ID查找项目
+    const projectId = params.id;
+    console.log("正在查找人体伦理项目ID:", projectId);
     
-    // 使用类型转换确保比较时类型一致
-    const project = humanEthicProjects.find((p) => String(p.id) === String(projectId));
+    const project = humanEthicProjects.find((p) => p.id === projectId);
     if (!project) {
       console.error("未找到人体伦理项目:", projectId);
       return null;
     }
     
-    console.log("找到人体伦理项目:", project.name, "项目ID:", project.id);
+    console.log("找到人体伦理项目:", project.name);
 
-    // 添加AI摘要数据
-    const aiSummaryId = String(projectId);
-    const aiSummary = projectAISummaries[aiSummaryId];
-    if (aiSummary) {
-      console.log("找到AI摘要数据，ID:", aiSummaryId);
-      return {
-        ...project,
-        aiSummary: aiSummary.content,
-        aiModelName: aiSummary.aiModel,
-        aiModelVersion: aiSummary.version,
-        aiSuggestions: aiSummary.recommendations,
-        progressScore: aiSummary.platformScores.progress,
-        riskScore: aiSummary.platformScores.risk,
-        achievementScore: aiSummary.platformScores.achievement,
-        confidenceScore: aiSummary.confidenceScore,
-        analysisTime: aiSummary.analysisTime,
-      };
-    } else {
-      console.log("未找到AI摘要数据，ID:", aiSummaryId);
-    }
-
-    return project;
+    // 动态生成AI摘要数据
+    // 模拟获取审查数据和上传数据
+    const reviewData: any[] = []; // 这里可以从API获取实际的审查数据
+    const uploadData: any[] = []; // 这里可以从API获取实际的上传数据
+    
+    const aiSummary = generateAISummary(project, reviewData, uploadData);
+    
+    return {
+      ...project,
+      aiSummary: aiSummary.content,
+      aiModelName: aiSummary.aiModel,
+      aiModelVersion: aiSummary.version,
+      aiSuggestions: aiSummary.recommendations,
+      progressScore: aiSummary.platformScores.progress,
+      riskScore: aiSummary.platformScores.risk,
+      achievementScore: aiSummary.platformScores.achievement,
+      confidenceScore: aiSummary.confidenceScore,
+      analysisTime: aiSummary.analysisTime,
+    };
   };
 
   // 获取优先级颜色
@@ -470,7 +408,7 @@ export default function HumanEthicProjectDetailPage({ params }: { params: { id: 
 
   // 编辑项目
   const handleEditProject = () => {
-    router.push(`/ethic-projects/edit/human/${projectId}`);
+    router.push(`/ethic-projects/human/edit/${params.id}`);
   };
 
   // 删除项目
@@ -488,7 +426,7 @@ export default function HumanEthicProjectDetailPage({ params }: { params: { id: 
 
   return (
     <DetailPage
-      id={projectId}
+      id={params.id}
       title={projectTitle}
       onTitleEdit={handleTitleEdit}
       onBack={handleBackToList}
@@ -502,7 +440,7 @@ export default function HumanEthicProjectDetailPage({ params }: { params: { id: 
         },
         {
           id: "projectType",
-          label: "项目类型",
+          label: "项目类型", 
           value: currentProject.projectType,
           icon: <Tag className="h-4 w-4 text-gray-400" />,
         },
@@ -545,25 +483,25 @@ export default function HumanEthicProjectDetailPage({ params }: { params: { id: 
           id: "reviewProgress",
           label: "审查进度",
           icon: <FileCheck className="h-4 w-4" />,
-          component: <ReviewProgressTab projectId={projectId} projectType="human" />,
+          component: <ReviewProgressTab projectId={params.id} projectType="human" />,
         },
         {
           id: "experimentProgress",
-          label: "研究进度与结果",
+          label: "实验数据",
           icon: <BarChart3 className="h-4 w-4" />,
           component: <ExperimentProgressTab />,
+        },
+        {
+          id: "reviewFiles",
+          label: "送审文件",
+          icon: <FileText className="h-4 w-4" />,
+          component: <ReviewFilesTab projectId={params.id} />,
         },
         {
           id: "riskAnalysis",
           label: "风险与分析",
           icon: <AlertTriangle className="h-4 w-4" />,
           component: <RiskAnalysisTab todo={currentProject} />,
-        },
-        {
-          id: "reviewFiles",
-          label: "送审文件",
-          icon: <FileText className="h-4 w-4" />,
-          component: <ReviewFilesTab />,
         },
       ]}
     />

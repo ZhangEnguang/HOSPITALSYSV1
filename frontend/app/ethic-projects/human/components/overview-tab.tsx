@@ -17,14 +17,8 @@ import {
   Mail,
   Phone,
   Users,
-  Tag,
-  Stethoscope,
-  FileText,
-  Bookmark,
-  GraduationCap,
-  BriefcaseMedical,
-  UserIcon,
-  CheckCircle
+  ExternalLink,
+  Sparkles,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -32,19 +26,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "@/components/ui/use-toast"
-import Image from "next/image"
 import { formatDateToString } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
-// 定义团队成员类型
-interface TeamMember {
-  name: string;
-  title: string;
-  department: string;
-  role: string;
-  contact: string;
-}
 
 // 人体伦理项目概览标签组件
 export default function EthicProjectOverviewTab({
@@ -66,16 +50,16 @@ export default function EthicProjectOverviewTab({
   const [aiInputValue, setAiInputValue] = useState("")
 
   // 从todo对象获取AI摘要内容
-  const aiSummaryContent = todo.aiSummary || "该研究项目当前进度为35%，符合预期计划。项目经费使用率为28.5%，整体于计划进度内。项目已入组42名患者，完成基线数据收集。预期结果显示饮食干预对血脂水平有积极影响。达到临床显著性标准，低密度脂蛋白胆固醇平均下降16.5%。"
+  const aiSummaryContent = todo.aiSummary || "该人体伦理研究项目当前进度为42%，符合预期计划。项目经费使用率为31.8%，整体于计划进度内。项目已完成受试者招募阶段，包括知情同意流程、基线数据收集与安全性评估。临床试验进展良好，已获得2家医疗机构合作支持，受试者依从性高于同类研究平均水平30%。"
   const aiModelName = todo.aiModelName || "GPT-Scientific 2023"
   const aiModelVersion = todo.aiModelVersion || "v2.4.1"
   const aiSuggestions: string[] = todo.aiSuggestions || [
-    "加强患者依从性监测，特别是饮食日记记录",
-    "增加中期数据分析节点，评估干预效果",
-    "完善不良事件报告流程"
+    "加强受试者随访管理，确保数据收集的完整性",
+    "重点关注安全性监测，建立不良事件快速反应机制",
+    "加强与临床机构合作，提高研究数据质量"
   ]
   const progressScore = todo.progressScore || "良好"
-  const riskScore = todo.riskScore || "低"
+  const riskScore = todo.riskScore || "中等"
   const achievementScore = todo.achievementScore || "良好"
   const confidenceScore = todo.confidenceScore || 95
   const analysisTime = todo.analysisTime || "2024-03-15 10:32"
@@ -184,8 +168,8 @@ export default function EthicProjectOverviewTab({
         <CardHeader className="pb-1 relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="relative w-10 h-10">
-                <Image src="/ai-icon.png" alt="AI摘要" width={40} height={40} className="object-contain" />
+              <div className="relative w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+                <Sparkles className="h-5 w-5 text-white" />
               </div>
               <div>
                 <CardTitle className="text-lg font-semibold flex items-center gap-2">
@@ -269,251 +253,470 @@ export default function EthicProjectOverviewTab({
                   <div className="flex items-center gap-1.5">
                     <LineChart className="h-4 w-4 text-green-600" />
                     <div className="text-xs text-slate-600">
-                      <span>成果评估</span>
+                      <span>成果质量</span>
                       <div className="font-semibold text-sm text-slate-900">{achievementScore}</div>
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="ml-auto h-7 text-xs text-slate-500 hover:text-slate-900"
-                    onClick={() => setIsCollapsed(false)}
-                  >
-                    展开
-                    <ChevronRight className="h-3.5 w-3.5 ml-1" />
-                  </Button>
                 </motion.div>
               ) : (
                 <motion.div
                   key="expanded"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="my-3"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="prose prose-sm max-w-none text-slate-700 leading-relaxed"
                 >
-                  <div className="mt-1 mb-4 text-sm leading-relaxed whitespace-pre-line text-slate-700">
-                    {aiSummaryContent}
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2 mb-3">
-                    <span className="text-xs font-medium text-slate-500">AI建议:</span>
-                    {aiSuggestions.map((suggestion, i) => (
-                      <Badge
-                        key={i}
-                        variant="outline"
-                        className="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-[10px] whitespace-normal text-left"
-                      >
-                        {suggestion}
-                      </Badge>
-                    ))}
-                  </div>
-
-                  <div className="flex flex-wrap items-center justify-between mt-4 border-t border-slate-100 pt-3">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1.5">
-                        <BarChart3 className="h-4 w-4 text-blue-600" />
-                        <div className="text-xs text-slate-600">
-                          <span>进度评估</span>
-                          <div className="font-semibold text-sm text-slate-900">{progressScore}</div>
+                  {isAnalysisUpdated ? (
+                    <>
+                      <div className="flex items-center gap-2 mb-3 text-sm text-amber-600 bg-amber-50 p-2 rounded-md border border-amber-100">
+                        <LayoutGrid className="h-4 w-4" />
+                        <span className="font-medium">最新分析已更新 - 检测到项目进度变更</span>
+                      </div>
+                      <p className="whitespace-pre-line">
+                        {aiSummaryContent.split('\n\n').map((paragraph: string, idx: number) => {
+                          // 检查段落是否包含【】标题
+                          if (paragraph.includes('【') && paragraph.includes('】')) {
+                            const titleMatch = paragraph.match(/【(.+?)】/);
+                            const title = titleMatch ? titleMatch[1] : '';
+                            const content = paragraph.replace(/【(.+?)】/, '');
+                            
+                            // 检查内容是否包含列表项（以"•"开头的行）
+                            const hasListItems = content.includes('\n•');
+                            
+                            if (hasListItems) {
+                              // 处理包含列表项的内容
+                              const listItems = content.split('\n').filter((line: string) => line.trim().length > 0);
+                              
+                              return (
+                                <div key={idx} className="mb-4">
+                                  <h4 className="text-sm font-semibold text-blue-700 bg-blue-50 py-1 px-2 rounded mb-2">
+                                    {title}
+                                  </h4>
+                                  <ul className="pl-1 space-y-1">
+                                    {listItems.map((item: string, itemIdx: number) => (
+                                      <li key={itemIdx} className={`pl-5 relative ${item.startsWith('•') ? 'text-slate-700' : 'text-slate-600'}`}>
+                                        {item.startsWith('•') ? (
+                                          <>
+                                            <span className="absolute left-0 text-blue-500">•</span>
+                                            {item.substring(1).trim()}
+                                          </>
+                                        ) : item}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <div key={idx} className="mb-3">
+                                  <h4 className="text-sm font-semibold text-blue-700 bg-blue-50 py-1 px-2 rounded mb-1.5">
+                                    {title}
+                                  </h4>
+                                  <div className="pl-2">{content}</div>
+                                </div>
+                              );
+                            }
+                          } else if (paragraph.includes('\n•')) {
+                            // 处理不包含标题但包含列表项的段落
+                            const lines = paragraph.split('\n').filter((line: string) => line.trim().length > 0);
+                            return (
+                              <div key={idx} className="mb-3">
+                                <ul className="pl-1 space-y-1">
+                                  {lines.map((line: string, lineIdx: number) => (
+                                    <li key={lineIdx} className={`pl-5 relative ${line.startsWith('•') ? 'text-slate-700' : 'text-slate-600'}`}>
+                                      {line.startsWith('•') ? (
+                                        <>
+                                          <span className="absolute left-0 text-blue-500">•</span>
+                                          {line.substring(1).trim()}
+                                        </>
+                                      ) : line}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            );
+                          } else {
+                            return (
+                              <p key={idx} className="mb-3">
+                                {paragraph}
+                              </p>
+                            );
+                          }
+                        })}
+                      </p>
+                      <div className="flex items-start gap-4 my-3 py-2">
+                        <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
+                          <BarChart3 className="h-4 w-4 text-blue-600" />
+                          <div className="text-xs text-slate-600">
+                            <span>进度评估</span>
+                            <div className="font-semibold text-sm text-slate-900">{progressScore}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
+                          <PieChart className="h-4 w-4 text-amber-600" />
+                          <div className="text-xs text-slate-600">
+                            <span>风险评估</span>
+                            <div className="font-semibold text-sm text-slate-900">
+                              {riskScore} <span className="text-green-600 text-xs">↓</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <LineChart className="h-4 w-4 text-green-600" />
+                          <div className="text-xs text-slate-600">
+                            <span>成果质量</span>
+                            <div className="font-semibold text-sm text-slate-900">{achievementScore}</div>
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <PieChart className="h-4 w-4 text-amber-600" />
-                        <div className="text-xs text-slate-600">
-                          <span>风险评估</span>
-                          <div className="font-semibold text-sm text-slate-900">{riskScore}</div>
+                      <p className="mt-2 text-slate-600 border-t border-slate-100 pt-2">
+                        <span className="font-medium text-primary">AI建议：</span>
+                        {aiSuggestions.map((suggestion: string, index: number) => (
+                          <span key={index} className="inline-flex items-center gap-1.5 mt-1">
+                            <ChevronRight className="h-3.5 w-3.5 text-primary" />
+                            <span>{suggestion}</span>
+                            {index < aiSuggestions.length - 1 && <br />}
+                          </span>
+                        ))}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="whitespace-pre-line">
+                        {aiSummaryContent.split('\n\n').map((paragraph: string, idx: number) => {
+                          // 检查段落是否包含【】标题
+                          if (paragraph.includes('【') && paragraph.includes('】')) {
+                            const titleMatch = paragraph.match(/【(.+?)】/);
+                            const title = titleMatch ? titleMatch[1] : '';
+                            const content = paragraph.replace(/【(.+?)】/, '');
+                            
+                            // 检查内容是否包含列表项（以"•"开头的行）
+                            const hasListItems = content.includes('\n•');
+                            
+                            if (hasListItems) {
+                              // 处理包含列表项的内容
+                              const listItems = content.split('\n').filter((line: string) => line.trim().length > 0);
+                              
+                              return (
+                                <div key={idx} className="mb-4">
+                                  <h4 className="text-sm font-semibold text-blue-700 bg-blue-50 py-1 px-2 rounded mb-2">
+                                    {title}
+                                  </h4>
+                                  <ul className="pl-1 space-y-1">
+                                    {listItems.map((item: string, itemIdx: number) => (
+                                      <li key={itemIdx} className={`pl-5 relative ${item.startsWith('•') ? 'text-slate-700' : 'text-slate-600'}`}>
+                                        {item.startsWith('•') ? (
+                                          <>
+                                            <span className="absolute left-0 text-blue-500">•</span>
+                                            {item.substring(1).trim()}
+                                          </>
+                                        ) : item}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <div key={idx} className="mb-3">
+                                  <h4 className="text-sm font-semibold text-blue-700 bg-blue-50 py-1 px-2 rounded mb-1.5">
+                                    {title}
+                                  </h4>
+                                  <div className="pl-2">{content}</div>
+                                </div>
+                              );
+                            }
+                          } else if (paragraph.includes('\n•')) {
+                            // 处理不包含标题但包含列表项的段落
+                            const lines = paragraph.split('\n').filter((line: string) => line.trim().length > 0);
+                            return (
+                              <div key={idx} className="mb-3">
+                                <ul className="pl-1 space-y-1">
+                                  {lines.map((line: string, lineIdx: number) => (
+                                    <li key={lineIdx} className={`pl-5 relative ${line.startsWith('•') ? 'text-slate-700' : 'text-slate-600'}`}>
+                                      {line.startsWith('•') ? (
+                                        <>
+                                          <span className="absolute left-0 text-blue-500">•</span>
+                                          {line.substring(1).trim()}
+                                        </>
+                                      ) : line}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            );
+                          } else {
+                            return (
+                              <p key={idx} className="mb-3">
+                                {paragraph}
+                              </p>
+                            );
+                          }
+                        })}
+                      </p>
+                      <div className="flex items-start gap-4 my-3 py-2">
+                        <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
+                          <BarChart3 className="h-4 w-4 text-blue-600" />
+                          <div className="text-xs text-slate-600">
+                            <span>进度评估</span>
+                            <div className="font-semibold text-sm text-slate-900">{progressScore}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
+                          <PieChart className="h-4 w-4 text-amber-600" />
+                          <div className="text-xs text-slate-600">
+                            <span>风险评估</span>
+                            <div className="font-semibold text-sm text-slate-900">{riskScore}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <LineChart className="h-4 w-4 text-green-600" />
+                          <div className="text-xs text-slate-600">
+                            <span>成果质量</span>
+                            <div className="font-semibold text-sm text-slate-900">{achievementScore}</div>
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <LineChart className="h-4 w-4 text-green-600" />
-                        <div className="text-xs text-slate-600">
-                          <span>成果评估</span>
-                          <div className="font-semibold text-sm text-slate-900">{achievementScore}</div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="text-xs text-slate-500">
-                        <span>可信度:</span>{" "}
-                        <span className="font-medium text-slate-700">{confidenceScore}%</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-3.5 w-3.5 text-slate-400" />
-                        <span className="text-xs text-slate-500">{analysisTime}</span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 text-xs text-slate-500 hover:text-slate-900"
-                        onClick={() => setIsCollapsed(true)}
-                      >
-                        收起
-                        <ChevronRight className="h-3.5 w-3.5 ml-1 rotate-90" />
-                      </Button>
-                    </div>
-                  </div>
+                      <p className="mt-2 text-slate-600 border-t border-slate-100 pt-2">
+                        <span className="font-medium text-primary">AI建议：</span>
+                        {aiSuggestions.map((suggestion: string, index: number) => (
+                          <span key={index} className="inline-flex items-center gap-1.5 mt-1">
+                            <ChevronRight className="h-3.5 w-3.5 text-primary" />
+                            <span>{suggestion}</span>
+                            {index < aiSuggestions.length - 1 && <br />}
+                          </span>
+                        ))}
+                      </p>
+                    </>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
+            <div className="flex justify-end items-center text-xs text-slate-500 mt-3 pt-2 border-t border-slate-100">
+              <div className="flex-1 flex items-center gap-2">
+                <div className="inline-flex h-5 items-center rounded-full border border-slate-200 bg-white px-2 text-xs font-semibold text-slate-900">
+                  可信度 {confidenceScore}%
+                </div>
+                <span>分析时间: {isAnalysisUpdated ? "2024-05-08 14:52" : analysisTime}</span>
+              </div>
+              <div className="flex items-center">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 gap-1 text-slate-500 hover:text-slate-900"
+                  onClick={() => {
+                    // 复制文本到剪贴板
+                    navigator.clipboard.writeText(
+                      isAnalysisUpdated
+                        ? `该科研项目当前进度为35%，符合预期计划。项目经费使用率为31.2%（↑2.7%），整体于计划进度内。项目已产出3篇研究论文，包括实验设计方案、动物伦理规范与代谢机制初步分析。成果转化进展良好，已有2家制药企业表达合作意向，高于同类项目平均水平25%。`
+                        : aiSummaryContent,
+                    )
+                    toast({
+                      title: "已复制到剪贴板",
+                      description: "AI智能摘要内容已复制",
+                      duration: 2000,
+                    })
+                  }}
+                >
+                  <Copy className="h-3 w-3" />
+                  <span>复制</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 ml-1 gap-1 text-slate-500 hover:text-slate-900"
+                  onClick={() => setIsCollapsed(!isCollapsed)}
+                >
+                  <motion.div animate={{ rotate: isCollapsed ? 90 : -90 }} transition={{ duration: 0.2 }}>
+                    <ChevronRight className="h-3 w-3" />
+                  </motion.div>
+                  <span>{isCollapsed ? "展开" : "收起"}</span>
+                </Button>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
 
+      {/* 隐藏的输入框，用于控制AI按钮的显示/隐藏 */}
+      <input
+        type="text"
+        className="hidden"
+        value={aiInputValue}
+        onChange={(e) => {
+          setAiInputValue(e.target.value)
+          if (e.target.value.trim() === "") {
+            setHasAiWritten(false)
+          }
+        }}
+      />
+
       {/* 基本信息卡片 */}
-      <Card className="border-slate-200 shadow-sm mb-6">
-        <CardHeader className="pb-2">
+      <Card>
+        <CardHeader>
           <CardTitle className="text-lg">基本信息</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-y-4">
-            <div className="flex flex-col">
-              <span className="text-sm text-slate-500">项目名称</span>
-              <span className="text-sm font-medium">{todo.name || "实验大鼠药代动力学研究"}</span>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+            <div>
+              <div className="text-sm text-muted-foreground">项目名称</div>
+              <div className="font-medium">{todo.name || "人体生理功能干预研究"}</div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm text-slate-500">项目编号</span>
-              <span className="text-sm font-medium">{todo.projectNumber || "动伦2025001"}</span>
+            <div>
+              <div className="text-sm text-muted-foreground">项目编号</div>
+              <div className="font-medium">{todo.projectNumber || "系统自动生成或手动输入"}</div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm text-slate-500">研究种系</span>
-              <span className="text-sm font-medium">{todo.animalType || "大鼠"}</span>
+            <div>
+              <div className="text-sm text-muted-foreground">项目类型</div>
+              <div className="font-medium">{todo.projectType || "临床干预研究"}</div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm text-slate-500">研究数量</span>
-              <span className="text-sm font-medium">{todo.participantCount || "85只"}</span>
+            <div>
+              <div className="text-sm text-muted-foreground">参与人数</div>
+              <div className="font-medium">{todo.participantCount || "120人"}</div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm text-slate-500">研究实施设备单位</span>
-              <span className="text-sm font-medium">{todo.researchUnit || "基础医学实验中心"}</span>
+            <div>
+              <div className="text-sm text-muted-foreground">研究实施单位</div>
+              <div className="font-medium">{todo.researchUnit || "临床研究中心"}</div>
             </div>
-            <div className="flex flex-col"></div>
-            <div className="flex flex-col">
-              <span className="text-sm text-slate-500">项目周期</span>
-              <span className="text-sm font-medium">
+            <div className="col-span-2">
+              <div className="text-sm text-muted-foreground">项目周期</div>
+              <div className="font-medium">
                 {formatDate(todo.startDate || "2024-01-01")} 至 {formatDate(todo.endDate || "2026-12-31")}
-              </span>
+              </div>
             </div>
-            <div className="flex flex-col"></div>
-            <div className="flex flex-col">
-              <span className="text-sm text-slate-500">项目预算</span>
-              <span className="text-sm font-medium">{(todo.budget || 850000).toLocaleString()} 元</span>
+            <div>
+              <div className="text-sm text-muted-foreground">项目预算</div>
+              <div className="font-medium">{todo.budget ? `${todo.budget} 元` : "未设置"}</div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm text-slate-500">项目状态</span>
-              <span className="text-sm font-medium">{todo.status || "进行中"}</span>
+            <div>
+              <div className="text-sm text-muted-foreground">项目状态</div>
+              <div className="font-medium">{todo.status || "进行中"}</div>
             </div>
-            <div className="flex flex-col col-span-2">
-              <span className="text-sm text-slate-500">项目描述</span>
-              <span className="text-sm">{todo.description || "研究药物在大鼠体内的代谢过程及其机制"}</span>
-            </div>
+          </div>
+
+          <div className="mt-6">
+            <div className="text-sm text-muted-foreground mb-1">项目描述</div>
+            <div className="text-sm">{todo.description || "研究生活方式干预对人体生理功能指标的影响"}</div>
           </div>
         </CardContent>
       </Card>
 
       {/* 研究信息卡片 */}
-      <Card className="border-slate-200 shadow-sm mb-6">
-        <CardHeader className="pb-2">
+      <Card>
+        <CardHeader>
           <CardTitle className="text-lg">研究信息</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col gap-4">
+          <div className="space-y-4">
             <div>
-              <span className="text-sm text-slate-500">研究目的</span>
-              <p className="text-sm mt-1">{todo.researchPurpose || "研究药物在大鼠体内的代谢过程及其机制"}</p>
+              <div className="text-sm text-muted-foreground mb-1">研究目的</div>
+              <div className="text-sm">{todo.researchPurpose || todo.description}</div>
             </div>
             <div>
-              <span className="text-sm text-slate-500">研究方法</span>
-              <p className="text-sm mt-1">{todo.researchMethod || "暂无研究方法详细信息"}</p>
+              <div className="text-sm text-muted-foreground mb-1">研究方法</div>
+              <div className="text-sm">{todo.researchMethod || "暂无研究方法信息"}</div>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* 主要研究者信息卡片 */}
-      <Card className="border-slate-200 shadow-sm mb-6">
-        <CardHeader className="pb-2">
+      <Card>
+        <CardHeader>
           <CardTitle className="text-lg">主要研究者信息</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-y-4">
-            <div className="flex flex-col">
-              <span className="text-sm text-slate-500">负责人姓名</span>
-              <span className="text-sm font-medium">{todo.leader?.name || "王教授"}</span>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+            <div>
+              <div className="text-sm text-muted-foreground">负责人姓名</div>
+              <div className="font-medium">{todo.leader?.name}</div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm text-slate-500">职称/职务</span>
-              <span className="text-sm font-medium">{todo.leader?.title || "教授"}</span>
+            <div>
+              <div className="text-sm text-muted-foreground">职称/职务</div>
+              <div className="font-medium">{todo.leader?.title || "未设置"}</div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm text-slate-500">所属院系</span>
-              <span className="text-sm font-medium">{todo.department || "基础医学院"}</span>
+            <div>
+              <div className="text-sm text-muted-foreground">所属院系</div>
+              <div className="font-medium">{todo.department || "未设置"}</div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm text-slate-500">电子邮箱</span>
-              <span className="text-sm font-medium">{todo.leader?.email || "wang@example.com"}</span>
+            <div>
+              <div className="text-sm text-muted-foreground">电子邮箱</div>
+              <div className="font-medium">{todo.leader?.email}</div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm text-slate-500">联系电话</span>
-              <span className="text-sm font-medium">{todo.leader?.phone || "13800000001"}</span>
+            <div>
+              <div className="text-sm text-muted-foreground">联系电话</div>
+              <div className="font-medium">{todo.leader?.phone || "未设置"}</div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm text-slate-500">联系地址</span>
-              <span className="text-sm font-medium">{todo.leaderAddress || "未设置"}</span>
+            <div>
+              <div className="text-sm text-muted-foreground">联系地址</div>
+              <div className="font-medium">{todo.address || "未设置"}</div>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* 项目团队成员卡片 */}
-      <Card className="border-slate-200 shadow-sm mb-6">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">项目团队成员</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {(todo.members || [
-              { name: "李助理", title: "研究助理", department: "基础医学院", role: "实验操作", contact: "li@example.com" },
-              { name: "张技术员", title: "高级技术员", department: "基础医学院", role: "数据分析", contact: "zhang@example.com" },
-              { name: "刘研究员", title: "副研究员", department: "药理学系", role: "实验设计", contact: "13800000003" }
-            ]).map((member: TeamMember, index: number) => (
-              <div key={index} className="flex items-start border-b border-slate-100 pb-4 last:border-0 last:pb-0">
-                <div className="flex-none w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center mr-3">
-                  <span className="text-sm font-medium">{member.name.charAt(0)}</span>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 flex-grow">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-sm font-medium">{member.name}</h3>
-                      <div className="flex gap-1 flex-wrap">
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs">
-                          {member.title}
-                        </Badge>
-                        <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 text-xs">
-                          {member.role}
-                        </Badge>
-                      </div>
+      {todo.members && todo.members.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">项目团队成员</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {todo.members.map((member: any, index: number) => (
+                <div key={index} className="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
+                  {/* 头像和基本信息 */}
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold flex items-center justify-center text-sm flex-shrink-0">
+                      {member.name ? member.name.charAt(0) : '?'}
                     </div>
-                    <div className="text-xs text-slate-500">所属院系</div>
-                    <div className="text-sm">{member.department}</div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-gray-900 text-sm truncate">{member.name || '未知'}</h4>
+                      <p className="text-xs text-muted-foreground truncate">{member.title || '未设置'}</p>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-xs text-slate-500">电子邮箱</div>
-                    <div className="text-sm text-blue-600">{member.contact.includes('@') ? member.contact : ''}</div>
+                  
+                  {/* 角色标签 */}
+                  {member.role && (
+                    <div className="mb-3">
+                      <Badge variant="outline" className="text-xs">
+                        {member.role}
+                      </Badge>
+                    </div>
+                  )}
+                  
+                  {/* 详细信息 */}
+                  <div className="space-y-2 text-xs">
+                    <div>
+                      <span className="text-muted-foreground">部门：</span>
+                      <span className="font-medium">{member.department || '未设置'}</span>
+                    </div>
                     
-                    {!member.contact.includes('@') && (
-                      <>
-                        <div className="text-xs text-slate-500 mt-2">联系电话</div>
-                        <div className="text-sm">{member.contact}</div>
-                      </>
+                    {member.email && (
+                      <div>
+                        <span className="text-muted-foreground">邮箱：</span>
+                        <a href={`mailto:${member.email}`} className="font-medium text-blue-600 hover:text-blue-800 break-all">
+                          {member.email}
+                        </a>
+                      </div>
+                    )}
+                    
+                    {member.phone && (
+                      <div>
+                        <span className="text-muted-foreground">电话：</span>
+                        <a href={`tel:${member.phone}`} className="font-medium text-blue-600 hover:text-blue-800">
+                          {member.phone}
+                        </a>
+                      </div>
                     )}
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 } 
