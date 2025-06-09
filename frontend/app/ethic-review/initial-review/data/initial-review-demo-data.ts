@@ -78,6 +78,19 @@ export const initialReviewItems = [
     comments: 3,
     reviewResult: "通过",
     approvalStatus: "已通过",
+    aiSummary: "经AI智能分析，该转基因小鼠模型研究项目设计科学合理，完全符合3R原则要求。实验方案中的动物福利保障措施完善，安乐死方案符合相关规范标准。项目实验设计清晰，预期目标明确，研究团队具备充足的专业经验。建议作为标准案例纳入伦理培训教材，为后续同类项目提供参考。",
+    members: [
+      { name: "李勤理", title: "副教授", department: "基础医学院", role: "副教授", email: "li@example.com", phone: "13800000010" },
+      { name: "张技术员", title: "高级技术员", department: "基础医学院", role: "数据分析", email: "zhang@example.com", phone: "13800000011" },
+      { name: "刘制研员", title: "副研究员", department: "药学院", role: "实验设计", email: "liu@example.com", phone: "13800000012" },
+      { name: "赵博士", title: "博士后", department: "基础医学院", role: "实验监督", email: "zhao@example.com", phone: "13800000012" }
+    ],
+    files: [
+      { id: "1", name: "项目申请书.pdf", type: "application", size: "2.4MB", uploadedAt: "2024-01-15", status: "审核通过" },
+      { id: "2", name: "实验方案.docx", type: "protocol", size: "1.8MB", uploadedAt: "2024-01-15", status: "审核通过" },
+      { id: "3", name: "3R声明.pdf", type: "declaration", size: "0.5MB", uploadedAt: "2024-01-15", status: "审核通过" },
+      { id: "4", name: "伦理审查意见.pdf", type: "review", size: "1.2MB", uploadedAt: "2024-01-18", status: "审核通过" }
+    ]
   },
   {
     id: "2",

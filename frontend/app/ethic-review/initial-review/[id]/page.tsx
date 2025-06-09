@@ -295,7 +295,7 @@ const mockReviewProjects = [
     reviewNumber: "ETH-H-2024-019",
     progress: 70,
     description: "本项目旨在评估认知行为疗法在重度抑郁症患者中的治疗效果，并探索最佳的治疗模式和干预频率。",
-    aiSummary: "【复审要点摘要】\n• 前期研究基础良好\n• 修正后的研究方案更加完善\n• 患者隐私保护措施得到加强\n• 心理干预风险控制方案合理\n\n建议：重点关注患者心理状态监测",
+    aiSummary: "经AI智能分析，该针对重度抑郁症患者的认知行为疗法研究项目设计较为完善，复审中发现前期研究基础良好，修正后的研究方案更加合理。患者隐私保护措施得到了明显加强，心理干预风险控制方案也更加完善。建议重点关注患者心理状态的动态监测，确保治疗过程中的安全性和有效性。",
     aiModelName: "EthicGPT 2024",
     aiModelVersion: "v3.1",
     risk: {
@@ -307,6 +307,11 @@ const mockReviewProjects = [
         "配备专业心理咨询师全程参与"
       ]
     },
+    members: [
+      { name: "陈心理师", title: "主任心理师", department: "心理学院", role: "心理干预", email: "chenxinli@example.com", phone: "13800000070" },
+      { name: "林医生", title: "主治医师", department: "精神科", role: "医学监督", email: "lin@example.com", phone: "13800000071" },
+      { name: "张护士", title: "专科护师", department: "心理学院", role: "患者护理", email: "zhanghl@example.com", phone: "13800000072" }
+    ],
     files: [
       { id: "p7-1", name: "修订研究方案.pdf", type: "protocol", size: "3.5MB", uploadedAt: "2024-03-20", status: "待审核" },
       { id: "p7-2", name: "知情同意书.pdf", type: "consent", size: "2.0MB", uploadedAt: "2024-03-20", status: "待审核" },
@@ -332,7 +337,7 @@ const mockReviewProjects = [
     reviewNumber: "ETH-A-2024-009",
     progress: 30,
     description: "本项目旨在建立转基因猪器官移植模型，评估异种器官移植的安全性和可行性，为临床应用提供前期数据支持。",
-    aiSummary: "【审核要点摘要】\n• 转基因技术应用需要特别关注\n• 生物安全风险评估需要加强\n• 动物福利保障措施需要完善\n• 实验废物处理方案需要详细\n\n建议：重点审查生物安全相关内容",
+    aiSummary: "经AI智能分析，该转基因猪器官移植研究项目具有重要的临床应用前景，但同时也面临着复杂的技术和伦理挑战。项目在转基因技术应用、生物安全风险控制、动物福利保障等方面需要特别关注。建议重点审查生物安全相关内容，确保实验废物处理方案的完整性，同时加强对转基因技术的监管要求。",
     aiModelName: "EthicGPT 2024",
     aiModelVersion: "v3.1",
     risk: {
@@ -344,6 +349,11 @@ const mockReviewProjects = [
         "加强转基因产物的环境风险评估"
       ]
     },
+    members: [
+      { name: "郭教授", title: "教授", department: "器官移植研究中心", role: "项目总监", email: "guo@example.com", phone: "13800000080" },
+      { name: "谢博士", title: "博士", department: "生物技术中心", role: "技术支持", email: "xie@example.com", phone: "13800000081" },
+      { name: "龚兽医", title: "高级兽医师", department: "实验动物中心", role: "动物健康", email: "gong@example.com", phone: "13800000082" }
+    ],
     files: [
       { id: "p8-1", name: "项目申请书.pdf", type: "application", size: "4.1MB", uploadedAt: "2024-04-02", status: "待审核" },
       { id: "p8-2", name: "转基因技术方案.docx", type: "protocol", size: "3.2MB", uploadedAt: "2024-04-02", status: "待审核" },
@@ -511,8 +521,8 @@ export default function EthicReviewDetail({ params }: { params: Promise<{ id: st
           reviewNumber: listProject.projectId,
           progress: listProject.completion || 0,
           description: listProject.description || "暂无描述",
-          // 添加其他必要的默认值
-          aiSummary: "AI审核摘要尚未生成",
+          // 使用真实的AI摘要或默认值
+          aiSummary: listProject.aiSummary || "AI审核摘要尚未生成",
           aiModelName: "EthicGPT 2024",
           aiModelVersion: "v3.1",
           risk: {
