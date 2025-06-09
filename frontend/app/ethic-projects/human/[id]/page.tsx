@@ -440,7 +440,7 @@ export default function HumanEthicProjectDetailPage({ params }: { params: { id: 
         },
         {
           id: "projectType",
-          label: "项目类型", 
+          label: "研究类型", 
           value: currentProject.projectType,
           icon: <Tag className="h-4 w-4 text-gray-400" />,
         },

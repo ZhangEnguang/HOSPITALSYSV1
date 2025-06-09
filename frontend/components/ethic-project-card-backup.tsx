@@ -329,7 +329,7 @@ export default function EthicProjectCard({
                 <>
                   <div className="flex items-center gap-2 text-sm whitespace-nowrap">
                     <Tag className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                    <span className="text-gray-600 flex-shrink-0">项目类型:</span>
+                    <span className="text-gray-600 flex-shrink-0">研究类型:</span>
                     <span className="font-medium truncate">{projectType}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm whitespace-nowrap">

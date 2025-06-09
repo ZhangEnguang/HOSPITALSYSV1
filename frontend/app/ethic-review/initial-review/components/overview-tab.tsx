@@ -470,7 +470,7 @@ export default function EthicProjectOverviewTab({
             ) : (
               <>
                 <div>
-                  <div className="text-sm text-muted-foreground">项目类型</div>
+                  <div className="text-sm text-muted-foreground">研究类型</div>
                   <div className="font-medium">{project.projectType || "临床干预研究"}</div>
                 </div>
                 <div>

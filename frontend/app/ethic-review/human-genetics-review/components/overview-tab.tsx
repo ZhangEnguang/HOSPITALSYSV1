@@ -449,7 +449,7 @@ export default function EthicProjectOverviewTab({
               <div className="font-medium">{project.ethicsCommittee}</div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">项目类型</div>
+                              <div className="text-sm text-muted-foreground">研究类型</div>
               <div className="font-medium">{project.projectType}伦理</div>
             </div>
             <div>

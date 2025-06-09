@@ -44,6 +44,7 @@ export function AnimalEthicProjectEditForm({ projectData }: { projectData: any }
     // 基本信息
     name: "",
     projectNumber: "",
+    projectType: "动物",
     animalType: "",
     animalCount: "",
     ethicsCommittee: "",
@@ -95,6 +96,7 @@ export function AnimalEthicProjectEditForm({ projectData }: { projectData: any }
       setFormData({
         name: projectData.name || "",
         projectNumber: projectData.projectNumber || "",
+        projectType: "动物", // 对于动物伦理项目，始终设置为"动物"
         animalType: projectData.animalType || "",
         animalCount: projectData.animalCount || "",
         ethicsCommittee: projectData.ethicsCommittee || "",
@@ -428,6 +430,7 @@ export function AnimalEthicProjectEditForm({ projectData }: { projectData: any }
           />
           
           {/* 基本信息部分 */}
+          {/* 第一行：项目名称、项目编号 */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name" className="text-muted-foreground">项目名称 <span className="text-red-500">*</span></Label>
@@ -456,7 +459,17 @@ export function AnimalEthicProjectEditForm({ projectData }: { projectData: any }
             </div>
           </div>
 
+          {/* 第二行：项目类型、伦理委员会 */}
           <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="projectType" className="text-muted-foreground">项目类型</Label>
+              <Input 
+                id="projectType" 
+                value={formData.projectType}
+                disabled
+                className="border-[#E9ECF2] rounded-md bg-gray-50 text-gray-600 cursor-not-allowed"
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="ethicsCommittee" className="text-muted-foreground">伦理委员会 <span className="text-red-500">*</span></Label>
               <Select 
@@ -482,6 +495,10 @@ export function AnimalEthicProjectEditForm({ projectData }: { projectData: any }
               </Select>
               {formTouched.ethicsCommittee && <ErrorMessage message={formErrors.ethicsCommittee || ""} />}
             </div>
+          </div>
+
+          {/* 第三行：动物种类、动物数量 */}
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="animalType" className="text-muted-foreground">动物种类 <span className="text-red-500">*</span></Label>
               <Select 
@@ -509,9 +526,6 @@ export function AnimalEthicProjectEditForm({ projectData }: { projectData: any }
               </Select>
               {formTouched.animalType && <ErrorMessage message={formErrors.animalType || ""} />}
             </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="animalCount" className="text-muted-foreground">动物数量 <span className="text-red-500">*</span></Label>
               <Input 
@@ -528,23 +542,26 @@ export function AnimalEthicProjectEditForm({ projectData }: { projectData: any }
               />
               {formTouched.animalCount && <ErrorMessage message={formErrors.animalCount || ""} />}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="facilityUnit" className="text-muted-foreground">动物实施设备单位 <span className="text-red-500">*</span></Label>
-              <Input 
-                id="facilityUnit" 
-                value={formData.facilityUnit} 
-                onChange={(e) => updateFormData("facilityUnit", e.target.value)} 
-                onBlur={() => handleBlur("facilityUnit")}
-                placeholder="请输入动物实施设备单位"
-                className={cn(
-                  "border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
-                  formTouched.facilityUnit && formErrors.facilityUnit ? "border-red-500" : ""
-                )}
-              />
-              {formTouched.facilityUnit && <ErrorMessage message={formErrors.facilityUnit || ""} />}
-            </div>
           </div>
 
+          {/* 第四行：动物实施设备单位（跨两列） */}
+          <div className="space-y-2">
+            <Label htmlFor="facilityUnit" className="text-muted-foreground">动物实施设备单位 <span className="text-red-500">*</span></Label>
+            <Input 
+              id="facilityUnit" 
+              value={formData.facilityUnit} 
+              onChange={(e) => updateFormData("facilityUnit", e.target.value)} 
+              onBlur={() => handleBlur("facilityUnit")}
+              placeholder="请输入动物实施设备单位"
+              className={cn(
+                "border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
+                formTouched.facilityUnit && formErrors.facilityUnit ? "border-red-500" : ""
+              )}
+            />
+            {formTouched.facilityUnit && <ErrorMessage message={formErrors.facilityUnit || ""} />}
+          </div>
+
+          {/* 第五行：开始日期、结束日期 */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="startDate" className="text-muted-foreground">开始日期</Label>
@@ -566,6 +583,7 @@ export function AnimalEthicProjectEditForm({ projectData }: { projectData: any }
             </div>
           </div>
 
+          {/* 第六行：项目预算 */}
           <div className="space-y-2">
             <Label htmlFor="budget" className="text-muted-foreground">项目预算</Label>
             <Input 

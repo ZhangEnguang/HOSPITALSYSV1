@@ -568,7 +568,7 @@ export default function EthicProjectOverviewTab({
               <div className="font-medium">{todo.projectNumber || "系统自动生成或手动输入"}</div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">项目类型</div>
+              <div className="text-sm text-muted-foreground">研究类型</div>
               <div className="font-medium">{todo.projectType || "临床干预研究"}</div>
             </div>
             <div>

@@ -86,6 +86,7 @@ export function HumanEthicProjectForm({ initialData, editMode = false }: HumanEt
         // 基本信息
         projectNumber: initialData.projectNumber || "",
         name: initialData.name || "",
+        projectCategory: "人体", // 项目类型，默认为人体，不可编辑
         projectType: initialData.projectType || "",
         projectSource: initialData.projectSource || "",
         startDate: parseDate(initialData.startDate),
@@ -113,6 +114,7 @@ export function HumanEthicProjectForm({ initialData, editMode = false }: HumanEt
         // 基本信息
         projectNumber: "",
         name: "",
+        projectCategory: "人体", // 项目类型，默认为人体，不可编辑
         projectType: "",
         projectSource: "",
         startDate: defaultStartDate,
@@ -165,8 +167,9 @@ export function HumanEthicProjectForm({ initialData, editMode = false }: HumanEt
     // 必填字段验证
     const requiredFields: Record<string, string> = {
       name: "请输入项目名称",
-      projectType: "请选择项目类型",
+      projectType: "请选择研究类型",
       projectSource: "请选择项目来源",
+      ethicsCommittee: "请选择伦理委员会",
       leader: "请输入负责人姓名",
       department: "请输入所属院系",
       email: "请输入电子邮箱"
@@ -339,7 +342,8 @@ export function HumanEthicProjectForm({ initialData, editMode = false }: HumanEt
     const requiredFields = [
       "name", 
       "projectType", 
-      "projectSource", 
+      "projectSource",
+      "ethicsCommittee",
       "leader", 
       "department", 
       "email"
@@ -356,8 +360,9 @@ export function HumanEthicProjectForm({ initialData, editMode = false }: HumanEt
       if (!formData[field as keyof typeof formData]) {
         isValid = false
         newErrors[field] = `请填写${field === "name" ? "项目名称" : 
-                            field === "projectType" ? "项目类型" : 
-                            field === "projectSource" ? "项目来源" : 
+                            field === "projectType" ? "研究类型" : 
+                            field === "projectSource" ? "项目来源" :
+                            field === "ethicsCommittee" ? "伦理委员会" :
                             field === "leader" ? "负责人姓名" : 
                             field === "department" ? "所属院系" : 
                             field === "email" ? "电子邮箱" : ""}`
@@ -466,6 +471,7 @@ export function HumanEthicProjectForm({ initialData, editMode = false }: HumanEt
       // 基本信息
       projectNumber: "",
       name: "",
+      projectCategory: "人体", // 项目类型，默认为人体，不可编辑
       projectType: "",
       projectSource: "",
       startDate: new Date(),
@@ -555,6 +561,7 @@ export function HumanEthicProjectForm({ initialData, editMode = false }: HumanEt
           />
           
           {/* 基本信息部分 */}
+          {/* 第一行：项目名称、项目编号 */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name" className="text-muted-foreground">项目名称 <span className="text-red-500">*</span></Label>
@@ -583,9 +590,49 @@ export function HumanEthicProjectForm({ initialData, editMode = false }: HumanEt
             </div>
           </div>
 
+          {/* 第二行：项目类型、伦理委员会 */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="projectType" className="text-muted-foreground">项目类型 <span className="text-red-500">*</span></Label>
+              <Label htmlFor="projectCategory" className="text-muted-foreground">项目类型</Label>
+              <Input 
+                id="projectCategory" 
+                value={formData.projectCategory}
+                disabled
+                className="border-[#E9ECF2] rounded-md bg-gray-50 text-gray-600 cursor-not-allowed"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ethicsCommittee" className="text-muted-foreground">伦理委员会 <span className="text-red-500">*</span></Label>
+              <Select 
+                value={formData.ethicsCommittee} 
+                onValueChange={(value) => updateFormData("ethicsCommittee", value)}
+                onOpenChange={(open) => !open && handleBlur("ethicsCommittee")}
+              >
+                <SelectTrigger 
+                  id="ethicsCommittee"
+                  className={cn(
+                    "border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
+                    formTouched.ethicsCommittee && formErrors.ethicsCommittee ? "border-red-500" : ""
+                  )}
+                >
+                  <SelectValue placeholder="请选择伦理委员会" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="人体医学伦理委员会">人体医学伦理委员会</SelectItem>
+                  <SelectItem value="临床研究伦理委员会">临床研究伦理委员会</SelectItem>
+                  <SelectItem value="药物临床试验伦理委员会">药物临床试验伦理委员会</SelectItem>
+                  <SelectItem value="医疗器械临床试验伦理委员会">医疗器械临床试验伦理委员会</SelectItem>
+                  <SelectItem value="生物医学研究伦理委员会">生物医学研究伦理委员会</SelectItem>
+                </SelectContent>
+              </Select>
+              {formTouched.ethicsCommittee && <ErrorMessage message={formErrors.ethicsCommittee || ""} />}
+            </div>
+          </div>
+
+          {/* 第三行：研究类型、研究单位 */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="projectType" className="text-muted-foreground">研究类型 <span className="text-red-500">*</span></Label>
               <Select 
                 value={formData.projectType} 
                 onValueChange={(value) => updateFormData("projectType", value)}
@@ -598,7 +645,7 @@ export function HumanEthicProjectForm({ initialData, editMode = false }: HumanEt
                     formTouched.projectType && formErrors.projectType ? "border-red-500" : ""
                   )}
                 >
-                  <SelectValue placeholder="请选择项目类型" />
+                  <SelectValue placeholder="请选择研究类型" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="临床研究">临床研究</SelectItem>
@@ -610,6 +657,20 @@ export function HumanEthicProjectForm({ initialData, editMode = false }: HumanEt
               </Select>
               {formTouched.projectType && <ErrorMessage message={formErrors.projectType || ""} />}
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="implementationUnit" className="text-muted-foreground">研究单位</Label>
+              <Input 
+                id="implementationUnit" 
+                value={formData.implementationUnit} 
+                onChange={(e) => updateFormData("implementationUnit", e.target.value)} 
+                placeholder="请输入研究单位"
+                className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+              />
+            </div>
+          </div>
+
+          {/* 第四行：项目来源、参与者数量 */}
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="projectSource" className="text-muted-foreground">项目来源 <span className="text-red-500">*</span></Label>
               <Select 
@@ -636,8 +697,20 @@ export function HumanEthicProjectForm({ initialData, editMode = false }: HumanEt
               </Select>
               {formTouched.projectSource && <ErrorMessage message={formErrors.projectSource || ""} />}
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="participantCount" className="text-muted-foreground">参与者数量</Label>
+              <Input 
+                id="participantCount" 
+                type="number"
+                value={formData.participantCount} 
+                onChange={(e) => updateFormData("participantCount", e.target.value)} 
+                placeholder="请输入参与者数量"
+                className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+              />
+            </div>
           </div>
 
+          {/* 第五行：开始时间、结束时间 */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-muted-foreground">开始日期</Label>
@@ -691,30 +764,8 @@ export function HumanEthicProjectForm({ initialData, editMode = false }: HumanEt
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="ethicsCommittee" className="text-muted-foreground">伦理委员会</Label>
-              <Input 
-                id="ethicsCommittee" 
-                value={formData.ethicsCommittee} 
-                onChange={(e) => updateFormData("ethicsCommittee", e.target.value)} 
-                placeholder="请输入伦理委员会名称"
-                className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="implementationUnit" className="text-muted-foreground">研究单位</Label>
-              <Input 
-                id="implementationUnit" 
-                value={formData.implementationUnit} 
-                onChange={(e) => updateFormData("implementationUnit", e.target.value)} 
-                placeholder="请输入研究单位"
-                className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+          {/* 第六行：项目预算（占两列） */}
+          <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
               <Label htmlFor="budget" className="text-muted-foreground">项目预算</Label>
               <Input 
@@ -723,17 +774,6 @@ export function HumanEthicProjectForm({ initialData, editMode = false }: HumanEt
                 value={formData.budget} 
                 onChange={(e) => updateFormData("budget", e.target.value)} 
                 placeholder="请输入项目预算（元）"
-                className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="participantCount" className="text-muted-foreground">参与者数量</Label>
-              <Input 
-                id="participantCount" 
-                type="number"
-                value={formData.participantCount} 
-                onChange={(e) => updateFormData("participantCount", e.target.value)} 
-                placeholder="请输入参与者数量"
                 className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
               />
             </div>

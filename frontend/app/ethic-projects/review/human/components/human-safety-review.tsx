@@ -47,7 +47,7 @@ export function HumanSafetyReview({
   // 项目信息字段定义
   const projectInfoFields: ProjectInfoField[] = [
     { key: "projectTitle", label: "项目名称", value: projectData.projectTitle, disabled: true, span: "half" },
-    { key: "projectType", label: "项目类型", value: projectData.projectType, disabled: true, span: "half" },
+    { key: "projectType", label: "研究类型", value: projectData.projectType, disabled: true, span: "half" },
     { key: "projectSource", label: "项目来源", value: projectData.projectSource, disabled: true, span: "half" },
     { key: "researchUnit", label: "研究单位", value: projectData.researchUnit, disabled: true, span: "half" },
     { key: "leaderName", label: "负责人名称", value: projectData.leaderName, disabled: true, span: "half" },

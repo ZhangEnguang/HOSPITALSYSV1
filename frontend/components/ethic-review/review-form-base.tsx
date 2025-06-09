@@ -292,7 +292,7 @@ export function ReviewFormBase({
                     leaderName: "负责人姓名",
                     department: "所属单位",
                     ethicsCommittee: "伦理委员会",
-                    projectType: "项目类型",
+                    projectType: "研究类型",
                     projectSource: "项目来源",
                     researchUnit: "研究单位",
                     subjectType: "受试者类型",

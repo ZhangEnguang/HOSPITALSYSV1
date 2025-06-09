@@ -62,7 +62,7 @@ export function HumanGeneticImportantResourceReview({
     { key: "projectTitle", label: "项目名称", value: projectData.projectTitle, disabled: true, span: "full" },
     { key: "projectSource", label: "项目来源", value: projectData.projectSource, disabled: true, span: "half" },
     { key: "researchUnit", label: "研究单位", value: projectData.researchUnit, disabled: true, span: "half" },
-    { key: "projectType", label: "项目类型", value: projectData.projectType, disabled: true, span: "half" },
+    { key: "projectType", label: "研究类型", value: projectData.projectType, disabled: true, span: "half" },
     { key: "leaderName", label: "负责人", value: projectData.leaderName, disabled: true, span: "half" },
     { key: "department", label: "所属部门", value: projectData.department, disabled: true, span: "half" },
     { key: "ethicsCommittee", label: "伦理委员会", value: projectData.ethicsCommittee, disabled: true, span: "half" }

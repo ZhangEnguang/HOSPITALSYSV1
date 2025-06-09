@@ -396,7 +396,7 @@ export default function EthicReviewReview({ params }: { params: { id: string } }
     if (!project) return "";
     
     const summaryIntro = `【${project.title}】审查摘要\n\n`;
-    const basicInfo = `项目类型: ${project.approvalType || "未指定"}\n研究类型: ${project.reviewType || "未指定"}\n负责人: ${project.leader || "未指定"}\n院系: ${project.department || "未指定"}\n\n`;
+    const basicInfo = `研究类型: ${project.approvalType || "未指定"}\n研究子类型: ${project.reviewType || "未指定"}\n负责人: ${project.leader || "未指定"}\n院系: ${project.department || "未指定"}\n\n`;
     const aiAnalysis = project.aiSummary || "AI分析摘要暂未生成";
     
     return summaryIntro + basicInfo + aiAnalysis;

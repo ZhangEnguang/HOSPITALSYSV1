@@ -247,7 +247,7 @@ export default function HumanEthicProjectsPage() {
     },
     {
       id: "type",
-      label: "项目类型",
+              label: "研究类型",
       value: (row: EthicProject) => row.type,
     },
     {
@@ -522,7 +522,7 @@ export default function HumanEthicProjectsPage() {
     // 扩展item对象添加额外的人体研究相关字段
     const extendedItem = {
       ...item,
-      项目类型: randomData.projectType,
+              研究类型: randomData.projectType,
       项目来源: randomData.projectSource,
       伦理委员会: randomData.committee,
       研究单位: randomData.department,
@@ -537,7 +537,7 @@ export default function HumanEthicProjectsPage() {
 
     // 输出扩展后的项目对象，方便调试
     console.log(`渲染卡片: 项目ID=${extendedItem.id}, 项目名称=${extendedItem.name}`);
-    console.log(`扩展的字段: 项目类型=${extendedItem.项目类型}, 项目来源=${extendedItem.项目来源}`);
+          console.log(`扩展的字段: 研究类型=${extendedItem.研究类型}, 项目来源=${extendedItem.项目来源}`);
 
     // 确保ID是字符串类型
     const itemId = String(item.id);
