@@ -22,6 +22,8 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
+import AssignAdvisorDialog from "./components/assign-advisor-dialog"
+import { toast } from "@/components/ui/use-toast"
 
 // 定义排序选项类型
 interface SortOption {
@@ -56,11 +58,13 @@ function QuickReviewContent() {
     status: "全部状态",
     reviewResult: "全部结果",
   })
-  const [seniorFilterValues, setSeniorFilterValues] = useState<Record<string, any>>({})
+  const [seniorFilterValues, setSeniorFilterValues] = useState<any>({})
   const [visibleColumns, setVisibleColumns] = useState(
     tableColumns.reduce((acc, col) => ({ ...acc, [col.id]: true }), {} as Record<string, boolean>)
   )
   const [selectedRows, setSelectedRows] = useState<string[]>([])
+  const [assignAdvisorDialogOpen, setAssignAdvisorDialogOpen] = useState(false)
+  const [selectedProjectForAdvisor, setSelectedProjectForAdvisor] = useState<any>(null)
   
   // 定义排序选项类型
   const typedSortOptions: SortOption[] = sortOptions as unknown as SortOption[]
@@ -177,8 +181,23 @@ function QuickReviewContent() {
     setCurrentPage(1)
   }
 
+  // 处理独立顾问指派事件监听
+  useEffect(() => {
+    const handleAssignAdvisor = (event: CustomEvent) => {
+      const { item } = event.detail
+      setSelectedProjectForAdvisor(item)
+      setAssignAdvisorDialogOpen(true)
+    }
+
+    window.addEventListener('assignAdvisor', handleAssignAdvisor as EventListener)
+    
+    return () => {
+      window.removeEventListener('assignAdvisor', handleAssignAdvisor as EventListener)
+    }
+  }, [])
+
   // 处理高级筛选
-  const handleAdvancedFilter = (filters: Record<string, any>) => {
+  const handleAdvancedFilter = (filters: any) => {
     setSeniorFilterValues(filters)
     
     // 筛选逻辑
@@ -355,10 +374,43 @@ function QuickReviewContent() {
   const handleSummaryOpinions = (item: any) => {
     router.push(`/ethic-review/quick-review/${item.id}/summary`)
   }
+
+  // 处理独立顾问指派
+  const handleAssignAdvisor = async (advisorIds: string[], questions: string) => {
+    try {
+      // 模拟API调用
+      console.log("指派独立顾问:", {
+        projectId: selectedProjectForAdvisor?.id,
+        advisorIds,
+        questions
+      })
+      
+      // 这里应该调用实际的API
+      // await assignAdvisorToProject(selectedProjectForAdvisor.id, advisorIds, questions)
+      
+      toast({
+        title: "指派成功",
+        description: `已成功为项目 "${selectedProjectForAdvisor?.name}" 指派独立顾问`,
+      })
+      
+      // 可以选择刷新数据或更新本地状态
+      // refreshData()
+      
+    } catch (error) {
+      console.error("指派独立顾问失败:", error)
+      toast({
+        title: "指派失败",
+        description: "指派过程中发生错误，请稍后重试",
+        variant: "destructive",
+      })
+      throw error // 重新抛出错误，让对话框处理
+    }
+  }
   
   return (
-    <DataList
-      title="快速审查"
+    <>
+      <DataList
+        title="快速审查"
       data={data}
       addButtonLabel="新建"
       onAddNew={handleAddNew}
@@ -398,6 +450,15 @@ function QuickReviewContent() {
       idField="id"
       batchActions={batchActions}
     />
+
+    {/* 独立顾问指派对话框 */}
+    <AssignAdvisorDialog
+      isOpen={assignAdvisorDialogOpen}
+      onOpenChange={setAssignAdvisorDialogOpen}
+      project={selectedProjectForAdvisor}
+      onAssign={handleAssignAdvisor}
+    />
+    </>
   )
 }
 

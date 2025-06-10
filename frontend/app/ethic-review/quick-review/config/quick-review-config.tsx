@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { Eye, FileEdit, Trash2, Clock, CheckCircle, XCircle, AlertTriangle, ClipboardCheck, Users, MoreVertical, MoreHorizontal } from "lucide-react"
+import { Eye, FileEdit, Trash2, Clock, CheckCircle, XCircle, AlertTriangle, ClipboardCheck, Users, MoreVertical, MoreHorizontal, UserPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Progress } from "@/components/ui/progress"
@@ -259,7 +259,18 @@ export const tableColumns = [
                 }}
               >
                 <Users className="mr-2 h-4 w-4 text-purple-600" />
-                <span>分配专家</span>
+                <span>分配主审委员</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // 触发指派独立顾问的对话框
+                  const event = new CustomEvent('assignAdvisor', { detail: { item } });
+                  window.dispatchEvent(event);
+                }}
+              >
+                <UserPlus className="mr-2 h-4 w-4 text-indigo-600" />
+                <span>指派独立顾问</span>
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={(e) => {
@@ -344,10 +355,20 @@ export const cardActions = [
   },
   {
     id: "assign",
-    label: "分配专家",
+    label: "分配主审委员",
     icon: <Users className="h-4 w-4" />,
     onClick: (item: any) => {
       window.location.href = `/ethic-review/quick-review/${item.id}/assign`
+    },
+  },
+  {
+    id: "assignAdvisor",
+    label: "指派独立顾问",
+    icon: <UserPlus className="h-4 w-4" />,
+    onClick: (item: any) => {
+      // 触发指派独立顾问的对话框
+      const event = new CustomEvent('assignAdvisor', { detail: { item } });
+      window.dispatchEvent(event);
     },
   },
   {
