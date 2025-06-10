@@ -49,6 +49,7 @@ import React, { use } from "react"
 // 修改组件引用路径从quick-review到meeting-review
 import EthicProjectOverviewTab from "../../components/overview-tab"
 import ReviewFilesTab from "../../components/review-files-tab"
+import ExpertReviewTab from "../../components/expert-review-tab"
 
 // 导入AI推荐面板组件
 import AISummaryPanel from "./components/ai-summary-panel"
@@ -432,22 +433,10 @@ export default function SummaryPage({ params }: { params: { id: string } }) {
   const getActionButtons = () => {
     return [
       {
-        id: "export-pdf",
-        label: "导出PDF",
+        id: "export-summary",
+        label: "导出汇总",
         icon: <Download className="h-4 w-4" />,
-        onClick: () => handleExport("pdf")
-      },
-      {
-        id: "export-word",
-        label: "导出Word",
-        icon: <FileText className="h-4 w-4" />,
-        onClick: () => handleExport("docx")
-      },
-      {
-        id: "print",
-        label: "打印报告",
-        icon: <Printer className="h-4 w-4" />,
-        onClick: handlePrint
+        onClick: () => handleExport("pdf") // 默认导出PDF格式的汇总报告
       }
     ];
   };
@@ -489,266 +478,16 @@ export default function SummaryPage({ params }: { params: { id: string } }) {
     return baseFields;
   };
 
-  // 获取AI推荐面板作为侧边栏
+  // AI意见汇总侧边栏组件
   const aiSidebar = (
-    <AISummaryPanel 
+    <AISummaryPanel
       projectId={projectId}
-      aiSummary={currentProject.aiSummary}
-      expertOpinions={currentProject.expertOpinions}
+      expertOpinions={mockExpertOpinions}
+      aiSummary={mockAISummary}
       onExport={handleExport}
       onPrint={handlePrint}
     />
   );
-
-  // 意见汇总选项卡
-  const OpinionSummaryTab = () => {
-    // 管理展开状态的钩子
-    const [expandedExpert, setExpandedExpert] = useState<string | null>(null);
-    
-    // 切换展开状态
-    const toggleExpert = (expertId: string) => {
-      setExpandedExpert(expandedExpert === expertId ? null : expertId);
-    };
-    
-    return (
-      <div className="space-y-6">
-        {/* 专家评审意见列表 - 简约版 */}
-        <div>
-          <h3 className="text-lg font-medium flex items-center mb-3">
-            <Users className="h-5 w-5 mr-2 text-blue-600" />
-            专家评审意见 ({currentProject.expertOpinions.length})
-          </h3>
-          
-          <div className="overflow-hidden border rounded-lg bg-white">
-            <table className="min-w-full divide-y divide-gray-200">
-              {/* 优化表头样式 */}
-              <thead className="bg-blue-50">
-                <tr>
-                  <th scope="col" className="px-4 py-3 text-left text-sm font-medium text-blue-700 tracking-wider w-1/5">专家信息</th>
-                  <th scope="col" className="px-4 py-3 text-left text-sm font-medium text-blue-700 tracking-wider w-1/6">评审结果</th>
-                  <th scope="col" className="px-4 py-3 text-left text-sm font-medium text-blue-700 tracking-wider">AI总结评审意见</th>
-                  <th scope="col" className="px-4 py-3 text-center text-sm font-medium text-blue-700 tracking-wider w-24">操作</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {currentProject.expertOpinions.map((opinion: any) => (
-                  <React.Fragment key={opinion.id}>
-                    <tr 
-                      className={`hover:bg-gray-50 ${expandedExpert === opinion.id ? 'bg-blue-50' : ''}`}
-                    >
-                      <td className="px-4 py-3">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                            <User className="h-4 w-4" />
-                          </div>
-                          <div className="ml-3">
-                            <div className="text-sm font-medium text-gray-900">{opinion.expertName}</div>
-                            <div className="text-xs text-gray-500">{opinion.department}</div>
-                            <div className="text-xs text-gray-500">{opinion.date}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-medium rounded-full ${
-                          opinion.result === "同意" 
-                            ? "bg-green-50 text-green-700" 
-                            : opinion.result === "修改后同意" 
-                            ? "bg-amber-50 text-amber-700" 
-                            : "bg-red-50 text-red-700"
-                        }`}>
-                          {opinion.result}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex flex-wrap gap-1 mb-1">
-                          {opinion.key_points.map((point: string, index: number) => (
-                            <span key={index} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
-                              {point}
-                            </span>
-                          ))}
-                        </div>
-                        
-                        {/* AI总结部分 */}
-                        {opinion.aiSummary && (
-                          <div className="text-xs text-gray-700">
-                            <p className="text-gray-600 line-clamp-2">{opinion.aiSummary}</p>
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {/* 优化详情按钮样式，确保在一行内展示 */}
-                        <button
-                          onClick={() => toggleExpert(opinion.id)}
-                          className={`px-3 py-1.5 rounded-md text-xs font-medium inline-flex items-center whitespace-nowrap ${
-                            expandedExpert === opinion.id
-                              ? "bg-blue-100 text-blue-700 border border-blue-300"
-                              : "bg-gray-100 text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-200"
-                          }`}
-                        >
-                          {expandedExpert === opinion.id ? (
-                            <>
-                              <ChevronUp className="h-3 w-3 mr-1 flex-shrink-0" /><span>收起</span>
-                            </>
-                          ) : (
-                            <>
-                              <ChevronDown className="h-3 w-3 mr-1 flex-shrink-0" /><span>详情</span>
-                            </>
-                          )}
-                        </button>
-                      </td>
-                    </tr>
-                    
-                    {/* 行内展开的详情内容 */}
-                    {expandedExpert === opinion.id && (
-                      <tr className="bg-gray-50">
-                        <td colSpan={4} className="px-4 py-3 border-t border-gray-100">
-                          <div className="py-2">
-                            <div className="mb-3">
-                              <h4 className="text-sm font-medium text-gray-700 mb-2">专家意见</h4>
-                              <div className="p-3 bg-white rounded border text-sm">
-                                {opinion.opinion}
-                              </div>
-                            </div>
-                            
-                            {opinion.detailedOpinion && (
-                              <div className="mb-3">
-                                <h4 className="text-sm font-medium text-gray-700 mb-2">详细评审意见</h4>
-                                <div className="p-3 bg-white rounded border text-sm whitespace-pre-line">
-                                  {opinion.detailedOpinion}
-                                </div>
-                              </div>
-                            )}
-                            
-                            <div className="grid grid-cols-2 gap-4 mt-4">
-                              {opinion.expertise && (
-                                <div>
-                                  <h4 className="text-xs font-medium text-gray-700 mb-1">专业背景</h4>
-                                  <div className="flex flex-wrap gap-1">
-                                    {opinion.expertise.map((expertise: string, index: number) => (
-                                      <div key={index} className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full text-xs">
-                                        {expertise}
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                              
-                              {opinion.follow_up_questions && opinion.follow_up_questions.length > 0 && (
-                                <div>
-                                  <h4 className="text-xs font-medium text-gray-700 mb-1">跟进问题</h4>
-                                  <ul className="list-disc pl-4 text-xs text-amber-800 space-y-1">
-                                    {opinion.follow_up_questions.map((question: string, index: number) => (
-                                      <li key={index}>{question}</li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* 独立顾问回复 - 简约版 */}
-        <div>
-          <h3 className="text-lg font-medium flex items-center mb-3">
-            <UserPlus className="h-5 w-5 mr-2 text-indigo-600" />
-            独立顾问回复 ({currentProject.advisorResponses.length})
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {currentProject.advisorResponses.map((advisor: any) => (
-              <div key={advisor.id} className="border rounded-lg p-3 bg-white">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center">
-                    <div className="h-6 w-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 mr-2">
-                      <UserPlus className="h-3 w-3" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium">{advisor.advisorName}</div>
-                      <div className="text-xs text-gray-500">{advisor.organization} · {advisor.responseType}</div>
-                    </div>
-                  </div>
-                  
-                  {/* 优化顾问详情按钮样式 */}
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const detailEl = document.getElementById(`advisor-${advisor.id}`);
-                      if (detailEl) {
-                        const isHidden = detailEl.classList.contains('hidden');
-                        detailEl.classList.toggle('hidden', !isHidden);
-                        
-                        // 同时切换按钮文本
-                        const btnEl = e.currentTarget as HTMLButtonElement;
-                        if (btnEl.querySelector('.btn-text')?.textContent === '详情') {
-                          btnEl.querySelector('.btn-icon')?.classList.replace('rotate-0', '-rotate-180');
-                          btnEl.querySelector('.btn-text')!.textContent = '收起';
-                        } else {
-                          btnEl.querySelector('.btn-icon')?.classList.replace('-rotate-180', 'rotate-0');
-                          btnEl.querySelector('.btn-text')!.textContent = '详情';
-                        }
-                      }
-                    }}
-                    className="px-3 py-1.5 rounded-md text-xs font-medium inline-flex items-center bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-all"
-                  >
-                    <ChevronDown className="h-3 w-3 mr-1 btn-icon rotate-0 transition-transform duration-200" />
-                    <span className="btn-text whitespace-nowrap">详情</span>
-                  </button>
-                </div>
-                
-                <div className="mb-2">
-                  <div className="text-xs font-medium text-gray-500 mb-1">咨询问题</div>
-                  <div className="p-2 bg-indigo-50 rounded text-sm text-indigo-800">
-                    {advisor.question}
-                  </div>
-                </div>
-                
-                <div>
-                  <div className="text-xs font-medium text-gray-500 mb-1">主要建议</div>
-                  <div className="mt-1">
-                    <div className="text-sm text-gray-800">
-                      {advisor.recommendations[0]}
-                    </div>
-                    {advisor.recommendations.length > 1 && (
-                      <div className="text-xs text-gray-500 mt-1">
-                        还有 {advisor.recommendations.length - 1} 条建议...
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div id={`advisor-${advisor.id}`} className="hidden mt-3">
-                    <div className="border-t pt-2 mt-2">
-                      <div className="text-xs font-medium text-gray-500 mb-1">完整回复</div>
-                      <div className="p-3 bg-gray-50 rounded border text-sm whitespace-pre-line">
-                        {advisor.response}
-                      </div>
-                      
-                      {/* 显示所有建议 */}
-                      <div className="mt-3">
-                        <div className="text-xs font-medium text-gray-500 mb-1">所有建议</div>
-                        <ul className="list-disc pl-4 text-xs text-green-800 space-y-1 p-2 bg-green-50 rounded-md">
-                          {advisor.recommendations.map((rec: string, index: number) => (
-                            <li key={index}>{rec}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <>
@@ -766,10 +505,15 @@ export default function SummaryPage({ params }: { params: { id: string } }) {
         actions={getActionButtons()}
         tabs={[
           {
-            id: "opinions",
+            id: "expertReview",
             label: "专家评审",
             icon: <ClipboardCheck className="h-4 w-4" />,
-            component: <OpinionSummaryTab />
+            component: (
+              <ExpertReviewTab 
+                expertOpinions={mockExpertOpinions}
+                advisorResponses={mockAdvisorResponses}
+              />
+            )
           },
           {
             id: "overview",
