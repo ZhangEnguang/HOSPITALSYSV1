@@ -271,7 +271,7 @@ export const tableColumns = [
                 }}
               >
                 <Users className="mr-2 h-4 w-4 text-purple-600" />
-                <span>分配专家</span>
+                <span>分配主审委员</span>
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={(e) => {
@@ -361,10 +361,19 @@ export const cardActions = [
   },
   {
     id: "assign",
-    label: "分配专家",
+    label: "分配主审委员",
     icon: <Users className="h-4 w-4" />,
     onClick: (item: any) => {
       window.location.href = `/ethic-review/meeting-review/${item.id}/assign`
+    },
+  },
+  {
+    id: "assignAdvisor",
+    label: "指派独立顾问",
+    icon: <Users className="h-4 w-4" />,
+    onClick: (item: any) => {
+      // 这个onClick会在主页面中被覆盖
+      console.log("指派独立顾问", item)
     },
   },
   {

@@ -22,6 +22,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
+import { AssignAdvisorDialog } from "./components/assign-advisor-dialog"
 
 // 定义排序选项类型
 interface SortOption {
@@ -61,6 +62,10 @@ function MeetingReviewContent() {
     tableColumns.reduce((acc, col) => ({ ...acc, [col.id]: true }), {} as Record<string, boolean>)
   )
   const [selectedRows, setSelectedRows] = useState<string[]>([])
+  
+  // 独立顾问对话框状态
+  const [showAssignAdvisorDialog, setShowAssignAdvisorDialog] = useState(false)
+  const [selectedProjectForAdvisor, setSelectedProjectForAdvisor] = useState<any>(null)
   
   // 定义排序选项类型
   const typedSortOptions: SortOption[] = sortOptions as unknown as SortOption[]
@@ -340,8 +345,99 @@ function MeetingReviewContent() {
     router.push(`/ethic-review/meeting-review/${item.id}/summary`)
   }
   
+  // 处理指派独立顾问
+  const handleAssignAdvisor = (item: any) => {
+    setSelectedProjectForAdvisor(item)
+    setShowAssignAdvisorDialog(true)
+  }
+  
+  // 处理独立顾问指派确认
+  const handleAdvisorAssign = async (advisorIds: string[], questions: string) => {
+    console.log("指派独立顾问:", advisorIds, questions, selectedProjectForAdvisor)
+    // 这里应该调用API来指派独立顾问
+    // 实际实现中会发送请求到后端
+  }
+  
+  // 创建自定义的卡片操作，覆盖指派独立顾问的处理函数
+  const customCardActions = cardActions.map(action => {
+    if (action.id === 'assignAdvisor') {
+      return {
+        ...action,
+        onClick: handleAssignAdvisor
+      }
+    }
+    return action
+  })
+
+  // 创建自定义的表格列，覆盖操作列以支持指派独立顾问
+  const customTableColumns = tableColumns.map(column => {
+    if (column.id === 'actions') {
+      return {
+        ...column,
+        cell: (item: any) => {
+          return (
+            <div className="flex items-center justify-end">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                  <DropdownMenuItem 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleViewDetails(item);
+                    }}
+                  >
+                    <Eye className="mr-2 h-4 w-4 text-blue-600" />
+                    <span>查看详情</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAssignExperts(item);
+                    }}
+                  >
+                    <Users className="mr-2 h-4 w-4 text-purple-600" />
+                    <span>分配主审委员</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAssignAdvisor(item);
+                    }}
+                  >
+                    <Users className="mr-2 h-4 w-4 text-green-600" />
+                    <span>指派独立顾问</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSummaryOpinions(item);
+                    }}
+                  >
+                    <ClipboardCheck className="mr-2 h-4 w-4 text-orange-600" />
+                    <span>意见汇总</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          );
+        },
+      }
+    }
+    return column
+  })
+  
   return (
-    <DataList
+    <>
+      <DataList
       title="会议审查"
       data={data}
       addButtonLabel="新建"
@@ -362,11 +458,11 @@ function MeetingReviewContent() {
       onSortChange={handleSortChange}
       defaultViewMode={viewMode}
       onViewModeChange={handleViewModeChange}
-      tableColumns={typedTableColumns as any}
+      tableColumns={customTableColumns as any}
       visibleColumns={visibleColumns}
       onVisibleColumnsChange={handleVisibleColumnsChange}
       cardFields={cardFields}
-      cardActions={cardActions}
+      cardActions={customCardActions}
       titleField="name"
       descriptionField="description"
       statusField="status"
@@ -404,6 +500,15 @@ function MeetingReviewContent() {
         }
       ]}
     />
+    
+      {/* 独立顾问指派对话框 */}
+      <AssignAdvisorDialog
+        isOpen={showAssignAdvisorDialog}
+        onOpenChange={setShowAssignAdvisorDialog}
+        project={selectedProjectForAdvisor}
+        onAssign={handleAdvisorAssign}
+      />
+    </>
   )
 }
 
