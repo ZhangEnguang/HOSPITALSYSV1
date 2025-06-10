@@ -6,7 +6,6 @@ import { toast } from "@/components/ui/use-toast"
 import DetailPage from "@/components/detail-page/detail-page"
 import {
   FileIcon,
-  AlertTriangle,
   FileText,
   Building2,
   Calendar,
@@ -24,7 +23,8 @@ import {
   Check,
   Zap,
   ClipboardList,
-  X
+  X,
+  AlertTriangle
 } from "lucide-react"
 import { useLoading } from "@/hooks/use-loading"
 import { Separator } from "@/components/ui/separator"
@@ -40,7 +40,6 @@ import { Button } from "@/components/ui/button"
 
 // 复用快速审查组件
 import EthicProjectOverviewTab from "@/app/ethic-review/meeting-review/components/overview-tab"
-import RiskAnalysisTab from "@/app/ethic-review/meeting-review/components/risk-analysis-tab"
 import ReviewFilesTab from "@/app/ethic-review/meeting-review/components/review-files-tab"
 
 // 导入AI推荐面板组件
@@ -526,17 +525,6 @@ export default function AssignExpertsPage({ params }: { params: { id: string } }
               <>
                 <InfoHeader />
                 <EthicProjectOverviewTab project={currentProject} />
-              </>
-            )
-          },
-          {
-            id: "riskAnalysis",
-            label: "风险分析",
-            icon: <AlertTriangle className="h-4 w-4" />,
-            component: (
-              <>
-                <InfoHeader />
-                <RiskAnalysisTab project={currentProject} />
               </>
             )
           },

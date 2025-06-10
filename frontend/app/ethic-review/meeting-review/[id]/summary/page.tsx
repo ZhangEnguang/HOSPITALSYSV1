@@ -48,7 +48,6 @@ import React, { use } from "react"
 
 // 修改组件引用路径从quick-review到meeting-review
 import EthicProjectOverviewTab from "../../components/overview-tab"
-import RiskAnalysisTab from "../../components/risk-analysis-tab"
 import ReviewFilesTab from "../../components/review-files-tab"
 
 // 导入AI推荐面板组件
@@ -783,12 +782,6 @@ export default function SummaryPage({ params }: { params: { id: string } }) {
             label: "送审文件",
             icon: <FileText className="h-4 w-4" />,
             component: <ReviewFilesTab project={currentProject} />
-          },
-          {
-            id: "riskAnalysis",
-            label: "风险分析",
-            icon: <AlertTriangle className="h-4 w-4" />,
-            component: <RiskAnalysisTab project={currentProject} />
           }
         ]}
       />

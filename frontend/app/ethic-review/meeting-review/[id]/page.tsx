@@ -25,7 +25,6 @@ import { useLoading } from "@/hooks/use-loading"
 
 // 导入我们创建的组件
 import EthicProjectOverviewTab from "@/app/ethic-review/meeting-review/components/overview-tab"
-import RiskAnalysisTab from "@/app/ethic-review/meeting-review/components/risk-analysis-tab"
 import ReviewFilesTab from "@/app/ethic-review/meeting-review/components/review-files-tab"
 
 // 模拟数据 - 审查项目
@@ -553,12 +552,6 @@ export default function EthicReviewDetail({ params }: { params: { id: string } }
           label: "送审文件",
           icon: <FileText className="h-4 w-4" />,
           component: <ReviewFilesTab project={currentProject} />,
-        },
-        {
-          id: "riskAnalysis",
-          label: "风险分析",
-          icon: <AlertTriangle className="h-4 w-4" />,
-          component: <RiskAnalysisTab project={currentProject} />,
         },
       ]}
     />

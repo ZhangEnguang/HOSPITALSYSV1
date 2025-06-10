@@ -1,48 +1,43 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   Calendar,
   Clock,
-  FileText,
+  Award,
   RefreshCw,
   Copy,
   ChevronRight,
-  Building,
-  User,
-  PawPrint,
-  Users,
-  FileCheck,
-  Tag,
-  BadgeCheck,
-  Info,
-  Heart,
-  Beaker,
-  Microscope,
-  Brain,
-  Hourglass,
   BarChart3,
   PieChart,
   LineChart,
   LayoutGrid,
   StarIcon,
-  Sparkles
+  Building,
+  Mail,
+  Phone,
+  Users,
+  ExternalLink,
+  Sparkles,
+  FileText,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { motion, AnimatePresence } from "framer-motion"
-import Image from "next/image"
 import { toast } from "@/components/ui/use-toast"
+import { formatDateToString } from "@/lib/utils"
 import { cn } from "@/lib/utils"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-// 项目概览标签页组件
+// 初始审查项目概览标签组件
 export default function EthicProjectOverviewTab({
-  project
+  project,
+  getPriorityColor,
 }: { 
-  project: any 
+  project: any; 
+  getPriorityColor?: (priority: string) => string 
 }) {
   // 折线图动画的引用
   const chartRef = useRef<SVGPathElement>(null)
@@ -55,21 +50,73 @@ export default function EthicProjectOverviewTab({
   const [hasAiWritten, setHasAiWritten] = useState(false)
   const [aiInputValue, setAiInputValue] = useState("")
 
-  // 从project对象获取AI摘要内容
-  const aiSummaryContent = project.aiSummary || ""
-  const aiModelName = project.aiModelName || "EthicGPT 2024"
-  const aiModelVersion = project.aiModelVersion || "v3.1"
-  const aiSuggestions: string[] = project.aiSuggestions || [
-    "完善受试者基因数据保护与匿名化方案",
-    "明确CRISPR技术仅限于体外诊断用途，禁止人体基因组修饰",
-    "加强实验动物福利保障措施，严格遵循3R原则",
-    "建立基因信息安全泄露应急处理机制"
-  ]
-  const progressScore = project.progressScore || "良好"
-  const riskScore = project.riskScore || "低"
-  const achievementScore = project.achievementScore || "良好"
-  const confidenceScore = project.confidenceScore || 95
-  const analysisTime = project.analysisTime || "2024-05-18 14:30"
+  // 从project对象获取AI摘要内容，根据项目类型提供不同的默认内容
+  const getDefaultAiSummary = () => {
+    if (!project?.projectType) {
+      return "项目信息暂未完善，无法生成AI分析摘要。请先完善项目基本信息。"
+    }
+    
+    // 如果项目有具体的进度和数据，可以基于实际数据生成摘要
+    const progress = project.progress || 0
+    const budgetUsed = project.budgetUsed || 0
+    const budget = project.budget || 0
+    const usageRate = budget > 0 ? ((budgetUsed / budget) * 100).toFixed(1) : 0
+    
+    if (project.projectType === "动物实验") {
+      return `该动物实验伦理项目当前进度为${progress}%。项目预算为${budget}元，已使用${budgetUsed}元，使用率为${usageRate}%。项目按计划稳步推进，动物福利保障措施完善，符合相关伦理规范要求。`
+    } else if (project.projectType === "人体试验") {
+      return `该人体试验伦理项目当前进度为${progress}%。项目预算为${budget}元，已使用${budgetUsed}元，使用率为${usageRate}%。受试者招募和知情同意程序规范，试验安全性监测到位，符合人体试验伦理要求。`
+    } else {
+      return `该伦理审查项目当前进度为${progress}%。项目预算为${budget}元，已使用${budgetUsed}元，使用率为${usageRate}%。项目进展符合预期，伦理合规性良好。`
+    }
+  }
+
+  const getDefaultAiSuggestions = () => {
+    if (!project?.projectType) {
+      return ["请完善项目基本信息", "明确项目类型和研究内容", "提交必要的伦理审查文件"]
+    }
+    
+    const suggestions = []
+    
+    // 基于项目状态给出建议
+    if (project.status === "待审核") {
+      suggestions.push("确保所有必需文件已提交完整")
+      suggestions.push("关注伦理委员会审核进度")
+    }
+    
+    if (project.projectType === "动物实验") {
+      suggestions.push("严格遵守动物福利相关规定")
+      suggestions.push("定期更新动物使用记录")
+      suggestions.push("确保实验人员具备相应资质")
+    } else if (project.projectType === "人体试验") {
+      suggestions.push("加强受试者安全性监测")
+      suggestions.push("确保知情同意程序规范")
+      suggestions.push("建立不良事件报告机制")
+    }
+    
+    // 基于项目进度给出建议
+    const progress = project.progress || 0
+    if (progress < 30) {
+      suggestions.push("制定详细的项目推进计划")
+    } else if (progress > 80) {
+      suggestions.push("准备项目结题相关文件")
+    }
+    
+    return suggestions.length > 0 ? suggestions : ["项目进展正常，请继续按计划执行"]
+  }
+
+  // 动态获取AI分析数据
+  const aiSummaryContent = project?.aiAnalysis?.summary || getDefaultAiSummary()
+  const aiModelName = project?.aiAnalysis?.modelName || "EthicsGPT"
+  const aiModelVersion = project?.aiAnalysis?.modelVersion || "v1.0"
+  const aiSuggestions: string[] = project?.aiAnalysis?.suggestions || getDefaultAiSuggestions()
+  
+  // 评分数据
+  const progressScore = project?.analysis?.progressScore || (project?.progress >= 80 ? "优秀" : project?.progress >= 60 ? "良好" : project?.progress >= 40 ? "一般" : "待改进")
+  const riskScore = project?.analysis?.riskScore || (project?.riskLevel === "高" ? "高风险" : project?.riskLevel === "中" ? "中等风险" : "低风险")
+  const achievementScore = project?.analysis?.achievementScore || "良好"
+  const confidenceScore = project?.aiAnalysis?.confidence || (project?.progress > 50 ? 85 : 70)
+  const analysisTime = project?.aiAnalysis?.updatedAt || project?.updatedAt || new Date().toISOString().slice(0, 16).replace('T', ' ')
 
   // 处理更新分析
   const handleUpdateAnalysis = () => {
@@ -122,7 +169,7 @@ export default function EthicProjectOverviewTab({
 
     observer.observe(chartContainerRef.current)
 
-    // 添加进度条动画样式
+    // 添加进度条动画样式 - 移除了animation-delay-200类，避免闪动
     const style = document.createElement("style")
     style.textContent = `
   @keyframes progress {
@@ -143,44 +190,30 @@ export default function EthicProjectOverviewTab({
     }
   }, [])
 
-  // 获取项目类型图标
-  const getProjectTypeIcon = () => {
-    if (project.projectType === "动物") {
-      return <PawPrint className="h-4 w-4 text-blue-500 mr-2" />
-    } else {
-      return <User className="h-4 w-4 text-blue-500 mr-2" />
+  const formatDate = (dateString: string) => {
+    try {
+      return formatDateToString(new Date(dateString));
+    } catch (error) {
+      return dateString;
     }
-  }
+  };
 
-  // 生成项目简化摘要
-  const generateProjectSummary = () => {
-    const reviewType = project.reviewType || "初始审查"
+  const getPriorityBadge = (priority: string) => {
+    if (!priority) return null;
     
-    // 会议审查通常是对初始审查通过后的项目进行会议讨论和审议
-    if (project.projectType === "动物") {
-      if (project.title?.includes("转基因")) {
-        return "该项目采用转基因动物模型进行研究，已通过初审进入会议审查阶段。实验设计科学合理，动物福利保障措施完善，符合3R原则要求。会议将重点讨论实验方案的伦理合规性和可行性。"
-      } else if (project.title?.includes("基因编辑")) {
-        return "该项目采用CRISPR基因编辑技术构建动物模型，已进入会议审查阶段。技术方案相对成熟，但会议将重点审议基因编辑的安全性评估和动物福利保障措施的完善性。"
-      } else if (project.title?.includes("灵长类")) {
-        return "该项目使用非人灵长类动物，已进入会议审查阶段。由于灵长类动物的特殊性，会议将重点讨论福利保障措施、3R原则实施和实验伦理的特殊要求。"
-      } else {
-        return "该项目为动物实验研究，已通过初审进入会议审查阶段。实验设计遵循3R原则，动物福利保障措施完善。会议将对项目的伦理合规性进行全面评议。"
-      }
-    } else if (project.projectType === "人体") {
-      if (project.title?.includes("临床试验")) {
-        return "该项目为人体临床试验研究，已通过初审进入会议审查阶段。知情同意流程规范，受试者保护措施完善。会议将重点讨论试验的风险效益平衡和安全监测机制。"
-      } else if (project.title?.includes("基因") || project.title?.includes("遗传")) {
-        return "该项目涉及基因检测和遗传信息研究，已进入会议审查阶段。知情同意程序规范，遗传咨询支持完善。会议将重点审议遗传信息保护和心理风险防范措施。"
-      } else if (project.title?.includes("药物")) {
-        return "该项目涉及药物相关的人体研究，已进入会议审查阶段。受试者安全保障措施完善，不良反应监测机制健全。会议将重点评议药物安全性和风险控制方案。"
-      } else {
-        return "该项目为人体研究，已通过初审进入会议审查阶段。知情同意程序规范，隐私保护措施完善。会议将对研究的伦理合规性进行全面审议。"
-      }
-    }
-    
-    return "该项目已通过初步审查进入会议评议阶段，研究设计合理，伦理风险控制措施适当。会议将对项目的伦理合规性进行全面讨论和评估。"
-  }
+    const colorMap: Record<string, string> = {
+      "高": "bg-red-100 text-red-700 hover:bg-red-100",
+      "中": "bg-yellow-100 text-yellow-700 hover:bg-yellow-100",
+      "低": "bg-green-100 text-green-700 hover:bg-green-100",
+    };
+
+    return (
+      <Badge className={cn("font-normal py-0.5", colorMap[priority] || "bg-gray-100 text-gray-700")}>
+        <StarIcon className="h-3 w-3 mr-1" />
+        {priority}级
+      </Badge>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -191,8 +224,8 @@ export default function EthicProjectOverviewTab({
         <CardHeader className="pb-1 relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="relative w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center shadow-sm">
-                <Sparkles className="h-6 w-6 text-white" />
+              <div className="relative w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+                <Sparkles className="h-5 w-5 text-white" />
               </div>
               <div>
                 <CardTitle className="text-lg font-semibold flex items-center gap-2">
@@ -296,12 +329,9 @@ export default function EthicProjectOverviewTab({
                         <LayoutGrid className="h-4 w-4" />
                         <span className="font-medium">最新分析已更新 - 检测到项目进度变更</span>
                       </div>
-                      {/* 简化的AI摘要显示 - 只显示一段话总结 */}
-                      <div className="mb-4">
-                        <p className="text-slate-700 leading-relaxed">
-                          {generateProjectSummary()}
-                        </p>
-                      </div>
+                      <p className="text-slate-700 leading-relaxed">
+                        {aiSummaryContent}
+                      </p>
                       <div className="flex items-start gap-4 my-3 py-2">
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                           <BarChart3 className="h-4 w-4 text-blue-600" />
@@ -340,12 +370,9 @@ export default function EthicProjectOverviewTab({
                     </>
                   ) : (
                     <>
-                      {/* 简化的AI摘要显示 - 只显示一段话总结 */}
-                      <div className="mb-4">
-                        <p className="text-slate-700 leading-relaxed">
-                          {generateProjectSummary()}
-                        </p>
-                      </div>
+                      <p className="text-slate-700 leading-relaxed">
+                        {aiSummaryContent}
+                      </p>
                       <div className="flex items-start gap-4 my-3 py-2">
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                           <BarChart3 className="h-4 w-4 text-blue-600" />
@@ -389,7 +416,7 @@ export default function EthicProjectOverviewTab({
                 <div className="inline-flex h-5 items-center rounded-full border border-slate-200 bg-white px-2 text-xs font-semibold text-slate-900">
                   可信度 {confidenceScore}%
                 </div>
-                <span>分析时间: {isAnalysisUpdated ? "2024-05-18 15:25" : analysisTime}</span>
+                <span>分析时间: {isAnalysisUpdated ? "2024-05-08 14:52" : analysisTime}</span>
               </div>
               <div className="flex items-center">
                 <Button
@@ -398,7 +425,11 @@ export default function EthicProjectOverviewTab({
                   className="h-6 gap-1 text-slate-500 hover:text-slate-900"
                   onClick={() => {
                     // 复制文本到剪贴板
-                    navigator.clipboard.writeText(aiSummaryContent)
+                    navigator.clipboard.writeText(
+                      isAnalysisUpdated
+                        ? `该科研项目当前进度为35%，符合预期计划。项目经费使用率为31.2%（↑2.7%），整体于计划进度内。项目已产出3篇研究论文，包括实验设计方案、动物伦理规范与代谢机制初步分析。成果转化进展良好，已有2家制药企业表达合作意向，高于同类项目平均水平25%。`
+                        : aiSummaryContent,
+                    )
                     toast({
                       title: "已复制到剪贴板",
                       description: "AI智能摘要内容已复制",
@@ -439,7 +470,7 @@ export default function EthicProjectOverviewTab({
         }}
       />
 
-      {/* 项目基本信息区域 */}
+      {/* 基本信息卡片 */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">基本信息</CardTitle>
@@ -448,74 +479,208 @@ export default function EthicProjectOverviewTab({
           <div className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div>
               <div className="text-sm text-muted-foreground">项目名称</div>
-              <div className="font-medium">{project.title}</div>
+              <div className="font-medium">{project?.title || project?.name || "未设置项目名称"}</div>
             </div>
             <div>
               <div className="text-sm text-muted-foreground">项目编号</div>
-              <div className="font-medium">{project.reviewNumber || "未设置"}</div>
+              <div className="font-medium">{project?.projectNumber || project?.reviewNumber || "未分配编号"}</div>
             </div>
-            <div>
-              <div className="text-sm text-muted-foreground">审查类型</div>
-              <div className="font-medium">{project.reviewType || "初始审查"}</div>
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground">伦理委员会</div>
-              <div className="font-medium">{project.ethicsCommittee}</div>
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground">项目类型</div>
-              <div className="font-medium">{project.projectType}伦理</div>
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground">负责人</div>
-              <div className="font-medium">{project.leader}</div>
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground">所属院系</div>
-              <div className="font-medium">{project.department}</div>
-            </div>
-            
-            {project.projectType === "动物" && (
+            {project?.projectType === "动物实验" ? (
               <>
                 <div>
                   <div className="text-sm text-muted-foreground">动物种系</div>
-                  <div className="font-medium">{project.animalType}</div>
+                  <div className="font-medium">{project?.animalType || "未设置"}</div>
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">动物数量</div>
-                  <div className="font-medium">{project.animalCount}</div>
+                  <div className="font-medium">{project?.animalCount || "未设置"}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">实验设施单位</div>
+                  <div className="font-medium">{project?.facilityUnit || "未设置"}</div>
+                </div>
+              </>
+            ) : project?.projectType === "人体试验" ? (
+              <>
+                <div>
+                  <div className="text-sm text-muted-foreground">研究类型</div>
+                  <div className="font-medium">{project?.studyType || "临床研究"}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">参与人数</div>
+                  <div className="font-medium">{project?.participantCount ? `${project.participantCount}人` : "未设置"}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">研究实施单位</div>
+                  <div className="font-medium">{project?.researchUnit || "未设置"}</div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <div className="text-sm text-muted-foreground">研究类型</div>
+                  <div className="font-medium">{project?.projectType || "未设置"}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">研究规模</div>
+                  <div className="font-medium">{project?.scale || "未设置"}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">实施单位</div>
+                  <div className="font-medium">{project?.institution || "未设置"}</div>
                 </div>
               </>
             )}
-            
-            {project.projectType === "人体" && (
-              <div>
-                <div className="text-sm text-muted-foreground">参与人数</div>
-                <div className="font-medium">{project.participantCount}</div>
-              </div>
-            )}
-            
             <div className="col-span-2">
-              <div className="text-sm text-muted-foreground">审核期限</div>
+              <div className="text-sm text-muted-foreground">项目周期</div>
               <div className="font-medium">
-                {project.submittedAt || "2024-05-18"} 至 {project.deadline || "2024-06-15"}
+                {project?.startDate ? formatDate(project.startDate) : "未设置"} 至 {project?.endDate ? formatDate(project.endDate) : "未设置"}
               </div>
             </div>
-            
+            <div>
+              <div className="text-sm text-muted-foreground">项目预算</div>
+              <div className="font-medium">{project?.budget ? `${project.budget} 元` : "未设置"}</div>
+            </div>
             <div>
               <div className="text-sm text-muted-foreground">项目状态</div>
-              <div className="font-medium">{project.status || "审核中"}</div>
+              <div className="font-medium">{project?.status || "未设置"}</div>
             </div>
           </div>
 
           <div className="mt-6">
             <div className="text-sm text-muted-foreground mb-1">项目描述</div>
-            <div className="text-sm">{project.description}</div>
+            <div className="text-sm">{project?.description || "暂无项目描述"}</div>
           </div>
         </CardContent>
       </Card>
-      
-    
+
+      {/* 研究信息卡片 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">研究信息</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <div className="text-sm text-muted-foreground mb-1">研究目的</div>
+              <div className="text-sm">{project?.researchPurpose || project?.purpose || "暂无研究目的信息"}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground mb-1">研究方法</div>
+              <div className="text-sm">{project?.researchMethod || project?.methodology || "暂无研究方法信息"}</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 主要研究者信息卡片 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">主要研究者信息</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+            <div>
+              <div className="text-sm text-muted-foreground">负责人姓名</div>
+              <div className="font-medium">{project?.leader?.name || project?.leader || "未设置"}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">职称/职务</div>
+              <div className="font-medium">{project?.leader?.title || project?.leaderTitle || "未设置"}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">所属院系</div>
+              <div className="font-medium">{project?.department || project?.leader?.department || "未设置"}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">电子邮箱</div>
+              <div className="font-medium">{project?.leader?.email || project?.contactEmail || "未设置"}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">联系电话</div>
+              <div className="font-medium">{project?.leader?.phone || project?.contactPhone || "未设置"}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">联系地址</div>
+              <div className="font-medium">{project?.address || project?.leader?.address || "未设置"}</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 项目团队成员卡片 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">项目团队成员</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {project?.members && project.members.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {project.members.map((member: any, index: number) => {
+                // 为每个成员生成不同的头像颜色
+                const avatarColors = [
+                  "bg-gradient-to-r from-blue-500 to-purple-600",
+                  "bg-gradient-to-r from-green-500 to-blue-500", 
+                  "bg-gradient-to-r from-purple-500 to-pink-500",
+                  "bg-gradient-to-r from-yellow-500 to-orange-500",
+                  "bg-gradient-to-r from-red-500 to-pink-500",
+                  "bg-gradient-to-r from-indigo-500 to-blue-500",
+                  "bg-gradient-to-r from-teal-500 to-green-500",
+                  "bg-gradient-to-r from-orange-500 to-red-500"
+                ]
+                const avatarColor = avatarColors[index % avatarColors.length]
+                
+                return (
+                  <div key={index} className="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
+                    {/* 头像和基本信息 */}
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className={`h-10 w-10 rounded-full ${avatarColor} text-white font-semibold flex items-center justify-center text-sm flex-shrink-0`}>
+                        {member.name ? member.name.charAt(0) : '?'}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-gray-900 text-sm truncate">{member.name || '未知'}</h4>
+                        <p className="text-xs text-muted-foreground truncate">{member.title || member.role || '未设置'}</p>
+                      </div>
+                    </div>
+                    
+                    {/* 详细信息 */}
+                    <div className="space-y-2 text-xs">
+                      <div>
+                        <span className="text-muted-foreground">部门：</span>
+                        <span className="font-medium">{member.department || '未设置'}</span>
+                      </div>
+                      
+                      {member.email && (
+                        <div>
+                          <span className="text-muted-foreground">邮箱：</span>
+                          <a href={`mailto:${member.email}`} className="font-medium text-blue-600 hover:text-blue-800 break-all">
+                            {member.email}
+                          </a>
+                        </div>
+                      )}
+                      
+                      {member.phone && (
+                        <div>
+                          <span className="text-muted-foreground">电话：</span>
+                          <a href={`tel:${member.phone}`} className="font-medium text-blue-600 hover:text-blue-800">
+                            {member.phone}
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+                              })}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-slate-500">
+                <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p className="font-medium">暂无团队成员信息</p>
+                <p className="text-sm mt-1">请在项目设置中添加团队成员</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
     </div>
   )
 } 
