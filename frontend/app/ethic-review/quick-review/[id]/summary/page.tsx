@@ -9,29 +9,10 @@ import {
   AlertTriangle,
   FileText,
   Building2,
-  Calendar,
-  CheckCircle2,
   FileCheck,
-  PenSquare,
-  Trash2,
-  RotateCw,
   User,
   FileSignature,
-  BriefcaseMedical,
-  PawPrint,
-  Users,
-  ClipboardCheck,
-  Check,
-  Zap,
-  ClipboardList,
-  X,
-  Download,
-  Printer,
-  UserPlus,
-  MessageSquareText,
-  MailQuestion,
-  ChevronUp,
-  ChevronDown
+  ClipboardCheck
 } from "lucide-react"
 import { useLoading } from "@/hooks/use-loading"
 import { Separator } from "@/components/ui/separator"
@@ -44,15 +25,17 @@ import {
   DialogFooter 
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import React, { use } from "react"
+import React from "react"
 
 // 复用快速审查组件
 import EthicProjectOverviewTab from "@/app/ethic-review/quick-review/components/overview-tab"
-import RiskAnalysisTab from "@/app/ethic-review/quick-review/components/risk-analysis-tab"
 import ReviewFilesTab from "@/app/ethic-review/quick-review/components/review-files-tab"
 
 // 导入AI推荐面板组件
 import AISummaryPanel from "./components/ai-summary-panel"
+
+// 导入专家评审页签组件  
+import ExpertReviewTab, { ExpertReviewSummaryDialog } from "../../components/expert-review-tab"
 
 // 导入项目数据
 import { quickReviewItems } from "../../data/quick-review-demo-data"
@@ -204,9 +187,9 @@ const mockAISummary = {
   version: "v1.0"
 };
 
-export default function SummaryPage({ params }: { params: { id: string } }) {
-  // 使用正确的use函数解包params，使用断言解决类型问题
-  const projectId = use(params as any).id;
+export default function SummaryPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = React.use(params);
+  const projectId = resolvedParams.id;
   
   const router = useRouter();
   const { startLoading, stopLoading, isLoading } = useLoading();
@@ -218,6 +201,10 @@ export default function SummaryPage({ params }: { params: { id: string } }) {
   // 导出对话框状态
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [exportFormat, setExportFormat] = useState<"pdf" | "docx" | "excel">("pdf");
+
+  // 汇总统计状态 - 必须在所有条件渲染之前
+  const [summaryStats, setSummaryStats] = useState<any>({});
+  const [starredOpinions, setStarredOpinions] = useState<Set<string>>(new Set());
 
   // 初始化
   useEffect(() => {
@@ -232,14 +219,70 @@ export default function SummaryPage({ params }: { params: { id: string } }) {
     }
   }, [projectId]);
 
+  // 计算统计数据
+  useEffect(() => {
+    if (currentProject?.expertOpinions) {
+      const opinions = currentProject.expertOpinions;
+      const total = opinions.length;
+      const agree = opinions.filter((op: any) => op.result === "同意").length;
+      const modifyAgree = opinions.filter((op: any) => op.result === "修改后同意").length;
+      const disagree = opinions.filter((op: any) => op.result === "不同意").length;
+      
+      const stats = {
+        total,
+        agree,
+        modifyAgree,
+        disagree,
+        agreePercent: total > 0 ? ((agree / total) * 100).toFixed(0) : "0",
+        modifyAgreePercent: total > 0 ? ((modifyAgree / total) * 100).toFixed(0) : "0",
+        disagreePercent: total > 0 ? ((disagree / total) * 100).toFixed(0) : "0",
+        conflictCount: 0,
+        conflicts: {}
+      };
+      
+      setSummaryStats(stats);
+    }
+  }, [currentProject]);
+
   // 获取项目详情
   const getProjectDetail = () => {
+    const searchId = projectId;
+    console.log("意见汇总页面 - 正在查找项目，搜索ID:", searchId);
+    
     try {
-      // 从模拟数据中查找项目
-      console.log("意见汇总页面 - 搜索项目ID:", projectId);
+      console.log("意见汇总页面 - 尝试从quickReviewItems查找项目，可用项目数:", quickReviewItems.length);
       
-      // 从快速审查数据中查找
-      const listProject = quickReviewItems.find(item => item.id === projectId);
+      console.log("意见汇总页面 - 可用项目ID列表:", quickReviewItems.map((p: any) => p.id).join(", "));
+      
+      // 先尝试直接匹配完整ID
+      let listProject = quickReviewItems.find((p: any) => p.id === searchId);
+      console.log("意见汇总页面 - 直接匹配查找结果:", listProject ? "已找到" : "未找到");
+      
+      // 如果没找到，尝试从URL中解析出正确的格式
+      if (!listProject) {
+        // 处理 qr-2024-001 或 2024-001 格式
+        const idParts = searchId.split('-');
+        // 确保是数字部分
+        if (idParts.length >= 2) {
+          const yearPart = idParts[idParts.length - 2];
+          const numberPart = idParts[idParts.length - 1];
+          
+          // 尝试匹配格式为 qr-YYYY-NNN 的项目
+          console.log(`意见汇总页面 - 尝试匹配格式: qr-${yearPart}-${numberPart}`);
+          listProject = quickReviewItems.find((p: any) => 
+            p.id === `qr-${yearPart}-${numberPart}`
+          );
+        }
+      }
+      
+      // 如果还没找到，尝试其他属性匹配
+      if (!listProject) {
+        console.log("意见汇总页面 - 尝试通过其他属性查找...");
+        listProject = quickReviewItems.find((p: any) => 
+          p.projectId === searchId || 
+          p.reviewNumber === searchId
+        );
+      }
       
       if (listProject) {
         console.log("意见汇总页面 - 在quickReviewItems中找到项目:", listProject.id, listProject.name);
@@ -252,56 +295,52 @@ export default function SummaryPage({ params }: { params: { id: string } }) {
           statusLabel: mapStatus(listProject.status),
           reviewType: listProject.reviewType,
           projectType: listProject.projectType,
-          // 处理可能不存在的属性
+          animalType: listProject.projectSubType === "动物" ? ((listProject as any).animalType || "未指定") : undefined,
+          animalCount: listProject.projectSubType === "动物" ? ((listProject as any).animalCount || "未指定") : undefined,
+          participantCount: listProject.projectSubType === "人体" ? ((listProject as any).participantCount || "未指定") : undefined,
           ethicsCommittee: listProject.ethicsCommittee,
           department: listProject.department,
           leader: listProject.projectLeader?.name || "未指定",
           createdAt: listProject.createdAt || "未指定",
+          deadline: (listProject as any).dueDate || "未指定",
           submittedAt: listProject.submissionDate || listProject.createdAt || "未指定",
           reviewNumber: listProject.projectId,
           progress: listProject.reviewProgress || 0,
           description: listProject.description || "暂无描述",
+          // 添加其他必要的默认值
+          assignedExperts: [], // 初始化为空的已分配专家列表
+          aiSummary: "该项目提出了基于CRISPR基因编辑技术的罕见遗传病快速基因诊断体系，拟通过基因组筛查和AI辅助分析提高罕见病诊断效率。项目涉及人类基因组数据和动物模型验证，具有中度伦理风险。建议审查重点关注：(1)知情同意过程及基因信息保密措施；(2)基因编辑范围的明确限制；(3)动物实验3R原则落实情况。推荐分配具有分子生物学和医学伦理专业背景的专家进行评审。",
+          aiModelName: "EthicGPT 2024",
+          aiModelVersion: "v3.1",
+          risk: {
+            level: "中度风险",
+            analysis: "项目涉及人类基因组数据采集与分析，存在隐私泄露风险；同时涉及基因编辑技术应用于诊断，需确保不会用于非医疗目的；动物实验部分需评估动物福利保障措施的充分性。",
+            suggestions: [
+              "完善受试者基因数据保护与匿名化方案",
+              "明确CRISPR技术仅限于体外诊断用途，禁止人体基因组修饰",
+              "加强实验动物福利保障措施，严格遵循3R原则",
+              "建立基因信息安全泄露应急处理机制"
+            ]
+          },
+          files: [
+            { id: "temp1", name: "项目申请书.pdf", type: "application", size: "未知", uploadedAt: listProject.submissionDate || "未知", status: "待审核" }
+          ],
+          members: [
+            { id: "m1", name: "李助理", title: "研究助理", department: "神经科学研究院", email: "li@example.com", phone: "13800000010" },
+            { id: "m2", name: "张技术员", title: "高级技术员", department: "神经科学研究院", email: "zhang@example.com", phone: "13800000011" },
+            { id: "m3", name: "刘研究员", title: "副研究员", department: "药学院", email: "liu@example.com", phone: "13800000012" },
+            { id: "m4", name: "赵博士", title: "博士后", department: "神经科学研究院", email: "zhao@example.com", phone: "13800000012" }
+          ],
           // 添加意见汇总相关数据
           expertOpinions: mockExpertOpinions,
           advisorResponses: mockAdvisorResponses,
-          aiSummaryRaw: mockAISummary,
-          // 为 EthicProjectOverviewTab 添加字符串格式的 aiSummary
-          aiSummary: mockAISummary ? `${mockAISummary.overallOpinion}\n\n专家共识：\n${mockAISummary.expertConsensus}\n\n建议：\n${mockAISummary.recommendations}\n\n伦理考量：\n${mockAISummary.ethicalConsiderations}` : "",
-          aiModelName: "EthicGPT 2024",
-          aiModelVersion: "v3.1",
-          aiSuggestions: mockAISummary ? mockAISummary.keyPoints : [],
-          // 额外的属性用于 EthicProjectOverviewTab 组件
-          progressScore: "良好",
-          riskScore: "中度",
-          achievementScore: "良好",
-          confidenceScore: 95,
-          analysisTime: mockAISummary ? mockAISummary.date : "2024-04-15",
-          reviewResult: listProject.reviewResult || "未知",
-          reviewDate: listProject.reviewDate || "未知",
-          reviewComments: listProject.reviewComments || "暂无评论",
-          files: [
-            { id: "temp1", name: "项目申请书.pdf", type: "application", size: "未知", uploadedAt: listProject.submissionDate || "未知", status: "已审核" },
-            { id: "temp2", name: "专家意见汇总.pdf", type: "review", size: "1.2MB", uploadedAt: listProject.reviewDate || "未知", status: "已生成" }
-          ],
-          // 添加风险分析数据
-          risk: {
-            level: "中",
-            aiConfidence: 92,
-            analysis: "该罕见遗传病快速基因诊断体系建立项目主要涉及基因诊断技术的开发与应用，主要风险点分析如下：\n\n1. 技术相关风险：CRISPR基因诊断技术虽然高效准确，但在临床应用前需要严格验证其特异性和敏感性，避免假阳性和假阴性结果。当前方案中对于技术验证环节设计较为合理，但验证样本量偏小，可能影响技术评估的可靠性。\n\n2. 数据安全风险：基因数据属于高度敏感的个人信息，项目虽然采用了多级加密存储方案，但对于数据使用边界的限定和数据访问审计机制还不够完善，存在潜在的数据滥用或泄露风险。\n\n3. 伦理风险：基因诊断结果可能对受试者产生心理影响，特别是针对儿童受试者的知情同意和结果告知流程需要更加细化。当前方案中对特殊人群（如儿童、孕妇）的保护措施描述不足。\n\n4. 临床应用风险：快速诊断要求在时效性和准确性之间取得平衡，紧急情况下可能面临诊断时间压力，影响结果质量。项目需要建立明确的质量控制流程和异常结果处理机制。",
-            suggestions: [
-              "扩大技术验证样本量，建议增加至少100例不同类型罕见病样本进行验证，确保诊断技术的普适性和可靠性",
-              "完善基因数据保护方案，增加数据访问审计和追溯机制，明确规定数据使用范围和销毁流程",
-              "针对儿童受试者，制定专门的知情同意流程和心理支持方案，确保其特殊权益得到充分保障",
-              "建立诊断结果质量控制体系，包括结果复核机制、阳性/阴性对照设置和定期能力验证",
-              "完善紧急情况下的操作规程，确保在时间压力下仍能保证诊断质量和结果准确性"
-            ]
-          }
+          aiSummaryRaw: mockAISummary
         };
         
         console.log("意见汇总页面 - 已转换项目数据:", detailProject.id, detailProject.title);
         return detailProject;
       } else {
-        console.error("意见汇总页面 - 在所有数据源中均未找到ID为", projectId, "的项目");
+        console.error("意见汇总页面 - 在所有数据源中均未找到ID为", searchId, "的项目");
         return null;
       }
     } catch (error) {
@@ -416,39 +455,24 @@ export default function SummaryPage({ params }: { params: { id: string } }) {
     }
   };
 
-  // 加载状态或错误处理
-  if (!currentProject) {
-    return (
-      <div className="p-8 flex flex-col items-center justify-center">
-        <div className="mb-4">
-          <div className="w-10 h-10 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
-        </div>
-        <div className="text-lg font-medium">加载中...</div>
-        <div className="text-sm text-gray-500 mt-2">正在加载项目ID: {projectId} 的详情数据</div>
-      </div>
-    );
-  }
+  // 处理汇总报告按钮点击
+  const handleSummaryReport = () => {
+    // 触发隐藏的汇总报告对话框
+    const trigger = document.getElementById("summary-report-trigger");
+    if (trigger) {
+      trigger.click();
+    }
+  };
 
-  // 获取操作按钮
+  // 获取操作按钮 - 添加汇总报告按钮
   const getActionButtons = () => {
     return [
       {
-        id: "export-pdf",
-        label: "导出PDF",
-        icon: <Download className="h-4 w-4" />,
-        onClick: () => handleExport("pdf")
-      },
-      {
-        id: "export-word",
-        label: "导出Word",
+        id: "summary-report",
+        label: "导出汇报",
         icon: <FileText className="h-4 w-4" />,
-        onClick: () => handleExport("docx")
-      },
-      {
-        id: "print",
-        label: "打印报告",
-        icon: <Printer className="h-4 w-4" />,
-        onClick: handlePrint
+        onClick: handleSummaryReport,
+        variant: "outline" as const
       }
     ];
   };
@@ -491,7 +515,7 @@ export default function SummaryPage({ params }: { params: { id: string } }) {
   };
 
   // 获取AI推荐面板作为侧边栏
-  const aiSidebar = (
+  const aiSidebar = currentProject ? (
     <AISummaryPanel 
       projectId={projectId}
       aiSummary={currentProject.aiSummary}
@@ -499,257 +523,31 @@ export default function SummaryPage({ params }: { params: { id: string } }) {
       onExport={handleExport}
       onPrint={handlePrint}
     />
-  );
+  ) : null;
 
-  // 意见汇总选项卡
-  const OpinionSummaryTab = () => {
-    // 管理展开状态的钩子
-    const [expandedExpert, setExpandedExpert] = useState<string | null>(null);
-    
-    // 切换展开状态
-    const toggleExpert = (expertId: string) => {
-      setExpandedExpert(expandedExpert === expertId ? null : expertId);
-    };
-    
+  // 获取专家评审页签组件实例
+  const getOpinionSummaryTab = () => {
+    if (!currentProject) return null;
     return (
-      <div className="space-y-6">
-        {/* 专家评审意见列表 - 简约版 */}
-        <div>
-          <h3 className="text-lg font-medium flex items-center mb-3">
-            <Users className="h-5 w-5 mr-2 text-blue-600" />
-            专家评审意见 ({currentProject.expertOpinions.length})
-          </h3>
-          
-          <div className="overflow-hidden border rounded-lg bg-white">
-            <table className="min-w-full divide-y divide-gray-200">
-              {/* 优化表头样式 */}
-              <thead className="bg-blue-50">
-                <tr>
-                  <th scope="col" className="px-4 py-3 text-left text-sm font-medium text-blue-700 tracking-wider w-1/5">专家信息</th>
-                  <th scope="col" className="px-4 py-3 text-left text-sm font-medium text-blue-700 tracking-wider w-1/6">评审结果</th>
-                  <th scope="col" className="px-4 py-3 text-left text-sm font-medium text-blue-700 tracking-wider">AI总结评审意见</th>
-                  <th scope="col" className="px-4 py-3 text-center text-sm font-medium text-blue-700 tracking-wider w-24">操作</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {currentProject.expertOpinions.map((opinion: any) => (
-                  <React.Fragment key={opinion.id}>
-                    <tr 
-                      className={`hover:bg-gray-50 ${expandedExpert === opinion.id ? 'bg-blue-50' : ''}`}
-                    >
-                      <td className="px-4 py-3">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                            <User className="h-4 w-4" />
-                          </div>
-                          <div className="ml-3">
-                            <div className="text-sm font-medium text-gray-900">{opinion.expertName}</div>
-                            <div className="text-xs text-gray-500">{opinion.department}</div>
-                            <div className="text-xs text-gray-500">{opinion.date}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-medium rounded-full ${
-                          opinion.result === "同意" 
-                            ? "bg-green-50 text-green-700" 
-                            : opinion.result === "修改后同意" 
-                            ? "bg-amber-50 text-amber-700" 
-                            : "bg-red-50 text-red-700"
-                        }`}>
-                          {opinion.result}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex flex-wrap gap-1 mb-1">
-                          {opinion.key_points.map((point: string, index: number) => (
-                            <span key={index} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
-                              {point}
-                            </span>
-                          ))}
-                        </div>
-                        
-                        {/* AI总结部分 */}
-                        {opinion.aiSummary && (
-                          <div className="text-xs text-gray-700">
-                            <p className="text-gray-600 line-clamp-2">{opinion.aiSummary}</p>
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {/* 优化详情按钮样式，确保在一行内展示 */}
-                        <button
-                          onClick={() => toggleExpert(opinion.id)}
-                          className={`px-3 py-1.5 rounded-md text-xs font-medium inline-flex items-center whitespace-nowrap ${
-                            expandedExpert === opinion.id
-                              ? "bg-blue-100 text-blue-700 border border-blue-300"
-                              : "bg-gray-100 text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-200"
-                          }`}
-                        >
-                          {expandedExpert === opinion.id ? (
-                            <>
-                              <ChevronUp className="h-3 w-3 mr-1 flex-shrink-0" /><span>收起</span>
-                            </>
-                          ) : (
-                            <>
-                              <ChevronDown className="h-3 w-3 mr-1 flex-shrink-0" /><span>详情</span>
-                            </>
-                          )}
-                        </button>
-                      </td>
-                    </tr>
-                    
-                    {/* 行内展开的详情内容 */}
-                    {expandedExpert === opinion.id && (
-                      <tr className="bg-gray-50">
-                        <td colSpan={4} className="px-4 py-3 border-t border-gray-100">
-                          <div className="py-2">
-                            <div className="mb-3">
-                              <h4 className="text-sm font-medium text-gray-700 mb-2">专家意见</h4>
-                              <div className="p-3 bg-white rounded border text-sm">
-                                {opinion.opinion}
-                              </div>
-                            </div>
-                            
-                            {opinion.detailedOpinion && (
-                              <div className="mb-3">
-                                <h4 className="text-sm font-medium text-gray-700 mb-2">详细评审意见</h4>
-                                <div className="p-3 bg-white rounded border text-sm whitespace-pre-line">
-                                  {opinion.detailedOpinion}
-                                </div>
-                              </div>
-                            )}
-                            
-                            <div className="grid grid-cols-2 gap-4 mt-4">
-                              {opinion.expertise && (
-                                <div>
-                                  <h4 className="text-xs font-medium text-gray-700 mb-1">专业背景</h4>
-                                  <div className="flex flex-wrap gap-1">
-                                    {opinion.expertise.map((expertise: string, index: number) => (
-                                      <div key={index} className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full text-xs">
-                                        {expertise}
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                              
-                              {opinion.follow_up_questions && opinion.follow_up_questions.length > 0 && (
-                                <div>
-                                  <h4 className="text-xs font-medium text-gray-700 mb-1">跟进问题</h4>
-                                  <ul className="list-disc pl-4 text-xs text-amber-800 space-y-1">
-                                    {opinion.follow_up_questions.map((question: string, index: number) => (
-                                      <li key={index}>{question}</li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* 独立顾问回复 - 简约版 */}
-        <div>
-          <h3 className="text-lg font-medium flex items-center mb-3">
-            <UserPlus className="h-5 w-5 mr-2 text-indigo-600" />
-            独立顾问回复 ({currentProject.advisorResponses.length})
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {currentProject.advisorResponses.map((advisor: any) => (
-              <div key={advisor.id} className="border rounded-lg p-3 bg-white">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center">
-                    <div className="h-6 w-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 mr-2">
-                      <UserPlus className="h-3 w-3" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium">{advisor.advisorName}</div>
-                      <div className="text-xs text-gray-500">{advisor.organization} · {advisor.responseType}</div>
-                    </div>
-                  </div>
-                  
-                  {/* 优化顾问详情按钮样式 */}
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const detailEl = document.getElementById(`advisor-${advisor.id}`);
-                      if (detailEl) {
-                        const isHidden = detailEl.classList.contains('hidden');
-                        detailEl.classList.toggle('hidden', !isHidden);
-                        
-                        // 同时切换按钮文本
-                        const btnEl = e.currentTarget as HTMLButtonElement;
-                        if (btnEl.querySelector('.btn-text')?.textContent === '详情') {
-                          btnEl.querySelector('.btn-icon')?.classList.replace('rotate-0', '-rotate-180');
-                          btnEl.querySelector('.btn-text')!.textContent = '收起';
-                        } else {
-                          btnEl.querySelector('.btn-icon')?.classList.replace('-rotate-180', 'rotate-0');
-                          btnEl.querySelector('.btn-text')!.textContent = '详情';
-                        }
-                      }
-                    }}
-                    className="px-3 py-1.5 rounded-md text-xs font-medium inline-flex items-center bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-all"
-                  >
-                    <ChevronDown className="h-3 w-3 mr-1 btn-icon rotate-0 transition-transform duration-200" />
-                    <span className="btn-text whitespace-nowrap">详情</span>
-                  </button>
-                </div>
-                
-                <div className="mb-2">
-                  <div className="text-xs font-medium text-gray-500 mb-1">咨询问题</div>
-                  <div className="p-2 bg-indigo-50 rounded text-sm text-indigo-800">
-                    {advisor.question}
-                  </div>
-                </div>
-                
-                <div>
-                  <div className="text-xs font-medium text-gray-500 mb-1">主要建议</div>
-                  <div className="mt-1">
-                    <div className="text-sm text-gray-800">
-                      {advisor.recommendations[0]}
-                    </div>
-                    {advisor.recommendations.length > 1 && (
-                      <div className="text-xs text-gray-500 mt-1">
-                        还有 {advisor.recommendations.length - 1} 条建议...
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div id={`advisor-${advisor.id}`} className="hidden mt-3">
-                    <div className="border-t pt-2 mt-2">
-                      <div className="text-xs font-medium text-gray-500 mb-1">完整回复</div>
-                      <div className="p-3 bg-gray-50 rounded border text-sm whitespace-pre-line">
-                        {advisor.response}
-                      </div>
-                      
-                      {/* 显示所有建议 */}
-                      <div className="mt-3">
-                        <div className="text-xs font-medium text-gray-500 mb-1">所有建议</div>
-                        <ul className="list-disc pl-4 text-xs text-green-800 space-y-1 p-2 bg-green-50 rounded-md">
-                          {advisor.recommendations.map((rec: string, index: number) => (
-                            <li key={index}>{rec}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <ExpertReviewTab 
+        expertOpinions={currentProject.expertOpinions || []}
+        advisorResponses={currentProject.advisorResponses || []}
+      />
     );
   };
+
+  // 加载状态或错误处理 - 在所有Hooks之后
+  if (!currentProject) {
+    return (
+      <div className="p-8 flex flex-col items-center justify-center">
+        <div className="mb-4">
+          <div className="w-10 h-10 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
+        </div>
+        <div className="text-lg font-medium">加载中...</div>
+        <div className="text-sm text-gray-500 mt-2">正在加载项目ID: {projectId} 的详情数据</div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -770,27 +568,37 @@ export default function SummaryPage({ params }: { params: { id: string } }) {
             id: "opinions",
             label: "专家评审",
             icon: <ClipboardCheck className="h-4 w-4" />,
-            component: <OpinionSummaryTab />
+            component: getOpinionSummaryTab()
           },
           {
             id: "overview",
             label: "项目概要",
             icon: <FileIcon className="h-4 w-4" />,
-            component: <EthicProjectOverviewTab project={currentProject} />
+            component: currentProject ? <EthicProjectOverviewTab project={currentProject} /> : null
           },
           {
             id: "reviewFiles",
             label: "送审文件",
             icon: <FileText className="h-4 w-4" />,
-            component: <ReviewFilesTab project={currentProject} />
-          },
-          {
-            id: "riskAnalysis",
-            label: "风险分析",
-            icon: <AlertTriangle className="h-4 w-4" />,
-            component: <RiskAnalysisTab project={currentProject} />
+            component: currentProject ? <ReviewFilesTab project={currentProject} /> : null
           }
         ]}
+      />
+
+      {/* 专家评审汇总报告对话框 */}
+      <ExpertReviewSummaryDialog
+        stats={summaryStats}
+        starredOpinions={starredOpinions}
+        trigger={
+          <Button 
+            variant="outline" 
+            className="hidden" 
+            id="summary-report-trigger"
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            导出汇报
+          </Button>
+        }
       />
 
       {/* 导出确认对话框 */}

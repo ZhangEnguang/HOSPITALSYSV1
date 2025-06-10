@@ -545,20 +545,20 @@ export function AnimalEthicProjectEditForm({ projectData }: { projectData: any }
           </div>
 
           {/* 第四行：动物实施设备单位（跨两列） */}
-          <div className="space-y-2">
-            <Label htmlFor="facilityUnit" className="text-muted-foreground">动物实施设备单位 <span className="text-red-500">*</span></Label>
-            <Input 
-              id="facilityUnit" 
-              value={formData.facilityUnit} 
-              onChange={(e) => updateFormData("facilityUnit", e.target.value)} 
-              onBlur={() => handleBlur("facilityUnit")}
-              placeholder="请输入动物实施设备单位"
-              className={cn(
-                "border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
-                formTouched.facilityUnit && formErrors.facilityUnit ? "border-red-500" : ""
-              )}
-            />
-            {formTouched.facilityUnit && <ErrorMessage message={formErrors.facilityUnit || ""} />}
+            <div className="space-y-2">
+              <Label htmlFor="facilityUnit" className="text-muted-foreground">动物实施设备单位 <span className="text-red-500">*</span></Label>
+              <Input 
+                id="facilityUnit" 
+                value={formData.facilityUnit} 
+                onChange={(e) => updateFormData("facilityUnit", e.target.value)} 
+                onBlur={() => handleBlur("facilityUnit")}
+                placeholder="请输入动物实施设备单位"
+                className={cn(
+                  "border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
+                  formTouched.facilityUnit && formErrors.facilityUnit ? "border-red-500" : ""
+                )}
+              />
+              {formTouched.facilityUnit && <ErrorMessage message={formErrors.facilityUnit || ""} />}
           </div>
 
           {/* 第五行：开始日期、结束日期 */}

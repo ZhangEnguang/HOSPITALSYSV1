@@ -342,7 +342,7 @@ export function HumanEthicProjectForm({ initialData, editMode = false }: HumanEt
     const requiredFields = [
       "name", 
       "projectType", 
-      "projectSource",
+      "projectSource", 
       "ethicsCommittee",
       "leader", 
       "department", 
@@ -361,7 +361,7 @@ export function HumanEthicProjectForm({ initialData, editMode = false }: HumanEt
         isValid = false
         newErrors[field] = `请填写${field === "name" ? "项目名称" : 
                             field === "projectType" ? "研究类型" : 
-                            field === "projectSource" ? "项目来源" :
+                            field === "projectSource" ? "项目来源" : 
                             field === "ethicsCommittee" ? "伦理委员会" :
                             field === "leader" ? "负责人姓名" : 
                             field === "department" ? "所属院系" : 
