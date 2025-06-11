@@ -12,7 +12,9 @@ import {
   quickFilters, 
   filterCategories,
   dataListStatusVariants,
-  getStatusName
+  getStatusName,
+  reviewResultVariants,
+  dataListReviewResultVariants
 } from "./config/quick-review-config"
 import { Brain, Eye, Users, ClipboardCheck, MoreVertical, Trash2, UserPlus, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -24,6 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import AssignAdvisorDialog from "./components/assign-advisor-dialog"
 import { toast } from "@/components/ui/use-toast"
+import QuickReviewCard from "./components/quick-review-card"
 
 // 定义排序选项类型
 interface SortOption {
@@ -70,6 +73,34 @@ function QuickReviewContent() {
   const typedSortOptions: SortOption[] = sortOptions as unknown as SortOption[]
   // 定义表格列类型
   const typedTableColumns: Column[] = tableColumns as Column[]
+
+  // 为审查结果变体添加类型转换，保持与表格列中相同的颜色样式
+  const statusVariantsFormatted = Object.keys(reviewResultVariants).reduce((acc, key) => {
+    acc[key] = reviewResultVariants[key].color;
+    return acc;
+  }, {} as Record<string, string>);
+
+  // 自定义卡片渲染器
+  const customCardRenderer = (
+    item: any, 
+    actions: any[], 
+    isSelected: boolean, 
+    onToggleSelect: (selected: boolean) => void,
+    onRowActionClick?: (action: any, item: any) => void
+  ) => {
+    return (
+      <QuickReviewCard
+        key={item.id}
+        item={item}
+        actions={actions}
+        isSelected={isSelected}
+        onToggleSelect={onToggleSelect}
+        onClick={() => handleItemClick(item)}
+        statusVariants={statusVariantsFormatted}
+        getStatusName={getStatusName}
+      />
+    )
+  }
 
   // 处理视图模式切换
   const handleViewModeChange = (mode: string) => {
@@ -436,8 +467,8 @@ function QuickReviewContent() {
       cardActions={cardActions}
       titleField="name"
       descriptionField="description"
-      statusField="status"
-      statusVariants={dataListStatusVariants}
+      statusField="reviewResult"
+      statusVariants={dataListReviewResultVariants}
       getStatusName={getStatusName}
       pageSize={pageSize}
       currentPage={currentPage}
@@ -448,6 +479,7 @@ function QuickReviewContent() {
       onSelectedRowsChange={handleSelectionChange}
       idField="id"
       batchActions={batchActions}
+      customCardRenderer={customCardRenderer}
     />
 
     {/* 独立顾问指派对话框 */}

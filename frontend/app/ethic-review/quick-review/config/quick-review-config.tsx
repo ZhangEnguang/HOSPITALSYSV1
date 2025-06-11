@@ -84,6 +84,15 @@ export const dataListStatusVariants: Record<string, "default" | "destructive" | 
   "驳回": "destructive",
 }
 
+// 为 DataList 组件提供的审查结果状态变体
+export const dataListReviewResultVariants: Record<string, "default" | "destructive" | "outline" | "secondary"> = {
+  "审查通过": "default",
+  "必要的修改后同意": "secondary",
+  "不同意": "destructive",
+  "终止或暂停已同意的研究": "outline",
+  "未出结果": "secondary",
+}
+
 // 优先级变体和颜色
 export const priorityVariants: Record<string, PriorityVariant> = {
   "高": { color: "text-red-600", icon: <AlertTriangle className="h-4 w-4" /> },
@@ -91,20 +100,14 @@ export const priorityVariants: Record<string, PriorityVariant> = {
   "低": { color: "text-blue-600", icon: <CheckCircle className="h-4 w-4" /> },
 }
 
-// 状态名称映射函数
-export const getStatusName = (status: string) => {
-  switch (status) {
-    case "pending":
-      return "待审查"
-    case "reviewing":
-      return "审查中"
-    case "approved":
-      return "通过"
-    case "rejected":
-      return "驳回"
-    default:
-      return status
-  }
+// 审查结果名称映射函数
+export const getStatusName = (item: any) => {
+  // 从item中获取审查结果字段
+  const reviewResult = item.reviewResult;
+  if (!reviewResult) return "未出结果";
+  
+  // 直接返回审查结果值，因为数据中已经是中文的了
+  return reviewResult;
 }
 
 // 表格列配置
@@ -335,11 +338,6 @@ export const cardFields = [
         </div>
       );
     },
-  },
-  {
-    id: "reviewResult",
-    label: "审查结果",
-    value: (item: any) => item.reviewResult || "未出结果",
   },
 ]
 
