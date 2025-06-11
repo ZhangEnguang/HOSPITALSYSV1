@@ -146,7 +146,7 @@ function EquipmentContent() {
     setEquipmentItems(
       equipmentItems.map((item) =>
         selectedRows.includes(item.id)
-          ? { ...item, status: "在用", maintenanceStatus: "正常" }
+          ? { ...item, status: "正常", maintenanceStatus: "正常" }
           : item,
       ),
     )
@@ -188,7 +188,7 @@ function EquipmentContent() {
   const configuredBatchActions = [
     {
       id: "setInUse",
-      label: "设为在用",
+      label: "设为正常",
       icon: "CheckCircle",
       onClick: handleBatchSetInUse,
     },
@@ -209,18 +209,11 @@ function EquipmentContent() {
 
   // 创建兼容DataList组件的状态变体映射
   const compatibleStatusVariants: Record<string, "default" | "destructive" | "outline" | "secondary"> = {
-    "在用": "secondary", // 将success映射为secondary
+    "正常": "secondary", // 将success映射为secondary
     "维修中": "destructive", // warning映射为destructive  
-    "闲置": "secondary",
     "报废": "destructive",
     "待验收": "outline",
     "外借": "default",
-    
-    "正常": "secondary", // success映射为secondary
-    "异常": "destructive",
-    "待维护": "destructive", // warning映射为destructive
-    "已预约": "secondary",
-    "未使用": "outline",
   }
 
   return (
@@ -266,7 +259,7 @@ function EquipmentContent() {
         selectedRows={selectedRows}
         onSelectedRowsChange={setSelectedRows}
         batchActions={configuredBatchActions}
-        gridClassName="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        gridClassName="grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4"
         onRowActionClick={(action, row) => {
           if (action.id === "delete") {
             handleDeleteItem(row)

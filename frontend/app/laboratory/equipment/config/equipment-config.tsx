@@ -69,18 +69,11 @@ type ExtendedBadgeVariant = "default" | "destructive" | "outline" | "secondary" 
 
 // 状态颜色映射
 export const statusColors: Record<string, ExtendedBadgeVariant> = {
-  "在用": "success",
+  "正常": "success",
   "维修中": "warning",
-  "闲置": "secondary",
   "报废": "destructive",
   "待验收": "outline",
   "外借": "default",
-  
-  "正常": "success",
-  "异常": "destructive",
-  "待维护": "warning",
-  "已预约": "secondary",
-  "未使用": "outline",
 }
 
 // 通用表格列配置
@@ -126,15 +119,14 @@ export const quickFilters = [
   },
   {
     id: "status",
-    label: "使用状态",
+    label: "仪器状态",
     value: "",
     options: [
-      { id: "1", label: "在用", value: "在用" },
+      { id: "1", label: "正常", value: "正常" },
       { id: "2", label: "维修中", value: "维修中" },
-      { id: "3", label: "闲置", value: "闲置" },
-      { id: "4", label: "报废", value: "报废" },
-      { id: "5", label: "待验收", value: "待验收" },
-      { id: "6", label: "外借", value: "外借" },
+      { id: "3", label: "报废", value: "报废" },
+      { id: "4", label: "待验收", value: "待验收" },
+      { id: "5", label: "外借", value: "外借" },
     ],
     category: "default",
   },
@@ -432,7 +424,7 @@ export const equipmentCardFields = [
   },
   { 
     id: "status", 
-    label: "使用状态", 
+    label: "仪器状态", 
     value: (item: any) => (
       <Badge variant={(statusColors[item.status] || "secondary") as any}>{item.status}</Badge>
     )
@@ -454,55 +446,35 @@ export const equipmentCardFields = [
   }
 ]
 
-// 仪器特定操作配置
+// 仪器操作配置
 export const equipmentActions = [
   {
     id: "view",
     label: "查看详情",
     icon: <Eye className="h-4 w-4" />,
-    onClick: (item: any) => {
-      // 使用路由跳转到仪器详情页
-      const url = `/laboratory/equipment/${item.id}`;
-      window.open(url, "_self");
-    },
-  },
-  {
-    id: "edit",
-    label: "编辑仪器",
-    icon: <Pencil className="h-4 w-4" />,
-    onClick: (item: any) => {
-      const url = `/laboratory/equipment/edit/${item.id}`;
-      window.open(url, "_self");
-    },
   },
   {
     id: "booking",
-    label: "预约申请",
+    label: "仪器预约",
     icon: <Calendar className="h-4 w-4" />,
-    onClick: (item: any) => {
-      const url = `/laboratory/equipment/booking/${item.id}`;
-      window.open(url, "_self");
-    },
+    // 只有状态为"正常"的仪器才可以预约
+    disabled: (item: any) => item.status !== "正常",
   },
   {
     id: "maintenance",
     label: "维护登记",
     icon: <Wrench className="h-4 w-4" />,
-    onClick: (item: any) => {
-      const url = `/laboratory/equipment/maintenance/${item.id}`;
-      window.open(url, "_self");
-    },
+  },
+  {
+    id: "edit",
+    label: "编辑仪器",
+    icon: <Pencil className="h-4 w-4" />,
   },
   {
     id: "delete",
     label: "删除仪器",
     icon: <Trash2 className="h-4 w-4" />,
     variant: "destructive",
-    onClick: (item: any) => {
-      // 这个onClick会被DataList组件的onRowActionClick处理
-      // 实际的删除逻辑在page.tsx中的handleDeleteItem函数中
-      console.log("删除仪器:", item.name);
-    },
   },
 ]
 
@@ -561,15 +533,15 @@ const EquipmentCard = ({
   return (
     <Card
       className={cn(
-        "group transition-all duration-300 border border-[#E9ECF2] shadow-none hover:shadow-[0px_38px_45px_0px_rgba(198,210,241,0.25)] hover:border-primary/20 cursor-pointer",
-        "flex flex-col w-full", // 确保卡片占据完整宽度且为flex布局
+        "group transition-all duration-200 border border-[#E9ECF2] shadow-sm hover:shadow-md hover:border-primary/20 cursor-pointer",
+        "flex flex-col w-full h-full", // 确保卡片占据完整宽度和高度且为flex布局
         isSelected && "ring-2 ring-primary"
       )}
     >
       {/* 仪器图片区域 - 只显示第一张图片 */}
       <div 
         className="relative w-full overflow-hidden rounded-t-lg bg-gray-50 flex-shrink-0"
-        style={{ paddingBottom: '60%' }}
+        style={{ paddingBottom: '45%' }}
       >
         <div className="absolute inset-0">
           {item.images && item.images.length > 0 ? (
@@ -585,7 +557,7 @@ const EquipmentCard = ({
                   parent.innerHTML = `
                     <div class="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
                       <div class="flex flex-col items-center justify-center space-y-2 text-gray-400">
-                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                           <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
                         </svg>
                         <span class="text-xs text-gray-500">暂无图片</span>
@@ -598,7 +570,7 @@ const EquipmentCard = ({
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
               <div className="flex flex-col items-center justify-center space-y-2 text-gray-400">
-                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
                 </svg>
                 <span className="text-xs text-gray-500">暂无图片</span>
@@ -645,33 +617,39 @@ const EquipmentCard = ({
       </div>
       
       {/* 卡片内容 */}
-      <div className="p-3 flex flex-col flex-1">
-        <div className="mb-2">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-sm text-gray-900 transition-colors duration-300 group-hover:text-primary truncate leading-tight">
-              {item.name}
-            </h3>
-            <p className="text-xs text-muted-foreground truncate mt-0.5">
-              {item.model}
-            </p>
-          </div>
+      <div className="p-3 flex flex-col flex-1 min-h-0">
+        {/* 标题和型号 */}
+        <div className="flex-shrink-0 mb-2">
+          <h3 className="font-medium text-sm text-gray-900 transition-colors duration-300 group-hover:text-primary truncate leading-tight mb-1">
+            {item.name}
+          </h3>
+          <p className="text-xs text-muted-foreground truncate leading-relaxed">
+            {item.model}
+          </p>
         </div>
 
-        {/* 仪器信息 */}
-        <div className="space-y-2 flex-1">
-          {/* 移除原有的详细信息网格 */}
-          
-          {/* 简化后只保留必要信息 */}
-        </div>
+        {/* 填充空间 */}
+        <div className="flex-1 min-h-0"></div>
         
         {/* 预约次数和使用状态 - 固定在底部 */}
-        <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
-          <span className="text-xs text-muted-foreground">
-            预约次数：{item.bookingCount || 0}次
-          </span>
+        <div className="flex-shrink-0 flex items-center justify-between pt-2 border-t border-gray-100">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground leading-none">
+              预约次数：{item.bookingCount || 0}次
+            </span>
+            {item.status === "正常" ? (
+              <span className="text-xs px-2 py-0.5 bg-green-50 text-green-600 rounded-full border border-green-200 leading-none">
+                可预约
+              </span>
+            ) : (
+              <span className="text-xs px-2 py-0.5 bg-gray-50 text-gray-500 rounded-full border border-gray-200 leading-none">
+                不可预约
+              </span>
+            )}
+          </div>
           <Badge 
             variant={(statusColors[item.status] || "secondary") as any}
-            className="font-medium text-xs"
+            className="font-medium text-xs leading-none"
           >
             {item.status}
           </Badge>

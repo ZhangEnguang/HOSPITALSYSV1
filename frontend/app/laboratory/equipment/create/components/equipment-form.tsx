@@ -44,7 +44,7 @@ export function EquipmentForm({ equipmentId, isEditMode = false }: EquipmentForm
     serialNumber: "",
     description: "",
     category: "",
-    status: "待验收",
+    status: "正常",
     department: "",
     location: "",
     
@@ -211,7 +211,7 @@ export function EquipmentForm({ equipmentId, isEditMode = false }: EquipmentForm
       serialNumber: "",
       description: "",
       category: "",
-      status: "待验收",
+      status: "正常",
       department: "",
       location: "",
       purchaseDate: new Date(),
@@ -411,7 +411,7 @@ export function EquipmentForm({ equipmentId, isEditMode = false }: EquipmentForm
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="status" className="text-muted-foreground">使用状态</Label>
+              <Label htmlFor="status" className="text-muted-foreground">仪器状态</Label>
               <Select 
                 value={formData.status} 
                 onValueChange={(value) => updateFormData("status", value)}
@@ -420,12 +420,11 @@ export function EquipmentForm({ equipmentId, isEditMode = false }: EquipmentForm
                   id="status"
                   className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
                 >
-                  <SelectValue placeholder="请选择使用状态" />
+                  <SelectValue placeholder="请选择仪器状态" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="在用">在用</SelectItem>
+                  <SelectItem value="正常">正常</SelectItem>
                   <SelectItem value="维修中">维修中</SelectItem>
-                  <SelectItem value="闲置">闲置</SelectItem>
                   <SelectItem value="报废">报废</SelectItem>
                   <SelectItem value="待验收">待验收</SelectItem>
                   <SelectItem value="外借">外借</SelectItem>
