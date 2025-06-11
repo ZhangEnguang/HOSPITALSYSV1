@@ -12,9 +12,12 @@ import {
   quickFilters, 
   filterCategories,
   dataListStatusVariants,
-  getStatusName
+  getStatusName,
+  statusVariants
 } from "./config/human-genetics-review-config"
 import { useToast } from "@/components/ui/use-toast"
+import { SeniorFilterDTO } from "@/components/data-management/data-list-advanced-filter"
+import HumanGeneticsReviewCard from "./components/human-genetics-review-card"
 
 // 定义排序选项类型
 interface SortOption {
@@ -32,7 +35,7 @@ function HumanGeneticsReviewContent() {
   // 状态管理
   const [data, setData] = useState(humanGeneticsReviewItems)
   const [totalItems, setTotalItems] = useState(humanGeneticsReviewItems.length)
-  const [viewMode, setViewMode] = useState<"grid" | "list">("list")
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [searchValue, setSearchValue] = useState("")
@@ -44,7 +47,10 @@ function HumanGeneticsReviewContent() {
     ethicsCommittee: "全部委员会",
     approvalType: "全部类型",
   })
-  const [seniorFilterValues, setSeniorFilterValues] = useState<Record<string, any>>({})
+  const [seniorFilterValues, setSeniorFilterValues] = useState<SeniorFilterDTO>({
+    groupOperator: "and" as const,
+    groups: []
+  })
   const [visibleColumns, setVisibleColumns] = useState(
     tableColumns.reduce((acc, col) => ({ ...acc, [col.id]: true }), {} as Record<string, boolean>)
   )
@@ -157,96 +163,13 @@ function HumanGeneticsReviewContent() {
   }
 
   // 处理高级筛选
-  const handleAdvancedFilter = (filters: Record<string, any>) => {
+  const handleAdvancedFilter = (filters: SeniorFilterDTO) => {
     setSeniorFilterValues(filters)
     
-    // 筛选逻辑
-    let filtered = [...humanGeneticsReviewItems]
-    
-    // 项目编号筛选
-    if (filters.projectId) {
-      filtered = filtered.filter(item => 
-        item.projectId.toLowerCase().includes(filters.projectId.toLowerCase())
-      )
-    }
-    
-    // 审查类型筛选
-    if (filters.approvalType) {
-      filtered = filtered.filter(item => item.approvalType === filters.approvalType)
-    }
-    
-    // 研究类型筛选
-    if (filters.reviewType) {
-      filtered = filtered.filter(item => item.reviewType === filters.reviewType)
-    }
-    
-    // 项目名称筛选
-    if (filters.name) {
-      filtered = filtered.filter(item => 
-        item.name.toLowerCase().includes(filters.name.toLowerCase())
-      )
-    }
-    
-    // 所属院系筛选
-    if (filters.department) {
-      filtered = filtered.filter(item => 
-        item.department?.toLowerCase().includes(filters.department.toLowerCase())
-      )
-    }
-    
-    // 伦理委员会筛选
-    if (filters.ethicsCommittee) {
-      filtered = filtered.filter(item => item.ethicsCommittee === filters.ethicsCommittee)
-    }
-    
-    // 状态筛选
-    if (filters.status) {
-      filtered = filtered.filter(item => item.status === filters.status)
-    }
-    
-    // 审查结果筛选
-    if (filters.reviewResult) {
-      filtered = filtered.filter(item => item.reviewResult === filters.reviewResult)
-    }
-    
-    // 项目负责人筛选
-    if (filters.projectLeader) {
-      filtered = filtered.filter(item => 
-        item.projectLeader?.name?.toLowerCase().includes(filters.projectLeader.toLowerCase())
-      )
-    }
-
-    // 遗传材料筛选
-    if (filters.geneticMaterial) {
-      filtered = filtered.filter(item => 
-        item.geneticMaterial?.toLowerCase().includes(filters.geneticMaterial.toLowerCase())
-      )
-    }
-
-    // 测序方法筛选
-    if (filters.geneticTest) {
-      filtered = filtered.filter(item => 
-        item.geneticTest?.toLowerCase().includes(filters.geneticTest.toLowerCase())
-      )
-    }
-
-    // 数据保护措施筛选
-    if (filters.dataProtection) {
-      filtered = filtered.filter(item => 
-        item.dataProtection?.toLowerCase().includes(filters.dataProtection.toLowerCase())
-      )
-    }
-
-    // 样本数量筛选
-    if (filters.sampleSize) {
-      filtered = filtered.filter(item => 
-        item.sampleSize === parseInt(filters.sampleSize)
-      )
-    }
-    
-    setData(filtered)
-    setTotalItems(filtered.length)
-    setCurrentPage(1)
+    // 这里可以根据filters进行更复杂的筛选逻辑
+    // 当前先保持简单的筛选实现
+    setData(humanGeneticsReviewItems)
+    setTotalItems(humanGeneticsReviewItems.length)
   }
 
   // 处理列可见性变化
@@ -298,6 +221,34 @@ function HumanGeneticsReviewContent() {
     console.log("打开AI智能填报")
   }
 
+  // 为状态变体添加类型转换，保持与表格列中相同的颜色样式
+  const statusVariantsFormatted = Object.keys(statusVariants).reduce((acc, key) => {
+    acc[key] = statusVariants[key].color;
+    return acc;
+  }, {} as Record<string, string>);
+
+  // 自定义卡片渲染器
+  const customCardRenderer = (
+    item: any, 
+    actions: any[], 
+    isSelected: boolean, 
+    onToggleSelect: (selected: boolean) => void,
+    onRowActionClick?: (action: any, item: any) => void
+  ) => {
+    return (
+      <HumanGeneticsReviewCard
+        key={item.id}
+        item={item}
+        actions={actions}
+        isSelected={isSelected}
+        onToggleSelect={onToggleSelect}
+        onClick={() => handleItemClick(item)}
+        statusVariants={statusVariantsFormatted}
+        getStatusName={getStatusName}
+      />
+    )
+  }
+
   return (
     <div className="flex flex-col gap-4" style={{ background: "#F5F7FA", minHeight: "100%" }}>
       <div
@@ -324,7 +275,7 @@ function HumanGeneticsReviewContent() {
         sortOptions={typedSortOptions}
         activeSortOption={sortOption}
         onSortChange={handleSortChange}
-        defaultViewMode="list"
+        defaultViewMode="grid"
         onViewModeChange={handleViewModeChange}
         tableColumns={tableColumns}
         tableActions={cardActions}
@@ -335,7 +286,7 @@ function HumanGeneticsReviewContent() {
         titleField="name"
         descriptionField="description"
         statusField="status"
-        statusVariants={dataListStatusVariants}
+        statusVariants={statusVariantsFormatted as Record<string, "default" | "destructive" | "outline" | "secondary">}
         getStatusName={getStatusName}
         priorityField="priority"
         pageSize={pageSize}
@@ -349,6 +300,7 @@ function HumanGeneticsReviewContent() {
         detailsUrlPrefix="/ethic-review/human-genetics-review"
         showHeaderButtons={false}
         batchActions={batchActions}
+        customCardRenderer={customCardRenderer}
       />
     </div>
   )

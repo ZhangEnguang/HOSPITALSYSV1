@@ -440,8 +440,7 @@ function MeetingReviewContent() {
       <DataList
       title="会议审查"
       data={data}
-      addButtonLabel="新建"
-      onAddNew={handleAddNew}
+      showHeaderButtons={false}
       searchValue={searchValue}
       searchPlaceholder="搜索项目名称、院系或负责人..."
       noResultsText="未找到符合条件的会议审查项目"

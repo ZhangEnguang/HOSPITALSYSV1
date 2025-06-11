@@ -64,9 +64,10 @@ interface PriorityVariant {
 
 // 定义状态变体和颜色
 export const statusVariants: Record<string, StatusVariant> = {
-  "已提交": { color: "bg-blue-100 text-blue-700 border-blue-300" },
-  "形审通过": { color: "bg-green-100 text-green-700 border-green-300" },
-  "形审退回": { color: "bg-red-100 text-red-700 border-red-300" },
+  "已提交": { color: "bg-sky-50 text-sky-600 border-sky-200" },
+  "形审通过": { color: "bg-emerald-50 text-emerald-600 border-emerald-200" },
+  "形审退回": { color: "bg-rose-50 text-rose-600 border-rose-200" },
+  "已作废": { color: "bg-gray-50 text-gray-500 border-gray-200" },
 }
 
 // 优先级变体和颜色
@@ -77,21 +78,13 @@ export const priorityVariants: Record<string, PriorityVariant> = {
 }
 
 // 状态名称映射函数
-export const getStatusName = (status: string) => {
-  switch (status) {
-    case "approved":
-      return "已通过"
-    case "pending":
-      return "待审核"
-    case "inProgress":
-      return "进行中"
-    case "rejected":
-      return "已驳回"
-    case "unsubmitted":
-      return "待提交"
-    default:
-      return status
-  }
+export const getStatusName = (item: any) => {
+  // 从item中获取status字段
+  const status = item.status;
+  if (!status) return "";
+  
+  // 直接返回中文状态值，因为数据中已经是中文的了
+  return status;
 }
 
 // 此函数使用了card-list组件中的MoreVertical

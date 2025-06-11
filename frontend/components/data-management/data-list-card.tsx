@@ -43,7 +43,7 @@ export interface DataListCardProps {
   titleField: string
   descriptionField?: string
   statusField?: string
-  statusVariants?: Record<string, "default" | "destructive" | "outline" | "secondary">
+  statusVariants?: Record<string, "default" | "destructive" | "outline" | "secondary" | string>
   getStatusName?: (item: any) => string
   priorityField?: string
   progressField?: string
@@ -128,7 +128,22 @@ export default function DataListCard({
   };
 
   const getStatusVariant = (status: string) => {
-    return statusVariants[status] || "secondary"
+    const variant = statusVariants[status];
+    // 如果variant是内置的Badge variant类型，直接返回
+    if (variant && ["default", "destructive", "outline", "secondary"].includes(variant)) {
+      return variant as "default" | "destructive" | "outline" | "secondary";
+    }
+    // 否则返回outline作为默认值，并在Badge上应用自定义类
+    return "outline";
+  }
+
+  const getStatusCustomClass = (status: string) => {
+    const variant = statusVariants[status];
+    // 如果variant不是内置的Badge variant类型，则作为自定义CSS类返回
+    if (variant && !["default", "destructive", "outline", "secondary"].includes(variant)) {
+      return variant;
+    }
+    return "";
   }
 
   const getDisplayStatus = () => {
@@ -163,7 +178,14 @@ export default function DataListCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-base transition-colors duration-300 group-hover:text-primary truncate flex-1">{renderValue(title)}</h3>
-              {status && <Badge variant={getStatusVariant(status)}>{renderValue(getDisplayStatus())}</Badge>}
+              {status && (
+                <Badge 
+                  variant={getStatusVariant(status)} 
+                  className={cn("", getStatusCustomClass(status))}
+                >
+                  {renderValue(getDisplayStatus())}
+                </Badge>
+              )}
               {priority === "medium" && (
                 <Badge variant="destructive" className="whitespace-nowrap flex-shrink-0">
                   高

@@ -32,28 +32,7 @@ export const tableColumns = [
     header: "审查类型",
     accessorKey: "reviewType",
     className: "w-[130px]",
-    cell: (item: any) => (
-      <div className="flex items-center gap-2">
-        <Badge 
-          variant="outline" 
-          className={cn("px-2 py-0.5 border", 
-            item.reviewType.includes("初始") ? "bg-blue-100 text-blue-700 border-blue-300" :
-            item.reviewType.includes("定期") || item.reviewType.includes("年度") ? "bg-purple-100 text-purple-700 border-purple-300" :
-            item.reviewType.includes("人遗") ? "bg-amber-100 text-amber-700 border-amber-300" :
-            item.reviewType.includes("修正案") ? "bg-green-100 text-green-700 border-green-300" :
-            item.reviewType.includes("安全") ? "bg-red-100 text-red-700 border-red-300" :
-            item.reviewType.includes("偏离") ? "bg-yellow-100 text-yellow-700 border-yellow-300" :
-            item.reviewType.includes("暂停") || item.reviewType.includes("终止") ? "bg-orange-100 text-orange-700 border-orange-300" :
-            item.reviewType.includes("完成") ? "bg-teal-100 text-teal-700 border-teal-300" :
-            item.reviewType.includes("国际") ? "bg-indigo-100 text-indigo-700 border-indigo-300" :
-            item.reviewType.includes("材料") ? "bg-cyan-100 text-cyan-700 border-cyan-300" :
-            "bg-gray-100 text-gray-700 border-gray-300"
-          )}
-        >
-          {item.reviewType}
-        </Badge>
-      </div>
-    ),
+    cell: (item: any) => <div>{item.reviewType || "-"}</div>,
   },
   {
     id: "name",
@@ -67,22 +46,7 @@ export const tableColumns = [
     header: "适用项目类型",
     accessorKey: "projectType",
     className: "w-[120px]",
-    cell: (item: any) => {
-      const projectType = item.projectType || "-";
-      let badgeClass = "bg-gray-100 text-gray-700 border-gray-300";
-      
-      if (projectType === "人体") {
-        badgeClass = "bg-blue-100 text-blue-700 border-blue-300";
-      } else if (projectType === "动物") {
-        badgeClass = "bg-amber-100 text-amber-700 border-amber-300";
-      }
-      
-      return (
-        <Badge variant="outline" className={cn("px-2 py-0.5 border", badgeClass)}>
-          {projectType}
-        </Badge>
-      );
-    },
+    cell: (item: any) => <div>{item.projectType || "-"}</div>,
   },
   {
     id: "documentCount",
