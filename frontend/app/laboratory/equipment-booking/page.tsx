@@ -27,7 +27,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { toast } from "@/components/ui/use-toast"
-import { BookingDetailDialog } from "./components/booking-detail-dialog"
 import { BookingApprovalDialog } from "./components/booking-approval-dialog"
 
 function EquipmentBookingContent() {
@@ -54,13 +53,10 @@ function EquipmentBookingContent() {
     duration: true,
     applicationDate: true,
   })
+  
   // 删除确认对话框状态
   const [itemToDelete, setItemToDelete] = useState<any>(null)
   
-  // 预约详情弹框状态
-  const [detailDialogOpen, setDetailDialogOpen] = useState(false)
-  const [selectedBooking, setSelectedBooking] = useState<any>(null)
-
   // 审核弹框状态
   const [approvalDialogOpen, setApprovalDialogOpen] = useState(false)
   const [selectedApprovalBooking, setSelectedApprovalBooking] = useState<any>(null)
@@ -254,9 +250,8 @@ function EquipmentBookingContent() {
     const actionId = action.id; // 从action对象中提取id
     
     if (actionId === "view") {
-      // 使用弹框显示详情而不是跳转页面
-      setSelectedBooking(item)
-      setDetailDialogOpen(true)
+      // 跳转到独立的查看页面
+      router.push(`/laboratory/equipment-booking/view/${item.id}`)
     } else if (actionId === "edit") {
       router.push(`/laboratory/equipment-booking/edit/${item.id}`)
     } else if (actionId === "approve") {
@@ -409,13 +404,6 @@ function EquipmentBookingContent() {
         onSelectedRowsChange={setSelectedRows}
         batchActions={configuredBatchActions}
         onRowActionClick={handleRowAction}
-      />
-
-      {/* 预约详情弹框 */}
-      <BookingDetailDialog
-        open={detailDialogOpen}
-        onOpenChange={setDetailDialogOpen}
-        booking={selectedBooking}
       />
 
       {/* 审核申领弹框 */}

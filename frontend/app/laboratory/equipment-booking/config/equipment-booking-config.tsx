@@ -62,12 +62,12 @@ export const users = [
 // 自定义扩展Badge组件支持的variant类型
 type ExtendedBadgeVariant = "default" | "destructive" | "outline" | "secondary" | "success" | "warning";
 
-// 状态颜色映射
-export const statusColors: Record<string, ExtendedBadgeVariant> = {
-  "待审核": "secondary",
-  "审核通过": "success", 
-  "审核退回": "destructive",
-  "已取消": "warning",
+// 状态颜色映射 - 更新为CSS类名形式，与系统其他模块保持一致
+export const statusColors: Record<string, string> = {
+  "待审核": "bg-amber-50 text-amber-700 border-amber-200",
+  "审核通过": "bg-green-50 text-green-700 border-green-200", 
+  "审核退回": "bg-red-50 text-red-700 border-red-200",
+  "已取消": "bg-gray-50 text-gray-700 border-gray-200",
 }
 
 // 快速筛选配置
@@ -298,50 +298,44 @@ export const equipmentBookingColumns = [
     id: "status",
     header: "审核状态",
     accessorKey: "status",
-    cell: (item: any) => <Badge variant={(statusColors[item.status] || "secondary") as any}>{item.status}</Badge>,
+    cell: (item: any) => <Badge className={statusColors[item.status] || "bg-slate-50 text-slate-700 border-slate-200"}>{item.status}</Badge>,
   },
 ]
 
 // 卡片视图字段配置
 export const equipmentBookingCardFields = [
   { 
-    id: "equipmentName", 
+    id: "equipmentInfo", 
     label: "预约仪器", 
     value: (item: any) => `${item.equipmentName} (${item.equipmentType})`
-  },
-  { 
-    id: "status", 
-    label: "预约状态", 
-    value: (item: any) => (
-      <Badge variant={(statusColors[item.status] || "secondary") as any}>{item.status}</Badge>
-    )
   },
   { 
     id: "bookingTime", 
     label: "预约时间", 
     value: (item: any) => (
       <div className="flex flex-col">
-        <span>{format(new Date(item.startTime), "yyyy/MM/dd")}</span>
+        <span className="font-medium">{format(new Date(item.startTime), "yyyy年MM月dd日")}</span>
         <span className="text-sm text-muted-foreground">
-          {format(new Date(item.startTime), "HH:mm")} - {format(new Date(item.endTime), "HH:mm")}
+          {format(new Date(item.startTime), "HH:mm")} - {format(new Date(item.endTime), "HH:mm")} ({item.duration})
         </span>
       </div>
     )
   },
   { 
-    id: "duration", 
-    label: "使用时长", 
-    value: (item: any) => item.duration
-  },
-  { 
     id: "applicant", 
     label: "申请人", 
-    value: (item: any) => `${item.applicant.name} (${item.department})`
+    value: (item: any) => (
+      <div className="flex items-center gap-2">
+        <span className="font-medium">{item.applicant.name}</span>
+        <div className="w-px h-3 bg-gray-300"></div>
+        <span className="text-sm text-muted-foreground">{item.department}</span>
+      </div>
+    )
   },
   { 
     id: "applicationDate", 
     label: "申请时间", 
-    value: (item: any) => format(new Date(item.applicationDate), "yyyy/MM/dd HH:mm")
+    value: (item: any) => format(new Date(item.applicationDate), "MM/dd HH:mm")
   }
 ]
 
@@ -351,6 +345,10 @@ export const equipmentBookingActions = [
     id: "view",
     label: "查看详情",
     icon: <Eye className="h-4 w-4" />,
+    onClick: (item: any) => {
+      const url = `/laboratory/equipment-booking/view/${item.id}`;
+      window.open(url, "_self");
+    },
   },
   {
     id: "edit",
@@ -369,12 +367,6 @@ export const equipmentBookingActions = [
       const url = `/laboratory/equipment-booking/approve/${item.id}`;
       window.open(url, "_self");
     },
-  },
-  {
-    id: "cancel",
-    label: "取消预约",
-    icon: <X className="h-4 w-4" />,
-    variant: "destructive",
   },
   {
     id: "delete",

@@ -57,12 +57,12 @@ export const users = [
 // 自定义扩展Badge组件支持的variant类型
 type ExtendedBadgeVariant = "default" | "destructive" | "outline" | "secondary" | "success" | "warning";
 
-// 状态颜色映射
-export const statusColors: Record<string, ExtendedBadgeVariant> = {
-  "待审核": "secondary",
-  "审核通过": "success", 
-  "审核退回": "destructive",
-  "已取消": "warning",
+// 状态颜色映射 - 更新为CSS类名形式，与系统其他模块保持一致
+export const statusColors: Record<string, string> = {
+  "待审核": "bg-amber-50 text-amber-700 border-amber-200",
+  "审核通过": "bg-green-50 text-green-700 border-green-200", 
+  "审核退回": "bg-red-50 text-red-700 border-red-200",
+  "已取消": "bg-gray-50 text-gray-700 border-gray-200",
 }
 
 // 快速筛选配置
@@ -335,7 +335,7 @@ export const reagentApplicationColumns = [
     id: "status",
     header: "审核状态",
     accessorKey: "status",
-    cell: (item: any) => <Badge variant={(statusColors[item.status] || "secondary") as any}>{item.status}</Badge>,
+    cell: (item: any) => <Badge className={statusColors[item.status] || "bg-slate-50 text-slate-700 border-slate-200"}>{item.status}</Badge>,
   },
 ]
 
@@ -347,43 +347,32 @@ export const reagentApplicationCardFields = [
     value: (item: any) => `${item.reagentName} (${item.reagentType})`
   },
   { 
-    id: "quantity", 
-    label: "申领数量", 
-    value: (item: any) => `${item.quantity} ${item.unit}`
-  },
-  { 
-    id: "status", 
-    label: "审核状态", 
+    id: "quantityInfo", 
+    label: "申领信息", 
     value: (item: any) => (
-      <Badge variant={(statusColors[item.status] || "secondary") as any}>{item.status}</Badge>
+      <div className="flex flex-col">
+        <span className="font-medium">{item.quantity} {item.unit}</span>
+        <span className="text-sm text-muted-foreground">
+          期望：{format(new Date(item.expectedDate), "MM/dd")} ({item.urgency})
+        </span>
+      </div>
     )
-  },
-  { 
-    id: "urgency", 
-    label: "紧急程度", 
-    value: (item: any) => {
-      const urgencyColors: Record<string, ExtendedBadgeVariant> = {
-        "一般": "outline",
-        "紧急": "warning",
-        "非常紧急": "destructive",
-      }
-      return <Badge variant={(urgencyColors[item.urgency] || "outline") as any}>{item.urgency}</Badge>
-    }
   },
   { 
     id: "applicant", 
     label: "申请人", 
-    value: (item: any) => `${item.applicant.name} (${item.department})`
-  },
-  { 
-    id: "expectedDate", 
-    label: "期望日期", 
-    value: (item: any) => format(new Date(item.expectedDate), "yyyy/MM/dd")
+    value: (item: any) => (
+      <div className="flex items-center gap-2">
+        <span className="font-medium">{item.applicant.name}</span>
+        <div className="w-px h-3 bg-gray-300"></div>
+        <span className="text-sm text-muted-foreground">{item.department}</span>
+      </div>
+    )
   },
   { 
     id: "applicationDate", 
     label: "申请时间", 
-    value: (item: any) => format(new Date(item.applicationDate), "yyyy/MM/dd HH:mm")
+    value: (item: any) => format(new Date(item.applicationDate), "MM/dd HH:mm")
   }
 ]
 
@@ -411,12 +400,6 @@ export const reagentApplicationActions = [
     id: "approve",
     label: "审核申领",
     icon: <ClipboardCheck className="h-4 w-4" />,
-  },
-  {
-    id: "cancel",
-    label: "取消申领",
-    icon: <X className="h-4 w-4" />,
-    variant: "destructive",
   },
   {
     id: "delete",
