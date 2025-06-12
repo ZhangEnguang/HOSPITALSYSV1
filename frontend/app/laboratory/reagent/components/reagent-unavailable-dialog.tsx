@@ -25,13 +25,20 @@ import {
   Package,
   FlaskConical,
   ShieldAlert,
-  Droplets
+  Droplets,
+  Contact
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { allDemoReagentItems } from "../data/reagent-demo-data"
 import { statusColors } from "../config/reagent-config"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface ReagentUnavailableDialogProps {
   open: boolean
@@ -119,7 +126,7 @@ export function ReagentUnavailableDialog({
       // 简单的化学相似性判断：包含相同元素
       const reagentElements = reagent.linearFormula.match(/[A-Z][a-z]*/g) || []
       const itemElements = item.linearFormula.match(/[A-Z][a-z]*/g) || []
-      const commonElements = reagentElements.filter(el => itemElements.includes(el))
+      const commonElements = reagentElements.filter((el: string) => itemElements.includes(el))
       return commonElements.length >= 2 // 至少有2个相同元素
     })
     
@@ -128,8 +135,8 @@ export function ReagentUnavailableDialog({
       if (!reagent.description || !item.description) return false
       const reagentKeywords = reagent.description.toLowerCase().split(/[，。、\s]+/)
       const itemKeywords = item.description.toLowerCase().split(/[，。、\s]+/)
-      const commonKeywords = reagentKeywords.filter(kw => 
-        kw.length > 1 && itemKeywords.some(ikw => ikw.includes(kw) || kw.includes(ikw))
+      const commonKeywords = reagentKeywords.filter((kw: string) => 
+        kw.length > 1 && itemKeywords.some((ikw: string) => ikw.includes(kw) || kw.includes(ikw))
       )
       return commonKeywords.length >= 1
     })
@@ -179,10 +186,22 @@ export function ReagentUnavailableDialog({
   }
   
   const handleContactManager = (type: 'phone' | 'email') => {
+    console.log('联系管理员:', type, managerContact)
     if (type === 'phone') {
-      window.open(`tel:${managerContact.phone}`)
+      // 复制电话号码到剪贴板
+      navigator.clipboard?.writeText(managerContact.phone).then(() => {
+        alert(`电话号码已复制: ${managerContact.phone}`)
+      }).catch(() => {
+        // 尝试打开电话应用
+        const link = document.createElement('a')
+        link.href = `tel:${managerContact.phone}`
+        link.click()
+      })
     } else {
-      window.open(`mailto:${managerContact.email}`)
+      // 打开邮件客户端
+      const link = document.createElement('a')
+      link.href = `mailto:${managerContact.email}?subject=试剂申领咨询&body=您好，我在试剂申领过程中遇到问题，请协助处理。`
+      link.click()
     }
   }
 
@@ -203,15 +222,61 @@ export function ReagentUnavailableDialog({
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto space-y-6 min-h-0 custom-scrollbar">
-          {/* 试剂信息卡片 */}
-          <Card className={cn(
-            "border-l-4",
-            reason.severity === "high" ? "border-l-red-400" : 
-            reason.severity === "medium" ? "border-l-orange-400" : "border-l-gray-400"
-          )}>
-            <CardContent className="pt-4">
-              <div className="flex items-start gap-4">
+        <div className="flex-1 overflow-y-auto space-y-4 min-h-0 custom-scrollbar">
+          {/* 试剂信息卡片 - 融合不可申领原因和管理员联系方式 */}
+          <Card className="relative">
+            {/* 右上角管理员联系图标 */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center cursor-pointer hover:bg-blue-100 transition-colors">
+                    <Contact className="h-4 w-4 text-blue-600" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="max-w-xs">
+                  <div className="space-y-3 p-2">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={managerContact.avatar} />
+                        <AvatarFallback className="text-xs">李</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium text-xs">{managerContact.name}</p>
+                        <p className="text-xs text-muted-foreground">{managerContact.department}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <button 
+                        className="w-full text-xs h-7 px-3 py-1 border border-gray-300 rounded-md bg-white hover:bg-gray-50 flex items-center justify-center gap-1 transition-colors"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleContactManager('phone');
+                        }}
+                      >
+                        <Phone className="h-3 w-3" />
+                        {managerContact.phone}
+                      </button>
+                      <button 
+                        className="w-full text-xs h-7 px-3 py-1 border border-gray-300 rounded-md bg-white hover:bg-gray-50 flex items-center justify-center gap-1 transition-colors"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleContactManager('email');
+                        }}
+                      >
+                        <Mail className="h-3 w-3" />
+                        邮件联系
+                      </button>
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            <CardContent className="pt-4 space-y-4">
+              {/* 试剂基本信息 */}
+              <div className="flex items-start gap-4 pr-12">
                 <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {reagent.imageUrl ? (
                     <img
@@ -265,18 +330,15 @@ export function ReagentUnavailableDialog({
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* 不可申领原因 */}
-            <Card>
-              <CardContent className="p-6 space-y-4">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-orange-500" />
+              <Separator />
+
+              {/* 不可申领原因 */}
+              <div className="space-y-3">
+                <h4 className="font-medium flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-orange-500" />
                   不可申领原因
-                </h3>
-                
+                </h4>
                 <div className={cn(
                   "p-4 rounded-lg border",
                   reason.severity === "high" ? "bg-red-50 border-red-200" :
@@ -297,83 +359,43 @@ export function ReagentUnavailableDialog({
                     {reason.suggestion}
                   </p>
                 </div>
-                
-                <Separator />
-                
-                {/* 联系管理员 */}
-                <div className="space-y-3">
-                  <h4 className="font-medium flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    联系试剂管理员
-                  </h4>
-                  
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={managerContact.avatar} />
-                      <AvatarFallback>李</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{managerContact.name}</p>
-                      <p className="text-xs text-muted-foreground">{managerContact.department}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1"
-                      onClick={() => handleContactManager('phone')}
-                    >
-                      <Phone className="h-4 w-4 mr-2" />
-                      电话联系
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1"
-                      onClick={() => handleContactManager('email')}
-                    >
-                      <Mail className="h-4 w-4 mr-2" />
-                      邮件联系
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* AI推荐替代试剂 */}
-            <Card className="border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Sparkles className="h-5 w-5 text-blue-600 animate-pulse" />
-                  <h3 className="font-semibold text-blue-900">AI智能推荐试剂</h3>
-                  <Badge variant="outline" className="text-xs bg-blue-100 text-blue-700 border-blue-300">
-                    基于化学性质分析
-                  </Badge>
-                </div>
-                
-                <p className="text-sm text-blue-700 mb-4">
-                  基于试剂类型、用途和化学性质为您推荐可申领的试剂
-                </p>
+          {/* AI推荐替代试剂 - 撑满整个宽度 */}
+          <Card className="border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="h-5 w-5 text-blue-600 animate-pulse" />
+                <h3 className="font-semibold text-blue-900">AI智能推荐试剂</h3>
+                <Badge variant="outline" className="text-xs bg-blue-100 text-blue-700 border-blue-300">
+                  智能推荐
+                </Badge>
+              </div>
+              
+              <p className="text-sm text-blue-700 mb-4">
+                为您推荐化学性质相似的可申领试剂
+              </p>
 
-                {isLoadingRecommendations ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <Skeleton className="w-12 h-12 rounded-lg" />
-                        <div className="flex-1">
-                          <Skeleton className="h-4 w-3/4 mb-2" />
-                          <Skeleton className="h-3 w-1/2" />
-                        </div>
-                        <Skeleton className="w-16 h-8 rounded-md" />
+              {isLoadingRecommendations ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 bg-white rounded-lg">
+                      <Skeleton className="w-12 h-12 rounded-lg flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <Skeleton className="h-4 w-3/4 mb-2" />
+                        <Skeleton className="h-3 w-1/2 mb-2" />
+                        <Skeleton className="h-6 w-16" />
                       </div>
-                    ))}
-                  </div>
-                ) : recommendedReagents.length > 0 ? (
-                  <div className="space-y-3">
-                    {recommendedReagents.map((rec) => (
-                      <div key={rec.id} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-blue-100 hover:border-blue-200 hover:shadow-sm transition-all">
+                    </div>
+                  ))}
+                </div>
+              ) : recommendedReagents.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {recommendedReagents.map((rec) => (
+                    <div key={rec.id} className="flex flex-col p-3 bg-white rounded-lg border border-blue-100 hover:border-blue-200 hover:shadow-sm transition-all h-full">
+                      <div className="flex items-start gap-3 mb-3 flex-1">
                         <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                           {rec.imageUrl ? (
                             <img
@@ -402,45 +424,39 @@ export function ReagentUnavailableDialog({
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-gray-900 truncate">{rec.name}</h4>
-                          <p className="text-sm text-muted-foreground truncate">{rec.englishName}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-                              <Droplets className="h-3 w-3 mr-1" />
-                              {rec.currentAmount}{rec.unit}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground truncate">{rec.category}</span>
-                          </div>
+                          <h4 className="font-medium text-gray-900 text-sm line-clamp-2">{rec.name}</h4>
+                          <p className="text-xs text-muted-foreground truncate mt-1">{rec.englishName}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between mt-auto">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200 flex-shrink-0">
+                            <Droplets className="h-3 w-3 mr-1" />
+                            {rec.currentAmount}{rec.unit}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground truncate">{rec.category}</span>
                         </div>
                         <Button 
                           size="sm" 
-                          className="text-xs px-4 py-2 h-8 bg-blue-600 hover:bg-blue-700 flex-shrink-0 font-medium"
+                          className="text-xs px-3 py-1 h-7 bg-blue-600 hover:bg-blue-700 flex-shrink-0 font-medium ml-2"
                           onClick={() => handleApplyRedirect(rec)}
                         >
                           快速申领
                         </Button>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-6">
-                    <FlaskConical className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-sm text-gray-500">暂无可推荐的替代试剂</p>
-                    <p className="text-xs text-gray-400 mt-1">请联系管理员了解更多选择</p>
-                  </div>
-                )}
-
-                {recommendedReagents.length > 0 && (
-                  <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="text-xs text-blue-600 flex items-center gap-1">
-                      <Sparkles className="h-3 w-3" />
-                      推荐基于AI化学性质分析，如需更多选择请联系试剂管理员
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <FlaskConical className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-sm text-gray-500">暂无可推荐的替代试剂</p>
+                  <p className="text-xs text-gray-400 mt-1">请联系管理员了解更多选择</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         <div className="flex-shrink-0 pt-4 border-t bg-background">

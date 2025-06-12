@@ -26,12 +26,19 @@ import {
   MapPin,
   User,
   Zap,
-  X
+  X,
+  Contact
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { allDemoEquipmentItems } from "../data/equipment-demo-data"
 import { statusColors } from "../config/equipment-config"
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface BookingUnavailableDialogProps {
   open: boolean
@@ -160,11 +167,57 @@ export function BookingUnavailableDialog({
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto space-y-6 min-h-0 custom-scrollbar">
-          {/* 仪器信息卡片 */}
-          <Card className="border-l-4 border-l-orange-400">
-            <CardContent className="pt-4">
-              <div className="flex items-start gap-4">
+        <div className="flex-1 overflow-y-auto space-y-4 min-h-0 custom-scrollbar">
+          {/* 设备信息卡片 - 融合不可预约原因和管理员联系方式 */}
+          <Card className="relative">
+            {/* 右上角管理员联系图标 */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center cursor-pointer hover:bg-blue-100 transition-colors">
+                    <Contact className="h-4 w-4 text-blue-600" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="max-w-xs">
+                  <div className="space-y-3 p-2">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={managerContact.avatar} />
+                        <AvatarFallback className="text-xs">张</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium text-xs">{managerContact.name}</p>
+                        <p className="text-xs text-muted-foreground">{managerContact.department}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full text-xs h-7"
+                        onClick={() => handleContactManager('phone')}
+                      >
+                        <Phone className="h-3 w-3 mr-1" />
+                        {managerContact.phone}
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full text-xs h-7"
+                        onClick={() => handleContactManager('email')}
+                      >
+                        <Mail className="h-3 w-3 mr-1" />
+                        邮件联系
+                      </Button>
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            <CardContent className="pt-4 space-y-4">
+              {/* 设备基本信息 */}
+              <div className="flex items-start gap-4 pr-12">
                 <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {equipment.images && equipment.images.length > 0 ? (
                     <img
@@ -205,19 +258,15 @@ export function BookingUnavailableDialog({
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* 不可预约原因 */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-orange-500" />
+              <Separator />
+
+              {/* 不可预约原因 */}
+              <div className="space-y-3">
+                <h4 className="font-medium flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-orange-500" />
                   不可预约原因
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+                </h4>
                 <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
                   <p className="text-sm text-orange-800 font-medium">
                     {reason.description}
@@ -226,83 +275,43 @@ export function BookingUnavailableDialog({
                     {reason.suggestion}
                   </p>
                 </div>
-                
-                <Separator />
-                
-                {/* 联系管理员 */}
-                <div className="space-y-3">
-                  <h4 className="font-medium flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    联系设备管理员
-                  </h4>
-                  
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={managerContact.avatar} />
-                      <AvatarFallback>张</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{managerContact.name}</p>
-                      <p className="text-xs text-muted-foreground">{managerContact.department}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1"
-                      onClick={() => handleContactManager('phone')}
-                    >
-                      <Phone className="h-4 w-4 mr-2" />
-                      电话联系
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1"
-                      onClick={() => handleContactManager('email')}
-                    >
-                      <Mail className="h-4 w-4 mr-2" />
-                      邮件联系
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* AI推荐替代仪器 */}
-            <Card className="border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Sparkles className="h-5 w-5 text-blue-600 animate-pulse" />
-                  <h3 className="font-semibold text-blue-900">AI推荐替代仪器</h3>
-                  <Badge variant="outline" className="text-xs bg-blue-100 text-blue-700 border-blue-300">
-                    基于功能相似性分析
-                  </Badge>
-                </div>
-                
-                <p className="text-sm text-blue-700 mb-4">
-                  基于功能相似性为您推荐可预约的仪器
-                </p>
+          {/* AI推荐替代仪器 - 撑满整个宽度 */}
+          <Card className="border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="h-5 w-5 text-blue-600 animate-pulse" />
+                <h3 className="font-semibold text-blue-900">AI推荐替代仪器</h3>
+                <Badge variant="outline" className="text-xs bg-blue-100 text-blue-700 border-blue-300">
+                  智能推荐
+                </Badge>
+              </div>
+              
+              <p className="text-sm text-blue-700 mb-4">
+                为您推荐功能相似的可预约仪器
+              </p>
 
-                {isLoadingRecommendations ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <Skeleton className="w-12 h-12 rounded-lg" />
-                        <div className="flex-1">
-                          <Skeleton className="h-4 w-3/4 mb-2" />
-                          <Skeleton className="h-3 w-1/2" />
-                        </div>
-                        <Skeleton className="w-16 h-8 rounded-md" />
+              {isLoadingRecommendations ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 bg-white rounded-lg">
+                      <Skeleton className="w-12 h-12 rounded-lg flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <Skeleton className="h-4 w-3/4 mb-2" />
+                        <Skeleton className="h-3 w-1/2 mb-2" />
+                        <Skeleton className="h-6 w-16" />
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {recommendedEquipment.map((rec) => (
-                      <div key={rec.id} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-blue-100 hover:border-blue-200 hover:shadow-sm transition-all">
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {recommendedEquipment.map((rec) => (
+                    <div key={rec.id} className="flex flex-col p-3 bg-white rounded-lg border border-blue-100 hover:border-blue-200 hover:shadow-sm transition-all h-full">
+                      <div className="flex items-start gap-3 mb-3 flex-1">
                         <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                           {rec.images && rec.images.length > 0 ? (
                             <img
@@ -331,18 +340,21 @@ export function BookingUnavailableDialog({
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-gray-900 truncate">{rec.name}</h4>
-                          <p className="text-sm text-muted-foreground truncate">{rec.model}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-                              可预约
-                            </Badge>
-                            <span className="text-xs text-muted-foreground truncate">{rec.department}</span>
-                          </div>
+                          <h4 className="font-medium text-gray-900 text-sm line-clamp-2">{rec.name}</h4>
+                          <p className="text-xs text-muted-foreground truncate mt-1">{rec.model}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between mt-auto">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200 flex-shrink-0">
+                            可预约
+                          </Badge>
+                          <span className="text-xs text-muted-foreground truncate">{rec.department}</span>
                         </div>
                         <Button 
                           size="sm" 
-                          className="text-xs px-4 py-2 h-8 bg-blue-600 hover:bg-blue-700 flex-shrink-0 font-medium"
+                          className="text-xs px-3 py-1 h-7 bg-blue-600 hover:bg-blue-700 flex-shrink-0 font-medium ml-2"
                           onClick={() => {
                             router.push(`/laboratory/equipment/booking?id=${rec.id}&quick=true`);
                             onOpenChange(false);
@@ -351,19 +363,14 @@ export function BookingUnavailableDialog({
                           快速预约
                         </Button>
                       </div>
-                    ))}
-                  </div>
-                )}
-
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="text-xs text-blue-600 flex items-center gap-1">
-                    <Sparkles className="h-3 w-3" />
-                    推荐基于AI功能相似性分析，如需更多选择请联系设备管理员
-                  </p>
+                    </div>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              )}
+
+
+            </CardContent>
+          </Card>
         </div>
 
         <div className="flex-shrink-0 pt-4 border-t bg-background">
