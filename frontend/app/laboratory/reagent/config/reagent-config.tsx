@@ -240,6 +240,37 @@ export const advancedFilters = [
 // 排序选项
 export const sortOptions = [
   {
+    id: "smart_desc",
+    label: "🧪 智能排序 (推荐)",
+    field: "smart",
+    direction: "desc" as const,
+    description: "安全等级 → 有效期 → 库存状态 → 使用频率 → 名称"
+  },
+  {
+    id: "safety_desc",
+    label: "安全等级 (危险品优先)",
+    field: "dangerLevel",
+    direction: "desc" as const,
+  },
+  {
+    id: "expiry_asc",
+    label: "有效期 (即将过期优先)",
+    field: "expiryDate",
+    direction: "asc" as const,
+  },
+  {
+    id: "stock_asc",
+    label: "库存状态 (不足优先)",
+    field: "stockLevel",
+    direction: "asc" as const,
+  },
+  {
+    id: "usage_desc",
+    label: "使用频率 (常用优先)",
+    field: "usageFrequency",
+    direction: "desc" as const,
+  },
+  {
     id: "name_asc",
     label: "名称 (A-Z)",
     field: "name",
@@ -249,18 +280,6 @@ export const sortOptions = [
     id: "name_desc",
     label: "名称 (Z-A)",
     field: "name",
-    direction: "desc" as const,
-  },
-  {
-    id: "purchaseDate_asc",
-    label: "购置日期 (最早优先)",
-    field: "purchaseDate",
-    direction: "asc" as const,
-  },
-  {
-    id: "purchaseDate_desc",
-    label: "购置日期 (最近优先)",
-    field: "purchaseDate",
     direction: "desc" as const,
   },
   {
@@ -274,6 +293,18 @@ export const sortOptions = [
     label: "过期日期 (最晚优先)",
     field: "expiryDate",
     direction: "desc" as const,
+  },
+  {
+    id: "purchaseDate_desc",
+    label: "购置日期 (最新优先)",
+    field: "purchaseDate",
+    direction: "desc" as const,
+  },
+  {
+    id: "purchaseDate_asc",
+    label: "购置日期 (最早优先)",
+    field: "purchaseDate",
+    direction: "asc" as const,
   },
 ]
 
@@ -652,31 +683,23 @@ const ReagentCard = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-36">
             {actions.map((action) => {
-              // 申领功能验证：过期或无库存时禁用申领操作
-              const isDisabled = action.id === "apply" && !canApply();
-              
               return (
                 <DropdownMenuItem 
                   key={action.id}
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (!isDisabled && action.onClick) {
+                    if (action.onClick) {
                       action.onClick(item, e);
                     }
                   }}
                   className={cn(
                     "flex items-center gap-2 cursor-pointer",
-                    action.variant === "destructive" && "text-red-600 focus:text-red-600",
-                    isDisabled && "opacity-50 cursor-not-allowed"
+                    action.variant === "destructive" && "text-red-600 focus:text-red-600"
                   )}
-                  disabled={isDisabled}
                 >
                   {action.icon}
                   <span>
-                    {isDisabled && action.id === "apply" 
-                      ? (isExpired() ? "试剂已过期" : "库存不足") 
-                      : action.label
-                    }
+                    {action.label}
                   </span>
                 </DropdownMenuItem>
               );
@@ -794,33 +817,21 @@ const ReagentCard = ({
           </span>
         </div>
         
-        {/* 库存量信息和库存状态标签在同一行 */}
+        {/* 库存量 */}
         <div className="flex items-center justify-between pb-3">
-          <div className="flex items-center gap-1">
-            <span className={cn(
-              "text-sm",
-              "text-muted-foreground"
-            )}>
-              库存量:
-            </span>
-            <span className={cn(
-              "text-sm font-medium",
-              item.currentAmount <= 0 ? "text-red-600" : 
-              item.currentAmount <= item.initialAmount * 0.5 ? "text-orange-600" : "text-green-600"
-            )}>
-              {item.currentAmount <= 0 ? "无库存" : `${item.currentAmount}${item.unit}`}
-            </span>
-          </div>
-          {/* 库存状态标签 */}
-          <Badge 
-            variant="outline" 
-            className={cn(
-              "text-xs font-medium border",
-              stockStatus.color
-            )}
-          >
-            {stockStatus.text}
-          </Badge>
+          <span className={cn(
+            "text-sm",
+            "text-muted-foreground"
+          )}>
+            库存量:
+          </span>
+          <span className={cn(
+            "text-sm font-medium",
+            item.currentAmount <= 0 ? "text-red-600" : 
+            item.currentAmount <= item.initialAmount * 0.5 ? "text-orange-600" : "text-green-600"
+          )}>
+            {item.currentAmount <= 0 ? "无库存" : `${item.currentAmount}${item.unit}`}
+          </span>
         </div>
       </div>
 

@@ -221,6 +221,43 @@ export const advancedFilters = [
 // 排序选项
 export const sortOptions = [
   {
+    id: "smart_desc",
+    label: "🧪 智能排序 (推荐)",
+    field: "smart",
+    direction: "desc" as const,
+    description: "库存状态 → 使用频率 → 有效期 → 成本价值 → 名称"
+  },
+  {
+    id: "stock_asc",
+    label: "库存状态 (紧急优先)",
+    field: "stockLevel",
+    direction: "asc" as const,
+  },
+  {
+    id: "usage_desc",
+    label: "使用频率 (常用优先)",
+    field: "usageFrequency",
+    direction: "desc" as const,
+  },
+  {
+    id: "expiry_asc",
+    label: "有效期 (即将过期优先)",
+    field: "expiryDate",
+    direction: "asc" as const,
+  },
+  {
+    id: "value_desc",
+    label: "成本价值 (高价值优先)",
+    field: "totalValue",
+    direction: "desc" as const,
+  },
+  {
+    id: "category_asc",
+    label: "耗材类别 (分组排序)",
+    field: "category",
+    direction: "asc" as const,
+  },
+  {
     id: "name_asc",
     label: "名称 (A-Z)",
     field: "name",
@@ -240,7 +277,7 @@ export const sortOptions = [
   },
   {
     id: "expiryDate_desc",
-    label: "有效期 (最近优先)",
+    label: "有效期 (最晚优先)",
     field: "expiryDate",
     direction: "desc" as const,
   },
@@ -660,30 +697,23 @@ const ConsumableCard = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-36">
             {actions.map((action) => {
-              // 申领操作根据条件禁用
-              const isActionDisabled = (isDisabled() || !canApply()) && action.id === "apply";
-              
               return (
                 <DropdownMenuItem 
                   key={action.id}
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (!isActionDisabled && action.onClick) {
+                    if (action.onClick) {
                       action.onClick(item, e);
                     }
                   }}
                   className={cn(
                     "flex items-center gap-2 cursor-pointer",
-                    action.variant === "destructive" && "text-red-600 focus:text-red-600",
-                    isActionDisabled && "opacity-50 cursor-not-allowed"
+                    action.variant === "destructive" && "text-red-600 focus:text-red-600"
                   )}
-                  disabled={isActionDisabled}
                 >
                   {action.icon}
                   <span>
-                    {isActionDisabled && action.id === "apply" 
-                      ? (isExpired() ? "耗材已过期" : "库存不足") 
-                      : action.label}
+                    {action.label}
                   </span>
                 </DropdownMenuItem>
               );
@@ -820,33 +850,20 @@ const ConsumableCard = ({
           </span>
         </div>
         
-        {/* 库存量和状态标签 */}
+        {/* 库存量 */}
         <div className="flex items-center justify-between pb-5">
-          <div className="flex items-center gap-1">
-            <span className={cn(
-              "text-sm",
-              isDisabled() ? "text-gray-400" : "text-muted-foreground"
-            )}>
-              库存量:
-            </span>
-            <span className={cn(
-              "text-sm font-medium",
-              isDisabled() ? "text-gray-500" : stockStatus.color.split(' ')[0]
-            )}>
-              {item.currentStock}{item.unit}
-            </span>
-          </div>
-          
-          {/* 右下角库存状态显示 */}
-          <Badge 
-            variant="outline" 
-            className={cn(
-              "font-medium text-xs",
-              isDisabled() ? "bg-gray-100 text-gray-700 border-gray-200 opacity-70" : stockStatus.color
-            )}
-          >
-            {stockStatus.text}
-          </Badge>
+          <span className={cn(
+            "text-sm",
+            isDisabled() ? "text-gray-400" : "text-muted-foreground"
+          )}>
+            库存量:
+          </span>
+          <span className={cn(
+            "text-sm font-medium",
+            isDisabled() ? "text-gray-500" : stockStatus.color.split(' ')[0]
+          )}>
+            {item.currentStock}{item.unit}
+          </span>
         </div>
       </div>
     </Card>

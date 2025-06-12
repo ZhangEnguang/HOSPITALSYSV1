@@ -18,8 +18,16 @@ const soonExpiredDate = new Date(today.getTime() + 15 * 24 * 60 * 60 * 1000) // 
 const normalExpiredDate = new Date(today.getTime() + 365 * 24 * 60 * 60 * 1000) // 1年后过期
 const longExpiredDate = new Date(today.getTime() + 2 * 365 * 24 * 60 * 60 * 1000) // 2年后过期
 
+// 为演示数据添加使用频率字段
+const addUsageFrequency = (items: any[]) => {
+  return items.map((item, index) => ({
+    ...item,
+    usageFrequency: [85, 92, 78, 45, 67, 88, 23, 56, 91, 34, 72, 89, 15, 63][index] || Math.floor(Math.random() * 100)
+  }))
+}
+
 // 模拟试剂数据 - 增加库存量和有效期的多样性
-export const allDemoReagentItems = [
+const baseDemoReagentItems = [
   {
     id: generateId(),
     name: "乙腈",
@@ -74,7 +82,7 @@ export const allDemoReagentItems = [
     department: "化学实验室",
     status: "低库存",
     storageCondition: "常温",
-    dangerLevel: "中",
+    dangerLevel: "高",
     initialAmount: 4000,
     currentAmount: 1600, // 库存不足 (40%)
     unit: "mL",
@@ -214,7 +222,7 @@ export const allDemoReagentItems = [
     department: "化学实验室",
     status: "缺货",
     storageCondition: "常温",
-    dangerLevel: "中",
+    dangerLevel: "高",
     initialAmount: 2500,
     currentAmount: 0, // 无库存 (0%)
     unit: "mL",
@@ -508,6 +516,9 @@ export const allDemoReagentItems = [
     boilingPoint: "61.2°C",
     meltingPoint: "-63.5°C",
     density: "1.483 g/mL",
-    imageUrl: "/reagent/CHCl3.png",
+    imageUrl: "/reagent/CH2Cl2.png",
   },
-] 
+]
+
+// 导出添加了使用频率的试剂数据
+export const allDemoReagentItems = addUsageFrequency(baseDemoReagentItems)

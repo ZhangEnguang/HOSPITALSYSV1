@@ -36,6 +36,7 @@ import {
 import { toast } from "@/components/ui/use-toast"
 import { ReagentStockInDialog } from "./components/reagent-stock-in-dialog"
 import { ReagentApplyDialog } from "./components/reagent-apply-dialog"
+import { ReagentUnavailableDialog } from "./components/reagent-unavailable-dialog"
 
 function ReagentContent() {
   const router = useRouter()
@@ -47,7 +48,7 @@ function ReagentContent() {
   const [reagentItems, setReagentItems] = useState(allDemoReagentItems)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterValues, setFilterValues] = useState<Record<string, any>>({})
-  const [sortOption, setSortOption] = useState("purchaseDate_desc")
+  const [sortOption, setSortOption] = useState("smart_desc")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
@@ -73,6 +74,10 @@ function ReagentContent() {
   // 申领弹框状态
   const [applyDialogOpen, setApplyDialogOpen] = useState(false)
   const [selectedReagentForApply, setSelectedReagentForApply] = useState<any>(null)
+
+  // 不可申领弹框状态
+  const [unavailableDialogOpen, setUnavailableDialogOpen] = useState(false)
+  const [selectedReagentForUnavailable, setSelectedReagentForUnavailable] = useState<any>(null)
 
   // 过滤和排序数据
   const filteredReagentItems = reagentItems
@@ -135,12 +140,89 @@ function ReagentContent() {
       return true
     })
     .sort((a, b) => {
-      // 排序逻辑
+      // 智能综合排序逻辑
       const option = sortOptions.find((opt) => opt.id === sortOption)
       if (!option) return 0
 
       const field = option.field
       const direction = option.direction
+      
+      // 如果选择了智能排序，使用综合排序逻辑
+      if (field === "smart") {
+        // 1. 主排序：安全等级优先级（危险品优先管理）
+        const dangerPriority = {
+          "高": 1,      // 最高优先级：高危险品需要优先关注
+          "中": 2,      // 中等优先级：中等危险品
+          "低": 3       // 最低优先级：低危险品
+        }
+        
+        const dangerA = dangerPriority[a.dangerLevel as keyof typeof dangerPriority] || 999
+        const dangerB = dangerPriority[b.dangerLevel as keyof typeof dangerPriority] || 999
+        const dangerDiff = dangerA - dangerB
+        if (dangerDiff !== 0) return dangerDiff
+        
+        // 2. 次排序：有效期状态（即将过期优先）
+        const today = new Date()
+        const expiryA = new Date(a.expiryDate)
+        const expiryB = new Date(b.expiryDate)
+        const daysToExpiryA = Math.ceil((expiryA.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+        const daysToExpiryB = Math.ceil((expiryB.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+        
+        // 过期的排在最前面，然后是即将过期的
+        if (daysToExpiryA <= 0 && daysToExpiryB > 0) return -1
+        if (daysToExpiryA > 0 && daysToExpiryB <= 0) return 1
+        if (daysToExpiryA <= 0 && daysToExpiryB <= 0) return daysToExpiryB - daysToExpiryA
+        
+        // 30天内过期的优先
+        const isExpiringA = daysToExpiryA <= 30
+        const isExpiringB = daysToExpiryB <= 30
+        if (isExpiringA && !isExpiringB) return -1
+        if (!isExpiringA && isExpiringB) return 1
+        if (isExpiringA && isExpiringB) return daysToExpiryA - daysToExpiryB
+        
+        // 3. 三级排序：库存状态（不足优先）
+        const stockRatioA = a.currentAmount / a.initialAmount
+        const stockRatioB = b.currentAmount / b.initialAmount
+        
+        // 缺货优先
+        if (stockRatioA === 0 && stockRatioB > 0) return -1
+        if (stockRatioA > 0 && stockRatioB === 0) return 1
+        
+        // 低库存优先（<20%）
+        const isLowStockA = stockRatioA > 0 && stockRatioA <= 0.2
+        const isLowStockB = stockRatioB > 0 && stockRatioB <= 0.2
+        if (isLowStockA && !isLowStockB) return -1
+        if (!isLowStockA && isLowStockB) return 1
+        
+        // 4. 四级排序：使用频率（常用优先）
+        const usageA = a.usageFrequency || 0
+        const usageB = b.usageFrequency || 0
+        const usageDiff = usageB - usageA
+        if (usageDiff !== 0) return usageDiff
+        
+        // 5. 最后排序：按名称字母顺序
+        return a.name.localeCompare(b.name)
+      }
+      
+      // 原有的单字段排序逻辑
+      if (field === "dangerLevel") {
+        const dangerPriority = { "高": 3, "中": 2, "低": 1 }
+        const priorityA = dangerPriority[a.dangerLevel as keyof typeof dangerPriority] || 0
+        const priorityB = dangerPriority[b.dangerLevel as keyof typeof dangerPriority] || 0
+        return direction === "asc" ? priorityA - priorityB : priorityB - priorityA
+      }
+      
+      if (field === "stockLevel") {
+        const stockRatioA = a.currentAmount / a.initialAmount
+        const stockRatioB = b.currentAmount / b.initialAmount
+        return direction === "asc" ? stockRatioA - stockRatioB : stockRatioB - stockRatioA
+      }
+      
+      if (field === "usageFrequency") {
+        const usageA = a.usageFrequency || 0
+        const usageB = b.usageFrequency || 0
+        return direction === "asc" ? usageA - usageB : usageB - usageA
+      }
 
       if (field.includes("Date")) {
         const dateA = new Date(String(a[field as keyof typeof a])).getTime()
@@ -159,9 +241,23 @@ function ReagentContent() {
         : (b[field as keyof typeof b] as number) - (a[field as keyof typeof a] as number)
     })
 
+  // 调试输出：显示排序结果
+  if (sortOption === "smart_desc" && filteredReagentItems.length > 0) {
+    console.log("🧪 试剂智能排序结果:")
+    filteredReagentItems.slice(0, 10).forEach((item, index) => {
+      const today = new Date()
+      const expiryDate = new Date(item.expiryDate)
+      const daysToExpiry = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+      const stockRatio = ((item.currentAmount / item.initialAmount) * 100).toFixed(1)
+      
+      console.log(`${index + 1}. ${item.name}`)
+      console.log(`   安全等级: ${item.dangerLevel} | 有效期: ${daysToExpiry}天 | 库存: ${stockRatio}% | 使用频率: ${item.usageFrequency || 0}`)
+      console.log(`   状态: ${item.status}`)
+    })
+  }
+
   // 分页数据
   const totalItems = filteredReagentItems.length
-  const paginatedItems = filteredReagentItems.slice((currentPage - 1) * pageSize, currentPage * pageSize)
 
   // 处理批量操作
   const handleBatchSetNormal = () => {
@@ -241,23 +337,24 @@ function ReagentContent() {
 
   // 处理申领弹框打开
   const handleOpenApplyDialog = (reagent: any) => {
-    // 检查试剂是否已过期
-    const isExpired = () => {
-      const expiryDate = new Date(reagent.expiryDate);
-      const today = new Date();
-      return expiryDate < today || reagent.status === "已过期";
-    };
-
-    // 如果试剂已过期，显示警告但仍然打开弹框（弹框内会有更详细的提示和限制）
-    if (isExpired()) {
-      toast({
-        title: "试剂已过期",
-        description: `试剂"${reagent.name}"已过期，无法申领。`,
-        variant: "destructive",
-        duration: 5000,
-      });
+    // 检查试剂是否可以申领
+    const canApply = () => {
+      const today = new Date()
+      const expiryDate = new Date(reagent.expiryDate)
+      const isExpired = expiryDate < today || reagent.status === "已过期"
+      const isOutOfStock = reagent.currentAmount <= 0 || reagent.status === "缺货"
+      
+      return !isExpired && !isOutOfStock
     }
 
+    // 如果试剂不可申领，显示不可申领弹框
+    if (!canApply()) {
+      setSelectedReagentForUnavailable(reagent)
+      setUnavailableDialogOpen(true)
+      return
+    }
+
+    // 可以申领，打开正常申领弹框
     setSelectedReagentForApply(reagent)
     setApplyDialogOpen(true)
   }
@@ -319,7 +416,7 @@ function ReagentContent() {
     <div className="space-y-6">
       <DataList
         title="试剂管理"
-        data={paginatedItems}
+        data={filteredReagentItems}
         searchValue={searchTerm}
         searchPlaceholder="搜索试剂名称、英文名或描述..."
         onSearchChange={setSearchTerm}
@@ -395,6 +492,13 @@ function ReagentContent() {
         open={applyDialogOpen}
         onOpenChange={setApplyDialogOpen}
         reagent={selectedReagentForApply}
+      />
+
+      {/* 不可申领弹框 */}
+      <ReagentUnavailableDialog
+        open={unavailableDialogOpen}
+        onOpenChange={setUnavailableDialogOpen}
+        reagent={selectedReagentForUnavailable}
       />
     </div>
   )

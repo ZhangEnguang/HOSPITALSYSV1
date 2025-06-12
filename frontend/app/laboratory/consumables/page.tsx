@@ -36,6 +36,7 @@ import {
 import { toast } from "@/components/ui/use-toast"
 import { ConsumableStockInDialog } from "./components/consumable-stock-in-dialog"
 import { ConsumableApplyDialog } from "./components/consumable-apply-dialog"
+import { ConsumableUnavailableDialog } from "./components/consumable-unavailable-dialog"
 
 function ConsumableContent() {
   const router = useRouter()
@@ -47,7 +48,7 @@ function ConsumableContent() {
   const [consumableItems, setConsumableItems] = useState(allDemoConsumableItems)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterValues, setFilterValues] = useState<Record<string, any>>({})
-  const [sortOption, setSortOption] = useState("expiryDate_desc")
+  const [sortOption, setSortOption] = useState("smart_desc")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
@@ -73,6 +74,10 @@ function ConsumableContent() {
   // 申领弹框状态
   const [applyDialogOpen, setApplyDialogOpen] = useState(false)
   const [selectedConsumableForApply, setSelectedConsumableForApply] = useState<any>(null)
+
+  // 不可申领弹框状态
+  const [unavailableDialogOpen, setUnavailableDialogOpen] = useState(false)
+  const [selectedConsumableForUnavailable, setSelectedConsumableForUnavailable] = useState<any>(null)
 
   // 过滤和排序数据
   const filteredConsumableItems = consumableItems
@@ -126,12 +131,76 @@ function ConsumableContent() {
       return true
     })
     .sort((a, b) => {
-      // 排序逻辑
+      // 智能综合排序逻辑
       const option = sortOptions.find((opt) => opt.id === sortOption)
       if (!option) return 0
 
       const field = option.field
       const direction = option.direction
+      
+      // 如果选择了智能排序，使用综合排序逻辑
+      if (field === "smart") {
+        // 1. 主排序：库存状态优先级（紧急需求优先）
+        const stockPriority = {
+          "缺货": 1,        // 最高优先级：无库存，需要紧急采购
+          "库存不足": 2,    // 高优先级：库存不足，需要及时补充
+          "充足": 3,        // 正常优先级：库存充足
+          "已过期": 4       // 最低优先级：已过期，需要处理
+        }
+        
+        const stockA = stockPriority[a.status as keyof typeof stockPriority] || 999
+        const stockB = stockPriority[b.status as keyof typeof stockPriority] || 999
+        const stockDiff = stockA - stockB
+        if (stockDiff !== 0) return stockDiff
+        
+        // 2. 次排序：使用频率（常用耗材优先）
+        const usageA = a.usageFrequency || 0
+        const usageB = b.usageFrequency || 0
+        const usageDiff = usageB - usageA
+        if (usageDiff !== 0) return usageDiff
+        
+        // 3. 三级排序：有效期状态（即将过期优先使用）
+        const today = new Date()
+        const expiryA = new Date(a.expiryDate)
+        const expiryB = new Date(b.expiryDate)
+        const daysToExpiryA = Math.ceil((expiryA.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+        const daysToExpiryB = Math.ceil((expiryB.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+        
+        // 过期的排在最前面（需要处理）
+        if (daysToExpiryA <= 0 && daysToExpiryB > 0) return -1
+        if (daysToExpiryA > 0 && daysToExpiryB <= 0) return 1
+        if (daysToExpiryA <= 0 && daysToExpiryB <= 0) return daysToExpiryB - daysToExpiryA
+        
+        // 30天内过期的优先使用
+        const isExpiringA = daysToExpiryA <= 30
+        const isExpiringB = daysToExpiryB <= 30
+        if (isExpiringA && !isExpiringB) return -1
+        if (!isExpiringA && isExpiringB) return 1
+        if (isExpiringA && isExpiringB) return daysToExpiryA - daysToExpiryB
+        
+        // 4. 四级排序：成本价值（高价值耗材优先关注）
+        const valueA = a.totalValue || 0
+        const valueB = b.totalValue || 0
+        const valueDiff = valueB - valueA
+        if (valueDiff !== 0) return valueDiff
+        
+        // 5. 最后排序：按名称字母顺序
+        return a.name.localeCompare(b.name)
+      }
+      
+      // 原有的单字段排序逻辑
+      if (field === "stockLevel") {
+        const stockPriority = { "缺货": 1, "库存不足": 2, "充足": 3, "已过期": 4 }
+        const priorityA = stockPriority[a.status as keyof typeof stockPriority] || 999
+        const priorityB = stockPriority[b.status as keyof typeof stockPriority] || 999
+        return direction === "asc" ? priorityA - priorityB : priorityB - priorityA
+      }
+      
+      if (field === "usageFrequency") {
+        const usageA = a.usageFrequency || 0
+        const usageB = b.usageFrequency || 0
+        return direction === "asc" ? usageA - usageB : usageB - usageA
+      }
 
       if (field.includes("Date")) {
         const dateA = new Date(String(a[field as keyof typeof a])).getTime()
@@ -150,9 +219,23 @@ function ConsumableContent() {
         : (b[field as keyof typeof b] as number) - (a[field as keyof typeof a] as number)
     })
 
+  // 调试输出：显示排序结果
+  if (sortOption === "smart_desc" && filteredConsumableItems.length > 0) {
+    console.log("🧪 耗材智能排序结果:")
+    filteredConsumableItems.slice(0, 10).forEach((item, index) => {
+      const today = new Date()
+      const expiryDate = new Date(item.expiryDate)
+      const daysToExpiry = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+      const stockRatio = ((item.currentStock / item.maxStock) * 100).toFixed(1)
+      
+      console.log(`${index + 1}. ${item.name}`)
+      console.log(`   库存状态: ${item.status} | 有效期: ${daysToExpiry}天 | 库存: ${stockRatio}% | 使用频率: ${item.usageFrequency || 0}`)
+      console.log(`   成本价值: ¥${item.totalValue} | 类别: ${item.category}`)
+    })
+  }
+
   // 分页数据
   const totalItems = filteredConsumableItems.length
-  const paginatedItems = filteredConsumableItems.slice((currentPage - 1) * pageSize, currentPage * pageSize)
 
   // 处理批量操作
   const handleBatchSetNormal = () => {
@@ -247,6 +330,30 @@ function ConsumableContent() {
 
   // 处理申领弹框打开
   const handleOpenApplyDialog = (consumable: any) => {
+    // 检查耗材数据是否有效
+    if (!consumable) {
+      console.error('耗材数据为空，无法打开申领弹框')
+      return
+    }
+
+    // 检查耗材是否可以申领
+    const canApply = () => {
+      const today = new Date()
+      const expiryDate = new Date(consumable.expiryDate)
+      const isExpired = expiryDate < today || consumable.status === "已过期"
+      const isOutOfStock = consumable.currentStock <= 0 || consumable.status === "缺货"
+      
+      return !isExpired && !isOutOfStock
+    }
+
+    // 如果耗材不可申领，显示不可申领弹框
+    if (!canApply()) {
+      setSelectedConsumableForUnavailable(consumable)
+      setUnavailableDialogOpen(true)
+      return
+    }
+
+    // 可以申领，打开正常申领弹框
     setSelectedConsumableForApply(consumable)
     setApplyDialogOpen(true)
   }
@@ -284,7 +391,7 @@ function ConsumableContent() {
     <div className="space-y-6">
       <DataList
         title="耗材管理"
-        data={paginatedItems}
+        data={filteredConsumableItems}
         searchValue={searchTerm}
         searchPlaceholder="搜索耗材名称、型号或描述..."
         onSearchChange={setSearchTerm}
@@ -360,6 +467,13 @@ function ConsumableContent() {
         open={applyDialogOpen}
         onOpenChange={setApplyDialogOpen}
         consumable={selectedConsumableForApply}
+      />
+
+      {/* 耗材不可申领弹框 */}
+      <ConsumableUnavailableDialog
+        open={unavailableDialogOpen}
+        onOpenChange={setUnavailableDialogOpen}
+        consumable={selectedConsumableForUnavailable}
       />
     </div>
   )

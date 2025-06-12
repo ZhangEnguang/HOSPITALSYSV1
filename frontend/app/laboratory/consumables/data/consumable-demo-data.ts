@@ -20,7 +20,15 @@ const soonExpiredDate25 = new Date(today.getTime() + 25 * 24 * 60 * 60 * 1000) /
 const normalExpiredDate = new Date(today.getTime() + 365 * 24 * 60 * 60 * 1000) // 1年后过期
 const longExpiredDate = new Date(today.getTime() + 2 * 365 * 24 * 60 * 60 * 1000) // 2年后过期
 
-export const allDemoConsumableItems = [
+// 为演示数据添加使用频率字段
+const addUsageFrequency = (items: any[]) => {
+  return items.map((item, index) => ({
+    ...item,
+    usageFrequency: [95, 88, 72, 45, 82, 67, 78, 34, 91, 56, 73][index] || Math.floor(Math.random() * 100)
+  }))
+}
+
+const baseDemoConsumableItems = [
   // 1. 库存充足 + 正常有效期 (可申领)
   {
     id: "cons-001",
@@ -307,4 +315,7 @@ export const allDemoConsumableItems = [
     notes: "耐腐蚀，可高温灭菌，适用于有机溶剂",
     imageUrl: "/consumables/stainless-steel-tips.png",
   },
-] 
+]
+
+// 导出添加了使用频率的耗材数据
+export const allDemoConsumableItems = addUsageFrequency(baseDemoConsumableItems)
