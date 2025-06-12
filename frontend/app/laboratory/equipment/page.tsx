@@ -34,6 +34,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { toast } from "@/components/ui/use-toast"
+import { BookingUnavailableDialog } from "./components/booking-unavailable-dialog"
 
 function EquipmentContent() {
   const router = useRouter()
@@ -45,7 +46,7 @@ function EquipmentContent() {
   const [equipmentItems, setEquipmentItems] = useState(allDemoEquipmentItems)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterValues, setFilterValues] = useState<Record<string, any>>({})
-  const [sortOption, setSortOption] = useState("purchaseDate_desc")
+  const [sortOption, setSortOption] = useState("smart_desc")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
@@ -64,6 +65,12 @@ function EquipmentContent() {
   })
   // 删除确认对话框状态
   const [itemToDelete, setItemToDelete] = useState<any>(null)
+  
+  // 预约不可用对话框状态
+  const [bookingUnavailableDialog, setBookingUnavailableDialog] = useState({
+    open: false,
+    equipment: null as any
+  })
 
   // 过滤和排序数据
   const filteredEquipmentItems = equipmentItems
@@ -117,9 +124,43 @@ function EquipmentContent() {
       return true
     })
     .sort((a, b) => {
-      // 排序逻辑
+      // 智能综合排序逻辑
       const [field, direction] = sortOption.split("_")
-
+      
+      // 如果选择了智能排序，使用综合排序逻辑
+      if (field === "smart") {
+        // 1. 主排序：仪器状态优先级（可用性优先）
+        const statusPriority = {
+          "正常": 1,      // 最高优先级：可直接预约
+          "已预约": 2,    // 次优先级：虽然被预约但仍可查看
+          "维修中": 3,    // 中等优先级：临时不可用
+          "待验收": 4,    // 较低优先级：等待验收
+          "外借": 5,      // 低优先级：外借中
+          "报废": 6       // 最低优先级：已报废
+        }
+        
+        const statusA = statusPriority[a.status as keyof typeof statusPriority] || 999
+        const statusB = statusPriority[b.status as keyof typeof statusPriority] || 999
+        const statusDiff = statusA - statusB
+        if (statusDiff !== 0) return statusDiff
+        
+        // 2. 次排序：使用频率（预约次数降序）- 热门设备优先
+        const bookingA = a.bookingCount || 0
+        const bookingB = b.bookingCount || 0
+        const bookingDiff = bookingB - bookingA
+        if (bookingDiff !== 0) return bookingDiff
+        
+        // 3. 三级排序：仪器价值（价格降序）- 高价值设备优先
+        const priceA = a.price || 0
+        const priceB = b.price || 0
+        const priceDiff = priceB - priceA
+        if (priceDiff !== 0) return priceDiff
+        
+        // 4. 最后排序：按名称字母顺序（升序）
+        return a.name.localeCompare(b.name)
+      }
+      
+      // 原有的单字段排序逻辑
       if (field === "name") {
         return direction === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
       }
@@ -133,9 +174,38 @@ function EquipmentContent() {
       if (field === "price") {
         return direction === "asc" ? a.price - b.price : b.price - a.price
       }
+      
+      if (field === "bookingCount") {
+        const countA = a.bookingCount || 0
+        const countB = b.bookingCount || 0
+        return direction === "asc" ? countA - countB : countB - countA
+      }
+      
+      if (field === "status") {
+        const statusPriority = {
+          "正常": 1,
+          "已预约": 2,
+          "维修中": 3, 
+          "待验收": 4,
+          "外借": 5,
+          "报废": 6
+        }
+        const priorityA = statusPriority[a.status as keyof typeof statusPriority] || 999
+        const priorityB = statusPriority[b.status as keyof typeof statusPriority] || 999
+        return direction === "asc" ? priorityA - priorityB : priorityB - priorityA
+      }
 
       return 0
     })
+
+  // 调试信息：显示排序后的前5个项目
+  console.log("当前排序选项:", sortOption)
+  console.log("排序后前5个项目:", filteredEquipmentItems.slice(0, 5).map(item => ({
+    name: item.name,
+    status: item.status,
+    bookingCount: item.bookingCount,
+    price: item.price
+  })))
 
   // 分页数据
   const totalItems = filteredEquipmentItems.length
@@ -268,7 +338,16 @@ function EquipmentContent() {
           } else if (action.id === "view") {
             router.push(`/laboratory/equipment/${row.id}`)
           } else if (action.id === "booking") {
-            router.push(`/laboratory/equipment/booking/${row.id}`)
+            // 检查仪器状态是否可预约
+            if (row.status === "正常") {
+              router.push(`/laboratory/equipment/booking/${row.id}`)
+            } else {
+              // 显示不可预约对话框
+              setBookingUnavailableDialog({
+                open: true,
+                equipment: row
+              })
+            }
           } else if (action.id === "maintenance") {
             router.push(`/laboratory/equipment/maintenance/${row.id}`)
           }
@@ -293,6 +372,13 @@ function EquipmentContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 预约不可用对话框 */}
+      <BookingUnavailableDialog
+        open={bookingUnavailableDialog.open}
+        onOpenChange={(open) => setBookingUnavailableDialog({ open, equipment: open ? bookingUnavailableDialog.equipment : null })}
+        equipment={bookingUnavailableDialog.equipment}
+      />
     </div>
   )
 }

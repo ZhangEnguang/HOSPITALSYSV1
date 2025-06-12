@@ -28,6 +28,7 @@ export interface SortOption {
   label: string
   field: string
   direction: "asc" | "desc"
+  description?: string
 }
 
 export interface ColumnVisibility {
@@ -226,8 +227,14 @@ export default function DataListToolbar({
                       key={option.id}
                       checked={activeSortOption === option.id}
                       onCheckedChange={() => onSortChange?.(option.id)}
+                      className="flex flex-col items-start py-2"
                     >
-                      {option.label}
+                      <span>{option.label}</span>
+                      {option.description && (
+                        <span className="text-xs text-muted-foreground mt-1">
+                          {option.description}
+                        </span>
+                      )}
                     </DropdownMenuCheckboxItem>
                   ))}
                 </DropdownMenuContent>

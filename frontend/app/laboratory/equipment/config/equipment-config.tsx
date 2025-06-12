@@ -236,6 +236,43 @@ export const advancedFilters = [
 // 排序选项
 export const sortOptions = [
   {
+    id: "smart_desc",
+    label: "🤖 智能排序 (推荐)",
+    field: "smart",
+    direction: "desc" as const,
+    description: "状态优先 → 使用频率 → 设备价值 → 名称"
+  },
+  {
+    id: "status_asc",
+    label: "状态优先 (可用优先)",
+    field: "status",
+    direction: "asc" as const,
+  },
+  {
+    id: "bookingCount_desc",
+    label: "使用频率 (热门优先)",
+    field: "bookingCount",
+    direction: "desc" as const,
+  },
+  {
+    id: "bookingCount_asc",
+    label: "使用频率 (冷门优先)",
+    field: "bookingCount",
+    direction: "asc" as const,
+  },
+  {
+    id: "price_desc",
+    label: "设备价值 (从高到低)",
+    field: "price",
+    direction: "desc" as const,
+  },
+  {
+    id: "price_asc",
+    label: "设备价值 (从低到高)",
+    field: "price",
+    direction: "asc" as const,
+  },
+  {
     id: "name_asc",
     label: "名称 (A-Z)",
     field: "name",
@@ -248,28 +285,16 @@ export const sortOptions = [
     direction: "desc" as const,
   },
   {
+    id: "purchaseDate_desc",
+    label: "购置日期 (最新优先)",
+    field: "purchaseDate",
+    direction: "desc" as const,
+  },
+  {
     id: "purchaseDate_asc",
     label: "购置日期 (最早优先)",
     field: "purchaseDate",
     direction: "asc" as const,
-  },
-  {
-    id: "purchaseDate_desc",
-    label: "购置日期 (最近优先)",
-    field: "purchaseDate",
-    direction: "desc" as const,
-  },
-  {
-    id: "price_asc",
-    label: "价格 (从低到高)",
-    field: "price",
-    direction: "asc" as const,
-  },
-  {
-    id: "price_desc",
-    label: "价格 (从高到低)",
-    field: "price",
-    direction: "desc" as const,
   },
 ]
 
@@ -457,8 +482,9 @@ export const equipmentActions = [
     id: "booking",
     label: "仪器预约",
     icon: <Calendar className="h-4 w-4" />,
-    // 只有状态为"正常"的仪器才可以预约
-    disabled: (item: any) => item.status !== "正常",
+    // 所有仪器的预约按钮都可以点击，状态检查在点击时进行
+    // 为不可预约的仪器添加提示文本
+    title: (item: any) => item.status !== "正常" ? `仪器当前${item.status}，点击查看详情` : "点击预约仪器",
   },
   {
     id: "maintenance",
