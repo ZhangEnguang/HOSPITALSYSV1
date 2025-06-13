@@ -819,19 +819,19 @@ const ReagentCard = ({
         
         {/* 库存量 */}
         <div className="flex items-center justify-between pb-3">
-          <span className={cn(
-            "text-sm",
-            "text-muted-foreground"
-          )}>
-            库存量:
-          </span>
-          <span className={cn(
-            "text-sm font-medium",
-            item.currentAmount <= 0 ? "text-red-600" : 
-            item.currentAmount <= item.initialAmount * 0.5 ? "text-orange-600" : "text-green-600"
-          )}>
-            {item.currentAmount <= 0 ? "无库存" : `${item.currentAmount}${item.unit}`}
-          </span>
+            <span className={cn(
+              "text-sm",
+              "text-muted-foreground"
+            )}>
+              库存量:
+            </span>
+            <span className={cn(
+              "text-sm font-medium",
+              item.currentAmount <= 0 ? "text-red-600" : 
+              item.currentAmount <= item.initialAmount * 0.5 ? "text-orange-600" : "text-green-600"
+            )}>
+              {item.currentAmount <= 0 ? "无库存" : `${item.currentAmount}${item.unit}`}
+            </span>
         </div>
       </div>
 

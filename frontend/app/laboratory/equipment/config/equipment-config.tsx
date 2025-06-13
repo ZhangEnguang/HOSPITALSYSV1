@@ -490,7 +490,7 @@ export const equipmentActions = [
     id: "maintenance",
     label: "维护登记",
     icon: <Wrench className="h-4 w-4" />,
-  },
+    },
   {
     id: "edit",
     label: "编辑仪器",
@@ -647,11 +647,11 @@ const EquipmentCard = ({
         {/* 标题和型号 */}
         <div className="flex-shrink-0 mb-2">
           <h3 className="font-medium text-sm text-gray-900 transition-colors duration-300 group-hover:text-primary truncate leading-tight mb-1">
-            {item.name}
-          </h3>
+              {item.name}
+            </h3>
           <p className="text-xs text-muted-foreground truncate leading-relaxed">
-            {item.model}
-          </p>
+              {item.model}
+            </p>
         </div>
 
         {/* 填充空间 */}
@@ -661,8 +661,8 @@ const EquipmentCard = ({
         <div className="flex-shrink-0 flex items-center justify-between pt-2 border-t border-gray-100">
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground leading-none">
-              预约次数：{item.bookingCount || 0}次
-            </span>
+            预约次数：{item.bookingCount || 0}次
+          </span>
             {item.status === "正常" ? (
               <span className="text-xs px-2 py-0.5 bg-green-50 text-green-600 rounded-full border border-green-200 leading-none">
                 可预约

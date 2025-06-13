@@ -56,7 +56,7 @@ function EquipmentBookingContent() {
   
   // 删除确认对话框状态
   const [itemToDelete, setItemToDelete] = useState<any>(null)
-  
+
   // 审核弹框状态
   const [approvalDialogOpen, setApprovalDialogOpen] = useState(false)
   const [selectedApprovalBooking, setSelectedApprovalBooking] = useState<any>(null)
@@ -362,49 +362,51 @@ function EquipmentBookingContent() {
 
   return (
     <div className="space-y-6">
-      <DataList
-        title="仪器预约管理"
-        data={paginatedItems}
-        searchValue={searchTerm}
-        searchPlaceholder="搜索预约标题、仪器名称、申请人..."
-        onSearchChange={setSearchTerm}
-        onSearch={() => {}}
-        onAddNew={() => router.push("/laboratory/equipment-booking/create")}
-        onAIAssist={undefined}
-        addButtonLabel="新增预约"
-        settingsButtonLabel={undefined}
-        onOpenSettings={undefined}
-        quickFilters={quickFilters}
-        onQuickFilterChange={(filterId, value) =>
-          setFilterValues((prev) => ({ ...prev, [filterId]: value }))
-        }
-        quickFilterValues={filterValues}
-        onAdvancedFilter={(values) => setFilterValues(values)}
-        sortOptions={sortOptions as any}
-        activeSortOption={sortOption}
-        onSortChange={setSortOption}
-        defaultViewMode={viewMode}
-        onViewModeChange={(mode) => setViewMode(mode as "grid" | "list")}
-        tableColumns={equipmentBookingColumns as any}
-        tableActions={equipmentBookingActions}
-        cardActions={equipmentBookingActions}
-        visibleColumns={visibleColumns}
-        onVisibleColumnsChange={setVisibleColumns}
-        cardFields={equipmentBookingCardFields}
-        titleField="bookingTitle"
-        descriptionField="purpose"
-        statusField="status"
-        statusVariants={statusColors as any}
-        pageSize={pageSize}
-        currentPage={currentPage}
-        totalItems={totalItems}
-        onPageChange={setCurrentPage}
-        onPageSizeChange={setPageSize}
-        selectedRows={selectedRows}
-        onSelectedRowsChange={setSelectedRows}
-        batchActions={configuredBatchActions}
-        onRowActionClick={handleRowAction}
-      />
+      <div className="equipment-booking-cards [&_.grid.grid-cols-2.gap-x-6.gap-y-3]:gap-4">
+        <DataList
+          title="仪器预约管理"
+          data={paginatedItems}
+          searchValue={searchTerm}
+          searchPlaceholder="搜索预约标题、仪器名称、申请人..."
+          onSearchChange={setSearchTerm}
+          onSearch={() => {}}
+          onAddNew={() => router.push("/laboratory/equipment-booking/create")}
+          onAIAssist={undefined}
+          addButtonLabel="新增预约"
+          settingsButtonLabel={undefined}
+          onOpenSettings={undefined}
+          quickFilters={quickFilters}
+          onQuickFilterChange={(filterId, value) =>
+            setFilterValues((prev) => ({ ...prev, [filterId]: value }))
+          }
+          quickFilterValues={filterValues}
+          onAdvancedFilter={(values) => setFilterValues(values)}
+          sortOptions={sortOptions as any}
+          activeSortOption={sortOption}
+          onSortChange={setSortOption}
+          defaultViewMode={viewMode}
+          onViewModeChange={(mode) => setViewMode(mode as "grid" | "list")}
+          tableColumns={equipmentBookingColumns as any}
+          tableActions={equipmentBookingActions}
+          cardActions={equipmentBookingActions}
+          visibleColumns={visibleColumns}
+          onVisibleColumnsChange={setVisibleColumns}
+          cardFields={equipmentBookingCardFields}
+          titleField="bookingTitle"
+          descriptionField="purpose"
+          statusField="status"
+          statusVariants={statusColors as any}
+          pageSize={pageSize}
+          currentPage={currentPage}
+          totalItems={totalItems}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setPageSize}
+          selectedRows={selectedRows}
+          onSelectedRowsChange={setSelectedRows}
+          batchActions={configuredBatchActions}
+          onRowActionClick={handleRowAction}
+        />
+      </div>
 
       {/* 审核申领弹框 */}
       <BookingApprovalDialog

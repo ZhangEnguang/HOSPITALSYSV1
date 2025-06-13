@@ -399,8 +399,9 @@ function ReagentApplicationContent() {
 
   return (
     <div className="space-y-6">
-      <DataList
-        title="试剂申领管理"
+      <div className="reagent-application-cards [&_.grid.grid-cols-2.gap-x-6.gap-y-3]:gap-4">
+        <DataList
+          title="试剂申领管理"
         data={paginatedItems}
         searchValue={searchTerm}
         searchPlaceholder="搜索申领标题、试剂名称、申请人..."
@@ -441,7 +442,8 @@ function ReagentApplicationContent() {
         onSelectedRowsChange={setSelectedRows}
         batchActions={configuredBatchActions}
         onRowActionClick={handleRowAction}
-      />
+        />
+      </div>
 
       {/* 查看详情弹框 */}
       <ReagentApplicationViewDialog

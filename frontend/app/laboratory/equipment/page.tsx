@@ -126,7 +126,7 @@ function EquipmentContent() {
     .sort((a, b) => {
       // 智能综合排序逻辑
       const [field, direction] = sortOption.split("_")
-      
+
       // 如果选择了智能排序，使用综合排序逻辑
       if (field === "smart") {
         // 1. 主排序：仪器状态优先级（可用性优先）
@@ -340,7 +340,7 @@ function EquipmentContent() {
           } else if (action.id === "booking") {
             // 检查仪器状态是否可预约
             if (row.status === "正常") {
-              router.push(`/laboratory/equipment/booking/${row.id}`)
+            router.push(`/laboratory/equipment/booking/${row.id}`)
             } else {
               // 显示不可预约对话框
               setBookingUnavailableDialog({

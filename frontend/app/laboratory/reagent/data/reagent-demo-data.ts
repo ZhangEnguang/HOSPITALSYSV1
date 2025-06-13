@@ -553,7 +553,7 @@ const baseDemoReagentItems = [
     density: "1.483 g/mL",
     imageUrl: "/reagent/CH2Cl2.png",
   },
-]
+] 
 
 // 导出添加了使用频率的试剂数据
 export const allDemoReagentItems = addUsageFrequency(baseDemoReagentItems)

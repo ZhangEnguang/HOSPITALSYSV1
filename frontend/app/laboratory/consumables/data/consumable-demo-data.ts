@@ -315,7 +315,7 @@ const baseDemoConsumableItems = [
     notes: "耐腐蚀，可高温灭菌，适用于有机溶剂",
     imageUrl: "/consumables/stainless-steel-tips.png",
   },
-]
+] 
 
 // 导出添加了使用频率的耗材数据
 export const allDemoConsumableItems = addUsageFrequency(baseDemoConsumableItems)

@@ -852,18 +852,18 @@ const ConsumableCard = ({
         
         {/* 库存量 */}
         <div className="flex items-center justify-between pb-5">
-          <span className={cn(
-            "text-sm",
-            isDisabled() ? "text-gray-400" : "text-muted-foreground"
-          )}>
-            库存量:
-          </span>
-          <span className={cn(
-            "text-sm font-medium",
-            isDisabled() ? "text-gray-500" : stockStatus.color.split(' ')[0]
-          )}>
-            {item.currentStock}{item.unit}
-          </span>
+            <span className={cn(
+              "text-sm",
+              isDisabled() ? "text-gray-400" : "text-muted-foreground"
+            )}>
+              库存量:
+            </span>
+            <span className={cn(
+              "text-sm font-medium",
+              isDisabled() ? "text-gray-500" : stockStatus.color.split(' ')[0]
+            )}>
+              {item.currentStock}{item.unit}
+            </span>
         </div>
       </div>
     </Card>

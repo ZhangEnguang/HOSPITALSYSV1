@@ -400,8 +400,9 @@ function ConsumablesApplicationContent() {
 
   return (
     <div className="space-y-6">
-      <DataList
-        title="耗材申领管理"
+      <div className="consumables-application-cards [&_.grid.grid-cols-2.gap-x-6.gap-y-3]:gap-4">
+        <DataList
+          title="耗材申领管理"
         data={paginatedItems}
         searchValue={searchTerm}
         searchPlaceholder="搜索申领标题、耗材名称、申请人..."
@@ -442,7 +443,8 @@ function ConsumablesApplicationContent() {
         onSelectedRowsChange={setSelectedRows}
         batchActions={configuredBatchActions}
         onRowActionClick={handleRowAction}
-      />
+        />
+      </div>
 
       {/* 删除确认对话框 */}
       <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
