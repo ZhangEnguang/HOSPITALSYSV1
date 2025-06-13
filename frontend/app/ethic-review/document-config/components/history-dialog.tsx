@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { format } from "date-fns"
-import { Clock, Archive, FileText, ArrowDown, X, ArrowRightLeft, Diff } from "lucide-react"
+import { Clock, Archive, FileText, X, ArrowRightLeft, Diff } from "lucide-react"
 import { 
   Dialog,
   DialogContent,
@@ -470,7 +470,7 @@ export function HistoryDialog({ isOpen, onClose, config, history }: HistoryDialo
                       </div>
                     </div>
                     
-                    <Accordion type="single" collapsible className="w-full">
+                    <Accordion type="single" collapsible className="w-full" defaultValue="documents">
                       <AccordionItem value="documents">
                         <AccordionTrigger className="py-2">
                           <span className="font-medium">送审文件清单 ({selectedHistory.documents.length})</span>
@@ -510,24 +510,6 @@ export function HistoryDialog({ isOpen, onClose, config, history }: HistoryDialo
                           </div>
                         </AccordionContent>
                       </AccordionItem>
-                      
-                      {selectedHistory.changedFields.length > 0 && (
-                        <AccordionItem value="changes">
-                          <AccordionTrigger className="py-2">
-                            <span className="font-medium">变更字段</span>
-                          </AccordionTrigger>
-                          <AccordionContent>
-                            <div className="space-y-1 p-1">
-                              {selectedHistory.changedFields.map((field) => (
-                                <div key={field} className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
-                                  <ArrowDown className="h-3 w-3 text-blue-500" />
-                                  <span>{field}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
-                      )}
                     </Accordion>
                   </div>
                 </ScrollArea>

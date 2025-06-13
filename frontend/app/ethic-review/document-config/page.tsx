@@ -4,6 +4,7 @@ import { documentConfigItems } from "./data/document-config-demo-data"
 import { useRouter } from "next/navigation"
 import { Suspense, useState, useEffect } from "react"
 import DataList from "@/components/data-management/data-list"
+import { useToast } from "@/hooks/use-toast"
 import { 
   tableColumns, 
   cardFields, 
@@ -12,7 +13,8 @@ import {
   quickFilters, 
   filterCategories,
   dataListStatusVariants,
-  getStatusName
+  getStatusName,
+  batchActions
 } from "./config/document-config"
 import { Eye, FileEdit, Trash2, Files, FilePlus, FileCheck, File, CheckCircle, XCircle, Copy, MoreVertical, MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -56,8 +58,7 @@ interface CardField {
 
 // 将cardFields转换为DataListCard需要的格式
 const adaptedCardFields: CardField[] = cardFields
-  // 只保留最重要的几个字段，避免卡片内容溢出
-  .filter(field => ['reviewType', 'projectType', 'documentCount', 'status'].includes(field.value))
+  // 使用全部4个新配置的字段
   .map((field: CardFieldConfig) => ({
     id: field.value,  // 使用value字段作为id
     label: field.label,
@@ -67,6 +68,7 @@ const adaptedCardFields: CardField[] = cardFields
 
 function DocumentConfigContent() {
   const router = useRouter()
+  const { toast } = useToast()
   
   // 确保表格列包含操作列
   const ensureTableColumns = () => {
@@ -391,10 +393,7 @@ function DocumentConfigContent() {
     router.push("/ethic-review/document-config/create")
   }
 
-  // 处理AI辅助生成
-  const handleAIAssist = () => {
-    console.log("启动AI智能填报")
-  }
+
   
   // 处理查看详情
   const handleViewDetails = (item: any) => {
@@ -421,14 +420,103 @@ function DocumentConfigContent() {
   
   // 处理删除配置
   const handleDeleteConfig = (item: any) => {
-    const confirmed = window.confirm(`确定要删除配置 "${item.name}" 吗？`)
-    if (confirmed) {
-      console.log("删除配置", item.id)
-      // 实际应用中应调用API删除数据
-      const newData = data.filter(config => config.id !== item.id)
-      setData(newData)
-      setTotalItems(newData.length)
-    }
+    console.log("删除配置", item.id)
+    // 实际应用中应调用API删除数据
+    const newData = data.filter(config => config.id !== item.id)
+    setData(newData)
+    setTotalItems(newData.length)
+    
+    // 显示成功提示toast
+    toast({
+      title: "删除成功",
+      description: `配置 "${item.name}" 已删除`,
+      variant: "destructive",
+    })
+  }
+  
+  // 处理状态切换（启用/禁用）
+  const handleToggleStatus = (item: any) => {
+    const newStatus = item.status === "enabled" ? "disabled" : "enabled"
+    const statusText = newStatus === "enabled" ? "启用" : "禁用"
+    
+    console.log(`${statusText}配置`, item.id, "新状态:", newStatus)
+    
+    // 更新数据中的状态
+    const newData = data.map(config => 
+      config.id === item.id 
+        ? { ...config, status: newStatus, updatedAt: new Date().toISOString() }
+        : config
+    )
+    
+    setData(newData)
+    
+    // 显示成功提示toast
+    const toastResult = toast({
+      title: "操作成功",
+      description: `配置 "${item.name}" 已${statusText}`,
+      variant: "default", // 统一使用默认样式
+      duration: 3000, // 3秒后自动关闭
+    })
+    
+    // 3秒后自动关闭toast
+    setTimeout(() => {
+      toastResult.dismiss()
+    }, 3000)
+    
+    // 实际应用中应调用API更新状态
+    // await updateDocumentConfigStatus(item.id, newStatus)
+  }
+  
+  // 处理批量状态切换
+  const handleBatchToggleStatus = (selectedItems: any[], targetStatus: "enabled" | "disabled") => {
+    const statusText = targetStatus === "enabled" ? "启用" : "禁用"
+    const actionText = targetStatus === "enabled" ? "启用" : "禁用"
+    
+    console.log(`批量${actionText}配置`, selectedItems.map(item => item.id), "新状态:", targetStatus)
+    
+    // 更新数据中的状态
+    const selectedIds = selectedItems.map(item => item.id)
+    const newData = data.map(config => 
+      selectedIds.includes(config.id)
+        ? { ...config, status: targetStatus, updatedAt: new Date().toISOString() }
+        : config
+    )
+    
+    setData(newData)
+    setSelectedRows([]) // 清空选择
+    
+    // 显示成功提示toast
+    toast({
+      title: "批量操作成功",
+      description: `已${statusText} ${selectedItems.length} 个配置`,
+      variant: "default", // 统一使用默认样式
+    })
+    
+    // 实际应用中应调用API更新状态
+    // await batchUpdateDocumentConfigStatus(selectedIds, targetStatus)
+  }
+  
+  // 处理批量删除
+  const handleBatchDelete = (selectedItems: any[]) => {
+    console.log("批量删除配置", selectedItems.map(item => item.id))
+    
+    // 从数据中移除选中的项目
+    const selectedIds = selectedItems.map(item => item.id)
+    const newData = data.filter(config => !selectedIds.includes(config.id))
+    
+    setData(newData)
+    setTotalItems(newData.length)
+    setSelectedRows([]) // 清空选择
+    
+    // 显示成功提示toast
+    toast({
+      title: "批量删除成功",
+      description: `已删除 ${selectedItems.length} 个配置`,
+      variant: "destructive",
+    })
+    
+    // 实际应用中应调用API删除数据
+    // await batchDeleteDocumentConfigs(selectedIds)
   }
   
   // 在DOM加载时注册处理函数到window对象供table和card调用
@@ -440,7 +528,10 @@ function DocumentConfigContent() {
     (window as any).__dataListHandlers = {
       handleViewDetails: handleViewDetails,
       handleEditConfig: handleEditConfig,
-      handleDeleteConfig: handleDeleteConfig
+      handleDeleteConfig: handleDeleteConfig,
+      handleToggleStatus: handleToggleStatus,
+      handleBatchToggleStatus: handleBatchToggleStatus,
+      handleBatchDelete: handleBatchDelete
     };
     
     // 添加一个临时调试函数到window对象
@@ -455,7 +546,7 @@ function DocumentConfigContent() {
         delete (window as any).__debugEditConfig
       }
     }
-  }, [router])
+  }, [router, handleViewDetails, handleEditConfig, handleDeleteConfig, handleToggleStatus, handleBatchToggleStatus, handleBatchDelete])
   
   return (
     <div className="w-full px-1 space-y-6">
@@ -492,6 +583,7 @@ function DocumentConfigContent() {
         onPageSizeChange={handlePageSizeChange}
         selectedRows={selectedRows}
         onSelectedRowsChange={handleSelectionChange}
+        batchActions={batchActions}
         onItemClick={handleItemClick}
         onViewDetails={handleViewDetails}
         onEditConfig={handleEditConfig}
@@ -499,7 +591,6 @@ function DocumentConfigContent() {
         detailsUrlPrefix="/ethic-review/document-config"
         onAddNew={handleAddNew}
         addButtonLabel="新建送审文件配置"
-        onAIAssist={handleAIAssist}
         showColumnToggle={true}
         visibleColumns={visibleColumns}
         onVisibleColumnsChange={handleVisibleColumnsChange}

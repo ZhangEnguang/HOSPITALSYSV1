@@ -14,14 +14,17 @@ export const dataListStatusVariants: Record<string, "default" | "destructive" | 
 }
 
 // 状态名称映射函数
-export const getStatusName = (status: string) => {
+export const getStatusName = (item: any) => {
+  // 适配通用组件的接口，item可能是状态值或者整个item对象
+  const status = typeof item === 'string' ? item : item?.status;
+  
   switch (status) {
     case "enabled":
       return "启用"
     case "disabled":
       return "禁用"
     default:
-      return status
+      return status || "未知"
   }
 }
 
@@ -143,11 +146,22 @@ export const tableColumns = [
     cell: (item: any) => {
       const status = item.status === "enabled" ? "启用" : "禁用";
       const badgeClass = item.status === "enabled" 
-        ? "bg-green-100 text-green-700 border-green-300" 
-        : "bg-red-100 text-red-700 border-red-300";
+        ? "bg-green-100 text-green-700 border-green-300 hover:bg-green-200 cursor-pointer" 
+        : "bg-red-100 text-red-700 border-red-300 hover:bg-red-200 cursor-pointer";
+      
+      const handlers = typeof window !== 'undefined' ? (window as any).__dataListHandlers : null;
+      const handleToggleStatus = handlers?.handleToggleStatus;
       
       return (
-        <Badge variant="outline" className={cn("px-2 py-0.5 border", badgeClass)}>
+        <Badge 
+          variant="outline" 
+          className={cn("px-2 py-0.5 border transition-colors", badgeClass)}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleToggleStatus?.(item);
+          }}
+          title={`点击${item.status === "enabled" ? "禁用" : "启用"}`}
+        >
           {status}
         </Badge>
       );
@@ -164,7 +178,10 @@ export const tableColumns = [
       const handleViewDetails = handlers?.handleViewDetails;
       const handleEditConfig = handlers?.handleEditConfig;
       const handleDeleteConfig = handlers?.handleDeleteConfig;
+      const handleToggleStatus = handlers?.handleToggleStatus;
     
+      const isEnabled = item.status === "enabled";
+      
       return (
         <div className="flex items-center justify-end">
           <DropdownMenu>
@@ -198,6 +215,25 @@ export const tableColumns = [
                 <span>编辑配置</span>
               </DropdownMenuItem>
               <DropdownMenuItem 
+                className="cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleToggleStatus?.(item);
+                }}
+              >
+                {isEnabled ? (
+                  <>
+                    <XCircle className="mr-2 h-4 w-4 text-red-600" />
+                    <span>禁用配置</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
+                    <span>启用配置</span>
+                  </>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuItem 
                 className="cursor-pointer text-red-600 focus:text-red-600"
                 onClick={() => handleDeleteConfig?.(item)}
               >
@@ -218,119 +254,48 @@ export const cardFields = [
     label: "审查类型",
     value: "reviewType",
     render: (item: any) => (
-      <Badge 
-        variant="outline" 
-        className={cn("px-2 py-0.5 border", 
-          item.reviewType.includes("初始") ? "bg-blue-100 text-blue-700 border-blue-300" :
-          item.reviewType.includes("定期") || item.reviewType.includes("年度") ? "bg-purple-100 text-purple-700 border-purple-300" :
-          item.reviewType.includes("人遗") ? "bg-amber-100 text-amber-700 border-amber-300" :
-          item.reviewType.includes("修正案") ? "bg-green-100 text-green-700 border-green-300" :
-          item.reviewType.includes("安全") ? "bg-red-100 text-red-700 border-red-300" :
-          item.reviewType.includes("偏离") ? "bg-yellow-100 text-yellow-700 border-yellow-300" :
-          item.reviewType.includes("暂停") || item.reviewType.includes("终止") ? "bg-orange-100 text-orange-700 border-orange-300" :
-          item.reviewType.includes("完成") ? "bg-teal-100 text-teal-700 border-teal-300" :
-          item.reviewType.includes("国际") ? "bg-indigo-100 text-indigo-700 border-indigo-300" :
-          item.reviewType.includes("材料") ? "bg-cyan-100 text-cyan-700 border-cyan-300" :
-          "bg-gray-100 text-gray-700 border-gray-300"
-        )}
-      >
-        {item.reviewType}
-      </Badge>
+      <div className="text-sm font-medium text-gray-900">
+        {item.reviewType || "-"}
+      </div>
     ),
   },
   {
-    label: "适用项目类型",
+    label: "适用项目类型", 
     value: "projectType",
-    render: (item: any) => {
-      const projectType = item.projectType || "-";
-      let badgeClass = "bg-gray-100 text-gray-700 border-gray-300";
-      
-      if (projectType === "人体") {
-        badgeClass = "bg-blue-100 text-blue-700 border-blue-300";
-      } else if (projectType === "动物") {
-        badgeClass = "bg-amber-100 text-amber-700 border-amber-300";
-      }
-      
-      return (
-        <Badge variant="outline" className={cn("px-2 py-0.5 border", badgeClass)}>
-          {projectType}
-        </Badge>
-      );
-    },
+    render: (item: any) => (
+      <div className="text-sm text-gray-600">
+        {item.projectType || "-"}
+      </div>
+    ),
   },
   {
     label: "文件数量",
-    value: "documentCount",
+    value: "documentCount", 
     render: (item: any) => (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 text-sm">
         <Files className="h-4 w-4 text-muted-foreground" />
-        <span>{item.documentCount || 0}</span>
+        <span className="font-medium">{item.documentCount || 0}</span>
+        <span className="text-gray-500">个文件</span>
       </div>
     ),
   },
   {
-    label: "必交文件",
-    value: "requiredCount",
+    label: "文件构成",
+    value: "documentBreakdown",
     render: (item: any) => (
-      <div className="flex items-center gap-2">
-        <FileCheck className="h-4 w-4 text-green-600" />
-        <span>{item.requiredCount || 0}</span>
+      <div className="flex items-center gap-4 text-sm">
+        <div className="flex items-center gap-1">
+          <FileCheck className="h-4 w-4 text-green-600" />
+          <span className="text-green-700 font-medium">{item.requiredCount || 0}</span>
+          <span className="text-gray-500">必交</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <File className="h-4 w-4 text-blue-600" />
+          <span className="text-blue-700 font-medium">{item.optionalCount || 0}</span>
+          <span className="text-gray-500">选交</span>
+        </div>
       </div>
     ),
-  },
-  {
-    label: "选交文件",
-    value: "optionalCount",
-    render: (item: any) => (
-      <div className="flex items-center gap-2">
-        <File className="h-4 w-4 text-blue-600" />
-        <span>{item.optionalCount || 0}</span>
-      </div>
-    ),
-  },
-  {
-    label: "创建人",
-    value: "createdBy",
-    render: (item: any) => (
-      <div className="flex items-center gap-2">
-        <Avatar className="h-6 w-6">
-          <AvatarImage src={item.createdBy?.avatar} alt={item.createdBy?.name} />
-          <AvatarFallback>{item.createdBy?.name?.charAt(0) || "-"}</AvatarFallback>
-        </Avatar>
-        <div>{item.createdBy?.name || "-"}</div>
-      </div>
-    ),
-  },
-  {
-    label: "创建时间",
-    value: "createdAt",
-    render: (item: any) => (
-      <div className="text-sm text-muted-foreground">
-        {item.createdAt ? new Date(item.createdAt).toLocaleString("zh-CN", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit"
-        }) : "-"}
-      </div>
-    ),
-  },
-  {
-    label: "状态",
-    value: "status",
-    render: (item: any) => {
-      const status = item.status === "enabled" ? "启用" : "禁用";
-      const badgeClass = item.status === "enabled" 
-        ? "bg-green-100 text-green-700 border-green-300" 
-        : "bg-red-100 text-red-700 border-red-300";
-      
-      return (
-        <Badge variant="outline" className={cn("px-2 py-0.5 border", badgeClass)}>
-          {status}
-        </Badge>
-      );
-    },
   },
 ];
 
@@ -369,6 +334,26 @@ export const cardActions = [
       
       // 优先使用window.location.href进行导航，这是最可靠的导航方式
       window.location.href = editUrl;
+    },
+  },
+  {
+    id: "toggle-status",
+    label: (item: any) => item.status === "enabled" ? "禁用配置" : "启用配置",
+    icon: (item: any) => item.status === "enabled" 
+      ? <XCircle className="h-4 w-4" />
+      : <CheckCircle className="h-4 w-4" />,
+    variant: (item: any) => item.status === "enabled" ? "destructive" : "default",
+    onClick: (item: any, event?: React.MouseEvent) => {
+      // 避免服务器端渲染错误
+      if (typeof window === 'undefined') return;
+      
+      // 阻止事件冒泡
+      event?.stopPropagation?.();
+      
+      const handleToggleStatus = (window as any).__dataListHandlers?.handleToggleStatus;
+      if (handleToggleStatus) {
+        handleToggleStatus(item);
+      }
     },
   },
   {
@@ -588,5 +573,54 @@ export const filterCategories = [
         placeholder: "请选择更新日期",
       },
     ],
+  },
+];
+
+// 批量操作配置
+export const batchActions = [
+  {
+    id: "batch-enable",
+    label: "批量启用",
+    icon: <CheckCircle className="h-4 w-4" />,
+    variant: "default" as const,
+    onClick: (selectedItems: any[]) => {
+      // 避免服务器端渲染错误
+      if (typeof window === 'undefined') return;
+      
+      const handleBatchToggleStatus = (window as any).__dataListHandlers?.handleBatchToggleStatus;
+      if (handleBatchToggleStatus) {
+        handleBatchToggleStatus(selectedItems, "enabled");
+      }
+    },
+  },
+  {
+    id: "batch-disable", 
+    label: "批量禁用",
+    icon: <XCircle className="h-4 w-4" />,
+    variant: "destructive" as const,
+    onClick: (selectedItems: any[]) => {
+      // 避免服务器端渲染错误
+      if (typeof window === 'undefined') return;
+      
+      const handleBatchToggleStatus = (window as any).__dataListHandlers?.handleBatchToggleStatus;
+      if (handleBatchToggleStatus) {
+        handleBatchToggleStatus(selectedItems, "disabled");
+      }
+    },
+  },
+  {
+    id: "batch-delete",
+    label: "批量删除",
+    icon: <Trash2 className="h-4 w-4" />,
+    variant: "destructive" as const,
+    onClick: (selectedItems: any[]) => {
+      // 避免服务器端渲染错误
+      if (typeof window === 'undefined') return;
+      
+      const handleBatchDelete = (window as any).__dataListHandlers?.handleBatchDelete;
+      if (handleBatchDelete) {
+        handleBatchDelete(selectedItems);
+      }
+    },
   },
 ]; 
