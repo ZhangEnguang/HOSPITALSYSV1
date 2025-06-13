@@ -1,11 +1,26 @@
 "use client"
 
 import { useState, useEffect, Suspense } from "react"
+
+// 扩展Window接口
+declare global {
+  interface Window {
+    showDeleteConfirm?: (item: any) => void
+  }
+}
 import { useRouter, useSearchParams } from "next/navigation"
 import DataList from "@/components/data-management/data-list"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PlusCircle, Settings, PlusSquare, Sparkles } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { initialReviewItems } from "./data/initial-review-demo-data"
 import {
   tableColumns,
@@ -62,6 +77,10 @@ function InitialReviewContent() {
   })
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   
+  // 删除确认弹框状态
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [itemToDelete, setItemToDelete] = useState<any>(null)
+  
   // 表格列定义和可见性
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
     projectId: true,
@@ -83,6 +102,14 @@ function InitialReviewContent() {
       setTotalItems(initialReviewItems.length)
       setLoading(false)
     }, 500)
+    
+    // 设置全局删除确认函数
+    window.showDeleteConfirm = handleDeleteConfirm
+    
+    // 清理函数
+    return () => {
+      delete window.showDeleteConfirm
+    }
   }, [])
 
   // 处理搜索
@@ -235,6 +262,40 @@ function InitialReviewContent() {
     router.push(`/ethic-review/initial-review/${id}`);
   }
 
+  // 处理删除确认
+  const handleDeleteConfirm = (item: any) => {
+    setItemToDelete(item)
+    setDeleteDialogOpen(true)
+  }
+
+  // 执行删除操作
+  const handleDeleteExecute = () => {
+    if (itemToDelete) {
+      // 从数据中移除项目
+      const newData = data.filter(item => item.id !== itemToDelete.id)
+      setData(newData)
+      setTotalItems(newData.length)
+      
+      // 显示成功提示
+      toast({
+        title: "删除成功",
+        description: `项目"${itemToDelete.name}"已成功删除`,
+        variant: "default",
+        duration: 3000,
+      })
+      
+      // 关闭弹框并清理状态
+      setDeleteDialogOpen(false)
+      setItemToDelete(null)
+    }
+  }
+
+  // 取消删除
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false)
+    setItemToDelete(null)
+  }
+
   // 批量操作按钮
   const batchActions = [
     {
@@ -320,11 +381,23 @@ function InitialReviewContent() {
     onToggleSelect: (selected: boolean) => void,
     onRowActionClick?: (action: any, item: any) => void
   ) => {
+    // 为卡片操作添加删除回调
+    const enhancedActions = actions.map(action => ({
+      ...action,
+      onClick: (item: any, e: any) => {
+        if (action.id === "delete") {
+          handleDeleteConfirm(item)
+        } else {
+          action.onClick(item, e, handleDeleteConfirm)
+        }
+      }
+    }))
+
     return (
       <InitialReviewCard
         key={item.id}
         item={item}
-        actions={actions}
+        actions={enhancedActions}
         isSelected={isSelected}
         onToggleSelect={onToggleSelect}
         onClick={() => handleItemClick(item)}
@@ -392,6 +465,26 @@ function InitialReviewContent() {
         showHeaderButtons={false}
         customCardRenderer={customCardRenderer}
       />
+
+      {/* 删除确认弹框 */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>确认删除</DialogTitle>
+            <DialogDescription>
+              您确定要删除项目"{itemToDelete?.name}"吗？此操作不可撤销。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleDeleteCancel}>
+              取消
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteExecute}>
+              删除
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

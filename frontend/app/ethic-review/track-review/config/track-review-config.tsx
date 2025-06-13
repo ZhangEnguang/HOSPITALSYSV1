@@ -180,7 +180,7 @@ export const tableColumns = [
               <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="w-32">
             <DropdownMenuItem onClick={() => window.location.href = `/ethic-review/track-review/${item.id}`}>
               <Eye className="h-4 w-4 mr-2" />
               查看详情
@@ -194,9 +194,11 @@ export const tableColumns = [
               审核项目
             </DropdownMenuItem>
             <DropdownMenuItem 
-              onClick={() => {
-                if (confirm("确定要删除此项目吗？")) {
-                  console.log("删除项目", item.id);
+              onClick={(e) => {
+                e.stopPropagation();
+                // 触发删除确认弹框
+                if (window.showDeleteConfirm) {
+                  window.showDeleteConfirm(item);
                 }
               }}
               className="text-destructive hover:text-destructive/90"
@@ -273,9 +275,9 @@ export const cardActions = [
     id: "delete",
     label: "删除项目",
     icon: <Trash2 className="h-4 w-4" />,
-    onClick: (item: any) => {
-      if (confirm("确定要删除此项目吗？")) {
-        console.log("删除项目", item);
+    onClick: (item: any, e: any, onDelete?: (item: any) => void) => {
+      if (onDelete) {
+        onDelete(item);
       }
     },
   },

@@ -407,7 +407,7 @@ export default function ReviewFilesTab({ project }: ReviewFilesTabProps) {
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent align="end" className="w-32">
                         <DropdownMenuItem onClick={() => handleFilePreview(file)}>
                           <Eye className="h-4 w-4 mr-2" />
                           查看详情

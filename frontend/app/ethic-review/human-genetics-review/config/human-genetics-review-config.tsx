@@ -171,6 +171,50 @@ export const tableColumns = [
       )
     },
   },
+  {
+    id: "actions",
+    header: "操作",
+    accessorKey: "actions",
+    className: "text-right pr-4",
+    cell: (item: any) => (
+      <div className="flex justify-end">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-32">
+            <DropdownMenuItem onClick={() => window.location.href = `/ethic-review/human-genetics-review/${item.id}`}>
+              <Eye className="h-4 w-4 mr-2" />
+              查看详情
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => window.location.href = `/ethic-review/human-genetics-review/edit?id=${item.id}`}>
+              <FileEdit className="h-4 w-4 mr-2" />
+              编辑项目
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => window.location.href = `/ethic-review/human-genetics-review/${item.id}/review`}>
+              <ClipboardCheck className="h-4 w-4 mr-2" />
+              审核项目
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={(e) => {
+                e.stopPropagation();
+                // 触发删除确认弹框
+                if (window.showDeleteConfirm) {
+                  window.showDeleteConfirm(item);
+                }
+              }}
+              className="text-destructive hover:text-destructive/90"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              删除项目
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    ),
+  },
 ]
 
 // 卡片字段配置
@@ -235,8 +279,10 @@ export const cardActions = [
     id: "delete",
     label: "删除项目",
     icon: <Trash2 className="h-4 w-4" />,
-    onClick: (item: any) => {
-      console.log("删除", item)
+    onClick: (item: any, e: any, onDelete?: (item: any) => void) => {
+      if (onDelete) {
+        onDelete(item);
+      }
     },
   },
 ]
