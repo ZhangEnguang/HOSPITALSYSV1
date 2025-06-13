@@ -610,7 +610,11 @@ export default function EthicProjectCard({
         )}
         onClick={handleClick}
       >
-        <CardHeader className={cn("px-6 py-4", getHeaderBgColor())}>
+        <CardHeader className={cn(
+          // 伦理项目统一样式：仅保留上方和左右padding
+          (type === "animal" || type === "human") ? "px-6 pt-4 pb-0" : "px-6 py-4", 
+          getHeaderBgColor()
+        )}>
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
@@ -648,12 +652,20 @@ export default function EthicProjectCard({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              {description && <p className="text-sm text-muted-foreground truncate mt-1">{description}</p>}
+              {description && <p className={cn(
+                "text-sm text-muted-foreground truncate",
+                // 伦理项目统一样式：副标题无下边距
+                (type === "animal" || type === "human") ? "mt-1 mb-0" : "mt-1"
+              )}>{description}</p>}
             </div>
           </div>
         </CardHeader>
         {/* 标题与内容之间的高端分割线 */}
-        <div className="mx-6 mb-2">
+        <div className={cn(
+          "mx-6",
+          // 伦理项目统一样式：增加分割线的margin-bottom
+          (type === "animal" || type === "human") ? "mb-4 mt-3" : "mb-2"
+        )}>
           <div className="h-[1px] bg-gradient-to-r from-blue-50 via-blue-200/40 to-blue-50"></div>
         </div>
         <CardContent className="px-6 py-3 pt-0">

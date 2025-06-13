@@ -71,7 +71,7 @@ export default function TrackReviewCard({
       )}
       onClick={handleClick}
     >
-      <CardHeader className="p-4 pb-3">
+      <CardHeader className="px-6 pt-4 pb-0">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
@@ -88,13 +88,10 @@ export default function TrackReviewCard({
               )}
             </div>
             {item.description && (
-              <p className="text-sm text-muted-foreground truncate mt-1">
+              <p className="text-sm text-muted-foreground truncate mt-1 mb-0">
                 {renderValue(item.description)}
               </p>
             )}
-            
-            {/* 添加分割线 */}
-            <div className="w-full h-px bg-gray-200 mt-3"></div>
           </div>
           
           {actions && actions.length > 0 && (
@@ -127,7 +124,12 @@ export default function TrackReviewCard({
         </div>
       </CardHeader>
       
-      <CardContent className="p-4 pt-0">
+      {/* 标题与内容之间的优雅分割线 */}
+      <div className="mx-6 mb-4 mt-3">
+        <div className="h-[1px] bg-gradient-to-r from-blue-50 via-blue-200/40 to-blue-50"></div>
+      </div>
+      
+      <CardContent className="px-6 py-3 pt-0">
         {/* 使用统一的布局，确保行间距与列间距一致 */}
         <div className="grid grid-cols-2 gap-4">
           {/* 项目负责人 */}
