@@ -55,6 +55,7 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CreateAnimalReviewDialog } from "./create-animal-review-dialog";
 import { CreateHumanReviewDialog } from "./create-human-review-dialog";
+import ProjectMemberAvatars from "./project-member-avatars";
 
 export interface EthicCardAction {
   id: string;
@@ -621,6 +622,16 @@ export default function EthicProjectCard({
                 <h3 className="font-semibold text-lg transition-colors duration-300 group-hover:text-blue-600 truncate flex-1">
                   {title}
                 </h3>
+                {/* 项目成员头像区域 */}
+                <div className="flex-shrink-0 mr-2">
+                  {item.members && item.members.length > 0 && (
+                    <ProjectMemberAvatars 
+                      members={item.members}
+                      maxDisplay={3}
+                      size="sm"
+                    />
+                  )}
+                </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-8 w-8 opacity-70 hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>

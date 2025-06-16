@@ -34,11 +34,10 @@ import { allDemoEquipmentItems } from "../data/equipment-demo-data"
 import { statusColors } from "../config/equipment-config"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 interface BookingUnavailableDialogProps {
   open: boolean
@@ -83,13 +82,22 @@ const getUnavailableReason = (status: string) => {
   }
 }
 
-// 管理员联系信息
-const managerContact = {
-  name: "张设备管理员",
-  phone: "021-12345678",
-  email: "equipment@lab.edu.cn",
-  avatar: "/avatars/manager.png",
-  department: "设备管理处"
+// 获取仪器负责人信息
+const getEquipmentManager = (equipment: any) => {
+  // 从设备数据中获取负责人信息，如果没有则使用默认管理员信息
+  return equipment?.manager ? {
+    name: equipment.manager.name || "设备负责人",
+    phone: equipment.manager.phone || "021-12345678",
+    email: equipment.manager.email || "equipment@lab.edu.cn",
+    avatar: equipment.manager.avatar || "/avatars/manager.png",
+    department: equipment.manager.department || equipment.department || "设备管理处"
+  } : {
+    name: "张设备管理员",
+    phone: "021-12345678",
+    email: "equipment@lab.edu.cn",
+    avatar: "/avatars/manager.png",
+    department: "设备管理处"
+  }
 }
 
 // AI推荐相似仪器
@@ -124,6 +132,7 @@ export function BookingUnavailableDialog({
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false)
   
   const reason = getUnavailableReason(equipment?.status || "")
+  const managerContact = getEquipmentManager(equipment)
   
   useEffect(() => {
     if (open && equipment) {
@@ -170,50 +179,54 @@ export function BookingUnavailableDialog({
         <div className="flex-1 overflow-y-auto space-y-4 min-h-0 custom-scrollbar">
           {/* 设备信息卡片 - 融合不可预约原因和管理员联系方式 */}
           <Card className="relative">
-            {/* 右上角管理员联系图标 */}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center cursor-pointer hover:bg-blue-100 transition-colors">
-                    <Contact className="h-4 w-4 text-blue-600" />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="left" className="max-w-xs">
-                  <div className="space-y-3 p-2">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={managerContact.avatar} />
-                        <AvatarFallback className="text-xs">张</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium text-xs">{managerContact.name}</p>
-                        <p className="text-xs text-muted-foreground">{managerContact.department}</p>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full text-xs h-7"
-                        onClick={() => handleContactManager('phone')}
-                      >
-                        <Phone className="h-3 w-3 mr-1" />
-                        {managerContact.phone}
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full text-xs h-7"
-                        onClick={() => handleContactManager('email')}
-                      >
-                        <Mail className="h-3 w-3 mr-1" />
-                        邮件联系
-                      </Button>
+            {/* 右上角负责人联系图标 */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center cursor-pointer hover:bg-blue-100 transition-colors">
+                  <Contact className="h-4 w-4 text-blue-600" />
+                </div>
+              </PopoverTrigger>
+              <PopoverContent side="left" className="w-64 p-0">
+                <div className="space-y-3 p-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={managerContact.avatar} />
+                      <AvatarFallback className="text-sm">
+                        {managerContact.name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium text-sm">{managerContact.name}</p>
+                      <p className="text-xs text-muted-foreground">{managerContact.department}</p>
                     </div>
                   </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+                  <Separator />
+                  <div className="space-y-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full text-xs h-8 justify-start"
+                      onClick={() => handleContactManager('phone')}
+                    >
+                      <Phone className="h-3 w-3 mr-2" />
+                      {managerContact.phone}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full text-xs h-8 justify-start"
+                      onClick={() => handleContactManager('email')}
+                    >
+                      <Mail className="h-3 w-3 mr-2" />
+                      发送邮件
+                    </Button>
+                  </div>
+                  <div className="text-xs text-muted-foreground text-center pt-2 border-t">
+                    点击按钮联系设备负责人
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
 
             <CardContent className="pt-4 space-y-4">
               {/* 设备基本信息 */}

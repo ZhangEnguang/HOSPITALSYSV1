@@ -52,7 +52,13 @@ export default function AnimalEthicProjectsPage() {
       createdAt: "2023-10-12",
       progress: 35,
       tasks: { completed: 3, total: 8 },
-      type: "动物伦理"
+      type: "动物伦理",
+      members: [
+        { name: "王教授", role: "项目负责人", avatar: null },
+        { name: "李助理", role: "实验操作", avatar: null },
+        { name: "张技术员", role: "数据分析", avatar: null },
+        { name: "刘研究员", role: "实验设计", avatar: null }
+      ]
     },
     {
       id: "2",
@@ -67,7 +73,12 @@ export default function AnimalEthicProjectsPage() {
       createdAt: "2023-11-05",
       progress: 15,
       tasks: { completed: 1, total: 7 },
-      type: "动物伦理"
+      type: "动物伦理",
+      members: [
+        { name: "李研究员", role: "项目负责人", avatar: null },
+        { name: "陈博士", role: "项目协调", avatar: null },
+        { name: "吴老师", role: "实验设计", avatar: null }
+      ]
     },
     {
       id: "3",
@@ -82,7 +93,11 @@ export default function AnimalEthicProjectsPage() {
       createdAt: "2023-08-20",
       progress: 100,
       tasks: { completed: 6, total: 6 },
-      type: "动物伦理"
+      type: "动物伦理",
+      members: [
+        { name: "张副教授", role: "项目负责人", avatar: null },
+        { name: "孙医生", role: "临床指导", avatar: null }
+      ]
     },
     {
       id: "4",
@@ -97,7 +112,14 @@ export default function AnimalEthicProjectsPage() {
       createdAt: "2023-09-15",
       progress: 45,
       tasks: { completed: 4, total: 9 },
-      type: "动物伦理"
+      type: "动物伦理",
+      members: [
+        { name: "赵教授", role: "项目负责人", avatar: null },
+        { name: "马医生", role: "外科手术", avatar: null },
+        { name: "刘技师", role: "设备操作", avatar: null },
+        { name: "韩研究员", role: "数据统计", avatar: null },
+        { name: "胡护师", role: "术后护理", avatar: null }
+      ]
     },
     {
       id: "5",
@@ -112,7 +134,12 @@ export default function AnimalEthicProjectsPage() {
       createdAt: "2023-12-03",
       progress: 10,
       tasks: { completed: 1, total: 10 },
-      type: "动物伦理"
+      type: "动物伦理",
+      members: [
+        { name: "钱研究员", role: "项目负责人", avatar: null },
+        { name: "周博士", role: "心脏专家", avatar: null },
+        { name: "黄技师", role: "实验操作", avatar: null }
+      ]
     },
     {
       id: "6",
@@ -127,7 +154,13 @@ export default function AnimalEthicProjectsPage() {
       createdAt: "2023-07-28",
       progress: 60,
       tasks: { completed: 5, total: 8 },
-      type: "动物伦理"
+      type: "动物伦理",
+      members: [
+        { name: "孙教授", role: "项目负责人", avatar: null },
+        { name: "邓博士", role: "神经科学专家", avatar: null },
+        { name: "郭技师", role: "成像技术", avatar: null },
+        { name: "林研究员", role: "数据分析", avatar: null }
+      ]
     }
   ])
   
@@ -340,45 +373,25 @@ export default function AnimalEthicProjectsPage() {
       id: "animalType",
       header: "动物种系",
       accessorKey: "animalType" as const,
-      cell: (row: any) => (
-        <div className="flex items-center">
-          <MousePointer2 className="h-4 w-4 text-blue-500 mr-2" />
-          <span>{row.animalType || row.动物种系 || "-"}</span>
-        </div>
-      ),
+      cell: (row: any) => row.animalType || row.动物种系 || "-",
     },
     {
       id: "animalCount",
       header: "动物数量",
       accessorKey: "animalCount" as const,
-      cell: (row: any) => (
-        <div className="flex items-center">
-          <Database className="h-4 w-4 text-blue-500 mr-2" />
-          <span>{row.animalCount || row.动物数量 || "-"}</span>
-        </div>
-      ),
+      cell: (row: any) => row.animalCount || row.动物数量 || "-",
     },
     {
       id: "ethicsCommittee",
       header: "伦理委员会",
       accessorKey: "ethicsCommittee" as const,
-      cell: (row: any) => (
-        <div className="flex items-center">
-          <Building2 className="h-4 w-4 text-blue-500 mr-2" />
-          <span>{row.ethicsCommittee || row.伦理委员会 || "医学院伦理审查委员会"}</span>
-        </div>
-      ),
+      cell: (row: any) => row.ethicsCommittee || row.伦理委员会 || "医学院伦理审查委员会",
     },
     {
       id: "facilityUnit",
       header: "动物实施设备单位",
       accessorKey: "facilityUnit" as const,
-      cell: (row: any) => (
-        <div className="flex items-center">
-          <BriefcaseMedical className="h-4 w-4 text-blue-500 mr-2" />
-          <span>{row.facilityUnit || row.动物实施设备单位 || "基础医学实验中心"}</span>
-        </div>
-      ),
+      cell: (row: any) => row.facilityUnit || row.动物实施设备单位 || "基础医学实验中心",
     },
     {
       id: "leader",
@@ -422,46 +435,26 @@ export default function AnimalEthicProjectsPage() {
     {
       id: "animalType",
       label: "动物种系",
-      value: (item: any) => (
-        <div className="flex items-center">
-          <MousePointer2 className="h-4 w-4 text-blue-500 mr-2" />
-          <span>{item.animalType || item.动物种系 || "-"}</span>
-        </div>
-      ),
-      className: "flex items-center gap-2",
+      value: (item: any) => item.animalType || item.动物种系 || "-",
+      className: "",
     },
     {
       id: "animalCount",
       label: "动物数量",
-      value: (item: any) => (
-        <div className="flex items-center">
-          <Database className="h-4 w-4 text-blue-500 mr-2" />
-          <span>{item.animalCount || item.动物数量 || "-"}</span>
-        </div>
-      ),
-      className: "flex items-center gap-2",
+      value: (item: any) => item.animalCount || item.动物数量 || "-",
+      className: "",
     },
     {
       id: "ethicsCommittee",
       label: "伦理委员会",
-      value: (item: any) => (
-        <div className="flex items-center">
-          <Building2 className="h-4 w-4 text-blue-500 mr-2" />
-          <span>{item.ethicsCommittee || item.伦理委员会 || "医学院伦理审查委员会"}</span>
-        </div>
-      ),
-      className: "flex items-center gap-2",
+      value: (item: any) => item.ethicsCommittee || item.伦理委员会 || "医学院伦理审查委员会",
+      className: "",
     },
     {
       id: "facilityUnit",
       label: "动物实施设备单位",
-      value: (item: any) => (
-        <div className="flex items-center">
-          <BriefcaseMedical className="h-4 w-4 text-blue-500 mr-2" />
-          <span>{item.facilityUnit || item.动物实施设备单位 || "基础医学实验中心"}</span>
-        </div>
-      ),
-      className: "flex items-center gap-2",
+      value: (item: any) => item.facilityUnit || item.动物实施设备单位 || "基础医学实验中心",
+      className: "",
     },
   ]
   
@@ -576,6 +569,8 @@ export default function AnimalEthicProjectsPage() {
                   动物实施设备单位: item.facilityUnit || "基础医学实验中心",
                   进行中: "3",
                   已完成: "1",
+                  // 确保成员信息传递
+                  members: item.members || []
                 };
                 
                 return (

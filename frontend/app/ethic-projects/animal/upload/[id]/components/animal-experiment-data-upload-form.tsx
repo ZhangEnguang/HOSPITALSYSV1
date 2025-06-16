@@ -38,7 +38,10 @@ export function AnimalExperimentDataUploadForm({ projectId }: AnimalExperimentDa
   const [formData, setFormData] = useState({
     // 试验阶段信息
     experimentStage: "",
-    experimentDate: new Date(),
+    plannedStartDate: undefined as Date | undefined,
+    plannedEndDate: undefined as Date | undefined,
+    actualStartDate: undefined as Date | undefined,
+    actualEndDate: undefined as Date | undefined,
     experimentLocation: "",
     experimentOperator: "",
     experimentEquipment: "",
@@ -98,7 +101,8 @@ export function AnimalExperimentDataUploadForm({ projectId }: AnimalExperimentDa
     
     if (step === 0) {
       if (!formData.experimentStage) errors.experimentStage = true
-      if (!formData.experimentDate) errors.experimentDate = true
+      if (!formData.plannedStartDate) errors.plannedStartDate = true
+      if (!formData.plannedEndDate) errors.plannedEndDate = true
     } else if (step === 1) {
       if (!formData.resultSummary) errors.resultSummary = true
     }

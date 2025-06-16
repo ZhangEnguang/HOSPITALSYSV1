@@ -29,7 +29,7 @@ interface EthicProject {
   progress: number;
   tasks: { completed: number; total: number };
   leader: { id: string; name: string; avatar: string };
-  members: number;
+  members: { id: string; name: string; role: string; avatar?: string }[] | number;
   budget: number;
   isFavorite: boolean;
   animalCount?: number;
@@ -519,10 +519,37 @@ export default function HumanEthicProjectsPage() {
     // 根据项目ID生成一致的随机数据
     const randomData = getRandomData(parseInt(item.id.slice(-2), 16) || 0);
     
+    // 生成成员数据
+    const generateMembers = (projectId: string) => {
+      const memberNames = [
+        "王建国", "李明华", "张丽娟", "陈志强", "刘晓敏", "赵文杰", "孙美玲", "周建军",
+        "吴雪梅", "郑春燕", "马文博", "朱红霞", "黄庆华", "于海洋", "徐丽君", "胡金涛",
+        "梁建强", "罗文慧", "高艳萍", "田小军", "魏志明", "冯春丽", "向明远", "邵建华"
+      ];
+      
+      const roles = ["主治医师", "副主任医师", "主任医师", "研究员", "助理研究员", "博士后研究员"];
+      
+      const hash = projectId.charCodeAt(0) + projectId.charCodeAt(projectId.length - 1);
+      const memberCount = (hash % 4) + 2; // 2-5个成员
+      
+      const members = [];
+      for (let i = 0; i < memberCount; i++) {
+        const nameIndex = (hash + i * 3) % memberNames.length;
+        const roleIndex = (hash + i * 7) % roles.length;
+        members.push({
+          id: `member-${projectId}-${i}`,
+          name: memberNames[nameIndex],
+          role: roles[roleIndex]
+        });
+      }
+      
+      return members;
+    };
+
     // 扩展item对象添加额外的人体研究相关字段
     const extendedItem = {
       ...item,
-              研究类型: randomData.projectType,
+      研究类型: randomData.projectType,
       项目来源: randomData.projectSource,
       伦理委员会: randomData.committee,
       研究单位: randomData.department,
@@ -532,7 +559,8 @@ export default function HumanEthicProjectsPage() {
       委员会审批号: `BJEC-2023-${item.id.slice(-3)}`,
       实验目的: "研究新型药物对肿瘤的抑制作用",
       实验方法: "体外细胞培养与动物模型验证",
-      动物福利保障: "符合国家实验动物伦理标准"
+      动物福利保障: "符合国家实验动物伦理标准",
+      members: generateMembers(item.id)
     };
 
     // 输出扩展后的项目对象，方便调试
@@ -561,6 +589,7 @@ export default function HumanEthicProjectsPage() {
           console.log("卡片点击: 项目ID=", itemId, "类型:", typeof itemId);
           router.push(`/ethic-projects/human/${itemId}`);
         }}
+        type="human"
       />
     );
   };

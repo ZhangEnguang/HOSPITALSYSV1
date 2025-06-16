@@ -38,7 +38,10 @@ export function HumanExperimentDataUploadForm({ projectId }: HumanExperimentData
   const [formData, setFormData] = useState({
     // 试验阶段信息
     experimentStage: "",
-    experimentDate: new Date(),
+    plannedStartTime: new Date(),
+    plannedEndTime: new Date(),
+    actualStartTime: null as Date | null,
+    actualEndTime: null as Date | null,
     experimentLocation: "",
     experimentOperator: "",
     experimentEquipment: "",
@@ -98,7 +101,8 @@ export function HumanExperimentDataUploadForm({ projectId }: HumanExperimentData
     
     if (step === 0) {
       if (!formData.experimentStage) errors.experimentStage = true
-      if (!formData.experimentDate) errors.experimentDate = true
+      if (!formData.plannedStartTime) errors.plannedStartTime = true
+      if (!formData.plannedEndTime) errors.plannedEndTime = true
     } else if (step === 1) {
       if (!formData.resultSummary) errors.resultSummary = true
     }
