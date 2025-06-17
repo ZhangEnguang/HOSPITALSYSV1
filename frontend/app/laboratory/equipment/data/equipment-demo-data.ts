@@ -98,8 +98,7 @@ export const allDemoEquipmentItems = [
     bookingStatus: "未预约",
     bookingCount: 205,
     images: [
-      "/equipment/single-crystal-diffractometer.png",
-      "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400&h=300&fit=crop&auto=format"
+      "/equipment/single-crystal-diffractometer.png"
     ],
     specifications: {
       powerSupply: "220V±10%, 50Hz",

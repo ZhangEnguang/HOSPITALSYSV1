@@ -33,13 +33,13 @@ const getInitials = (name: string): string => {
 // 根据姓名生成背景色
 const getAvatarColor = (name: string): string => {
   const colors = [
-    '#CBB6FF', // 淡紫色
-    '#B0C2FC', // 淡蓝色
-    '#ABBDFE', // 浅蓝色
-    '#B1D5FF', // 天蓝色
-    '#A3E9CD', // 薄荷绿
-    '#FEBFC8', // 粉色
-    '#FFD8B6'  // 桃橙色
+    '#3B82F6', // 蓝色
+    '#8B5CF6', // 紫色
+    '#06B6D4', // 青色
+    '#10B981', // 绿色
+    '#F59E0B', // 橙色
+    '#EF4444', // 红色
+    '#EC4899'  // 粉色
   ]
   
   const hash = name.split('').reduce((acc, char) => {
@@ -77,16 +77,21 @@ export default function ProjectMemberAvatars({
   return (
     <TooltipProvider>
       <div className={cn("flex items-center", className)}>
-        {displayMembers.map((member, index) => (
+        {displayMembers.map((member, index) => {
+          const isLeader = index === 0
+          return (
           <Tooltip key={`${member.name}-${index}`}>
             <TooltipTrigger asChild>
               <div
                 className={cn(
-                  "inline-flex items-center justify-center rounded-full border-2 border-white text-white shadow-sm cursor-pointer hover:z-10 transition-transform hover:scale-110",
+                    "inline-flex items-center justify-center rounded-full border-2 border-white shadow-sm cursor-pointer hover:z-10 transition-transform hover:scale-110",
                   sizeClasses[size],
-                  index > 0 && marginClasses[size]
+                    index > 0 && marginClasses[size],
+                    isLeader 
+                      ? "text-white" 
+                      : "text-gray-700 bg-gray-200"
                 )}
-                style={{ backgroundColor: getAvatarColor(member.name) }}
+                  style={isLeader ? { backgroundColor: getAvatarColor(member.name) } : {}}
               >
                 {member.avatar ? (
                   <img 
@@ -102,18 +107,21 @@ export default function ProjectMemberAvatars({
             <TooltipContent>
               <div className="text-center">
                 <p className="font-medium">{member.name}</p>
-                <p className="text-xs text-muted-foreground">{member.role}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {isLeader ? "项目负责人" : member.role}
+                  </p>
               </div>
             </TooltipContent>
           </Tooltip>
-        ))}
+          )
+        })}
         
         {remainingCount > 0 && (
           <Tooltip>
             <TooltipTrigger asChild>
               <div
                 className={cn(
-                  "inline-flex items-center justify-center rounded-full border-2 border-white bg-slate-200 text-white shadow-sm cursor-pointer hover:z-10 transition-transform hover:scale-110",
+                  "inline-flex items-center justify-center rounded-full border-2 border-white bg-gray-200 text-gray-700 shadow-sm cursor-pointer hover:z-10 transition-transform hover:scale-110",
                   sizeClasses[size],
                   marginClasses[size]
                 )}

@@ -518,9 +518,9 @@ export function HumanInitialReview({
       </div>
       
       {/* 左右分栏布局 */}
-      <div className={`grid grid-cols-1 ${isPanelCollapsed ? 'md:grid-cols-1' : 'md:grid-cols-2'} gap-6 relative transition-all duration-300`}>
+      <div className={`grid grid-cols-1 ${isPanelCollapsed ? 'md:grid-cols-1' : 'md:grid-cols-[1fr_480px]'} gap-6 relative transition-all duration-300`}>
         {/* 左侧：表单内容 */}
-        <div className={`space-y-6 ${isPanelCollapsed ? 'w-full' : ''}`}>
+        <div className={`space-y-6 ${isPanelCollapsed ? 'w-full' : 'w-full overflow-hidden'}`}>
           {/* 项目信息卡片 */}
           <ProjectInfoCard 
             title="项目信息"
@@ -578,10 +578,10 @@ export function HumanInitialReview({
           </Button>
         )}
         
-        {/* 右侧：AI审查结果 - 使用flex布局并添加独立滚动 */}
+        {/* 右侧：AI审查结果 - 动态高度根据内容调整 */}
         {!isPanelCollapsed && (
-          <div className="border border-[#e8ecf5] rounded-lg shadow-sm bg-white flex flex-col" style={{ maxHeight: "100%" }}>
-            <div className="border-b border-[#e8ecf5] bg-gradient-to-r from-gray-50 to-white px-6 py-4">
+          <div className="border border-[#e8ecf5] rounded-xl shadow-sm bg-white flex flex-col h-fit">
+            <div className="border-b border-[#e8ecf5] bg-white px-6 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <h2 className="text-lg font-semibold text-gray-800">AI形式审查</h2>
@@ -596,15 +596,6 @@ export function HumanInitialReview({
                     title={getToggleButtonTooltip()}
                   >
                     <Minimize2 className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 p-0 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full"
-                    onClick={closeAIReview}
-                    title="关闭审查面板，返回表单页面"
-                  >
-                    <X className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -630,8 +621,8 @@ export function HumanInitialReview({
               )}
             </div>
             
-            {/* 内容区域 - 使用flex-grow和overflow-y-auto实现自动填充和滚动 */}
-            <div className="flex-grow overflow-y-auto bg-[#fafbfd]">
+            {/* 内容区域 - 动态高度根据内容调整 */}
+            <div className="bg-white">
               {isReviewing ? (
                 <div className="flex flex-col items-center py-16">
                   <div className="text-center mb-8">
@@ -699,7 +690,7 @@ export function HumanInitialReview({
                   `}</style>
                 </div>
               ) : (
-                <div className="h-full">
+                <div>
                   <AIFileReviewResult
                     result={reviewResult || { hasIssues: false, issues: [], totalFiles: 0, validFiles: 0 }}
                     isLoading={isReviewing}

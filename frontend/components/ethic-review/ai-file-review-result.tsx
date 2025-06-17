@@ -10,8 +10,9 @@ import { CheckCircle2, AlertCircle, AlertTriangle, Info, Loader2, Zap, RefreshCw
 import { CheckCircle2 as FileCheck2 } from "lucide-react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { toast } from "@/components/ui/use-toast"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Dialog, DialogContent } from "@/components/ui/dialog" 
+
+import { Dialog, DialogContent } from "@/components/ui/dialog"
+ 
 import { FileDiffView } from "./file-diff-view"
 import { Progress } from "@/components/ui/progress"
 import {
@@ -51,6 +52,8 @@ export function AIFileReviewResult({
   const [progressValue, setProgressValue] = useState(0)
   const [isRefreshing, setIsRefreshing] = useState(false) // 添加重新审查状态
   
+
+  
   // 对问题列表进行排序：未修复的排在前面，已修复的排在后面
   const sortedIssues = React.useMemo(() => {
     if (!result?.issues) return [];
@@ -74,6 +77,8 @@ export function AIFileReviewResult({
       return 0;
     });
   }, [result?.issues]);
+  
+
   
   // 文件上传相关状态
   const [uploadingFiles, setUploadingFiles] = useState<{
@@ -272,8 +277,14 @@ export function AIFileReviewResult({
   }, [isLoading]);
 
   // 渲染问题严重性图标
-  const renderSeverityIcon = (severity: string) => {
-    switch (severity) {
+  const renderSeverityIcon = (issue: any) => {
+    // 如果问题已修复，显示完成图标
+    if (issue.fixed) {
+      return <CheckCircle2 className="h-5 w-5 text-green-500" />
+    }
+    
+    // 根据严重程度显示对应图标
+    switch (issue.severity) {
       case 'error':
         return <AlertCircle className="h-5 w-5 text-destructive" />
       case 'warning':
@@ -437,12 +448,21 @@ export function AIFileReviewResult({
 
   // 渲染AI文件审查结果
   return (
-    <div className="w-full h-full flex flex-col">
-      <div className="flex-grow flex flex-col overflow-hidden">
+    <div className="w-full">
+      <style jsx>{`
+        .ai-review-scroll::-webkit-scrollbar {
+          display: none;
+        }
+        @keyframes pulse-width {
+          0%, 100% { width: 40%; }
+          50% { width: 70%; }
+        }
+      `}</style>
+      <div className="flex flex-col">
         {/* 显示每个问题的列表 */}
-        <div className="flex-grow overflow-y-auto p-6">
+        <div className="p-6">
           {isLoading || isRefreshing ? (
-            <div className="flex flex-col items-center justify-center h-full py-12">
+            <div className="flex flex-col items-center justify-center py-12">
               <div className="relative mb-8">
                 <div className="w-16 h-16 border-4 border-blue-100 border-t-blue-500 rounded-full animate-spin"></div>
                 <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
@@ -469,16 +489,10 @@ export function AIFileReviewResult({
                 </div>
               </div>
               
-              {/* 自定义CSS动画 */}
-              <style jsx>{`
-                @keyframes pulse-width {
-                  0%, 100% { width: 40%; }
-                  50% { width: 70%; }
-                }
-              `}</style>
+
             </div>
           ) : sortedIssues.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+            <div className="flex flex-col items-center justify-center p-8 text-center">
               <FileCheck2 className="h-16 w-16 text-green-500 mb-4" />
               <h3 className="text-xl font-semibold text-gray-800 mb-2">太好了！文件格式审查通过</h3>
               <p className="text-gray-500 max-w-md">
@@ -513,17 +527,26 @@ export function AIFileReviewResult({
               </Button>
             </div>
           ) : (
-            <ScrollArea className="h-full pr-4">
+            <div 
+              className="pr-4 overflow-y-auto max-h-[70vh] ai-review-scroll"
+              style={{ 
+                msOverflowStyle: 'none', 
+                scrollbarWidth: 'none' 
+              }}
+            >
               <div className={`space-y-3 ${isExpanded ? 'pb-14' : ''}`}>
                 {/* 结果统计 - 简洁设计 */}
-                <div className="bg-white rounded-lg border border-gray-100 shadow-sm mb-3">
+                <div className="bg-gradient-to-br from-blue-50 via-white to-indigo-50 rounded-lg mb-3 shadow-sm relative overflow-hidden">
+                  {/* 渐变描边 */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-200 via-blue-100 to-indigo-200 rounded-lg"></div>
+                  <div className="absolute inset-[1px] bg-gradient-to-br from-blue-50 via-white to-indigo-50 rounded-lg"></div>
                   {/* 内容区域 */}
-                  <div className="p-3">
+                  <div className="relative z-10 p-3">
                     {/* 标题行 */}
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center">
-                        <div className="w-5 h-5 rounded-full flex items-center justify-center bg-blue-50 mr-2">
-                          <AlertCircle className="h-3 w-3 text-blue-500" />
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center bg-blue-100 mr-2 border border-blue-200">
+                          <AlertCircle className="h-3 w-3 text-blue-600" />
                         </div>
                         <h3 className="text-sm font-medium text-gray-800">审查结果</h3>
                       </div>
@@ -547,9 +570,7 @@ export function AIFileReviewResult({
                             </>
                           )}
                         </Button>
-                        <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">
-                          共 {result.issues.length} 个问题，已修复 {result.issues.filter(i => i.fixed).length}
-                        </span>
+
                       </div>
                     </div>
                     
@@ -586,9 +607,9 @@ export function AIFileReviewResult({
                         <span>修复进度</span>
                         <span>{Math.round(100 - (result.issues.filter(i => !i.fixed).length / Math.max(result.issues.length, 1) * 100))}%</span>
                       </div>
-                      <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden border border-gray-200">
                         <div 
-                          className="h-full bg-blue-500 rounded-full transition-all duration-300"
+                          className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-300"
                           style={{ width: `${100 - (result.issues.filter(i => !i.fixed).length / Math.max(result.issues.length, 1) * 100)}%` }}
                         ></div>
                       </div>
@@ -596,14 +617,12 @@ export function AIFileReviewResult({
                   </div>
                 </div>
                 
-                {/* 问题列表标题 - 更简洁 */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <span className="inline-block w-1 h-4 bg-blue-500 rounded-r mr-2"></span>
-                    <span className="text-sm font-medium text-gray-700">问题详情</span>
-                  </div>
-                  <span className="text-xs text-gray-500">
-                    {sortedIssues.filter(i => !i.fixed).length} 个待处理
+                {/* 问题列表标题 */}
+                <div className="flex items-center mb-3">
+                  <span className="inline-block w-1 h-4 bg-blue-500 rounded-r mr-2"></span>
+                  <span className="text-sm font-medium text-gray-700">问题详情</span>
+                  <span className="text-xs text-gray-500 ml-2">
+                    ({sortedIssues.filter(i => !i.fixed).length} 个待处理)
                   </span>
                 </div>
                 
@@ -614,34 +633,28 @@ export function AIFileReviewResult({
                     <div
                       key={`issue-${index}`}
                       className={`
-                        bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-200
+                        bg-white rounded-lg overflow-hidden transition-all duration-200 border border-gray-100
                         ${issue.fixed ? 'opacity-70' : 'opacity-100'}
-                        ${isExpanded ? 'border-l-4 border-blue-400' : 'border border-gray-100'}
+                        ${isExpanded ? 'border-t-4 border-t-blue-400' : 'hover:shadow-sm'}
                       `}
                     >
                       {/* 问题标题栏 */}
                       <div 
                         className={`
-                          flex justify-between items-center p-3 cursor-pointer 
-                          ${issue.fixed ? 'bg-gray-50' : (issue.severity === 'error' ? 'bg-red-50' : 'bg-amber-50')}
+                          flex justify-between items-center p-3 cursor-pointer bg-white
                         `}
                         onClick={() => toggleExpanded(`item-${index}`)}
                       >
                         <div className="flex items-center min-w-0">
-                          {renderSeverityIcon(issue.severity)}
+                          {renderSeverityIcon(issue)}
                           <div className="ml-3 flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium text-gray-900 truncate max-w-[350px]">
+                              <span className="text-sm font-medium text-gray-900 truncate max-w-[380px]">
                                 {issue.message}
                               </span>
-                              {issue.fixed && (
-                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-100">
-                                  已修复
-                                </Badge>
-                              )}
                             </div>
                             {issue.fileName && (
-                              <span className="text-xs text-gray-500 block truncate max-w-[400px]">
+                              <span className="text-xs text-gray-500 block truncate max-w-[420px]">
                                 文件: {issue.fileName}
                               </span>
                             )}
@@ -665,19 +678,19 @@ export function AIFileReviewResult({
                                   {getIssueTypeName(issue.issueType)}
                                 </span>
                               </div>
-                              {issue.expectedValue && (
+                              {issue.originalValue && (
                                 <div className="flex-1">
                                   <span className="text-xs font-medium text-gray-500 block mb-1">期望值</span>
                                   <span className="text-sm text-gray-800 font-medium">
-                                    {issue.expectedValue}
+                                    {issue.suggestedValue || "标准格式"}
                                   </span>
                                 </div>
                               )}
-                              {issue.actualValue && (
+                              {issue.originalValue && (
                                 <div className="flex-1">
                                   <span className="text-xs font-medium text-gray-500 block mb-1">实际值</span>
                                   <span className="text-sm text-gray-800 font-medium">
-                                    {issue.actualValue}
+                                    {issue.originalValue}
                                   </span>
                                 </div>
                               )}
@@ -695,64 +708,80 @@ export function AIFileReviewResult({
                             <div>
                               <span className="text-xs font-medium text-gray-500 block mb-1">问题描述</span>
                               <p className="text-sm text-gray-700 whitespace-pre-line">
-                                {issue.description || "未提供详细描述"}
+                                {issue.message || "未提供详细描述"}
                               </p>
                             </div>
                             
                             {/* 解决建议 */}
-                            {issue.solution && (
+                            {issue.suggestion && (
                               <div>
                                 <span className="text-xs font-medium text-gray-500 block mb-1">解决建议</span>
                                 <p className="text-sm text-gray-700 whitespace-pre-line p-2 bg-blue-50 rounded">
-                                  {issue.solution}
+                                  {issue.suggestion}
                                 </p>
+                                
+                                {/* 操作按钮 - 直接放在解决建议下方 */}
+                                {!issue.fixed && (
+                                  <div className="mt-3 flex justify-end">
+                                    {issue.autoFixable ? (
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm"
+                                        className="bg-white border-blue-200 text-blue-600 hover:bg-blue-50"
+                                        onClick={() => handleFixSingleIssue(issue)}
+                                        disabled={isFixing}
+                                      >
+                                        <WandSparkles className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
+                                        立即修复
+                                      </Button>
+                                    ) : issue.issueType === 'quantity' || issue.issueType === 'fileType' ? (
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm"
+                                        className="bg-white border-blue-200 text-blue-600 hover:bg-blue-50"
+                                        onClick={() => handleFileUpload(issue.fileId || 0, issue.suggestedValue || '', issue.issueType)}
+                                      >
+                                        <Upload className="h-3.5 w-3.5 mr-1.5" />
+                                        上传文件
+                                      </Button>
+                                    ) : (
+                                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-100">
+                                        需手动修复
+                                      </Badge>
+                                    )}
+                                  </div>
+                                )}
                               </div>
                             )}
                             
-                            {/* 统一的问题修复区域 */}
-                            {!issue.fixed && (
-                              <div className="mt-4 p-3 bg-gray-50 rounded-md border border-gray-100">
-                                <div className="flex justify-between items-center">
-                                  <span className="text-sm font-medium text-gray-700">
-                                    {issue.issueType === 'quantity' ? '缺少必需文件' : 
-                                     issue.issueType === 'fileType' ? '文件格式不符合要求' : 
-                                     '问题需要修复'}
-                                  </span>
-                                  
-                                  {/* 根据问题类型显示不同的修复按钮 */}
-                                  {issue.autoFixable ? (
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm"
-                                      className="bg-white border-blue-200 text-blue-600 hover:bg-blue-50"
-                                      onClick={() => handleFixSingleIssue(issue)}
-                                      disabled={isFixing}
-                                    >
-                                      <WandSparkles className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
-                                      查看并修复
-                                    </Button>
-                                  ) : issue.issueType === 'quantity' || issue.issueType === 'fileType' ? (
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm"
-                                      className="bg-white border-blue-200 text-blue-600 hover:bg-blue-50"
-                                      onClick={() => handleFileUpload(issue.fileId || 0, issue.expectedValue || '', issue.issueType)}
-                                    >
-                                      <Upload className="h-3.5 w-3.5 mr-1.5" />
-                                      上传文件
-                                    </Button>
-                                  ) : (
-                                    <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-100">
-                                      需手动修复
-                                    </Badge>
-                                  )}
-                                </div>
-                                
-                                {/* 文件类型提示 */}
-                                {(issue.issueType === 'quantity' || issue.issueType === 'fileType') && (
-                                  <p className="text-xs text-gray-500 mt-2">
-                                    支持的格式: {issue.expectedValue || 'PDF/Word'}
-                                  </p>
+                            {/* 如果没有解决建议但有未修复的问题，显示操作按钮 */}
+                            {!issue.suggestion && !issue.fixed && (
+                              <div className="mt-3 flex justify-end">
+                                {issue.autoFixable ? (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    className="bg-white border-blue-200 text-blue-600 hover:bg-blue-50"
+                                    onClick={() => handleFixSingleIssue(issue)}
+                                    disabled={isFixing}
+                                  >
+                                    <WandSparkles className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
+                                    立即修复
+                                  </Button>
+                                ) : issue.issueType === 'quantity' || issue.issueType === 'fileType' ? (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    className="bg-white border-blue-200 text-blue-600 hover:bg-blue-50"
+                                    onClick={() => handleFileUpload(issue.fileId || 0, issue.suggestedValue || '', issue.issueType)}
+                                  >
+                                    <Upload className="h-3.5 w-3.5 mr-1.5" />
+                                    上传文件
+                                  </Button>
+                                ) : (
+                                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-100">
+                                    需手动修复
+                                  </Badge>
                                 )}
                               </div>
                             )}
@@ -798,12 +827,14 @@ export function AIFileReviewResult({
                     </div>
                   );
                 })}
+                
+
               </div>
-            </ScrollArea>
+            </div>
           )}
         </div>
 
-        <div className="flex justify-center py-4 border-t border-gray-100 mt-auto sticky bottom-0 bg-white rounded-b-lg">
+        <div className="flex justify-center py-4 border-t border-gray-100 bg-white">
           {fixableIssuesCount > 0 ? (
             <Button 
               id="smart-fix-button"

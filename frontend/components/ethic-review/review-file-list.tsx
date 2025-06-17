@@ -243,6 +243,22 @@ export function ReviewFileList({
 
   return (
     <Card className="border-[#E9ECF2] shadow-sm">
+      <style jsx>{`
+        .file-table-container::-webkit-scrollbar {
+          height: 8px;
+        }
+        .file-table-container::-webkit-scrollbar-track {
+          background: #f1f5f9;
+          border-radius: 4px;
+        }
+        .file-table-container::-webkit-scrollbar-thumb {
+          background: rgba(156, 163, 175, 0.5);
+          border-radius: 4px;
+        }
+        .file-table-container::-webkit-scrollbar-thumb:hover {
+          background: rgba(156, 163, 175, 0.7);
+        }
+      `}</style>
       <CardContent className="p-6 space-y-6">
         <SectionTitle 
           icon={<FileTextIcon className="h-5 w-5" />} 
@@ -252,7 +268,10 @@ export function ReviewFileList({
 
         <div className="space-y-4">
           {/* 送审文件清单 */}
-          <div className="overflow-x-auto border border-gray-200 rounded-md">
+          <div className="file-table-container overflow-x-auto border border-gray-200 rounded-md" style={{ 
+            scrollbarWidth: 'thin',
+            scrollbarColor: 'rgba(156, 163, 175, 0.5) transparent'
+          }}>
             {/* 表格 */}
             <table className="w-full min-w-[1100px] border-collapse text-sm">
               {/* 表头 */}
@@ -283,16 +302,8 @@ export function ReviewFileList({
                     }`}
                   >
                     <td className="py-3 px-4 align-top border-b border-gray-200">
-                      <div className="font-medium text-slate-800 flex items-center">
+                      <div className="font-medium text-slate-800">
                         {item.fileName}
-                        {item.aiModified && (
-                          <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                            已修复
-                          </span>
-                        )}
                       </div>
                       {/* 已上传文件列表 - 移到文件名称下方 */}
                       {item.files.length > 0 && (

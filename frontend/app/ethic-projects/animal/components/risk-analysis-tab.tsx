@@ -21,7 +21,9 @@ import {
   Calendar,
   ShieldCheck,
   HeartHandshake,
-  TrendingDown
+  TrendingDown,
+  ArrowUp,
+  ArrowDown
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -498,25 +500,56 @@ const ProjectProgressDetails = ({ data }: { data: any }) => {
 const IssueRankingChart = ({ data }: { data: any[] }) => {
   const maxFreq = Math.max(...data.map(item => item.frequency))
   
+  // 获取排名数字的颜色样式
+  const getRankingTextColor = (index: number) => {
+    switch (index) {
+      case 0: // 第1名 - 深红色
+        return "text-red-500 font-bold"
+      case 1: // 第2名 - 中红色
+        return "text-red-400 font-bold"
+      case 2: // 第3名 - 浅红色
+        return "text-red-300 font-bold"
+      default: // 第4-5名 - 黑色字体
+        return "text-gray-700 font-medium"
+    }
+  }
+  
+  // 模拟趋势数据（实际项目中应该从数据源获取）
+  const getTrend = (index: number) => {
+    const trends = ['up', 'up', 'down', 'up', 'down'] // 示例趋势数据
+    return trends[index] || 'stable'
+  }
+  
   return (
     <div className="space-y-3">
-      {data.slice(0, 5).map((item, index) => (
-        <div key={index} className="flex items-center gap-3 py-1">
-          <div className="flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-white text-xs font-bold">
-            {index + 1}
-          </div>
-          <span className="text-sm text-gray-700 flex-1">{item.issue}</span>
-          <div className="flex items-center gap-2">
-            <div className="w-12 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-              <div 
-                className="h-1.5 bg-red-500 rounded-full"
-                style={{ width: `${(item.frequency / maxFreq) * 100}%` }}
-              />
+      {data.slice(0, 5).map((item, index) => {
+        const trend = getTrend(index)
+        return (
+          <div key={index} className="flex items-center gap-3 py-1">
+            <div className={`text-sm ${getRankingTextColor(index)}`}>
+              {index + 1}
             </div>
-            <span className="text-xs font-medium text-gray-900 min-w-0">{item.frequency}</span>
+            <span className="text-sm text-gray-700 flex-1">{item.issue}</span>
+            <div className="flex items-center gap-2">
+              <div className="w-12 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-1.5 bg-red-500 rounded-full"
+                  style={{ width: `${(item.frequency / maxFreq) * 100}%` }}
+                />
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-xs font-medium text-gray-900 min-w-0">{item.frequency}</span>
+                {trend === 'up' && (
+                  <ArrowUp className="h-3 w-3 text-red-500" />
+                )}
+                {trend === 'down' && (
+                  <ArrowDown className="h-3 w-3 text-green-500" />
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
