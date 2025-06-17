@@ -107,7 +107,7 @@ export function ReviewFileList({
     <Button 
       onClick={handleAIReviewClick} 
       variant="outline"
-      className="border-blue-200 text-blue-700 hover:text-blue-800 hover:bg-blue-50"
+      className="border-blue-300 text-blue-700 hover:text-blue-800 bg-white hover:bg-blue-50 shadow-[0_0_15px_rgba(59,130,246,0.15)] hover:shadow-[0_0_20px_rgba(59,130,246,0.25)] transition-all duration-300"
       size="sm"
     >
       <svg 

@@ -294,6 +294,53 @@ export function HumanInitialReview({
       };
     });
     
+    // 执行审查逻辑
+    executeAIReview(reviewFileList);
+  }
+
+  // 关闭AI审查
+  const closeAIReview = () => {
+    setShowAIReview(false);
+    setIsPanelCollapsed(false); // 重置折叠状态
+  }
+
+  // 切换面板折叠状态
+  const togglePanelCollapse = () => {
+    setIsPanelCollapsed(prev => !prev);
+  }
+
+  // 返回按钮的工具提示文本
+  const getCloseButtonTooltip = () => {
+    return "收起审查面板，返回单栏视图";
+  }
+
+  // 切换按钮的工具提示文本
+  const getToggleButtonTooltip = () => {
+    return isPanelCollapsed ? "展开审查面板" : "收起审查面板";
+  }
+
+  // 处理重新审查
+  const handleRefreshReview = () => {
+    // 重新审查时不进行文件校验，直接启动审查
+    setIsReviewing(true);
+    setReviewError(null);
+    setReviewProgress(0);
+    
+    // 构建审查文件列表
+    const reviewFileList = [...initialReviewFiles].map(file => {
+      const uploadedFiles = filesMap.get(file.id) || [];
+      return {
+        ...file,
+        files: uploadedFiles
+      };
+    });
+    
+    // 执行审查逻辑
+    executeAIReview(reviewFileList);
+  }
+
+  // 抽取的审查执行逻辑
+  const executeAIReview = async (reviewFileList: any[]) => {
     try {
       // 模拟进度增长
       const progressInterval = setInterval(() => {
@@ -323,32 +370,6 @@ export function HumanInitialReview({
       setReviewError("AI审查过程中发生错误，请重试");
       setIsReviewing(false);
     }
-  }
-
-  // 关闭AI审查
-  const closeAIReview = () => {
-    setShowAIReview(false);
-    setIsPanelCollapsed(false); // 重置折叠状态
-  }
-
-  // 切换面板折叠状态
-  const togglePanelCollapse = () => {
-    setIsPanelCollapsed(prev => !prev);
-  }
-
-  // 返回按钮的工具提示文本
-  const getCloseButtonTooltip = () => {
-    return "收起审查面板，返回单栏视图";
-  }
-
-  // 切换按钮的工具提示文本
-  const getToggleButtonTooltip = () => {
-    return isPanelCollapsed ? "展开审查面板" : "收起审查面板";
-  }
-
-  // 处理重新审查
-  const handleRefreshReview = () => {
-    startAIReview();
   }
 
   // 更新文件问题

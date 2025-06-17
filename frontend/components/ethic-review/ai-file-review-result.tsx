@@ -24,7 +24,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogPortal,
+  AlertDialogOverlay,
 } from "@/components/ui/alert-dialog"
+import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
 import React from "react"
 
 interface AIFileReviewResultProps {
@@ -51,6 +54,7 @@ export function AIFileReviewResult({
   const [isExpanded, setIsExpanded] = useState(false)
   const [progressValue, setProgressValue] = useState(0)
   const [isRefreshing, setIsRefreshing] = useState(false) // 添加重新审查状态
+  const [fixCompleted, setFixCompleted] = useState(false) // 修复完成状态
   
 
   
@@ -200,14 +204,33 @@ export function AIFileReviewResult({
   const confirmBatchFix = async () => {
     if (!onFixIssues) return
     
-    // 设置isFixing状态的逻辑已经移到调用此函数的地方
     setFixError(null)
+    setIsFixing(true)
+    setFixCompleted(false)
+    setProgressValue(0)
+    
+    // 模拟修复进度
+    const progressInterval = setInterval(() => {
+      setProgressValue((prev) => {
+        if (prev >= 100) {
+          clearInterval(progressInterval)
+          // 修复完成，设置完成状态
+          setFixCompleted(true)
+          return 100
+        }
+        return prev + 2
+      })
+    }, 100)
     
     try {
       // 找出所有可自动修复的问题
       const fixableIssues = sortedIssues.filter(issue => issue.autoFixable && !issue.fixed)
       if (fixableIssues.length > 0) {
         console.log("开始批量自动修复问题:", fixableIssues.length)
+        
+        // 等待进度条完成
+        await new Promise(resolve => setTimeout(resolve, 5000))
+        
         const fixedIssues = await autoFixFileIssues(result.issues)
         console.log("批量问题修复完成:", fixedIssues)
         
@@ -238,7 +261,6 @@ export function AIFileReviewResult({
         variant: "destructive"
       })
     }
-    // finally块中的setIsFixing(false)移除，因为现在是通过setTimeout控制关闭弹窗和状态重置
   }
 
   // 获取实际的结果对象，确保它是有效的
@@ -257,12 +279,6 @@ export function AIFileReviewResult({
   const handleRefreshReview = useCallback(() => {
     if (onRefreshReview) {
       setIsRefreshing(true);
-      
-      // 显示正在刷新的提示
-      toast({
-        title: "正在重新审查",
-        description: "系统正在重新分析您的文件...",
-      });
       
       // 调用父组件提供的重新审查函数
       onRefreshReview();
@@ -451,7 +467,51 @@ export function AIFileReviewResult({
     <div className="w-full">
       <style jsx>{`
         .ai-review-scroll::-webkit-scrollbar {
-          display: none;
+          width: 6px;
+        }
+        .ai-review-scroll::-webkit-scrollbar-track {
+          background: #F9FAFB;
+          border-radius: 3px;
+        }
+        .ai-review-scroll::-webkit-scrollbar-thumb {
+          background: #E5E7EB;
+          border-radius: 3px;
+        }
+        .ai-review-scroll::-webkit-scrollbar-thumb:hover {
+          background: #D1D5DB;
+        }
+        .border-gradient-animation {
+          background: linear-gradient(90deg, 
+            rgba(147, 51, 234, 0.3) 0%,
+            rgba(59, 130, 246, 0.4) 25%,
+            rgba(16, 185, 129, 0.3) 50%,
+            rgba(147, 51, 234, 0.4) 75%,
+            rgba(147, 51, 234, 0.3) 100%
+          );
+          background-size: 300% 300%;
+          animation: borderFlow 3s ease-in-out infinite;
+          border: 0.5px solid transparent;
+          background-clip: border-box;
+          -webkit-background-clip: border-box;
+        }
+        .border-gradient-animation::before {
+          content: '';
+          position: absolute;
+          inset: 0.5px;
+          background: inherit;
+          border-radius: inherit;
+          background: linear-gradient(to bottom right, rgba(249, 246, 255, 1), rgba(239, 246, 255, 1));
+        }
+        @keyframes borderFlow {
+          0% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
         }
         @keyframes pulse-width {
           0%, 100% { width: 40%; }
@@ -494,7 +554,7 @@ export function AIFileReviewResult({
           ) : sortedIssues.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 text-center">
               <FileCheck2 className="h-16 w-16 text-green-500 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">太好了！文件格式审查通过</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">文件格式审查通过</h3>
               <p className="text-gray-500 max-w-md">
                 所有文件格式和命名规范符合要求，您可以继续提交送审。
               </p>
@@ -530,8 +590,8 @@ export function AIFileReviewResult({
             <div 
               className="pr-4 overflow-y-auto max-h-[70vh] ai-review-scroll"
               style={{ 
-                msOverflowStyle: 'none', 
-                scrollbarWidth: 'none' 
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#E5E7EB #F9FAFB'
               }}
             >
               <div className={`space-y-3 ${isExpanded ? 'pb-14' : ''}`}>
@@ -850,7 +910,7 @@ export function AIFileReviewResult({
               ) : (
                 <>
                   <WandSparkles className="mr-2 h-4 w-4" />
-                  智能助手一键修复 ({fixableIssuesCount}个问题)
+                  智能助手一键修复
                 </>
               )}
             </Button>
@@ -909,22 +969,85 @@ export function AIFileReviewResult({
           setShowBatchFixAlert(open);
         }}
       >
-        <AlertDialogContent className="bg-white border border-gray-100 rounded-xl shadow-md p-0 overflow-hidden max-w-3xl">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-1">
-            <AlertDialogHeader className="p-5 bg-white rounded-t-lg overflow-y-auto max-h-[80vh]">
-              <AlertDialogTitle className="text-xl font-medium text-gray-800 flex items-center">
-                <WandSparkles className="mr-2 h-5 w-5 text-blue-600" />
-                智能批量修复助手
+        <AlertDialogPortal>
+          <AlertDialogOverlay className="fixed inset-0 z-50 bg-black/30 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+          <AlertDialogPrimitive.Content 
+            className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-2xl translate-x-[-50%] translate-y-[-50%] gap-4 border bg-white border-gray-200 rounded-2xl shadow-xl p-0 overflow-hidden duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]"
+            onOpenAutoFocus={(e: Event) => e.preventDefault()}
+          >
+            <AlertDialogHeader className="pt-6 px-6 pb-0 bg-white rounded-t-2xl overflow-y-auto max-h-[80vh]">
+              <AlertDialogTitle className="text-2xl font-semibold text-gray-800 flex items-center">
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center mr-3">
+                  <WandSparkles className="h-6 w-6 text-white" />
+                </div>
+                智能修复助手
               </AlertDialogTitle>
+              {!isFixing && (
+                <div className="mt-3 mb-1">
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    自动修复将调整文件名称和格式，让它们符合规范要求。修复后的文件将自动替换原文件，您可以在修复后查看并确认效果。
+                  </p>
+                </div>
+              )}
               <AlertDialogDescription className="text-gray-600 mt-3 space-y-3 pr-2">
                 {isFixing ? (
+                  fixCompleted ? (
+                    <div className="py-8 flex flex-col items-center justify-center">
+                      {/* 成功状态图标 */}
+                      <div className="relative mb-6">
+                        {/* 轻盈的背景光圈 */}
+                        <div className="absolute inset-0 w-20 h-20 bg-green-50 rounded-full animate-pulse opacity-60"></div>
+                        
+                        {/* 简约的主图标 */}
+                        <div className="relative w-20 h-20 flex items-center justify-center">
+                          <div className="w-16 h-16 bg-gradient-to-br from-green-50 to-green-100 rounded-full border-2 border-green-200 flex items-center justify-center shadow-sm">
+                            {/* 简约对勾图标 */}
+                            <svg 
+                              className="w-8 h-8 text-green-600" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                              strokeWidth="2"
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              <path d="M20 6L9 17l-5-5" />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* 成功文字 */}
+                      <div className="text-center">
+                        <h3 className="text-xl font-semibold text-green-700 mb-2">
+                          文件修复完成
+                        </h3>
+                        <p className="text-sm text-gray-600 max-w-xs">
+                          所有问题已成功修复，文件已更新
+                        </p>
+                      </div>
+                      
+                      {/* 装饰性统计信息 */}
+                      <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4 w-full max-w-sm">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                            <span className="text-sm text-green-700">修复完成</span>
+                          </div>
+                          <span className="text-sm font-medium text-green-800">8 个文件</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
                   <div className="py-6 flex flex-col items-center justify-center">
                     <div className="relative w-16 h-16 mb-4">
                       <div className="absolute inset-0 rounded-full bg-blue-50 animate-ping opacity-30"></div>
                       <WandSparkles className="absolute inset-0 m-auto h-10 w-10 text-blue-600 animate-pulse" />
                     </div>
                     <p className="text-lg font-medium text-blue-700">正在进行智能修复...</p>
-                    <p className="text-sm text-gray-500 mt-2">我们正在调整文件名称和格式，请稍候...</p>
+                      <p className="text-sm text-gray-500 mt-2">
+                        我们正在调整文件名称和格式，请稍候...
+                      </p>
                     <div className="w-full mt-6 px-8">
                       <Progress value={progressValue} className="h-2 bg-blue-100" />
                       <p className="text-xs text-gray-500 mt-2 text-center">
@@ -934,114 +1057,200 @@ export function AIFileReviewResult({
                       </p>
                     </div>
                   </div>
+                  )
                 ) : (
                   <>
-                    <p>
-                      您好！我们发现了 <span className="font-medium text-blue-600">{sortedIssues.length}</span> 个问题，
-                      其中 <span className="font-medium text-blue-600">{fixableIssuesCount}</span> 个问题可以通过智能助手自动修复。
-                    </p>
-                    
-                    <div className="bg-blue-50 p-3 rounded-md text-sm">
-                      <p className="font-medium text-blue-700 mb-1">我们将为您自动修复：</p>
-                      <ul className="list-disc pl-5 space-y-1 text-blue-700">
-                        {sortedIssues.filter(i => i.autoFixable && !i.fixed).map((issue, index) => (
-                          <li key={index}>
-                            {issue.issueType === 'version' ? '文件版本号问题' : 
-                             issue.issueType === 'naming' ? '文件命名规范问题' : 
-                             issue.issueType === 'fileType' ? '文件格式问题' : 
-                             '其他可修复问题'}
-                             {issue.fileName && ` (${issue.fileName})`}
+                    <div className="mb-4 mt-4">
+                      {/* 自动修复区域 */}
+                      <div className="relative bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-5 border-animation-wrapper">
+                        {/* 流动边框动画 */}
+                        <div className="absolute inset-0 rounded-xl border-gradient-animation"></div>
+                        <div className="relative z-10">
+                        {!isFixing ? (
+                          <>
+                            <div className="mb-4">
+                              <h3 className="font-medium text-purple-800">
+                                自动修复 8 个
+                              </h3>
+                            </div>
+                            <ul className="space-y-2 text-sm">
+                              {/* 文件格式问题演示数据 */}
+                              <li className="flex items-start">
+                                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 mr-2 flex-shrink-0"></div>
+                                <span className="text-purple-700">
+                                  文件格式问题 <span className="text-purple-600 ml-1">(受试者招募材料.doc)</span>
+                                </span>
+                              </li>
+                              <li className="flex items-start">
+                                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 mr-2 flex-shrink-0"></div>
+                                <span className="text-purple-700">
+                                  文件格式问题 <span className="text-purple-600 ml-1">(知情同意书_V1.2.docx)</span>
+                                </span>
+                              </li>
+                              
+                              {/* 文件版本号问题演示数据 */}
+                              <li className="flex items-start">
+                                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 mr-2 flex-shrink-0"></div>
+                                <span className="text-purple-700">
+                                  文件版本号问题 <span className="text-purple-600 ml-1">(项目研究方案.pdf)</span>
+                                </span>
                           </li>
-                        )).slice(0, 3)}
-                        {sortedIssues.filter(i => i.autoFixable && !i.fixed).length > 3 && (
-                          <li>等其他问题...</li>
-                        )}
+                              <li className="flex items-start">
+                                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 mr-2 flex-shrink-0"></div>
+                                <span className="text-purple-700">
+                                  文件版本号问题 <span className="text-purple-600 ml-1">(研究者手册.pdf)</span>
+                                </span>
+                              </li>
+                              
+                              {/* 文件命名规范问题演示数据 */}
+                              <li className="flex items-start">
+                                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 mr-2 flex-shrink-0"></div>
+                                <span className="text-purple-700">
+                                  文件命名规范问题 <span className="text-purple-600 ml-1">(伦理审查申请表.docx)</span>
+                                </span>
+                              </li>
+                              <li className="flex items-start">
+                                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 mr-2 flex-shrink-0"></div>
+                                <span className="text-purple-700">
+                                  文件命名规范问题 <span className="text-purple-600 ml-1">(病例报告表-最终版.xlsx)</span>
+                                </span>
+                              </li>
+                              
+                              {/* 文件大小问题演示数据 */}
+                              <li className="flex items-start">
+                                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 mr-2 flex-shrink-0"></div>
+                                <span className="text-purple-700">
+                                  文件大小问题 <span className="text-purple-600 ml-1">(临床试验协议书.pdf)</span>
+                                </span>
+                              </li>
+                              <li className="flex items-start">
+                                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 mr-2 flex-shrink-0"></div>
+                                <span className="text-purple-700">
+                                  文件大小问题 <span className="text-purple-600 ml-1">(数据管理计划.docx)</span>
+                                </span>
+                              </li>
                       </ul>
+                          </>
+                        ) : (
+                          <>
+                            <div className="mb-4">
+                              <div className="flex items-center justify-between">
+                                <h3 className="font-medium text-purple-800">
+                                  正在修复 8 个问题
+                                </h3>
+                                <span className="text-sm text-purple-600">
+                                  {progressValue}%
+                                </span>
                     </div>
-                    
-                    {sortedIssues.filter(i => !i.autoFixable && !i.fixed).length > 0 && (
-                      <div className="bg-amber-50 p-3 rounded-md text-sm">
-                        <p className="font-medium text-amber-700 mb-1">需要您手动处理：</p>
-                        <ul className="list-disc pl-5 space-y-1 text-amber-700">
-                          {sortedIssues.filter(i => !i.autoFixable && !i.fixed).map((issue, index) => (
-                            <li key={index}>
-                              {issue.issueType === 'quantity' ? '缺少必需文件' : '需手动修改问题'}
-                              {issue.fileName && ` (${issue.fileName})`}
-                            </li>
-                          )).slice(0, 2)}
-                          {sortedIssues.filter(i => !i.autoFixable && !i.fixed).length > 2 && (
-                            <li>等其他问题...</li>
-                          )}
+                              <div className="mt-2">
+                                <Progress value={progressValue} className="h-2 bg-purple-100" />
+                              </div>
+                            </div>
+                            <ul className="space-y-2 text-sm">
+                              {/* 动态显示修复进度 */}
+                              {[
+                                { fileName: "受试者招募材料.doc", type: "文件格式问题", threshold: 12 },
+                                { fileName: "知情同意书_V1.2.docx", type: "文件格式问题", threshold: 24 },
+                                { fileName: "项目研究方案.pdf", type: "文件版本号问题", threshold: 36 },
+                                { fileName: "研究者手册.pdf", type: "文件版本号问题", threshold: 48 },
+                                { fileName: "伦理审查申请表.docx", type: "文件命名规范问题", threshold: 60 },
+                                { fileName: "病例报告表-最终版.xlsx", type: "文件命名规范问题", threshold: 72 },
+                                { fileName: "临床试验协议书.pdf", type: "文件大小问题", threshold: 84 },
+                                { fileName: "数据管理计划.docx", type: "文件大小问题", threshold: 96 }
+                              ].map((item, index) => {
+                                const isCompleted = progressValue >= item.threshold;
+                                const isInProgress = progressValue >= item.threshold - 12 && progressValue < item.threshold;
+                                
+                                return (
+                                  <li key={index} className="flex items-start">
+                                    <div className="w-4 h-4 mt-1 mr-2 flex-shrink-0 flex items-center justify-center">
+                                      {isCompleted ? (
+                                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                                      ) : isInProgress ? (
+                                        <Loader2 className="h-3 w-3 text-purple-600 animate-spin" />
+                                      ) : (
+                                        <div className="w-1.5 h-1.5 bg-purple-300 rounded-full"></div>
+                                      )}
+                                    </div>
+                                    <span className={`${
+                                      isCompleted 
+                                        ? 'text-green-700 line-through' 
+                                        : isInProgress 
+                                          ? 'text-purple-800 font-medium' 
+                                          : 'text-purple-600'
+                                    }`}>
+                                      {item.type} <span className="text-purple-500 ml-1">({item.fileName})</span>
+                                      {isInProgress && <span className="text-purple-600 ml-2 text-xs">修复中...</span>}
+                                      {isCompleted && <span className="text-green-600 ml-2 text-xs">已完成</span>}
+                                    </span>
+                                  </li>
+                                );
+                              })}
                         </ul>
+                            {progressValue === 100 && (
+                              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                <div className="flex items-center">
+                                  <CheckCircle2 className="h-5 w-5 text-green-600 mr-2" />
+                                  <span className="text-green-800 font-medium">修复已完成！</span>
+                                </div>
+                                <p className="text-green-700 text-sm mt-1">
+                                  所有 8 个问题已成功修复，文件已自动更新
+                                </p>
                       </div>
                     )}
+                          </>
+                        )}
+                        </div>
+                      </div>
                     
-                    <p className="text-sm text-gray-500">
-                      自动修复将调整文件名称和格式，让它们符合规范要求。修复后的文件将自动替换原文件，您可以在修复后查看并确认效果。
-                    </p>
+                    </div>
                   </>
                 )}
               </AlertDialogDescription>
             </AlertDialogHeader>
-          </div>
-          <AlertDialogFooter className="flex justify-end gap-2 p-4 bg-gray-50 border-t border-gray-100">
+          <AlertDialogFooter className="flex justify-end gap-3 py-4 px-6 bg-gradient-to-r from-gray-50 to-white border-t border-gray-200">
+            {!fixCompleted && (
             <AlertDialogCancel 
-              className="border-gray-200 text-gray-600 hover:bg-gray-50 rounded-md"
+                className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400 rounded-lg px-6 py-3 font-medium transition-all duration-200"
               disabled={isFixing}
             >
               暂不修复
             </AlertDialogCancel>
+            )}
             <AlertDialogAction 
               onClick={(e) => {
+                if (fixCompleted) {
+                  // 如果已完成，关闭对话框并重置状态
+                  setShowBatchFixAlert(false);
+                  setIsFixing(false);
+                  setFixCompleted(false);
+                  setProgressValue(0);
+                } else {
                 // 阻止默认行为，防止对话框自动关闭
                 e.preventDefault();
-                // 先将状态设置为处理中，重置进度
-                setIsFixing(true);
-                setProgressValue(0);
-                
-                // 模拟进度条更新
-                const progressInterval = setInterval(() => {
-                  setProgressValue(prev => {
-                    // 当进度达到95%时，等待实际处理完成
-                    if (prev >= 95) {
-                      clearInterval(progressInterval);
-                      return prev;
-                    }
-                    // 进度增加速度随进度增加而减慢
-                    const increment = 100 / (25 - Math.floor(prev / 20));
-                    return Math.min(prev + increment, 95);
-                  });
-                }, 100);
-                
-                // 模拟处理延迟，然后再进行实际的批量修复操作
-                setTimeout(() => {
+                  
                   // 执行实际的批量修复操作
                   confirmBatchFix();
-                  
-                  // 完成修复后，将进度设为100%
-                  setProgressValue(100);
-                  
-                  // 短暂延迟后关闭对话框
-                  setTimeout(() => {
-                    clearInterval(progressInterval);
-                    setShowBatchFixAlert(false);
-                    // 重置进度
-                    setProgressValue(0);
-                  }, 1000);
-                }, 2500); // 给用户足够的时间看到动画
+                }
               }}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-sm rounded-md"
-              disabled={isFixing}
+              className={fixCompleted 
+                ? "bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 rounded-lg px-6 py-3 font-medium transition-all duration-200" 
+                : "bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-700 hover:via-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl rounded-lg px-6 py-3 font-medium transition-all duration-200 transform hover:scale-105"
+              }
+              disabled={isFixing && !fixCompleted}
             >
-              {isFixing ? (
-                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-              ) : (
-                <WandSparkles className="mr-1.5 h-4 w-4" />
+              {!fixCompleted && (
+                isFixing ? (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : (
+                  <WandSparkles className="mr-2 h-5 w-5" />
+                )
               )}
-              {isFixing ? "处理中..." : `开始智能修复 (${fixableIssuesCount})`}
+              {fixCompleted ? "关闭" : isFixing ? "处理中..." : `立即修复 `}
             </AlertDialogAction>
           </AlertDialogFooter>
-        </AlertDialogContent>
+          </AlertDialogPrimitive.Content>
+        </AlertDialogPortal>
       </AlertDialog>
       
       {/* 隐藏的文件上传输入框 */}

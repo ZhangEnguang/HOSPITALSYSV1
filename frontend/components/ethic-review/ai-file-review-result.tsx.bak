@@ -666,7 +666,7 @@ export function AIFileReviewResult({
               ) : (
                 <>
                   <WandSparkles className="mr-2 h-4 w-4" />
-                  智能助手一键修复 ({fixableIssuesCount}个问题)
+                  智能助手一键修复 
                 </>
               )}
             </Button>
@@ -730,7 +730,7 @@ export function AIFileReviewResult({
             <AlertDialogHeader className="p-5 bg-white rounded-t-lg">
               <AlertDialogTitle className="text-xl font-medium text-gray-800 flex items-center">
                 <WandSparkles className="mr-2 h-5 w-5 text-blue-600" />
-                智能批量修复助手
+                智能修复助手
               </AlertDialogTitle>
               <AlertDialogDescription className="text-gray-600 mt-3 space-y-3">
                 {isFixing ? (
@@ -854,7 +854,7 @@ export function AIFileReviewResult({
               ) : (
                 <WandSparkles className="mr-1.5 h-4 w-4" />
               )}
-              {isFixing ? "处理中..." : `开始智能修复 (${fixableIssuesCount})`}
+              {isFixing ? "处理中..." : `立即修复 (${fixableIssuesCount})`}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
