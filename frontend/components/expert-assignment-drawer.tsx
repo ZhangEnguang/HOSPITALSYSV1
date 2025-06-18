@@ -358,7 +358,7 @@ export function ExpertAssignmentDrawer({ isOpen, onClose, project, onAssignExper
                             <div className="flex-1 space-y-1">
                               <div className="flex items-center justify-between">
                                 <div className="font-medium">{expert.name}</div>
-                                <Badge variant={expert.status === "已接受" ? "success" : "outline"} className="text-xs">
+                                <Badge variant={expert.status === "已接受" ? "default" : "outline"} className="text-xs">
                                   {expert.status}
                                 </Badge>
                               </div>
@@ -400,11 +400,10 @@ export function ExpertAssignmentDrawer({ isOpen, onClose, project, onAssignExper
             <div className="flex items-center justify-between">
               <div className="text-sm text-muted-foreground">已分配 {assignedExperts.length} 位专家进行评审</div>
               <div className="flex space-x-2">
-                <Button variant="outline" onClick={handleClose}>
+                <Button variant="outline" onClick={handleClose} className="text-sm px-4 py-2">
                   取消
                 </Button>
-                <Button onClick={handleSaveAssignment}>
-                  <Check className="mr-1 h-4 w-4" />
+                <Button onClick={handleSaveAssignment} className="text-sm px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white">
                   保存分配
                 </Button>
               </div>

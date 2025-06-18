@@ -541,52 +541,68 @@ export default function AssignExpertsPage({ params }: { params: { id: string } }
       {/* 确认分配对话框 */}
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <DialogContent className="max-w-[550px] p-0 overflow-hidden">
-          <div className="p-6 pb-2 border-b bg-gradient-to-r from-blue-50/80 to-indigo-50/80">
+          <div className="px-6 py-4 border-b">
             <DialogTitle className="text-lg font-semibold text-slate-800 flex items-center">
               <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center mr-2.5 text-blue-600">
                 <FileCheck className="h-4 w-4" />
               </div>
               确认专家分配
             </DialogTitle>
-            <DialogDescription className="text-sm text-slate-500 mt-1 pl-[42px]">
-              请确认以下专家和工作表分配是否正确
-            </DialogDescription>
           </div>
           
-          <div className="py-6 px-8">
+          <div className="py-6 px-8 -my-4">
+            {/* 项目基本信息 */}
+            <div className="mb-6">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900 mb-2">
+                  {currentProject?.title || '未知项目'}
+                </h2>
+                <p className="text-sm text-slate-500">
+                  {currentProject?.reviewNumber || '-'} · {currentProject?.projectType || '-'}
+                </p>
+              </div>
+            </div>
+
+            {/* 已选择的专家 */}
+            <div className="mb-6">
             <h3 className="text-sm font-medium mb-3 flex items-center text-slate-700">
               <User className="h-4 w-4 mr-2 text-blue-500" />
               已选择的专家 ({selectedExpertDetails.length})
             </h3>
-            <div className="space-y-2.5 mb-5">
+              <div className="grid grid-cols-2 gap-4">
               {selectedExpertDetails.map((expert) => (
                 <div 
                   key={expert.id} 
-                  className="flex items-center p-3.5 border border-slate-200 rounded-lg bg-slate-50/80 hover:bg-slate-50 transition-colors shadow-sm"
+                    className="relative p-4 border border-slate-200 rounded-lg bg-slate-50/80 hover:bg-slate-50 transition-colors shadow-sm"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mr-3 text-blue-600">
-                    <User className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-slate-800">{expert.name}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">{expert.department} · {expert.title}</div>
-                  </div>
-                  <div className="ml-auto text-sm">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                    {/* 右上角匹配度标签 */}
+                    <div className="absolute top-3 right-3">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                       expert.matchScore >= 90 
                         ? "bg-green-50 text-green-700 border border-green-200" 
                         : "bg-blue-50 text-blue-700 border border-blue-200"
                     }`}>
-                      <span className="mr-1 flex-shrink-0">
-                        <CheckCircle2 className="h-3 w-3" />
+                        匹配度 {expert.matchScore}%
                       </span>
-                      匹配度 {expert.matchScore}%
-                    </span>
+                    </div>
+                    
+                    {/* 专家信息 */}
+                    <div className="flex items-start pr-16">
+                      <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mr-3 text-blue-600 flex-shrink-0">
+                        <User className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1 min-w-0 pt-1">
+                        <div className="font-medium text-slate-800 text-sm mb-1 truncate">{expert.name}</div>
+                        <div className="text-xs text-slate-500 leading-relaxed whitespace-nowrap">{expert.department} · {expert.title}</div>
+                      </div>
+                    </div>
                   </div>
+                ))}
                 </div>
-              ))}
             </div>
             
+            {/* 已选择的工作表 */}
+            <div className="mb-6">
             <h3 className="text-sm font-medium mb-3 flex items-center text-slate-700">
               <ClipboardList className="h-4 w-4 mr-2 text-blue-500" />
               已选择的工作表
@@ -616,65 +632,31 @@ export default function AssignExpertsPage({ params }: { params: { id: string } }
                     </span>
                   </div>
                 </div>
-                {selectedWorksheetDetail.description && (
-                  <div className="mt-2.5 text-xs text-slate-600 bg-white p-2.5 rounded border border-slate-100">
-                    {selectedWorksheetDetail.description}
                   </div>
                 )}
               </div>
-            )}
             
-            <div>
-              <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg shadow-sm">
-                <div className="flex items-start">
+            <div className="mt-6 mb-6 flex items-start">
                   <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 mr-3 flex-shrink-0" />
-                  <p className="text-sm text-amber-800">
+              <p className="text-sm text-amber-600">
                     确认后，系统将向选定的专家发送审查邀请，并分配所选工作表用于项目审查流程。
                   </p>
-                </div>
-              </div>
-              
-              <div className="mt-4">
-                <h3 className="text-sm font-medium mb-2 flex items-center text-slate-700">
-                  <FileSignature className="h-4 w-4 mr-2 text-blue-500" />
-                  项目基本信息
-                </h3>
-                <div className="border rounded-md overflow-hidden">
-                  <table className="w-full min-w-full divide-y divide-slate-200">
-                    <thead className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-200">
-                      <tr>
-                        <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-700">项目名称</th>
-                        <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-700">项目编号</th>
-                        <th className="py-2.5 px-3 text-left text-xs font-medium text-slate-700">类型</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="py-2 px-3 text-sm text-slate-700">{currentProject?.title || '-'}</td>
-                        <td className="py-2 px-3 text-sm text-slate-700">{currentProject?.reviewNumber || '-'}</td>
-                        <td className="py-2 px-3 text-sm text-slate-700">{currentProject?.projectType || '-'}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
             </div>
           </div>
           
-          <div className="bg-slate-50 px-8 py-4 border-t border-slate-200">
-            <DialogFooter className="gap-3">
+          <div className="px-8 py-4 border-t border-slate-200">
+            <DialogFooter className="gap-3 justify-end">
               <Button 
                 variant="outline" 
                 onClick={() => setShowConfirmDialog(false)}
-                className="flex-1 border-slate-300"
+                className="text-sm px-4 py-2"
               >
-                <X className="h-4 w-4 mr-2" />
-                返回修改
+                返回
               </Button>
               <Button 
                 onClick={handleConfirmAssignment} 
                 disabled={isLoading}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 shadow-sm"
+                className="text-sm px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white"
               >
                 {isLoading ? (
                   <>
@@ -682,10 +664,7 @@ export default function AssignExpertsPage({ params }: { params: { id: string } }
                     处理中...
                   </>
                 ) : (
-                  <>
-                    <Check className="h-4 w-4 mr-2" />
-                    确认分配
-                  </>
+                  "确认"
                 )}
               </Button>
             </DialogFooter>

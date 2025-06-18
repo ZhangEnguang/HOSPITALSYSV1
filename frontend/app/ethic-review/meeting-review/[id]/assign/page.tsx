@@ -653,15 +653,14 @@ export default function AssignExpertsPage({ params }: { params: { id: string } }
               <Button 
                 variant="outline" 
                 onClick={() => setShowConfirmDialog(false)}
-                className="flex-1 border-slate-300"
+                className="text-sm px-4 py-2"
               >
-                <X className="h-4 w-4 mr-2" />
                 返回修改
               </Button>
               <Button 
                 onClick={handleConfirmAssignment} 
                 disabled={isLoading}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 shadow-sm"
+                className="text-sm px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white"
               >
                 {isLoading ? (
                   <>
@@ -669,10 +668,7 @@ export default function AssignExpertsPage({ params }: { params: { id: string } }
                     处理中...
                   </>
                 ) : (
-                  <>
-                    <Check className="h-4 w-4 mr-2" />
-                    确认分配
-                  </>
+                  "确认分配"
                 )}
               </Button>
             </DialogFooter>

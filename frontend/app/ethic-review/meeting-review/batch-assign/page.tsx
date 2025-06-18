@@ -1395,15 +1395,14 @@ export default function BatchAssignPage() {
                 <button 
                   onClick={handleClosePreview}
                   disabled={isSubmitting}
-                  className="flex-1 py-2 px-4 border border-slate-300 rounded-md text-slate-700 font-medium hover:bg-slate-50 transition-colors flex items-center justify-center"
+                  className="text-sm px-4 py-2 border border-slate-300 rounded-md text-slate-700 font-medium hover:bg-slate-50 transition-colors flex items-center justify-center"
                 >
-                  <X className="h-4 w-4 mr-2" />
                   返回修改
                 </button>
                 <button 
                   onClick={handleFinalSubmit}
                   disabled={isSubmitting}
-                  className="flex-1 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md flex justify-center items-center gap-1.5 transition-colors shadow-sm"
+                  className="text-sm px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md flex justify-center items-center transition-colors"
                 >
                   {isSubmitting ? (
                     <>
@@ -1411,10 +1410,7 @@ export default function BatchAssignPage() {
                       处理中...
                     </>
                   ) : (
-                    <>
-                      <Check className="h-4 w-4 mr-2" />
-                      确认分配
-                    </>
+                    "确认分配"
                   )}
                 </button>
               </div>

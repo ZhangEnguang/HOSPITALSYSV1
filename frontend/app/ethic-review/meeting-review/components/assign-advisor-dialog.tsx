@@ -499,21 +499,23 @@ export function AssignAdvisorDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] min-h-[70vh] flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[90vh] min-h-[70vh] flex flex-col p-0 overflow-hidden">
         {/* 固定头部 */}
-        <DialogHeader className="flex-shrink-0 pb-4 border-b">
-          <DialogTitle className="flex items-center text-xl">
-            <UserPlus className="h-5 w-5 mr-2 text-indigo-600" />
+        <DialogHeader className="flex-shrink-0 px-6 py-4 border-b">
+          <DialogTitle className="flex items-center text-lg font-semibold">
+            <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center mr-2.5 text-indigo-600">
+              <UserPlus className="h-4 w-4" />
+            </div>
             指派独立顾问
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-sm text-slate-500 mt-1 pl-[42px]">
             为项目指派独立顾问，获取专业的伦理咨询意见
           </DialogDescription>
         </DialogHeader>
 
         {/* 可滚动内容区 */}
-        <div className="flex-1 overflow-y-auto px-2 py-4">
-          <div className="space-y-6 pr-2">
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <div className="space-y-6">
           {/* 项目信息卡片 */}
           {project && (
             <Card className="border-l-4 border-l-indigo-500">
@@ -551,8 +553,7 @@ export function AssignAdvisorDialog({
             <CardHeader>
               <CardTitle className="text-lg flex items-center">
                 <MessageSquare className="h-5 w-5 mr-2 text-blue-600" />
-                咨询内容
-                <span className="text-red-500 ml-1">*</span>
+                填写咨询
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -580,7 +581,6 @@ export function AssignAdvisorDialog({
               <CardTitle className="text-lg flex items-center">
                 <Users className="h-5 w-5 mr-2 text-purple-600" />
                 选择独立顾问
-                <span className="text-red-500 ml-1">*</span>
                 {selectedAdvisors.length > 0 && (
                   <Badge variant="outline" className="ml-2">
                     已选择 {selectedAdvisors.length} 位
@@ -829,11 +829,12 @@ export function AssignAdvisorDialog({
         </div>
 
         {/* 固定底部操作栏 */}
-        <DialogFooter className="flex-shrink-0 pt-4 border-t bg-white">
+        <DialogFooter className="flex-shrink-0 px-6 py-4 border-t bg-white">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
+            className="text-sm px-4 py-2"
           >
             取消
           </Button>
@@ -841,10 +842,10 @@ export function AssignAdvisorDialog({
             onClick={handleSubmit}
             disabled={isSubmitting || selectedAdvisors.length === 0 || !questions.trim()}
             className={cn(
-              "transition-all duration-200",
+              "transition-all duration-200 text-sm px-4 py-2",
               isSuccess 
                 ? "bg-green-600 hover:bg-green-700 text-white" 
-                : "bg-indigo-600 hover:bg-indigo-700"
+                : "bg-blue-600 hover:bg-blue-700 text-white"
             )}
           >
             {isSubmitting ? (
@@ -858,10 +859,7 @@ export function AssignAdvisorDialog({
                 指派成功！
               </>
             ) : (
-              <>
-                <UserPlus className="h-4 w-4 mr-2" />
-                确认指派 ({selectedAdvisors.length})
-              </>
+              `确认指派 (${selectedAdvisors.length})`
             )}
           </Button>
         </DialogFooter>

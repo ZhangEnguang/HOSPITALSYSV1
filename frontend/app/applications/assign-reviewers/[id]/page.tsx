@@ -1713,13 +1713,11 @@ export default function ProjectReviewPage() {
             </div>
           </div>
           
-          <DialogFooter className="flex justify-between sm:justify-between">
-            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
-              <X className="h-4 w-4 mr-2" />
+          <DialogFooter className="flex justify-between sm:justify-between gap-3">
+            <Button variant="outline" onClick={() => setShowConfirmDialog(false)} className="text-sm px-4 py-2">
               取消
             </Button>
-            <Button onClick={confirmAssignment}>
-              <Check className="h-4 w-4 mr-2" />
+            <Button onClick={confirmAssignment} className="text-sm px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white">
               确认分配
             </Button>
           </DialogFooter>
