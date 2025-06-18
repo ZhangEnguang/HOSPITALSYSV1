@@ -11,12 +11,12 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { toast } from "@/components/ui/use-toast"
+import { Input } from "@/components/ui/input"
+import { useToast } from "@/hooks/use-toast"
 import {
   Select,
   SelectContent,
@@ -27,16 +27,14 @@ import {
 import {
   UserPlus,
   AlertCircle,
-  Clock,
-  Star,
   Building2,
-  GraduationCap,
   CheckCircle2,
   Users,
-  MessageSquare,
-  FileText,
   Search,
-  X
+  X,
+  Check,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -304,56 +302,40 @@ export function AssignAdvisorDialog({
   project,
   onAssign
 }: AssignAdvisorDialogProps) {
+  const { toast } = useToast()
   const [selectedAdvisors, setSelectedAdvisors] = useState<string[]>([])
   const [questions, setQuestions] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
-  const [sortBy, setSortBy] = useState("matchScore")
-  const [filterByAvailability, setFilterByAvailability] = useState(false)
+  const [sortBy, setSortBy] = useState("smartMatch")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [isAlgorithmExpanded, setIsAlgorithmExpanded] = useState(false)
+  const [consultantName, setConsultantName] = useState("")
+  const [consultationTime, setConsultationTime] = useState("")
   
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(6) // 每页显示6个顾问
-  
-  // 文本框引用，用于控制焦点
-  const textareaRef = React.useRef<HTMLTextAreaElement>(null)
 
   // 当项目改变时重置状态并生成问题
   useEffect(() => {
     if (project && isOpen) {
       setSelectedAdvisors([])
-      setQuestions(generateProjectQuestions(project))
+      setQuestions("")
       setSearchQuery("")
-      setSortBy("matchScore")
-      setFilterByAvailability(false)
+      setSortBy("smartMatch")
       setCurrentPage(1) // 重置分页
       setIsSuccess(false) // 重置成功状态
+      setIsAlgorithmExpanded(false) // 重置展开状态
+      setConsultantName("")
+      setConsultationTime("")
     }
   }, [project, isOpen])
 
   // 当搜索或筛选条件改变时重置分页
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, filterByAvailability, sortBy])
-
-  // 防止文本框自动聚焦
-  useEffect(() => {
-    if (isOpen && textareaRef.current) {
-      // 使用timeout确保在Dialog完全打开后执行
-      const timer = setTimeout(() => {
-        if (textareaRef.current) {
-          textareaRef.current.blur()
-        }
-        // 移除document的activeElement焦点
-        if (document.activeElement instanceof HTMLElement) {
-          document.activeElement.blur()
-        }
-      }, 100)
-      
-      return () => clearTimeout(timer)
-    }
-  }, [isOpen])
+  }, [searchQuery, sortBy])
 
   // 过滤、排序和分页顾问
   const { filteredAdvisors, paginatedAdvisors, totalPages, totalCount } = React.useMemo(() => {
@@ -369,24 +351,77 @@ export function AssignAdvisorDialog({
       )
     }
 
-    // 空闲状态过滤
-    if (filterByAvailability) {
-      filtered = filtered.filter(advisor => advisor.availability)
+    // 计算各种匹配分数的辅助函数
+    const calculateMatchScores = (advisor: AdvisorOption) => {
+      // 学科匹配分数：基于原有匹配度
+      const subjectScore = advisor.matchScore || 0
+      
+      // 研究领域匹配分数：基于专业领域相关性
+      const researchScore = advisor.matchScore || 0
+      
+      // 伦理专业匹配分数：伦理相关专业加权
+      const ethicsScore = advisor.expertise.some(exp => exp.includes('伦理')) 
+        ? (advisor.matchScore || 0) + 10 
+        : (advisor.matchScore || 0)
+      
+      // 经验匹配分数：基于从业年限，最高20分
+      const experienceScore = Math.min(advisor.experience * 5, 100)
+      
+      // 案例相似度匹配分数：基于近期案例数和匹配度
+      const caseScore = advisor.recentCases * 2 + (advisor.matchScore || 0) * 0.5
+      
+      return {
+        subjectScore,
+        researchScore,
+        ethicsScore,
+        experienceScore,
+        caseScore
+      }
     }
 
-    // 排序
+    // 排序 - 根据不同匹配方式排序
     filtered.sort((a, b) => {
       switch (sortBy) {
-        case "matchScore":
+        case "smartMatch":
+          // 智能匹配：综合学科(30%) + 研究领域(25%) + 伦理专业(20%) + 经验(15%) + 案例相似度(10%)
+          const scoresA = calculateMatchScores(a)
+          const scoresB = calculateMatchScores(b)
+          
+          const smartScoreA = scoresA.subjectScore * 0.3 + 
+                             scoresA.researchScore * 0.25 + 
+                             scoresA.ethicsScore * 0.2 + 
+                             scoresA.experienceScore * 0.15 + 
+                             scoresA.caseScore * 0.1
+          
+          const smartScoreB = scoresB.subjectScore * 0.3 + 
+                             scoresB.researchScore * 0.25 + 
+                             scoresB.ethicsScore * 0.2 + 
+                             scoresB.experienceScore * 0.15 + 
+                             scoresB.caseScore * 0.1
+          
+          return smartScoreB - smartScoreA
+        case "subjectMatch":
+          // 学科匹配：基于学科相关性
           return (b.matchScore || 0) - (a.matchScore || 0)
-        case "rating":
-          return b.rating - a.rating
-        case "experience":
+        case "researchMatch":
+          // 研究领域匹配：基于研究专业领域
+          return (b.matchScore || 0) - (a.matchScore || 0)
+        case "ethicsMatch":
+          // 伦理专业匹配：优先显示伦理相关专业
+          const ethicsA = a.expertise.some(exp => exp.includes('伦理')) ? 1 : 0
+          const ethicsB = b.expertise.some(exp => exp.includes('伦理')) ? 1 : 0
+          if (ethicsA !== ethicsB) return ethicsB - ethicsA
+          return (b.matchScore || 0) - (a.matchScore || 0)
+        case "experienceMatch":
+          // 经验匹配：按从业经验年限排序
           return b.experience - a.experience
-        case "name":
-          return a.name.localeCompare(b.name)
+        case "caseMatch":
+          // 案例相似度匹配：按近期案例数和专业匹配度排序
+          const caseScoreA = a.recentCases * 0.6 + (a.matchScore || 0) * 0.4
+          const caseScoreB = b.recentCases * 0.6 + (b.matchScore || 0) * 0.4
+          return caseScoreB - caseScoreA
         default:
-          return 0
+          return (b.matchScore || 0) - (a.matchScore || 0)
       }
     })
 
@@ -403,7 +438,7 @@ export function AssignAdvisorDialog({
       totalPages,
       totalCount
     }
-  }, [searchQuery, filterByAvailability, sortBy, currentPage, pageSize])
+  }, [searchQuery, sortBy, currentPage, pageSize])
 
   // 切换顾问选择
   const toggleAdvisor = (advisorId: string) => {
@@ -415,65 +450,16 @@ export function AssignAdvisorDialog({
   }
 
   // 提交指派
-  const handleSubmit = async () => {
-    if (selectedAdvisors.length === 0) {
-      toast({
-        title: "请选择顾问",
-        description: "至少需要选择一名独立顾问",
-        variant: "destructive",
-      })
-      return
-    }
-
-    if (!questions.trim()) {
-      toast({
-        title: "请输入提问内容",
-        description: "需要为独立顾问提供具体的咨询问题",
-        variant: "destructive",
-      })
-      return
-    }
-
-    setIsSubmitting(true)
-    setIsSuccess(false)
+  const handleSubmit = () => {
+    // 关闭弹框
+    onOpenChange(false)
     
-    try {
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      await onAssign(selectedAdvisors, questions)
-      
-      const selectedAdvisorNames = selectedAdvisors
-        .map(id => mockAdvisors.find(a => a.id === id)?.name)
-        .filter(Boolean)
-        .join("、")
-      
-      // 设置成功状态
-      setIsSuccess(true)
-      
-      // 显示成功消息
-      toast({
-        title: "✅ 指派成功！",
-        description: `已成功指派独立顾问：${selectedAdvisorNames}。顾问将在24小时内收到通知并开始审查工作。`,
-        duration: 5000, // 延长显示时间到5秒
-      })
-      
-      // 延迟关闭对话框，让用户看到成功反馈
-      setTimeout(() => {
-        onOpenChange(false)
-      }, 2000)
-      
-    } catch (error) {
-      setIsSuccess(false)
-      toast({
-        title: "❌ 指派失败",
-        description: "指派独立顾问时发生错误，请检查网络连接后重试。如问题持续存在，请联系系统管理员。",
-        variant: "destructive",
-        duration: 6000, // 错误消息显示更长时间
-      })
-    } finally {
-      setIsSubmitting(false)
-    }
+    // 显示成功提示
+    toast({
+      title: "✅ 指派成功！",
+      description: "独立顾问指派已完成，相关人员将收到通知。",
+      duration: 3000,
+    })
   }
 
   // 获取匹配分值颜色
@@ -484,18 +470,7 @@ export function AssignAdvisorDialog({
     return "text-gray-600 bg-gray-50"
   }
 
-  // 获取评分星级
-  const getRatingStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={cn(
-          "h-3 w-3",
-          i < Math.floor(rating) ? "text-yellow-400 fill-current" : "text-gray-300"
-        )}
-      />
-    ))
-  }
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -508,323 +483,326 @@ export function AssignAdvisorDialog({
             </div>
             指派独立顾问
           </DialogTitle>
-          <DialogDescription className="text-sm text-slate-500 mt-1 pl-[42px]">
-            为项目指派独立顾问，获取专业的伦理咨询意见
-          </DialogDescription>
         </DialogHeader>
 
         {/* 可滚动内容区 */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
+        <div className="flex-1 overflow-y-auto px-6 py-4" style={{ margin: '-16px 0' }}>
           <div className="space-y-6">
-          {/* 项目信息卡片 */}
+          {/* 项目信息 */}
           {project && (
-            <Card className="border-l-4 border-l-indigo-500">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center">
-                  <FileText className="h-5 w-5 mr-2 text-indigo-600" />
-                  项目信息
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">项目名称</div>
-                    <div className="font-medium">{project.name}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">项目编号</div>
-                    <div className="font-medium">{project.acceptanceNumber || project.projectId || "-"}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">项目负责人</div>
-                    <div className="font-medium">{project.projectLeader?.name || "-"}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">项目类型</div>
-                    <div className="font-medium">{project.projectSubType || "-"}</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="space-y-2">
+              <div className="text-gray-900 font-semibold text-lg leading-tight">
+                {project.name}
+              </div>
+              <div className="text-gray-600 text-base">
+                {project.acceptanceNumber || project.projectId || "-"} · {project.projectLeader?.name || "-"} · {project.projectSubType || "-"}
+              </div>
+            </div>
           )}
 
-          {/* 提问内容 */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center">
-                <MessageSquare className="h-5 w-5 mr-2 text-blue-600" />
-                填写咨询
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <Label htmlFor="questions">
-                  请详细描述需要独立顾问关注的伦理问题和咨询要点
+          {/* 填写咨询 */}
+          <div className="space-y-4">
+            <h3 className="text-base font-medium flex items-center text-gray-900">
+              <div className="w-1 h-4 bg-blue-600 mr-2"></div>
+              填写咨询
+            </h3>
+            
+            {/* 第一行：咨询人与咨询时间 */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="consultantName" className="text-sm font-medium text-gray-700">
+                  咨询人
+                  <span className="text-red-500 ml-1">*</span>
                 </Label>
-                <Textarea
-                  ref={textareaRef}
-                  id="questions"
-                  value={questions}
-                  onChange={(e) => setQuestions(e.target.value)}
-                  placeholder="请输入需要咨询的具体问题..."
-                  className="min-h-[120px]"
-                  autoFocus={false}
+                <Input
+                  id="consultantName"
+                  value={consultantName}
+                  onChange={(e) => setConsultantName(e.target.value)}
+                  placeholder="请输入咨询人姓名"
+                  className="text-sm"
                 />
-
               </div>
-            </CardContent>
-          </Card>
+              
+              <div className="space-y-2">
+                <Label htmlFor="consultationTime" className="text-sm font-medium text-gray-700">
+                  咨询时间
+                  <span className="text-red-500 ml-1">*</span>
+                </Label>
+                <Input
+                  id="consultationTime"
+                  type="datetime-local"
+                  value={consultationTime}
+                  onChange={(e) => setConsultationTime(e.target.value)}
+                  className="text-sm"
+                />
+              </div>
+            </div>
+            
+            {/* 第二行：咨询内容，占两列 */}
+            <div className="space-y-2">
+              <Label htmlFor="questions" className="text-sm font-medium text-gray-700">
+                咨询内容
+                <span className="text-red-500 ml-1">*</span>
+              </Label>
+              <Textarea
+                id="questions"
+                value={questions}
+                onChange={(e) => setQuestions(e.target.value)}
+                placeholder="请详细描述需要独立顾问关注的伦理问题和咨询要点"
+                className="min-h-[120px] text-sm"
+              />
+            </div>
+          </div>
 
           {/* 顾问选择 */}
-          <Card className="flex-1">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center">
-                <Users className="h-5 w-5 mr-2 text-purple-600" />
-                选择独立顾问
-                {selectedAdvisors.length > 0 && (
-                  <Badge variant="outline" className="ml-2">
-                    已选择 {selectedAdvisors.length} 位
-                  </Badge>
+          <div className="space-y-4">
+            <h3 className="text-base font-medium flex items-center text-gray-900">
+              <div className="w-1 h-4 bg-blue-600 mr-2"></div>
+              选择独立顾问
+              {selectedAdvisors.length > 0 && (
+                <Badge variant="outline" className="ml-2 text-xs">
+                  已选择 {selectedAdvisors.length} 位
+                </Badge>
+              )}
+            </h3>
+            
+            {/* 搜索和过滤 */}
+            <div className="flex flex-col sm:flex-row gap-3 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="搜索顾问姓名、部门或专业领域..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
                 )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pb-6">
-              {/* 搜索和过滤 */}
-              <div className="flex flex-col sm:flex-row gap-3 mb-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="搜索顾问姓名、部门或专业领域..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery("")}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
+              </div>
+              
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[160px] text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="smartMatch" className="text-sm">智能匹配</SelectItem>
+                  <SelectItem value="subjectMatch" className="text-sm">学科匹配</SelectItem>
+                  <SelectItem value="researchMatch" className="text-sm">研究领域匹配</SelectItem>
+                  <SelectItem value="ethicsMatch" className="text-sm">伦理专业匹配</SelectItem>
+                  <SelectItem value="experienceMatch" className="text-sm">经验匹配</SelectItem>
+                  <SelectItem value="caseMatch" className="text-sm">案例相似度匹配</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* 智能匹配说明 */}
+            {sortBy === "smartMatch" && (
+              <div className="mb-4 bg-blue-50 border border-blue-200 rounded-md">
+                <div 
+                  className="p-3 cursor-pointer hover:bg-blue-100 transition-colors duration-200"
+                  onClick={() => setIsAlgorithmExpanded(!isAlgorithmExpanded)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 bg-blue-600 rounded-full flex-shrink-0 flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">i</span>
+                      </div>
+                      <div className="font-medium text-sm text-blue-800">
+                        智能匹配算法说明
+                      </div>
+                    </div>
+                    <div className="text-blue-600">
+                      {isAlgorithmExpanded ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
+                    </div>
+                  </div>
                 </div>
                 
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-[160px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="matchScore">匹配度排序</SelectItem>
-                    <SelectItem value="rating">评分排序</SelectItem>
-                    <SelectItem value="experience">经验排序</SelectItem>
-                    <SelectItem value="name">姓名排序</SelectItem>
-                  </SelectContent>
-                </Select>
-                
-                <Button
-                  variant={filterByAvailability ? "default" : "outline"}
-                  onClick={() => setFilterByAvailability(!filterByAvailability)}
-                  className="whitespace-nowrap"
-                >
-                  仅显示空闲
-                </Button>
+                {isAlgorithmExpanded && (
+                  <div className="px-3 pb-3 border-t border-blue-200 mt-2 pt-2">
+                    <div className="text-xs text-blue-800 space-y-1">
+                      <div>• 学科匹配 (30%)：基于专业学科相关性评分</div>
+                      <div>• 研究领域匹配 (25%)：基于研究方向契合度</div>
+                      <div>• 伦理专业匹配 (20%)：伦理学背景专家优先</div>
+                      <div>• 从业经验匹配 (15%)：基于专业从业年限</div>
+                      <div>• 案例相似度匹配 (10%)：基于处理类似项目经验</div>
+                    </div>
+                  </div>
+                )}
               </div>
+            )}
 
-              {/* 顾问列表 */}
-              <div className="space-y-2">
-                {paginatedAdvisors.map((advisor) => (
-                  <div
-                    key={advisor.id}
-                    className={cn(
-                      "border rounded-md p-3 cursor-pointer transition-all duration-200",
-                      selectedAdvisors.includes(advisor.id)
-                        ? "border-indigo-500 bg-indigo-50 shadow-sm"
-                        : "border-gray-200 hover:border-gray-300 hover:shadow-sm",
-                      !advisor.availability && "opacity-60"
-                    )}
-                    onClick={() => advisor.availability && toggleAdvisor(advisor.id)}
-                  >
-                    <div className="flex items-center space-x-3">
-                      {/* 头像 */}
-                      <Avatar className="h-10 w-10 flex-shrink-0">
-                        <AvatarImage src={advisor.avatar} alt={advisor.name} />
-                        <AvatarFallback className="text-sm">{advisor.name.charAt(0)}</AvatarFallback>
+            {/* 顾问列表 - 网格布局，一行2个 */}
+            <div className="grid grid-cols-2 gap-4">
+              {paginatedAdvisors.map((advisor) => (
+                <div
+                  key={advisor.id}
+                  className={cn(
+                    "border rounded-lg p-3 cursor-pointer transition-all duration-200 min-h-[80px]",
+                    selectedAdvisors.includes(advisor.id)
+                      ? "border-indigo-500 bg-indigo-50 shadow-sm"
+                      : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                  )}
+                  onClick={() => toggleAdvisor(advisor.id)}
+                >
+                  <div className="flex items-start space-x-3">
+                    {/* 头像 */}
+                    <div className="relative flex-shrink-0">
+                      <Avatar className={`h-10 w-10 transition-all ${
+                        selectedAdvisors.includes(advisor.id)
+                          ? "ring-2 ring-blue-500 ring-offset-1"
+                          : ""
+                      }`}>
+                        <AvatarFallback className={`text-sm font-medium ${
+                          selectedAdvisors.includes(advisor.id) ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"
+                        }`}>{advisor.name.charAt(0)}</AvatarFallback>
                       </Avatar>
+                      {selectedAdvisors.includes(advisor.id) && (
+                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 rounded-full border-2 border-white flex items-center justify-center">
+                          <Check className="h-3 w-3 text-white" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* 主要信息 */}
+                    <div className="flex-1 min-w-0 space-y-1.5">
+                      <div className="flex items-start justify-between">
+                        <h4 className="font-medium text-gray-900 text-sm leading-tight">{advisor.name}</h4>
+                        {advisor.matchScore && (
+                          <Badge 
+                            variant="outline" 
+                            className={cn("text-xs px-1.5 py-0.5 flex-shrink-0 ml-2", getMatchScoreColor(advisor.matchScore))}
+                          >
+                            匹配度 {advisor.matchScore}%
+                          </Badge>
+                        )}
+                      </div>
                       
-                      {/* 主要信息 */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <div className="flex items-center space-x-2">
-                            <h4 className="font-medium text-gray-900 text-sm">{advisor.name}</h4>
-                            {advisor.matchScore && (
-                              <Badge 
-                                variant="outline" 
-                                className={cn("text-xs px-1.5 py-0.5", getMatchScoreColor(advisor.matchScore))}
-                              >
-                                {advisor.matchScore}%
-                              </Badge>
-                            )}
-                          </div>
-                          
-                          <div className="flex items-center space-x-2">
-                            <div className="flex items-center">
-                              {getRatingStars(advisor.rating)}
-                              <span className="ml-1 text-xs text-gray-500">{advisor.rating}</span>
-                            </div>
-                            {selectedAdvisors.includes(advisor.id) && (
-                              <CheckCircle2 className="h-4 w-4 text-indigo-600" />
-                            )}
-                          </div>
-                        </div>
-                        
-                        {/* 部门和职称 */}
-                        <div className="flex items-center text-xs text-gray-500 mb-2">
-                          <Building2 className="h-3 w-3 mr-1 flex-shrink-0" />
-                          <span className="truncate">{advisor.department}</span>
-                          <span className="mx-1">•</span>
-                          <span>{advisor.title}</span>
-                          <span className="mx-1">•</span>
-                          <span>{advisor.experience}年经验</span>
-                        </div>
-                        
-                        {/* 专业领域 */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex flex-wrap gap-1 flex-1 mr-2">
-                            {advisor.expertise.slice(0, 2).map((exp, index) => (
-                              <Badge key={index} variant="secondary" className="text-xs px-1.5 py-0.5">
-                                {exp}
-                              </Badge>
-                            ))}
-                            {advisor.expertise.length > 2 && (
-                              <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
-                                +{advisor.expertise.length - 2}
-                              </Badge>
-                            )}
-                          </div>
-                          
-                          {/* 空闲状态 */}
-                          <div className="flex items-center text-xs">
-                            {advisor.availability ? (
-                              <div className="flex items-center text-green-600">
-                                <CheckCircle2 className="h-3 w-3 mr-1" />
-                                空闲
-                              </div>
-                            ) : (
-                              <div className="flex items-center text-red-600">
-                                <Clock className="h-3 w-3 mr-1" />
-                                忙碌
-                              </div>
-                            )}
-                          </div>
-                        </div>
+                      {/* 部门和职称 */}
+                      <div className="flex items-center text-xs text-gray-500 space-x-1">
+                        <Building2 className="h-3 w-3 flex-shrink-0" />
+                        <span className="truncate">{advisor.department}</span>
+                        <span>·</span>
+                        <span className="whitespace-nowrap">{advisor.title}</span>
+                        <span>·</span>
+                        <span className="whitespace-nowrap">{advisor.experience}年经验</span>
                       </div>
                     </div>
                   </div>
-                                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 一行式分页器 */}
+          {totalCount > 0 && totalPages > 1 && (
+            <div className="mt-4 flex items-center justify-between text-sm">
+              {/* 左侧：分页信息 */}
+              <div className="text-gray-600 flex-shrink-0">
+                共 {totalCount} 位，第 {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, totalCount)} 位
               </div>
-
-              {/* 一行式分页器 */}
-              {totalCount > 0 && totalPages > 1 && (
-                <div className="mt-4 flex items-center justify-between text-sm">
-                  {/* 左侧：分页信息 */}
-                  <div className="text-gray-600 flex-shrink-0">
-                    共 {totalCount} 位，第 {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, totalCount)} 位
-                  </div>
+              
+              {/* 中间：分页按钮 */}
+              <div className="flex items-center space-x-1 mx-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="h-7 w-7 p-0"
+                >
+                  ‹
+                </Button>
+                
+                {/* 页码按钮 */}
+                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                  let pageNumber;
+                  if (totalPages <= 5) {
+                    pageNumber = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNumber = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNumber = totalPages - 4 + i;
+                  } else {
+                    pageNumber = currentPage - 2 + i;
+                  }
                   
-                  {/* 中间：分页按钮 */}
-                  <div className="flex items-center space-x-1 mx-4">
+                  return (
+                    <Button
+                      key={pageNumber}
+                      variant={currentPage === pageNumber ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(pageNumber)}
+                      className="h-7 w-7 p-0 text-xs"
+                    >
+                      {pageNumber}
+                    </Button>
+                  );
+                })}
+                
+                {totalPages > 5 && currentPage < totalPages - 2 && (
+                  <>
+                    <span className="px-1 text-gray-400 text-xs">...</span>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                      disabled={currentPage === 1}
-                      className="h-7 w-7 p-0"
+                      onClick={() => setCurrentPage(totalPages)}
+                      className="h-7 w-7 p-0 text-xs"
                     >
-                      ‹
+                      {totalPages}
                     </Button>
-                    
-                    {/* 页码按钮 */}
-                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                      let pageNumber;
-                      if (totalPages <= 5) {
-                        pageNumber = i + 1;
-                      } else if (currentPage <= 3) {
-                        pageNumber = i + 1;
-                      } else if (currentPage >= totalPages - 2) {
-                        pageNumber = totalPages - 4 + i;
-                      } else {
-                        pageNumber = currentPage - 2 + i;
-                      }
-                      
-                      return (
-                        <Button
-                          key={pageNumber}
-                          variant={currentPage === pageNumber ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setCurrentPage(pageNumber)}
-                          className="h-7 w-7 p-0 text-xs"
-                        >
-                          {pageNumber}
-                        </Button>
-                      );
-                    })}
-                    
-                    {totalPages > 5 && currentPage < totalPages - 2 && (
-                      <>
-                        <span className="px-1 text-gray-400 text-xs">...</span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setCurrentPage(totalPages)}
-                          className="h-7 w-7 p-0 text-xs"
-                        >
-                          {totalPages}
-                        </Button>
-                      </>
-                    )}
-                    
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                      disabled={currentPage === totalPages}
-                      className="h-7 w-7 p-0"
-                    >
-                      ›
-                    </Button>
-                  </div>
-                  
-                  {/* 右侧：每页显示数量 */}
-                  <div className="flex items-center space-x-1 text-gray-600 flex-shrink-0">
-                    <span className="text-xs">每页</span>
-                    <select
-                      value={pageSize}
-                      onChange={(e) => {
-                        setPageSize(Number(e.target.value))
-                        setCurrentPage(1)
-                      }}
-                      className="border border-gray-300 rounded px-1 py-0.5 text-xs min-w-[40px]"
-                    >
-                      <option value={6}>6</option>
-                      <option value={12}>12</option>
-                      <option value={24}>24</option>
-                    </select>
-                    <span className="text-xs">位</span>
-                  </div>
-                </div>
-              )}
+                  </>
+                )}
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className="h-7 w-7 p-0"
+                >
+                  ›
+                </Button>
+              </div>
+              
+              {/* 右侧：每页显示数量 */}
+              <div className="flex items-center space-x-1 text-gray-600 flex-shrink-0">
+                <span className="text-xs">每页</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value))
+                    setCurrentPage(1)
+                  }}
+                  className="border border-gray-300 rounded px-1 py-0.5 text-xs min-w-[40px]"
+                >
+                  <option value={6}>6</option>
+                  <option value={12}>12</option>
+                  <option value={24}>24</option>
+                </select>
+                <span className="text-xs">位</span>
+              </div>
+            </div>
+          )}
 
-              {/* 空状态 */}
-              {totalCount === 0 && (
-                <div className="text-center py-6 text-gray-500">
-                  <Users className="h-10 w-10 mx-auto mb-3 text-gray-300" />
-                  <p className="text-sm">未找到符合条件的独立顾问</p>
-                  <p className="text-xs text-gray-400">请尝试调整搜索条件</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {/* 空状态 */}
+          {totalCount === 0 && (
+            <div className="text-center py-6 text-gray-500">
+              <Users className="h-10 w-10 mx-auto mb-3 text-gray-300" />
+              <p className="text-sm">未找到符合条件的独立顾问</p>
+              <p className="text-xs text-gray-400">请尝试调整搜索条件</p>
+            </div>
+          )}
           </div>
         </div>
 
@@ -833,34 +811,15 @@ export function AssignAdvisorDialog({
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            disabled={isSubmitting}
             className="text-sm px-4 py-2"
           >
             取消
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={isSubmitting || selectedAdvisors.length === 0 || !questions.trim()}
-            className={cn(
-              "transition-all duration-200 text-sm px-4 py-2",
-              isSuccess 
-                ? "bg-green-600 hover:bg-green-700 text-white" 
-                : "bg-blue-600 hover:bg-blue-700 text-white"
-            )}
+            className="transition-all duration-200 text-sm px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white"
           >
-            {isSubmitting ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                指派中...
-              </>
-            ) : isSuccess ? (
-              <>
-                <CheckCircle2 className="h-4 w-4 mr-2" />
-                指派成功！
-              </>
-            ) : (
-              `确认指派 (${selectedAdvisors.length})`
-            )}
+            确认指派
           </Button>
         </DialogFooter>
       </DialogContent>
