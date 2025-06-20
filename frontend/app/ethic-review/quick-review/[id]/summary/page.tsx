@@ -40,7 +40,7 @@ import ExpertReviewTab, { ExpertReviewSummaryDialog } from "../../components/exp
 // 导入项目数据
 import { quickReviewItems } from "../../data/quick-review-demo-data"
 
-// 模拟专家意见数据 - 增强版
+// 模拟专家意见数据 - 精简版
 const mockExpertOpinions = [
   {
     id: "op-001",
@@ -49,8 +49,7 @@ const mockExpertOpinions = [
     department: "基础医学院",
     title: "教授",
     date: "2024-04-12",
-    opinion: "项目总体设计合理，研究目标明确。在基因数据保护方面已有充分考虑，建议进一步完善对参与者的隐私保护措施。同意该项目实施。",
-    detailedOpinion: "该项目提出了罕见遗传病快速基因诊断体系的构建，具有重要的临床应用价值。技术路线设计清晰，采用CRISPR技术进行基因诊断是当前国际前沿方向。项目组具备实施该项目的技术条件和经验。\n\n数据保护方面，项目计划通过数据匿名化和加密存储确保基因数据安全，但建议进一步明确参与者隐私保护的具体措施，特别是在知情同意过程中应详细告知参与者其基因数据的使用范围和保护机制。\n\n伦理方面，项目符合伦理审查的基本要求，但建议项目组关注儿童受试者的特殊保护措施，完善知情同意过程。",
+    opinion: "项目总体设计合理，研究目标明确。在基因数据保护方面已有充分考虑，建议进一步完善对参与者的隐私保护措施。项目组具备实施该项目的技术条件和经验，CRISPR技术进行基因诊断是当前国际前沿方向。但在伦理方面，建议项目组关注儿童受试者的特殊保护措施，完善知情同意过程，详细告知参与者其基因数据的使用范围和保护机制。总体而言，项目符合伦理审查的基本要求，同意该项目实施。",
     rating: 4.5,
     result: "同意",
     category: "伦理审查",
@@ -67,14 +66,13 @@ const mockExpertOpinions = [
     department: "药理学研究所",
     title: "副研究员",
     date: "2024-04-13",
-    opinion: "项目方案设计科学，但对CRISPR技术应用范围的限制说明不够详细，建议明确技术应用边界，确保不会用于非诊断目的。修改后同意实施。",
-    detailedOpinion: "该项目的科学设计总体合理，CRISPR技术在罕见遗传病诊断中的应用具有创新性和科学价值。方法学上选择的技术路线符合当前研究趋势。\n\n但项目存在以下需要改进的问题：\n1. CRISPR技术应用范围的限制说明不够详细，需要明确技术应用边界，特别是要明确规定该技术仅用于疾病诊断而非基因编辑或其他目的\n2. 对于可能的误诊问题，缺乏应对措施和解决方案\n3. 数据分析方法中，对于假阳性和假阴性的控制措施描述不足\n\n建议项目组补充以上内容，明确技术应用的限制条件和范围，完善质控措施，修改后可以实施。",
+    opinion: "项目方案设计科学，CRISPR技术在罕见遗传病诊断中的应用具有创新性和科学价值，方法学上选择的技术路线符合当前研究趋势。但对CRISPR技术应用范围的限制说明不够详细，需要明确技术应用边界，特别是要明确规定该技术仅用于疾病诊断而非基因编辑或其他目的。对于可能的误诊问题，缺乏应对措施和解决方案，数据分析方法中对于假阳性和假阴性的控制措施描述不足。建议项目组补充以上内容，明确技术应用的限制条件和范围，完善质控措施，修改后可以实施。",
     rating: 3.8,
-    result: "修改后同意",
+          result: "必要的修改后同意",
     category: "科学性审查",
     specialty: "CRISPR基因技术",
     expertise: ["基因编辑", "CRISPR技术", "分子诊断"],
-    key_points: ["技术应用范围", "应用边界限制", "修改后同意"],
+          key_points: ["技术应用范围", "应用边界限制", "必要的修改后同意"],
     follow_up_questions: ["CRISPR技术的误判率如何控制?", "是否有替代诊断方法作为验证?"],
     aiSummary: "专家指出CRISPR技术应用边界描述不足，需明确限制在诊断用途，并完善质控措施防止误诊。"
   },
@@ -85,8 +83,7 @@ const mockExpertOpinions = [
     department: "公共卫生学院",
     title: "研究员",
     date: "2024-04-14",
-    opinion: "项目的知情同意过程描述详尽，但对于儿童受试者的特殊保护措施不足。建议补充相关内容，并强化数据匿名化流程。其他方面无重大问题。",
-    detailedOpinion: "本项目在知情同意文件的设计上基本符合要求，对研究目的、风险和受益的说明较为清晰。特别是对基因数据使用范围的说明详尽，这点值得肯定。\n\n但同时存在以下问题：\n1. 对于儿童受试者的特殊保护措施说明不足，缺乏对父母/监护人知情同意的详细规定\n2. 数据匿名化流程描述不够具体，特别是如何防止数据再识别的措施\n3. 没有明确说明研究终止后数据的处理方式\n\n建议项目组补充关于儿童受试者保护的专门章节，详细说明知情同意流程和数据保护措施。同时建议完善数据匿名化和销毁机制的描述。其他方面项目设计合理，同意实施。",
+    opinion: "本项目在知情同意文件的设计上基本符合要求，对研究目的、风险和受益的说明较为清晰，特别是对基因数据使用范围的说明详尽，这点值得肯定。但对于儿童受试者的特殊保护措施说明不足，缺乏对父母/监护人知情同意的详细规定；数据匿名化流程描述不够具体，特别是如何防止数据再识别的措施；没有明确说明研究终止后数据的处理方式。建议项目组补充关于儿童受试者保护的专门章节，详细说明知情同意流程和数据保护措施，同时建议完善数据匿名化和销毁机制的描述。其他方面项目设计合理，同意实施。",
     rating: 4.2,
     result: "同意",
     category: "伦理审查",
@@ -97,22 +94,21 @@ const mockExpertOpinions = [
     aiSummary: "专家强调需完善儿童受试者保护措施和数据匿名化流程，特别是知情同意和数据处理环节的详细规定。"
   },
   {
-    id: "op-004",
+    id: "op-004", 
     expertId: "exp-005",
-    expertName: "赵主任",
-    department: "临床医学中心",
-    title: "主任医师",
+    expertName: "李教授",
+    department: "生物医学工程系",
+    title: "教授",
     date: "2024-04-15",
-    opinion: "从临床应用角度，该项目具有较高的转化价值。建议增加临床验证样本量，并明确诊断标准与现有金标准的比对方案。总体上同意该项目实施。",
-    detailedOpinion: "作为临床医师，我对该项目的临床应用前景持积极态度。罕见遗传病的快速诊断是当前临床工作中的重要需求，项目提出的CRISPR基因诊断体系如能成功建立，将大大缩短诊断时间，提高诊断准确率。\n\n对项目的几点建议：\n1. 建议增加临床验证样本量，特别是对不同类型罕见病的覆盖范围\n2. 需要明确新方法与现有金标准(如全外显子测序)的比对方案和评价指标\n3. 应考虑不同人种和地区人群的基因差异，增加样本多样性\n4. 临床实施方案中应增加对临床医师的培训计划\n\n总体而言，项目具有较高临床价值，支持实施，但建议完善以上几点内容。",
-    rating: 4.3,
-    result: "同意",
-    category: "临床应用评估",
-    specialty: "罕见病诊断",
-    expertise: ["临床诊断", "罕见病研究", "转化医学"],
-    key_points: ["临床转化价值", "样本量扩大", "诊断标准"],
-    follow_up_questions: ["多中心验证是否有计划?", "临床推广时间规划?"],
-    aiSummary: "专家从临床角度支持项目，建议扩大临床验证样本量，完善与金标准比对方案，并考虑人群多样性因素。"
+    opinion: "该项目涉及CRISPR基因检测技术在罕见遗传病诊断中的创新应用，技术路线具有前瞻性，研究意义重大。然而，项目在多个核心环节存在重要问题需要深入讨论：首先，CRISPR技术的特异性和准确性在复杂基因背景下的表现尚需验证，可能存在假阳性和假阴性风险；其次，涉及儿童受试者的基因检测具有特殊的伦理考量，包括知情同意、隐私保护、以及对儿童未来生活的潜在影响；第三，基因数据的长期存储、使用和共享涉及复杂的法律和伦理问题。鉴于项目的复杂性和争议性，建议提交伦理委员会会议进行全面讨论，需要多学科专家共同评估技术风险、伦理风险和社会影响，制定更加详细和严格的实施方案。",
+    rating: 3.5,
+    result: "转会议",
+    category: "综合评估",
+    specialty: "生物医学工程",
+    expertise: ["基因检测技术", "生物医学伦理", "技术风险评估"],
+    key_points: ["技术特异性验证", "儿童伦理保护", "数据治理", "多学科评估"],
+    follow_up_questions: ["如何验证CRISPR技术在复杂基因背景下的准确性?", "儿童基因数据的长期影响如何评估?", "多学科专家会议的具体安排?"],
+    aiSummary: "专家认为项目具有重要意义但存在多个复杂问题，建议通过伦理委员会会议进行多学科专家的全面评估和讨论。"
   }
 ];
 
@@ -225,16 +221,19 @@ export default function SummaryPage({ params }: { params: Promise<{ id: string }
       const opinions = currentProject.expertOpinions;
       const total = opinions.length;
       const agree = opinions.filter((op: any) => op.result === "同意").length;
-      const modifyAgree = opinions.filter((op: any) => op.result === "修改后同意").length;
+      const modifyAgree = opinions.filter((op: any) => op.result === "必要的修改后同意").length;
+    const transferMeeting = opinions.filter((op: any) => op.result === "转会议").length;
       const disagree = opinions.filter((op: any) => op.result === "不同意").length;
       
       const stats = {
         total,
         agree,
         modifyAgree,
+        transferMeeting,
         disagree,
         agreePercent: total > 0 ? ((agree / total) * 100).toFixed(0) : "0",
         modifyAgreePercent: total > 0 ? ((modifyAgree / total) * 100).toFixed(0) : "0",
+        transferMeetingPercent: total > 0 ? ((transferMeeting / total) * 100).toFixed(0) : "0",
         disagreePercent: total > 0 ? ((disagree / total) * 100).toFixed(0) : "0",
         conflictCount: 0,
         conflicts: {}
