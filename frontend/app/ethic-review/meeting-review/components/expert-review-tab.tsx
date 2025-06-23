@@ -63,6 +63,7 @@ export function ExpertReviewTab({
 }: ExpertReviewTabProps) {
   // 状态管理
   const [expandedExpert, setExpandedExpert] = useState<string | null>(null);
+  const [expandedAdvisor, setExpandedAdvisor] = useState<string | null>(null);
   const [starredOpinions, setStarredOpinions] = useState<Set<string>>(new Set());
   const [adminNotes, setAdminNotes] = useState<Record<string, string>>({});
   const [showConflicts, setShowConflicts] = useState(true);
@@ -75,6 +76,11 @@ export function ExpertReviewTab({
   // 切换展开状态
   const toggleExpert = (expertId: string) => {
     setExpandedExpert(expandedExpert === expertId ? null : expertId);
+  };
+
+  // 切换顾问展开状态
+  const toggleAdvisor = (advisorId: string) => {
+    setExpandedAdvisor(expandedAdvisor === advisorId ? null : advisorId);
   };
 
   // 标记重要
@@ -408,7 +414,11 @@ export function ExpertReviewTab({
                   const isExpanded = expandedExpert === opinion.id;
                   
                   return (
-                  <div key={opinion.id} className="border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition-all duration-300">
+                  <div 
+                    key={opinion.id} 
+                    className="border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+                    onClick={() => toggleExpert(opinion.id)}
+                  >
                     {/* 专家信息卡片头部 */}
                     <div className="px-3 pt-3">
                       <div className="flex items-center justify-between">
@@ -416,12 +426,14 @@ export function ExpertReviewTab({
                           {/* 对比模式选择框 */}
                           {isCompareMode && (
                         <div className="flex items-center">
-                              <Checkbox
-                                checked={selectedExperts.has(opinion.id)}
-                                onCheckedChange={() => toggleExpertSelection(opinion.id)}
-                                disabled={!selectedExperts.has(opinion.id) && selectedExperts.size >= 4}
-                                className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
-                              />
+                              <div onClick={(e) => e.stopPropagation()}>
+                                <Checkbox
+                                  checked={selectedExperts.has(opinion.id)}
+                                  onCheckedChange={() => toggleExpertSelection(opinion.id)}
+                                  disabled={!selectedExperts.has(opinion.id) && selectedExperts.size >= 4}
+                                  className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                                />
+                              </div>
                             </div>
                           )}
                           
@@ -565,8 +577,15 @@ export function ExpertReviewTab({
         </CardHeader>
         <CardContent className="px-4 pt-0 pb-4">
           <div className="space-y-3">
-            {advisorResponses.map((advisor) => (
-              <div key={advisor.id} className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-all duration-200">
+            {advisorResponses.map((advisor) => {
+              const isExpanded = expandedAdvisor === advisor.id;
+              
+              return (
+              <div 
+                key={advisor.id} 
+                className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-all duration-200 cursor-pointer"
+                onClick={() => toggleAdvisor(advisor.id)}
+              >
                 {/* 顾问基本信息 */}
                 <div className="flex items-start space-x-3">
                   {/* 头像 */}
@@ -595,24 +614,15 @@ export function ExpertReviewTab({
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      const detailEl = document.getElementById(`advisor-${advisor.id}`);
-                      if (detailEl) {
-                        const isHidden = detailEl.classList.contains('hidden');
-                        detailEl.classList.toggle('hidden', !isHidden);
-                        
-                        // 同时切换按钮图标
-                        const btnEl = e.currentTarget as HTMLButtonElement;
-                        const iconEl = btnEl.querySelector('.btn-icon');
-                        if (isHidden) {
-                          iconEl?.classList.replace('rotate-0', '-rotate-180');
-                        } else {
-                          iconEl?.classList.replace('-rotate-180', 'rotate-0');
-                        }
-                      }
+                      toggleAdvisor(advisor.id);
                     }}
-                        className="h-7 w-7 p-0"
+                        className="h-7 w-7 p-0 hover:bg-gray-100 rounded-full"
                   >
-                        <ChevronDown className="h-4 w-4 btn-icon rotate-0 transition-transform duration-200" />
+                        {isExpanded ? (
+                          <ChevronUp className="h-4 w-4 text-gray-600" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4 text-gray-600" />
+                        )}
                   </Button>
                   </div>
                   
@@ -625,24 +635,27 @@ export function ExpertReviewTab({
                 </div>
                 
                 {/* 展开的详细内容 */}
-                    <div id={`advisor-${advisor.id}`} className="hidden mt-3 space-y-3" style={{ marginLeft: '0px' }}>
-                      {/* 完整回复 */}
-                      <div className="bg-gray-50 rounded-lg px-3 py-2">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <div className="h-4 w-4 bg-gradient-to-r from-gray-400 to-gray-500 rounded flex items-center justify-center">
-                            <FileText className="h-2.5 w-2.5 text-white" />
+                    {isExpanded && (
+                      <div className="mt-3 space-y-3" style={{ marginLeft: '0px' }}>
+                        {/* 完整回复 */}
+                        <div className="bg-gray-50 rounded-lg px-3 py-2">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <div className="h-4 w-4 bg-gradient-to-r from-gray-400 to-gray-500 rounded flex items-center justify-center">
+                              <FileText className="h-2.5 w-2.5 text-white" />
+                            </div>
+                            <span className="text-xs font-medium text-gray-700">完整回复</span>
                           </div>
-                          <span className="text-xs font-medium text-gray-700">完整回复</span>
-                        </div>
-                        <div className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
-                        {advisor.response}
+                          <div className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+                          {advisor.response}
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </CardContent>
       </Card>
