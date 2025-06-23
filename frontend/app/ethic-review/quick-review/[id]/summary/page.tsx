@@ -94,7 +94,7 @@ const mockExpertOpinions = [
     aiSummary: "专家强调需完善儿童受试者保护措施和数据匿名化流程，特别是知情同意和数据处理环节的详细规定。"
   },
   {
-    id: "op-004", 
+    id: "op-004",
     expertId: "exp-005",
     expertName: "李教授",
     department: "生物医学工程系",

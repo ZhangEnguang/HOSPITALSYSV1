@@ -285,17 +285,17 @@ export function ExpertReviewTab({
           </Card>
           
           <Card className="p-4 bg-gradient-to-br from-rose-50 via-pink-50 to-red-50 border-rose-200 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
+                <div className="flex items-center justify-between">
+                  <div>
                 <p className="text-sm text-slate-600 font-medium">不同意</p>
                 <p className="text-2xl font-bold text-slate-800">{stats.disagree}</p>
                 <p className="text-xs text-slate-500">{stats.disagreePercent}%</p>
-              </div>
+                  </div>
               <div className="p-2.5 bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl shadow-sm">
                 <AlertCircle className="h-8 w-8 text-rose-600" />
-              </div>
-            </div>
-          </Card>
+                  </div>
+                </div>
+              </Card>
         </div>
 
         {/* 专家评审意见列表 - 现代卡片式设计 */}
@@ -351,7 +351,7 @@ export function ExpertReviewTab({
                 </div>
                 
                 <p className="text-xs text-blue-600 mb-3">
-                  您可以勾选2-4位专家后点击"开始对比"，系统将为您分析专家在8项评审标准上的意见差异，自动识别一致认可和存在争议的关键问题，计算专家意见的统一程度，并为您提供针对性的处理建议。这将帮助您快速掌握专家观点的整体分布情况，重点关注需要进一步讨论的争议问题，为您的项目审批决策提供有力支撑。
+                  您可以勾选2-4位专家后点击"开始对比"，系统将为您分析专家在8项评审标准上的意见差异，自动识别一致认可和存在争议的关键问题，计算专家意见的统一程度，并为您提供针对性的处理建议。
                 </p>
                 
                 {/* 对比操作区域 */}
@@ -410,7 +410,7 @@ export function ExpertReviewTab({
                   return (
                   <div key={opinion.id} className="border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition-all duration-300">
                     {/* 专家信息卡片头部 */}
-                    <div className="p-3">
+                    <div className="px-3 pt-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2.5">
                           {/* 对比模式选择框 */}
@@ -491,9 +491,9 @@ export function ExpertReviewTab({
                     </div>
                     
                     {/* AI总结（包含关键点标签） */}
-                    <div className="px-3 pt-0 pb-3">
+                    <div className="px-3 pt-0">
                       {opinion.aiSummary && (
-                        <div className="bg-slate-50 border border-slate-200 rounded-md p-2.5" style={{ marginLeft: '50px' }}>
+                        <div className="p-2.5" style={{ marginLeft: '40px' }}>
                           <div className="flex items-center mb-2">
                             <div className="h-3 w-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-sm mr-1.5"></div>
                             <span className="text-xs font-medium text-slate-600">AI分析总结</span>
@@ -522,9 +522,9 @@ export function ExpertReviewTab({
                     {/* 展开的详细内容 */}
                     {isExpanded && (
                       <div className="border-t border-gray-100 bg-gray-50 rounded-b-lg">
-                        <div className="p-3 space-y-3">
+                        <div className="px-3 py-3 space-y-3">
                           {/* 完整评审意见 */}
-                          <div className="bg-white p-3 rounded-md border border-gray-200 shadow-sm" style={{ marginLeft: '50px' }}>
+                          <div className="bg-white px-3 py-3 rounded-md border border-gray-200 shadow-sm" style={{ marginLeft: '40px' }}>
                             <div className="flex items-center mb-2">
                               <div className="h-3 w-3 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-sm mr-1.5"></div>
                               <h4 className="text-sm font-semibold text-gray-900">完整评审意见</h4>
@@ -538,7 +538,7 @@ export function ExpertReviewTab({
 
                             {/* 管理员备注 */}
                             {adminNotes[opinion.id] && (
-                            <div className="bg-blue-50 border border-blue-200 p-3 rounded-md" style={{ marginLeft: '50px' }}>
+                            <div className="bg-blue-50 border border-blue-200 px-3 pt-3 rounded-md" style={{ marginLeft: '40px' }}>
                               <div className="text-xs font-medium text-blue-800 mb-1.5">管理员备注</div>
                               <div className="text-xs text-blue-700 whitespace-pre-line">
                                   {adminNotes[opinion.id]}
