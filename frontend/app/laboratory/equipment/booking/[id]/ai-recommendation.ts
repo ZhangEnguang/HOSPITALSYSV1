@@ -2,7 +2,7 @@
 import { format, addDays, isBefore, isAfter, addHours, differenceInHours } from "date-fns"
 
 // 模拟历史预约数据
-const mockHistoricalData = [
+export const mockHistoricalData = [
   // 周一数据
   { dayOfWeek: 1, hour: 9, usageCount: 45, avgDuration: 2 },
   { dayOfWeek: 1, hour: 10, usageCount: 38, avgDuration: 2.5 },
@@ -214,19 +214,7 @@ export function detectConflicts(
     }
   }
 
-  // 检查背靠背预约（可能造成疲劳）
-  const sortedSlots = [...selectedSlots].sort((a, b) => a.start.getTime() - b.start.getTime())
-  for (let i = 0; i < sortedSlots.length - 1; i++) {
-    const gap = differenceInHours(sortedSlots[i + 1].start, sortedSlots[i].end)
-    if (gap === 0) {
-      return {
-        hasConflict: true,
-        conflictType: 'back_to_back',
-        message: '存在连续的预约时段',
-        suggestion: '建议在连续使用之间安排15-30分钟的间隙进行设备检查和休息'
-      }
-    }
-  }
+  // 移除背靠背预约检查 - 允许连续预约时段
 
   // 检查单日过载（一天使用超过6小时）
   const dailyUsage = new Map<string, number>()
