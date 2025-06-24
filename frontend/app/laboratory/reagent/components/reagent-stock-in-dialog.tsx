@@ -271,12 +271,10 @@ export function ReagentStockInDialog({ open, onOpenChange, reagent }: ReagentSto
   }
 
   // 区域标题组件
-  const SectionTitle = ({ icon, title }: { icon: React.ReactNode, title: string }) => {
+  const SectionTitle = ({ title }: { title: string }) => {
     return (
       <div className="flex items-center gap-2 mb-4">
-        <div className="text-blue-500">
-          {icon}
-        </div>
+        <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
         <h3 className="text-base font-medium text-gray-900">{title}</h3>
       </div>
     )
@@ -330,7 +328,6 @@ export function ReagentStockInDialog({ open, onOpenChange, reagent }: ReagentSto
           {/* 入库基本信息 */}
           <div>
             <SectionTitle 
-              icon={<Package className="h-5 w-5" />} 
               title="入库信息" 
             />
             
@@ -447,7 +444,6 @@ export function ReagentStockInDialog({ open, onOpenChange, reagent }: ReagentSto
           {/* 存储信息 */}
           <div>
             <SectionTitle 
-              icon={<Calendar className="h-5 w-5" />} 
               title="存储信息" 
             />
             
@@ -513,7 +509,6 @@ export function ReagentStockInDialog({ open, onOpenChange, reagent }: ReagentSto
           {/* 成本信息 */}
           <div>
             <SectionTitle 
-              icon={<DollarSign className="h-5 w-5" />} 
               title="成本信息" 
             />
             
@@ -554,7 +549,6 @@ export function ReagentStockInDialog({ open, onOpenChange, reagent }: ReagentSto
           {/* 质检报告和备注 */}
           <div>
             <SectionTitle 
-              icon={<FileText className="h-5 w-5" />} 
               title="其他信息" 
             />
             
@@ -589,12 +583,12 @@ export function ReagentStockInDialog({ open, onOpenChange, reagent }: ReagentSto
         </div>
 
         {/* 固定底部操作栏 */}
-        <DialogFooter className="flex-shrink-0 flex gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+        <DialogFooter className="flex-shrink-0 flex justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50/50">
           <Button 
             variant="outline" 
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
-            className="flex-1 h-10 border-gray-300 text-gray-700 hover:bg-gray-50"
+            className="w-24 h-10 border-gray-300 text-gray-700 hover:bg-gray-50"
           >
             {isLoading ? "取消" : "返回列表"}
           </Button>
@@ -602,7 +596,7 @@ export function ReagentStockInDialog({ open, onOpenChange, reagent }: ReagentSto
             onClick={handleSubmit}
             disabled={isLoading || isSuccess}
             className={cn(
-              "flex-1 h-10 text-white",
+              "w-28 h-10 text-white",
               isSuccess 
                 ? "bg-green-600 hover:bg-green-700" 
                 : "bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400"

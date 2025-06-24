@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -167,11 +167,14 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl h-[90vh] flex flex-col p-0">
         {/* 固定顶部标题栏 */}
-        <DialogHeader className="flex-shrink-0 px-6 py-4 border-b border-gray-200">
-          <DialogTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5 text-blue-600" />
+        <DialogHeader className="flex-shrink-0 px-6 py-4 border-b border-gray-100">
+          <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
+            <Package className="h-5 w-5 text-blue-500" />
             试剂申领
           </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground mt-1">
+            为 <span className="font-medium text-foreground">{reagent?.name}</span> 提交申领申请
+          </DialogDescription>
         </DialogHeader>
 
         {/* 可滚动的中间内容区域 */}
@@ -384,22 +387,32 @@ export function ReagentApplyDialog({ open, onOpenChange, reagent }: ReagentApply
         </div>
 
         {/* 固定底部操作栏 */}
-        <div className="flex-shrink-0 flex justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-white">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="flex-shrink-0 flex justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)}
+            className="w-24 h-10 border-gray-300 text-gray-700 hover:bg-gray-50"
+          >
             取消
           </Button>
           {canApply() ? (
-            <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">
+            <Button 
+              onClick={handleSubmit} 
+              className="w-28 h-10 text-white bg-blue-600 hover:bg-blue-700"
+            >
               <FileText className="h-4 w-4 mr-2" />
               提交申请
             </Button>
           ) : (
-            <Button disabled className="opacity-50">
+            <Button 
+              disabled 
+              className="w-28 h-10 opacity-50"
+            >
               <AlertTriangle className="h-4 w-4 mr-2" />
               {isExpired() ? "试剂已过期" : "无法申领"}
             </Button>
           )}
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
