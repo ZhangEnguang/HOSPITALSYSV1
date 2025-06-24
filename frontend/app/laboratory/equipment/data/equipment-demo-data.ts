@@ -79,7 +79,7 @@ export const allDemoEquipmentItems = [
     name: "单晶（顶级解析专家）",
     model: "Bruker D8 VENTURE",
     serialNumber: "BKD8V789123",
-    description: "高精度单晶X射线衍射仪，用于单晶体结构解析和精确晶体学研究。",
+    description: "",
     category: "分析仪器",
     status: "正常",
     department: "物理实验室",

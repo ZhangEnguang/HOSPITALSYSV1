@@ -183,10 +183,10 @@ export default function EquipmentMaintenancePage() {
       </div>
 
       <div className="container mx-auto py-8">
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8 items-start">
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8 items-stretch">
           {/* 仪器信息卡片 */}
           <div className="xl:col-span-1">
-            <Card className="overflow-hidden bg-white border shadow-xl hover:shadow-2xl transition-all duration-500 group">
+            <Card className="overflow-hidden bg-white border h-full group">
               
               <CardHeader className="pb-4 h-16 flex flex-col justify-center">
                 <div className="flex items-center gap-3">
@@ -270,10 +270,6 @@ export default function EquipmentMaintenancePage() {
                       <span className="text-sm font-medium">{equipment.location}</span>
                     </div>
                   </div>
-                  
-                  <div className="p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl border border-orange-100">
-                    <p className="text-sm text-gray-700 leading-relaxed">{equipment.description}</p>
-                  </div>
                 </div>
                 
                 {/* 维护状态信息 */}
@@ -333,7 +329,7 @@ export default function EquipmentMaintenancePage() {
           {/* 维护登记表单 */}
           <div className="xl:col-span-3 space-y-8">
             {/* 维护信息表单卡片 */}
-            <Card className="overflow-hidden bg-white border shadow-xl">
+            <Card className="overflow-hidden bg-white border h-full">
               
               <CardHeader className="pb-4 h-16 flex flex-col justify-center">
                 <div className="flex items-center gap-3">
