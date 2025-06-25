@@ -223,12 +223,12 @@ export const tableColumns = [
               >
                 {isEnabled ? (
                   <>
-                    <XCircle className="mr-2 h-4 w-4 text-red-600" />
+                    <XCircle className="mr-2 h-4 w-4" />
                     <span>禁用配置</span>
                   </>
                 ) : (
                   <>
-                    <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
+                    <CheckCircle className="mr-2 h-4 w-4" />
                     <span>启用配置</span>
                   </>
                 )}
@@ -342,7 +342,6 @@ export const cardActions = [
     icon: (item: any) => item.status === "enabled" 
       ? <XCircle className="h-4 w-4" />
       : <CheckCircle className="h-4 w-4" />,
-    variant: (item: any) => item.status === "enabled" ? "destructive" : "default",
     onClick: (item: any, event?: React.MouseEvent) => {
       // 避免服务器端渲染错误
       if (typeof window === 'undefined') return;

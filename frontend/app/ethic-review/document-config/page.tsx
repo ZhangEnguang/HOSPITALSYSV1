@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Suspense, useState, useEffect } from "react"
 import DataList from "@/components/data-management/data-list"
 import { useToast } from "@/hooks/use-toast"
+import { SeniorFilterDTO } from "@/components/data-management/data-list-advanced-filter"
 import { 
   tableColumns, 
   cardFields, 
@@ -24,6 +25,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
+import DocumentConfigCard from "./components/document-config-card"
 
 // 定义排序选项类型
 interface SortOption {
@@ -140,7 +142,10 @@ function DocumentConfigContent() {
     projectType: "全部类型",
     status: "全部状态",
   })
-  const [seniorFilterValues, setSeniorFilterValues] = useState<Record<string, any>>({})
+  const [seniorFilterValues, setSeniorFilterValues] = useState<SeniorFilterDTO>({
+    groupOperator: "and" as const,
+    groups: []
+  })
   const [visibleColumns, setVisibleColumns] = useState(() => {
     // 确保actions列可见
     const columns = processedTableColumns.reduce(
@@ -269,7 +274,7 @@ function DocumentConfigContent() {
   }
 
   // 处理高级筛选
-  const handleAdvancedFilter = (filters: Record<string, any>) => {
+  const handleAdvancedFilter = (filters: SeniorFilterDTO) => {
     setSeniorFilterValues(filters)
     
     // 筛选逻辑
@@ -548,6 +553,46 @@ function DocumentConfigContent() {
     }
   }, [router, handleViewDetails, handleEditConfig, handleDeleteConfig, handleToggleStatus, handleBatchToggleStatus, handleBatchDelete])
   
+  // 自定义卡片渲染器
+  const customCardRenderer = (
+    item: any, 
+    actions: any[], 
+    isSelected: boolean, 
+    onToggleSelect: (selected: boolean) => void,
+    onRowActionClick?: (action: any, item: any) => void
+  ) => {
+    // 为卡片操作添加处理回调
+    const enhancedActions = actions.map(action => ({
+      ...action,
+      onClick: (item: any, e: any) => {
+        if (action.id === "delete") {
+          handleDeleteConfig(item)
+        } else if (action.id === "edit") {
+          handleEditConfig(item)
+        } else if (action.id === "view") {
+          handleViewDetails(item)
+        } else if (action.id === "toggle-status") {
+          handleToggleStatus(item)
+        } else {
+          action.onClick(item, e)
+        }
+      }
+    }))
+
+    return (
+      <DocumentConfigCard
+        key={item.id}
+        item={item}
+        actions={enhancedActions}
+        isSelected={isSelected}
+        onToggleSelect={onToggleSelect}
+        onClick={() => handleItemClick(item)}
+        statusVariants={dataListStatusVariants}
+        getStatusName={getStatusName}
+      />
+    )
+  }
+  
   return (
     <div className="w-full px-1 space-y-6">
       <DataList
@@ -594,6 +639,7 @@ function DocumentConfigContent() {
         showColumnToggle={true}
         visibleColumns={visibleColumns}
         onVisibleColumnsChange={handleVisibleColumnsChange}
+        customCardRenderer={customCardRenderer}
       />
     </div>
   )
