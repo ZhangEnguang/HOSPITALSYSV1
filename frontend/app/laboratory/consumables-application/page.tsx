@@ -13,6 +13,7 @@ import {
   consumablesApplicationColumns,
   consumablesApplicationActions,
   consumablesApplicationCardFields,
+  consumablesApplicationCustomCardRenderer,
   batchActions,
 } from "./config/consumables-application-config"
 import { allDemoConsumablesApplicationItems } from "./data/consumables-application-demo-data"
@@ -430,6 +431,7 @@ function ConsumablesApplicationContent() {
         visibleColumns={visibleColumns}
         onVisibleColumnsChange={setVisibleColumns}
         cardFields={consumablesApplicationCardFields}
+        customCardRenderer={consumablesApplicationCustomCardRenderer}
         titleField="applicationTitle"
         descriptionField="purpose"
         statusField="status"

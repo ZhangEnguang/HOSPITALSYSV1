@@ -13,7 +13,20 @@ import {
   Settings,
   FileText,
   ClipboardCheck,
+  MoreVertical,
 } from "lucide-react"
+import { Card, CardHeader, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
+import React from "react"
 
 // 模拟用户数据
 export const users = [
@@ -394,4 +407,186 @@ export const batchActions = [
     icon: <Trash2 className="h-4 w-4" />,
     variant: "destructive",
   },
-] 
+]
+
+// 设备预约卡片组件
+const EquipmentBookingCard = ({ 
+  item, 
+  actions, 
+  isSelected, 
+  onToggleSelect 
+}: {
+  item: any;
+  actions: any[];
+  isSelected: boolean;
+  onToggleSelect: (selected: boolean) => void;
+}) => {
+  const title = item.bookingTitle
+  const description = item.purpose
+  const status = item.status
+
+  // 确保值是可渲染的内容
+  const renderValue = (value: any): React.ReactNode => {
+    if (value === null || value === undefined) return "-";
+    if (typeof value === 'object' && value !== null) {
+      // 如果是对象且有name属性，返回name
+      if ('name' in value) return value.name;
+      // 如果是对象且有label属性，返回label
+      if ('label' in value) return value.label;
+      // 如果是React元素，直接返回
+      if (React.isValidElement(value)) return value;
+      // 其他情况返回JSON字符串
+      return JSON.stringify(value);
+    }
+    return value;
+  };
+
+  const getStatusVariant = (status: string) => {
+    const variant = statusColors[status];
+    // 如果variant是内置的Badge variant类型，直接返回
+    if (variant && ["default", "destructive", "outline", "secondary"].includes(variant)) {
+      return variant as "default" | "destructive" | "outline" | "secondary";
+    }
+    // 否则返回outline作为默认值，并在Badge上应用自定义类
+    return "outline";
+  }
+
+  const getStatusCustomClass = (status: string) => {
+    const variant = statusColors[status];
+    // 如果variant不是内置的Badge variant类型，则作为自定义CSS类返回
+    if (variant && !["default", "destructive", "outline", "secondary"].includes(variant)) {
+      return variant;
+    }
+    return "";
+  }
+
+  return (
+    <Card
+      className={cn(
+        "group transition-all duration-300 border border-[#E9ECF2] shadow-none hover:shadow-[0px_38px_45px_0px_rgba(198,210,241,0.25)] hover:border-primary/20",
+        isSelected && "ring-2 ring-primary"
+      )}
+    >
+      <CardHeader className="p-4 pb-2">
+        <div className="flex items-start justify-between">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-base transition-colors duration-300 group-hover:text-primary truncate flex-1">{renderValue(title)}</h3>
+              {status && (
+                <Badge 
+                  variant={getStatusVariant(status)} 
+                  className={cn("", getStatusCustomClass(status))}
+                >
+                  {renderValue(status)}
+                </Badge>
+              )}
+            </div>
+            {description && <p className="text-sm text-muted-foreground truncate mt-1">{renderValue(description)}</p>}
+          </div>
+          {actions && actions.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2" onClick={(e) => e.stopPropagation()}>
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-36">
+                {actions
+                  .filter((action) => !action.hidden || !action.hidden(item))
+                  .map((action, index) => (
+                    <React.Fragment key={action.id}>
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          action.onClick(item, e)
+                        }}
+                        disabled={action.disabled ? action.disabled(item) : false}
+                        className={action.variant === "destructive" ? "text-destructive" : ""}
+                      >
+                        {action.icon && <span className="mr-2">{action.icon}</span>}
+                        {action.label}
+                      </DropdownMenuItem>
+                      {index < actions.length - 1 && action.variant === "destructive" && (
+                        <DropdownMenuSeparator />
+                      )}
+                    </React.Fragment>
+                  ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="p-4 pt-0">
+        <div className="grid gap-2 mt-2">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+            {/* 预约仪器字段 */}
+            <div className="text-sm">
+              <span className="font-medium text-xs text-muted-foreground block mb-0.5">预约仪器</span>
+              <div className="truncate">
+                {`${item.equipmentName} (${item.equipmentType})`}
+              </div>
+            </div>
+            
+            {/* 申请人字段 */}
+            <div className="text-sm">
+              <span className="font-medium text-xs text-muted-foreground block mb-0.5">申请人</span>
+              <div className="truncate">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{item.applicant.name}</span>
+                  <div className="w-px h-3 bg-gray-300"></div>
+                  <span className="text-sm text-muted-foreground">{item.department}</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* 预约日期字段 */}
+            <div className="text-sm">
+              <span className="font-medium text-xs text-muted-foreground block mb-0.5">预约日期</span>
+              <div className="truncate">
+                {format(new Date(item.startTime), "yyyy/MM/dd")}
+              </div>
+            </div>
+            
+            {/* 预约时长字段 */}
+            <div className="text-sm">
+              <span className="font-medium text-xs text-muted-foreground block mb-0.5">预约时长</span>
+              <div className="truncate">
+                {item.duration}
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// 设备预约自定义卡片渲染器
+export const equipmentBookingCustomCardRenderer = (
+  item: any, 
+  actions: any[], 
+  isSelected: boolean, 
+  onToggleSelect: (selected: boolean) => void,
+  onRowActionClick?: (action: any, item: any) => void
+) => {
+  // 处理操作按钮点击事件，优先使用onRowActionClick
+  const processedActions = actions.map(action => ({
+    ...action,
+    onClick: (item: any, e: React.MouseEvent) => {
+      if (onRowActionClick) {
+        onRowActionClick(action, item);
+      } else if (action.onClick) {
+        action.onClick(item, e);
+      }
+    }
+  }));
+
+  return (
+    <EquipmentBookingCard 
+      item={item}
+      actions={processedActions}
+      isSelected={isSelected}
+      onToggleSelect={onToggleSelect}
+    />
+  );
+}; 

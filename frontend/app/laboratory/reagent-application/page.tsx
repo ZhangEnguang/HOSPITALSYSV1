@@ -14,6 +14,7 @@ import {
   reagentApplicationActions,
   reagentApplicationCardFields,
   batchActions,
+  reagentApplicationCustomCardRenderer,
 } from "./config/reagent-application-config"
 import { allDemoReagentApplicationItems } from "./data/reagent-application-demo-data"
 import {
@@ -442,6 +443,7 @@ function ReagentApplicationContent() {
         onSelectedRowsChange={setSelectedRows}
         batchActions={configuredBatchActions}
         onRowActionClick={handleRowAction}
+        customCardRenderer={reagentApplicationCustomCardRenderer}
         />
       </div>
 

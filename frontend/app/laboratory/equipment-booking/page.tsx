@@ -14,6 +14,7 @@ import {
   equipmentBookingActions,
   equipmentBookingCardFields,
   batchActions,
+  equipmentBookingCustomCardRenderer,
 } from "./config/equipment-booking-config"
 import { allDemoEquipmentBookingItems } from "./data/equipment-booking-demo-data"
 import {
@@ -405,6 +406,7 @@ function EquipmentBookingContent() {
           onSelectedRowsChange={setSelectedRows}
           batchActions={configuredBatchActions}
           onRowActionClick={handleRowAction}
+          customCardRenderer={equipmentBookingCustomCardRenderer}
         />
       </div>
 
