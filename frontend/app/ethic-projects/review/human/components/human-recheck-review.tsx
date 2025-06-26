@@ -962,7 +962,7 @@ export function HumanRecheckReview({
                 <span className="text-sm text-gray-900">{projectData.participantCount}</span>
               </div>
               <div className="flex items-start">
-                <span className="text-sm font-medium text-gray-600 w-20 flex-shrink-0 mt-0.5">实施单位:</span>
+                <span className="text-sm font-medium text-gray-600 w-20 flex-shrink-0 mt-0.5">研究执行单位:</span>
                 <span className="text-sm text-gray-900">{projectData.facilityUnit}</span>
               </div>
               <div className="flex items-start">

@@ -56,7 +56,7 @@ export function AnimalInitialReview({
     { key: "projectTitle", label: "项目名称", value: projectData.projectTitle, disabled: true, span: "half" },
     { key: "animalType", label: "动物种类", value: projectData.animalType, disabled: true, span: "half" },
     { key: "animalCount", label: "动物数量", value: projectData.animalCount, disabled: true, span: "half" },
-    { key: "facilityUnit", label: "动物实施设备单位", value: projectData.facilityUnit, disabled: true, span: "half" },
+    { key: "facilityUnit", label: "实验执行单位", value: projectData.facilityUnit, disabled: true, span: "half" },
     { key: "leaderName", label: "负责人名称", value: projectData.leaderName, disabled: true, span: "half" },
     { key: "department", label: "所属单位", value: projectData.department, disabled: true, span: "half" },
     { key: "ethicsCommittee", label: "伦理委员会", value: projectData.ethicsCommittee, disabled: true, span: "half" }

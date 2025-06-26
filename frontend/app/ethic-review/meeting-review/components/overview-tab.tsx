@@ -511,7 +511,7 @@ export default function EthicProjectOverviewTab({
                   <div className="font-medium">{project?.participantCount ? `${project.participantCount}人` : "未设置"}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-muted-foreground">研究实施单位</div>
+                  <div className="text-sm text-muted-foreground">研究执行单位</div>
                   <div className="font-medium">{project?.researchUnit || "未设置"}</div>
                 </div>
               </>
@@ -526,7 +526,7 @@ export default function EthicProjectOverviewTab({
                   <div className="font-medium">{project?.scale || "未设置"}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-muted-foreground">实施单位</div>
+                  <div className="text-sm text-muted-foreground">研究执行单位</div>
                   <div className="font-medium">{project?.institution || "未设置"}</div>
                 </div>
               </>

@@ -576,7 +576,7 @@ export default function EthicProjectOverviewTab({
               <div className="font-medium">{todo.animalCount}</div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">动物实施设备单位</div>
+                              <div className="text-sm text-muted-foreground">实验执行单位</div>
               <div className="font-medium">{todo.facilityUnit}</div>
             </div>
             <div className="col-span-2">

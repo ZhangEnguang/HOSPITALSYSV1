@@ -31,7 +31,7 @@ export default function AnimalEthicProjectsPage() {
   const { isLoading, startLoading, stopLoading } = useLoading()
   
   // 模板对话框状态
-  const [isTemplatesDialogOpen, setIsTemplatesDialogOpen] = useState(false)
+  // const [isTemplatesDialogOpen, setIsTemplatesDialogOpen] = useState(false)
   
   // 删除确认对话框状态
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
@@ -41,6 +41,7 @@ export default function AnimalEthicProjectsPage() {
   const [projects, setProjects] = useState<any[]>([
     {
       id: "1",
+      projectNumber: "AE-2024-0001",
       name: "实验大鼠药物代谢研究",
       description: "研究药物在大鼠体内的代谢过程及其机制",
       status: "进行中",
@@ -48,6 +49,7 @@ export default function AnimalEthicProjectsPage() {
       animalCount: "85只",
       ethicsCommittee: "医学院伦理审查委员会",
       facilityUnit: "基础医学实验中心",
+      项目归属单位: "药学院",
       leader: "王教授",
       createdAt: "2023-10-12",
       progress: 35,
@@ -62,6 +64,7 @@ export default function AnimalEthicProjectsPage() {
     },
     {
       id: "2",
+      projectNumber: "AE-2024-0002",
       name: "小鼠造血干细胞分化实验",
       description: "研究小鼠造血干细胞的分化过程与调控机制",
       status: "规划中",
@@ -69,6 +72,7 @@ export default function AnimalEthicProjectsPage() {
       animalCount: "120只",
       ethicsCommittee: "医学院伦理审查委员会",
       facilityUnit: "免疫学实验中心",
+      项目归属单位: "基础医学院",
       leader: "李研究员",
       createdAt: "2023-11-05",
       progress: 15,
@@ -82,6 +86,7 @@ export default function AnimalEthicProjectsPage() {
     },
     {
       id: "3",
+      projectNumber: "AE-2023-0001",
       name: "兔脊髓损伤修复研究",
       description: "通过神经干细胞移植技术研究兔脊髓损伤的修复机制",
       status: "已完成",
@@ -89,6 +94,7 @@ export default function AnimalEthicProjectsPage() {
       animalCount: "30只",
       ethicsCommittee: "医学院伦理审查委员会",
       facilityUnit: "神经科学实验中心",
+      项目归属单位: "临床医学院",
       leader: "张副教授",
       createdAt: "2023-08-20",
       progress: 100,
@@ -101,6 +107,7 @@ export default function AnimalEthicProjectsPage() {
     },
     {
       id: "4",
+      projectNumber: "AE-2024-0003",
       name: "微型猪心脏移植研究",
       description: "探索猪心脏移植到人体的可行性与排斥反应机制研究",
       status: "进行中",
@@ -108,6 +115,7 @@ export default function AnimalEthicProjectsPage() {
       animalCount: "8只",
       ethicsCommittee: "医学院伦理审查委员会",
       facilityUnit: "器官移植研究中心",
+      项目归属单位: "外科学系",
       leader: "赵教授",
       createdAt: "2023-09-15",
       progress: 45,
@@ -123,6 +131,7 @@ export default function AnimalEthicProjectsPage() {
     },
     {
       id: "5",
+      projectNumber: "AE-2024-0004",
       name: "犬类心脏病模型研究",
       description: "建立和验证犬类心脏病动物模型，用于心脏疾病治疗新药筛选",
       status: "规划中",
@@ -130,6 +139,7 @@ export default function AnimalEthicProjectsPage() {
       animalCount: "15只",
       ethicsCommittee: "医学院伦理审查委员会",
       facilityUnit: "心血管研究中心",
+      项目归属单位: "内科学系",
       leader: "钱研究员",
       createdAt: "2023-12-03",
       progress: 10,
@@ -143,6 +153,7 @@ export default function AnimalEthicProjectsPage() {
     },
     {
       id: "6",
+      projectNumber: "AE-2024-0005",
       name: "猕猴脑功能区神经连接图谱研究",
       description: "利用先进成像技术绘制猕猴脑功能区神经连接图谱，探索大脑工作机理",
       status: "进行中",
@@ -150,6 +161,7 @@ export default function AnimalEthicProjectsPage() {
       animalCount: "12只",
       ethicsCommittee: "医学院伦理审查委员会",
       facilityUnit: "脑科学中心",
+      项目归属单位: "神经科学系",
       leader: "孙教授",
       createdAt: "2023-07-28",
       progress: 60,
@@ -179,8 +191,9 @@ export default function AnimalEthicProjectsPage() {
   
   // 表格列可见性 - 修改为符合DataList组件要求的格式
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
+    "projectNumber": true,
     "name": true, 
-    "status": true, 
+    "status": false, 
     "animalType": true, 
     "animalCount": true, 
     "ethicsCommittee": true, 
@@ -196,13 +209,13 @@ export default function AnimalEthicProjectsPage() {
   }
   
   // 处理AI辅助
-  const handleAIAssist = () => {
-    // 显示模态框或跳转到AI辅助页面
-    toast({
-      title: "AI伦理助手启动中",
-      description: "正在为您分析伦理项目数据并提供建议..."
-    })
-  }
+  // const handleAIAssist = () => {
+  //   // 显示模态框或跳转到AI辅助页面
+  //   toast({
+  //     title: "AI伦理助手启动中",
+  //     description: "正在为您分析伦理项目数据并提供建议..."
+  //   })
+  // }
   
   // 处理删除项目
   const handleDeleteProject = (id: string) => {
@@ -343,6 +356,12 @@ export default function AnimalEthicProjectsPage() {
   // 表格列配置
   const tableColumns = [
     {
+      id: "projectNumber",
+      header: "项目编号",
+      accessorKey: "projectNumber" as const,
+      cell: (row: any) => row.projectNumber || row.项目编号 || "-",
+    },
+    {
       id: "name",
       header: "项目名称",
       accessorKey: "name" as const,
@@ -354,18 +373,6 @@ export default function AnimalEthicProjectsPage() {
               {row.description}
             </span>
           )}
-        </div>
-      ),
-    },
-    {
-      id: "status",
-      header: "状态",
-      accessorKey: "status" as const,
-      cell: (row: any) => (
-        <div className={`px-2.5 py-0.5 rounded-full text-xs font-medium inline-block ${
-          adaptedStatusColors[row.status] || "bg-gray-100 text-gray-800"
-        }`}>
-          {row.status}
         </div>
       ),
     },
@@ -389,9 +396,9 @@ export default function AnimalEthicProjectsPage() {
     },
     {
       id: "facilityUnit",
-      header: "动物实施设备单位",
+      header: "实验执行单位",
       accessorKey: "facilityUnit" as const,
-      cell: (row: any) => row.facilityUnit || row.动物实施设备单位 || "基础医学实验中心",
+      cell: (row: any) => row.facilityUnit || row.实验执行单位 || row.动物实施设备单位 || "基础医学实验中心",
     },
     {
       id: "leader",
@@ -452,8 +459,8 @@ export default function AnimalEthicProjectsPage() {
     },
     {
       id: "facilityUnit",
-      label: "动物实施设备单位",
-      value: (item: any) => item.facilityUnit || item.动物实施设备单位 || "基础医学实验中心",
+      label: "实验执行单位",
+      value: (item: any) => item.facilityUnit || item.实验执行单位 || item.动物实施设备单位 || "基础医学实验中心",
       className: "",
     },
   ]
@@ -511,9 +518,6 @@ export default function AnimalEthicProjectsPage() {
               data={paginatedProjects}
               onAddNew={() => router.push("/ethic-projects/create/animal")}
               addButtonLabel="新建动物伦理"
-              onOpenSettings={() => setIsTemplatesDialogOpen(true)}
-              settingsButtonLabel="模板库"
-              onAIAssist={handleAIAssist}
               searchValue={searchTerm}
               onSearchChange={setSearchTerm}
               onSearch={handleSearch}
@@ -566,7 +570,7 @@ export default function AnimalEthicProjectsPage() {
                   动物种系: item.animalType || "大鼠",
                   动物数量: item.animalCount || "45只",
                   伦理委员会: item.ethicsCommittee || "医学院伦理审查委员会",
-                  动物实施设备单位: item.facilityUnit || "基础医学实验中心",
+                  实验执行单位: item.facilityUnit || "基础医学实验中心",
                   进行中: "3",
                   已完成: "1",
                   // 确保成员信息传递
@@ -624,7 +628,7 @@ export default function AnimalEthicProjectsPage() {
       </Dialog>
 
       {/* 模板库对话框 */}
-      <Dialog open={isTemplatesDialogOpen} onOpenChange={setIsTemplatesDialogOpen}>
+      {/* <Dialog open={isTemplatesDialogOpen} onOpenChange={setIsTemplatesDialogOpen}>
         <DialogContent className="sm:max-w-[900px]">
           <div className="p-6">
             <h2 className="text-lg font-medium mb-4">动物伦理模板库</h2>
@@ -638,7 +642,7 @@ export default function AnimalEthicProjectsPage() {
             </div>
           </div>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </div>
   )
 } 

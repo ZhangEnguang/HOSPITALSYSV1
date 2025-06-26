@@ -576,7 +576,7 @@ export default function EthicProjectOverviewTab({
               <div className="font-medium">{todo.participantCount || "120人"}</div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">研究实施单位</div>
+                              <div className="text-sm text-muted-foreground">研究执行单位</div>
               <div className="font-medium">{todo.researchUnit || "临床研究中心"}</div>
             </div>
             <div className="col-span-2">

@@ -166,7 +166,7 @@ export function AnimalEthicProjectEditForm({ projectData }: { projectData: any }
                             field === "animalType" ? "动物种类" : 
                             field === "animalCount" ? "动物数量" : 
                             field === "ethicsCommittee" ? "伦理委员会" : 
-                            field === "facilityUnit" ? "动物实施设备单位" : 
+                            field === "facilityUnit" ? "实验执行单位" : 
                             field === "leader" ? "负责人姓名" : 
                             field === "department" ? "所属院系" : 
                             field === "email" ? "电子邮箱" : ""}`
@@ -544,15 +544,15 @@ export function AnimalEthicProjectEditForm({ projectData }: { projectData: any }
             </div>
           </div>
 
-          {/* 第四行：动物实施设备单位（跨两列） */}
-            <div className="space-y-2">
-              <Label htmlFor="facilityUnit" className="text-muted-foreground">动物实施设备单位 <span className="text-red-500">*</span></Label>
-              <Input 
-                id="facilityUnit" 
-                value={formData.facilityUnit} 
-                onChange={(e) => updateFormData("facilityUnit", e.target.value)} 
-                onBlur={() => handleBlur("facilityUnit")}
-                placeholder="请输入动物实施设备单位"
+                    {/* 第四行：实验执行单位（跨两列） */}
+          <div className="space-y-2">
+            <Label htmlFor="facilityUnit" className="text-muted-foreground">实验执行单位 <span className="text-red-500">*</span></Label>
+            <Input 
+              id="facilityUnit" 
+              value={formData.facilityUnit} 
+              onChange={(e) => updateFormData("facilityUnit", e.target.value)} 
+              onBlur={() => handleBlur("facilityUnit")}
+              placeholder="请输入实验执行单位"
                 className={cn(
                   "border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
                   formTouched.facilityUnit && formErrors.facilityUnit ? "border-red-500" : ""

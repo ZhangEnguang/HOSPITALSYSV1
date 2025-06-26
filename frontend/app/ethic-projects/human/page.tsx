@@ -48,20 +48,23 @@ export default function HumanEthicProjectsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
   const [selectedRows, setSelectedRows] = useState<string[]>([])
-  const [isTemplatesDialogOpen, setIsTemplatesDialogOpen] = useState(false)
+  // const [isTemplatesDialogOpen, setIsTemplatesDialogOpen] = useState(false)
   const [projectToDelete, setProjectToDelete] = useState<EthicProject | null>(null)
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
     projectNumber: true,
     name: true,
-    type: false,
-    status: true,
-    auditStatus: true,
+    source: true,
+    ethicsCommittee: true,
+    researchUnit: true,
     leader: true,
+    createdAt: true,
+    type: false,
+    status: false,
+    auditStatus: false,
     progress: true,
     budget: false,
-    dates: true,
+    dates: false,
     members: true,
-    source: true,
   })
 
   // 加载项目数据
@@ -189,8 +192,48 @@ export default function HumanEthicProjectsPage() {
     })
   }
 
-  // 获取分页数据
-  const paginatedProjects = projects.slice(0, pageSize)
+  // 扩展项目数据函数
+  const extendProjectData = (item: EthicProject, index: number) => {
+    const projectTypes = ["临床试验", "队列研究", "病例对照研究", "横断面研究", "干预性研究"];
+    const projectSources = ["国家自然科学基金", "省科技厅项目", "医院科研基金", "企业委托研究", "国际合作项目"];
+    const committees = ["医学院伦理审查委员会", "临床研究伦理委员会", "药物临床试验伦理委员会"];
+    const departments = ["临床研究中心", "心血管内科", "肿瘤科", "神经内科", "内分泌科"];
+    const leaderDepartments = ["医学院", "临床医学院", "基础医学院", "公共卫生学院", "药学院"];
+
+    const getRandomData = (index: number) => {
+      const hash = item.id.charCodeAt(0) + index;
+      return {
+        projectType: projectTypes[hash % projectTypes.length],
+        projectSource: projectSources[(hash + 1) % projectSources.length],
+        committee: committees[(hash + 2) % committees.length],
+        department: departments[(hash + 3) % departments.length],
+        leaderDepartment: leaderDepartments[(hash + 4) % leaderDepartments.length],
+        inProgress: Math.floor(Math.random() * 6) + 2,
+        completed: Math.floor(Math.random() * 4) + 1
+      };
+    };
+    
+    const randomData = getRandomData(parseInt(item.id.slice(-2), 16) || 0);
+    
+    return {
+      ...item,
+      研究类型: randomData.projectType,
+      项目来源: randomData.projectSource,
+      伦理委员会: randomData.committee,
+      研究执行单位: randomData.department,
+      负责人所属单位: randomData.leaderDepartment,
+      进行中: randomData.inProgress.toString(),
+      已完成: randomData.completed.toString(),
+      伦理审查日期: `2023-${(parseInt(item.id.slice(-2), 16) % 12) + 1}-${(parseInt(item.id.slice(0, 2), 16) % 28) + 1}`,
+      委员会审批号: `BJEC-2023-${item.id.slice(-3)}`,
+      实验目的: "研究新型药物对肿瘤的抑制作用",
+      实验方法: "体外细胞培养与动物模型验证",
+      动物福利保障: "符合国家实验动物伦理标准"
+    };
+  };
+
+  // 获取分页数据并扩展
+  const paginatedProjects = projects.slice(0, pageSize).map(extendProjectData)
 
   // 表格列配置
   const tableColumns = [
@@ -204,7 +247,37 @@ export default function HumanEthicProjectsPage() {
       id: "name",
       header: "项目名称",
       accessorKey: "name",
-      cell: (row: EthicProject) => <span className="font-medium text-blue-600">{row.name}</span>,
+      cell: (row: EthicProject) => <span className="font-medium text-gray-900">{row.name}</span>,
+    },
+    {
+      id: "source",
+      header: "项目来源",
+      accessorKey: "source",
+      cell: (row: EthicProject) => row.source || "-",
+    },
+    {
+      id: "ethicsCommittee",
+      header: "伦理委员会",
+      accessorKey: "ethicsCommittee",
+      cell: (row: any) => row.伦理委员会 || "医学院伦理审查委员会",
+    },
+    {
+      id: "researchUnit",
+      header: "研究执行单位",
+      accessorKey: "researchUnit",
+      cell: (row: any) => row.研究执行单位 || "临床研究中心",
+    },
+    {
+      id: "leader",
+      header: "负责人",
+      accessorKey: "leader.name",
+      cell: (row: EthicProject) => row.leader?.name || "-",
+    },
+    {
+      id: "createdAt",
+      header: "创建时间",
+      accessorKey: "createdAt",
+      cell: (row: EthicProject) => row.startDate || "-",
     },
     {
       id: "status",
@@ -219,22 +292,10 @@ export default function HumanEthicProjectsPage() {
       cell: (row: EthicProject) => row.auditStatus,
     },
     {
-      id: "leader",
-      header: "负责人",
-      accessorKey: "leader.name",
-      cell: (row: EthicProject) => row.leader?.name || "-",
-    },
-    {
       id: "dates",
       header: "项目周期",
       accessorKey: "startDate",
       cell: (row: EthicProject) => `${row.startDate} ~ ${row.endDate}`,
-    },
-    {
-      id: "source",
-      header: "项目来源",
-      accessorKey: "source",
-      cell: (row: EthicProject) => row.source || "-",
     },
   ]
 
@@ -328,9 +389,9 @@ export default function HumanEthicProjectsPage() {
   ]
 
   // AI辅助函数
-  const handleAIAssist = () => {
-    router.push("/ethic-projects/ai-form")
-  }
+  // const handleAIAssist = () => {
+  //   router.push("/ethic-projects/ai-form")
+  // }
 
   // 自定义卡片操作
   const customCardActions = [
@@ -503,6 +564,7 @@ export default function HumanEthicProjectsPage() {
       const projectSources = ["院内立项", "国家自然科学基金", "医学发展基金", "卫健委项目", "产学研合作"];
       const committees = ["北京医学伦理委员会", "医学院伦理审查委员会", "临床医学伦理委员会", "公共卫生伦理委员会"];
       const departments = ["内科学系", "外科学系", "神经内科", "精神科", "妇产科", "儿科学系", "公共卫生学院"];
+      const leaderDepartments = ["基础医学院", "临床医学院", "公共卫生学院", "药学院", "护理学院", "医学技术学院", "口腔医学院"];
       
       // 使用项目ID的哈希或索引来选择数据
       const hash = item.id.charCodeAt(0) + index;
@@ -511,6 +573,7 @@ export default function HumanEthicProjectsPage() {
         projectSource: projectSources[(hash + 1) % projectSources.length],
         committee: committees[(hash + 2) % committees.length],
         department: departments[(hash + 3) % departments.length],
+        leaderDepartment: leaderDepartments[(hash + 4) % leaderDepartments.length],
         inProgress: Math.floor(Math.random() * 6) + 2,
         completed: Math.floor(Math.random() * 4) + 1
       };
@@ -552,7 +615,8 @@ export default function HumanEthicProjectsPage() {
       研究类型: randomData.projectType,
       项目来源: randomData.projectSource,
       伦理委员会: randomData.committee,
-      研究单位: randomData.department,
+      研究执行单位: randomData.department,
+      负责人所属单位: randomData.leaderDepartment,
       进行中: randomData.inProgress.toString(),
       已完成: randomData.completed.toString(),
       伦理审查日期: `2023-${(parseInt(item.id.slice(-2), 16) % 12) + 1}-${(parseInt(item.id.slice(0, 2), 16) % 28) + 1}`,
@@ -613,9 +677,6 @@ export default function HumanEthicProjectsPage() {
               data={paginatedProjects}
               onAddNew={() => router.push("/ethic-projects/create/human")}
               addButtonLabel="新建人体伦理"
-              onOpenSettings={() => setIsTemplatesDialogOpen(true)}
-              settingsButtonLabel="模板库"
-              onAIAssist={handleAIAssist}
               searchValue={searchTerm}
               onSearchChange={setSearchTerm}
               onSearch={handleSearch}

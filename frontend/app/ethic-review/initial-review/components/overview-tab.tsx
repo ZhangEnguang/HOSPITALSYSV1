@@ -463,7 +463,7 @@ export default function EthicProjectOverviewTab({
                   <div className="font-medium">{project.animalCount}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-muted-foreground">动物实施设备单位</div>
+                  <div className="text-sm text-muted-foreground">实验执行单位</div>
                   <div className="font-medium">{project.facilityUnit}</div>
                 </div>
               </>
@@ -478,7 +478,7 @@ export default function EthicProjectOverviewTab({
                   <div className="font-medium">{project.participantCount || "120人"}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-muted-foreground">研究实施单位</div>
+                  <div className="text-sm text-muted-foreground">研究执行单位</div>
                   <div className="font-medium">{project.researchUnit || "临床研究中心"}</div>
                 </div>
               </>

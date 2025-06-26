@@ -519,6 +519,34 @@ export default function EthicProjectCard({
 }: EthicProjectCardProps) {
   const title = item[titleField] || "";
   const description = descriptionField ? item[descriptionField] : undefined;
+  
+  // 生成项目编号的函数
+  const generateProjectNumber = (projectType: "animal" | "human", projectId: string, createdAt?: string) => {
+    // 获取年份，优先使用创建时间，否则使用当前年份
+    const year = createdAt ? new Date(createdAt).getFullYear() : new Date().getFullYear();
+    
+    // 项目类型前缀 - 采用中英文结合的方式，更符合中国项目管理习惯
+    const prefix = projectType === "animal" ? "AE" : "HE";
+    
+    // 生成序号（简化处理：基于项目ID和年份生成一个合理的序号）
+    // 实际应用中应该查询数据库获取该年度该类型项目的真实序号
+    const idNumber = parseInt(projectId) || 1;
+    
+    // 根据年份调整序号，让编号更符合实际情况
+    let serialNumber;
+    if (year === 2023) {
+      // 2023年的项目，保持原有ID顺序
+      serialNumber = String(idNumber).padStart(4, '0');
+    } else if (year === 2024) {
+      // 2024年的项目，从较大数字开始
+      serialNumber = String(idNumber + 100).padStart(4, '0');
+    } else {
+      // 其他年份，使用默认逻辑
+      serialNumber = String(idNumber).padStart(4, '0');
+    }
+    
+    return `${prefix}-${year}-${serialNumber}`;
+  };
 
   const getBorderColor = () => {
     return "border-gray-200";
@@ -538,12 +566,13 @@ export default function EthicProjectCard({
   let animalType = "";
   let animalCount = "";
   let ethicsCommittee = item.伦理委员会 || item.ethicsCommittee || "医学院伦理审查委员会";
-  let facilityUnit = item.动物实施设备单位 || item.facilityUnit || "基础医学实验中心";
+  let facilityUnit = item.facilityUnit || item.实验执行单位 || item.动物实施设备单位 || "基础医学实验中心";
   
   // 人体伦理项目相关字段
   let projectType = item.项目类型 || item.projectType || "临床研究";
   let projectSource = item.项目来源 || item.projectSource || "院内立项";
-  let humanFacilityUnit = item.研究单位 || item.facilityUnit || "内科学系";
+  let humanFacilityUnit = item.研究执行单位 || item.研究单位 || item.facilityUnit || "内科学系";
+  let leaderDepartment = item.负责人所属单位 || item.leaderDepartment || "医学院";
   
   // 处理动物类型和数量
   if (type === "animal") {
@@ -622,16 +651,7 @@ export default function EthicProjectCard({
                 <h3 className="font-semibold text-lg transition-colors duration-300 group-hover:text-blue-600 truncate flex-1">
                   {title}
                 </h3>
-                {/* 项目成员头像区域 */}
-                <div className="flex-shrink-0 mr-2">
-                  {item.members && item.members.length > 0 && (
-                    <ProjectMemberAvatars 
-                      members={item.members}
-                      maxDisplay={3}
-                      size="sm"
-                    />
-                  )}
-                </div>
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-8 w-8 opacity-70 hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
@@ -663,11 +683,42 @@ export default function EthicProjectCard({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              {description && <p className={cn(
+              {/* 项目副标题：项目编号 · 头像+项目负责人 · 所属科室 */}
+              <div className={cn(
                 "text-sm text-muted-foreground truncate",
                 // 伦理项目统一样式：副标题无下边距
                 (type === "animal" || type === "human") ? "mt-1 mb-0" : "mt-1"
-              )}>{description}</p>}
+              )}>
+                <div className="flex items-center gap-1">
+                  {/* 项目编号 */}
+                  <span>{item.projectNumber || item.项目编号 || generateProjectNumber(type, item.id, item.createdAt)}</span>
+                  <span className="text-gray-400">·</span>
+                  
+                  {/* 头像+项目负责人 */}
+                  {item.members && item.members.length > 0 && (
+                    <>
+                      <div className="flex items-center gap-1">
+                        <div className="inline-flex items-center justify-center rounded-full h-4 w-4 bg-gray-400 text-white text-xs font-medium">
+                          {item.members[0].avatar ? (
+                            <img 
+                              src={item.members[0].avatar} 
+                              alt={item.members[0].name}
+                              className="w-full h-full rounded-full object-cover"
+                            />
+                          ) : (
+                            item.members[0].name.slice(0, 1)
+                          )}
+                        </div>
+                        <span>{item.members[0].name}</span>
+                      </div>
+                      <span className="text-gray-400">·</span>
+                    </>
+                  )}
+                  
+                  {/* 负责人所属单位（人体伦理）或项目归属单位（动物伦理） */}
+                  <span>{type === "human" ? leaderDepartment : (item.department || item.项目归属单位 || item.所属科室 || ethicsCommittee)}</span>
+                </div>
+              </div>
             </div>
           </div>
         </CardHeader>
@@ -710,7 +761,7 @@ export default function EthicProjectCard({
                   <div className="flex items-center justify-between text-sm whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <BriefcaseMedical className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                      <span className="text-gray-600 flex-shrink-0">动物实施设备单位:</span>
+                      <span className="text-gray-600 flex-shrink-0">实验执行单位:</span>
                     </div>
                     <span className="font-medium truncate">{facilityUnit}</span>
                   </div>
@@ -742,7 +793,7 @@ export default function EthicProjectCard({
                   <div className="flex items-center justify-between text-sm whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <BriefcaseMedical className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                      <span className="text-gray-600 flex-shrink-0">研究单位:</span>
+                      <span className="text-gray-600 flex-shrink-0">研究执行单位:</span>
                     </div>
                     <span className="font-medium truncate">{humanFacilityUnit}</span>
                   </div>

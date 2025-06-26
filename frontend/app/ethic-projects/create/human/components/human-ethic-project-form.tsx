@@ -107,7 +107,7 @@ export function HumanEthicProjectForm({ initialData, editMode = false }: HumanEt
         phone: initialData.phone || "",
         email: initialData.email || "",
         address: initialData.address || "",
-        implementationUnit: initialData.researchUnit || initialData.implementationUnit || "",
+        implementationUnit: initialData.研究执行单位 || initialData.researchUnit || initialData.implementationUnit || "",
       };
     } else {
       return {
@@ -658,7 +658,7 @@ export function HumanEthicProjectForm({ initialData, editMode = false }: HumanEt
               {formTouched.projectType && <ErrorMessage message={formErrors.projectType || ""} />}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="implementationUnit" className="text-muted-foreground">研究单位</Label>
+              <Label htmlFor="implementationUnit" className="text-muted-foreground">研究执行单位</Label>
               <Input 
                 id="implementationUnit" 
                 value={formData.implementationUnit} 
