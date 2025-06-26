@@ -198,12 +198,22 @@ export const tableColumns: TableColumn[] = [
     id: "assignee",
     header: "负责人",
     cell: (item) => (
-      <div className="flex items-center gap-2">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={item.assignee.avatar} />
-          <AvatarFallback>{item.assignee.name[0]}</AvatarFallback>
-        </Avatar>
-        <span className="font-medium">{item.assignee.name}</span>
+      <div className="flex items-start gap-1">
+        <div 
+          className="h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ 
+            backgroundColor: '#9ca3af',
+            color: 'white',
+            fontSize: '12px',
+            fontWeight: '500'
+          }}
+        >
+          {item.assignee.name[0]}
+        </div>
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <span className="text-sm text-foreground font-medium truncate">{item.assignee.name}</span>
+          <span className="text-xs text-muted-foreground">负责人</span>
+        </div>
       </div>
     ),
   },
@@ -286,12 +296,22 @@ export const projectChangeColumns: TableColumn[] = [
     id: "assignee",
     header: "负责人",
     cell: (item) => (
-      <div className="flex items-center gap-2">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={item.assignee.avatar} />
-          <AvatarFallback>{item.assignee.name[0]}</AvatarFallback>
-        </Avatar>
-        <span className="font-medium">{item.assignee.name}</span>
+      <div className="flex items-start gap-1">
+        <div 
+          className="h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ 
+            backgroundColor: '#9ca3af',
+            color: 'white',
+            fontSize: '12px',
+            fontWeight: '500'
+          }}
+        >
+          {item.assignee.name[0]}
+        </div>
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <span className="text-sm text-foreground font-medium truncate">{item.assignee.name}</span>
+          <span className="text-xs text-muted-foreground">负责人</span>
+        </div>
       </div>
     ),
   },
@@ -364,12 +384,22 @@ export const contractRecognitionColumns: TableColumn[] = [
     id: "assignee",
     header: "负责人",
     cell: (item) => (
-      <div className="flex items-center gap-2">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={item.assignee.avatar} />
-          <AvatarFallback>{item.assignee.name[0]}</AvatarFallback>
-        </Avatar>
-        <span className="font-medium">{item.assignee.name}</span>
+      <div className="flex items-start gap-1">
+        <div 
+          className="h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ 
+            backgroundColor: '#9ca3af',
+            color: 'white',
+            fontSize: '12px',
+            fontWeight: '500'
+          }}
+        >
+          {item.assignee.name[0]}
+        </div>
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <span className="text-sm text-foreground font-medium truncate">{item.assignee.name}</span>
+          <span className="text-xs text-muted-foreground">负责人</span>
+        </div>
       </div>
     ),
   },
@@ -444,12 +474,22 @@ export const projectInspectionColumns: TableColumn[] = [
     id: "assignee",
     header: "负责人",
     cell: (item) => (
-      <div className="flex items-center gap-2">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={item.assignee.avatar} />
-          <AvatarFallback>{item.assignee.name[0]}</AvatarFallback>
-        </Avatar>
-        <span className="font-medium">{item.assignee.name}</span>
+      <div className="flex items-start gap-1">
+        <div 
+          className="h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ 
+            backgroundColor: '#9ca3af',
+            color: 'white',
+            fontSize: '12px',
+            fontWeight: '500'
+          }}
+        >
+          {item.assignee.name[0]}
+        </div>
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <span className="text-sm text-foreground font-medium truncate">{item.assignee.name}</span>
+          <span className="text-xs text-muted-foreground">负责人</span>
+        </div>
       </div>
     ),
   },
@@ -533,12 +573,22 @@ export const projectCompletionColumns: TableColumn[] = [
     id: "assignee",
     header: "负责人",
     cell: (item) => (
-      <div className="flex items-center gap-2">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={item.assignee.avatar} />
-          <AvatarFallback>{item.assignee.name[0]}</AvatarFallback>
-        </Avatar>
-        <span className="font-medium">{item.assignee.name}</span>
+      <div className="flex items-start gap-1">
+        <div 
+          className="h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ 
+            backgroundColor: '#9ca3af',
+            color: 'white',
+            fontSize: '12px',
+            fontWeight: '500'
+          }}
+        >
+          {item.assignee.name[0]}
+        </div>
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <span className="text-sm text-foreground font-medium truncate">{item.assignee.name}</span>
+          <span className="text-xs text-muted-foreground">负责人</span>
+        </div>
       </div>
     ),
   },
@@ -587,14 +637,21 @@ export const cardFields: CardField[] = [
     id: "assignee",
     label: "",
     value: (item) => (
-      <div className="flex items-center gap-2">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={item.assignee.avatar} />
-          <AvatarFallback>{item.assignee.name[0]}</AvatarFallback>
-        </Avatar>
-        <div className="grid gap-0.5 text-sm">
-          <span className="font-medium">{item.assignee.name}</span>
-          <span className="text-muted-foreground text-xs">负责人</span>
+      <div className="flex items-start gap-1">
+        <div 
+          className="h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ 
+            backgroundColor: '#9ca3af',
+            color: 'white',
+            fontSize: '12px',
+            fontWeight: '500'
+          }}
+        >
+          {item.assignee.name[0]}
+        </div>
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <span className="text-sm text-foreground font-medium truncate">{item.assignee.name}</span>
+          <span className="text-xs text-muted-foreground">负责人</span>
         </div>
       </div>
     ),
@@ -613,196 +670,232 @@ export const cardFields: CardField[] = [
 // 项目变更特定卡片字段
 export const projectChangeCardFields: CardField[] = [
   {
-    id: "progressType",
-    label: "进度类别",
-    value: (item) => {
-      const progressTypeMap = {
-        projectChange: "项目变更",
-        contractRecognition: "合同认定",
-        projectInspection: "项目中检",
-        projectCompletion: "项目结项",
-      }
-      return (
-        <Badge variant="secondary" className="mt-1">
-          {progressTypeMap[item.progressType as keyof typeof progressTypeMap]}
-        </Badge>
-      )
-    },
-  },
-  {
-    id: "project",
-    label: "关联项目",
-    value: (item) => <span className="text-muted-foreground text-xs">{item.project.name}</span>,
-  },
-  {
     id: "assignee",
     label: "",
-    value: (item) => (
-      <div className="flex items-center gap-2">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={item.assignee.avatar} />
-          <AvatarFallback>{item.assignee.name[0]}</AvatarFallback>
-        </Avatar>
-        <div className="grid gap-0.5 text-sm">
-          <span className="font-medium">{item.assignee.name}</span>
-          <span className="text-muted-foreground text-xs">负责人</span>
+    value: (item: any) => (
+      <div className="flex items-start gap-1">
+        <div 
+          className="h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ 
+            backgroundColor: '#9ca3af',
+            color: 'white',
+            fontSize: '12px',
+            fontWeight: '500'
+          }}
+        >
+          {item.assignee.name[0]}
+        </div>
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <span className="text-sm text-foreground font-medium truncate">{item.assignee.name}</span>
+          <span className="text-xs text-muted-foreground">负责人</span>
         </div>
       </div>
     ),
+    className: "col-span-1",
   },
   {
-    id: "dates",
-    label: "计划完成日期",
-    value: (item) => (
-      <span className="text-muted-foreground text-xs">{format(new Date(item.dueDate), "yyyy/MM/dd")}</span>
+    id: "changeType",
+    label: "变更类别",
+    value: (item: any) => (
+      <Badge variant="secondary" className="text-sm px-1 py-0 h-5 text-center truncate">
+        {item.changeType || "内容变更"}
+      </Badge>
     ),
+    className: "col-span-1",
+  },
+  {
+    id: "plannedDate",
+    label: "计划完成",
+    value: (item: any) => (
+      <span className="text-sm text-muted-foreground truncate">
+        {format(new Date(item.dueDate), "yyyy/MM/dd")}
+      </span>
+    ),
+    className: "col-span-1",
+  },
+  {
+    id: "actualDate",
+    label: "实际完成",
+    value: (item: any) => (
+      <span className="text-sm text-muted-foreground truncate">
+        {item.actualDate ? format(new Date(item.actualDate), "yyyy/MM/dd") : "未完成"}
+      </span>
+    ),
+    className: "col-span-1",
   },
 ]
 
 // 合同认定特定卡片字段
 export const contractRecognitionCardFields: CardField[] = [
   {
-    id: "progressType",
-    label: "进度类别",
-    value: (item) => {
-      const progressTypeMap = {
-        projectChange: "项目变更",
-        contractRecognition: "合同认定",
-        projectInspection: "项目中检",
-        projectCompletion: "项目结项",
-      }
-      return (
-        <Badge variant="secondary" className="mt-1">
-          {progressTypeMap[item.progressType as keyof typeof progressTypeMap]}
-        </Badge>
-      )
-    },
-  },
-  {
-    id: "project",
-    label: "关联项目",
-    value: (item) => <span className="text-muted-foreground text-xs">{item.project.name}</span>,
-  },
-  {
     id: "assignee",
     label: "",
-    value: (item) => (
-      <div className="flex items-center gap-2">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={item.assignee.avatar} />
-          <AvatarFallback>{item.assignee.name[0]}</AvatarFallback>
-        </Avatar>
-        <div className="grid gap-0.5 text-sm">
-          <span className="font-medium">{item.assignee.name}</span>
-          <span className="text-muted-foreground text-xs">负责人</span>
+    value: (item: any) => (
+      <div className="flex items-start gap-1">
+        <div 
+          className="h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ 
+            backgroundColor: '#9ca3af',
+            color: 'white',
+            fontSize: '12px',
+            fontWeight: '500'
+          }}
+        >
+          {item.assignee.name[0]}
+        </div>
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <span className="text-sm text-foreground font-medium truncate">{item.assignee.name}</span>
+          <span className="text-xs text-muted-foreground">负责人</span>
         </div>
       </div>
     ),
+    className: "col-span-1",
   },
   {
-    id: "dates",
-    label: "计划完成日期",
-    value: (item) => (
-      <span className="text-muted-foreground text-xs">{format(new Date(item.dueDate), "yyyy/MM/dd")}</span>
+    id: "changeType",
+    label: "合同类型",
+    value: (item: any) => (
+      <Badge variant="secondary" className="text-sm px-1 py-0 h-5 text-center truncate">
+        {item.changeType || "合同认定"}
+      </Badge>
     ),
+    className: "col-span-1",
+  },
+  {
+    id: "plannedDate",
+    label: "计划完成",
+    value: (item: any) => (
+      <span className="text-sm text-muted-foreground truncate">
+        {format(new Date(item.dueDate), "yyyy/MM/dd")}
+      </span>
+    ),
+    className: "col-span-1",
+  },
+  {
+    id: "actualDate",
+    label: "实际完成",
+    value: (item: any) => (
+      <span className="text-sm text-muted-foreground truncate">
+        {item.actualDate ? format(new Date(item.actualDate), "yyyy/MM/dd") : "未完成"}
+      </span>
+    ),
+    className: "col-span-1",
   },
 ]
 
 // 项目中检特定卡片字段
 export const projectInspectionCardFields: CardField[] = [
   {
-    id: "progressType",
-    label: "进度类别",
-    value: (item) => {
-      const progressTypeMap = {
-        projectChange: "项目变更",
-        contractRecognition: "合同认定",
-        projectInspection: "项目中检",
-        projectCompletion: "项目结项",
-      }
-      return (
-        <Badge variant="secondary" className="mt-1">
-          {progressTypeMap[item.progressType as keyof typeof progressTypeMap]}
-        </Badge>
-      )
-    },
-  },
-  {
-    id: "project",
-    label: "关联项目",
-    value: (item) => <span className="text-muted-foreground text-xs">{item.project.name}</span>,
-  },
-  {
     id: "assignee",
     label: "",
-    value: (item) => (
-      <div className="flex items-center gap-2">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={item.assignee.avatar} />
-          <AvatarFallback>{item.assignee.name[0]}</AvatarFallback>
-        </Avatar>
-        <div className="grid gap-0.5 text-sm">
-          <span className="font-medium">{item.assignee.name}</span>
-          <span className="text-muted-foreground text-xs">负责人</span>
+    value: (item: any) => (
+      <div className="flex items-start gap-1">
+        <div 
+          className="h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ 
+            backgroundColor: '#9ca3af',
+            color: 'white',
+            fontSize: '12px',
+            fontWeight: '500'
+          }}
+        >
+          {item.assignee.name[0]}
+        </div>
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <span className="text-sm text-foreground font-medium truncate">{item.assignee.name}</span>
+          <span className="text-xs text-muted-foreground">负责人</span>
         </div>
       </div>
     ),
+    className: "col-span-1",
   },
   {
-    id: "dates",
-    label: "计划完成日期",
-    value: (item) => (
-      <span className="text-muted-foreground text-xs">{format(new Date(item.dueDate), "yyyy/MM/dd")}</span>
+    id: "changeType",
+    label: "检查类型",
+    value: (item: any) => (
+      <Badge variant="secondary" className="text-sm px-1 py-0 h-5 text-center truncate">
+        {item.changeType || "项目中检"}
+      </Badge>
     ),
+    className: "col-span-1",
+  },
+  {
+    id: "plannedDate",
+    label: "计划完成",
+    value: (item: any) => (
+      <span className="text-sm text-muted-foreground truncate">
+        {format(new Date(item.dueDate), "yyyy/MM/dd")}
+      </span>
+    ),
+    className: "col-span-1",
+  },
+  {
+    id: "actualDate",
+    label: "实际完成",
+    value: (item: any) => (
+      <span className="text-sm text-muted-foreground truncate">
+        {item.actualDate ? format(new Date(item.actualDate), "yyyy/MM/dd") : "未完成"}
+      </span>
+    ),
+    className: "col-span-1",
   },
 ]
 
 // 项目结项特定卡片字段
 export const projectCompletionCardFields: CardField[] = [
   {
-    id: "progressType",
-    label: "进度类别",
-    value: (item) => {
-      const progressTypeMap = {
-        projectChange: "项目变更",
-        contractRecognition: "合同认定",
-        projectInspection: "项目中检",
-        projectCompletion: "项目结项",
-      }
-      return (
-        <Badge variant="secondary" className="mt-1">
-          {progressTypeMap[item.progressType as keyof typeof progressTypeMap]}
-        </Badge>
-      )
-    },
-  },
-  {
-    id: "project",
-    label: "关联项目",
-    value: (item) => <span className="text-muted-foreground text-xs">{item.project.name}</span>,
-  },
-  {
     id: "assignee",
     label: "",
-    value: (item) => (
-      <div className="flex items-center gap-2">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={item.assignee.avatar} />
-          <AvatarFallback>{item.assignee.name[0]}</AvatarFallback>
-        </Avatar>
-        <div className="grid gap-0.5 text-sm">
-          <span className="font-medium">{item.assignee.name}</span>
-          <span className="text-muted-foreground text-xs">负责人</span>
+    value: (item: any) => (
+      <div className="flex items-start gap-1">
+        <div 
+          className="h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ 
+            backgroundColor: '#9ca3af',
+            color: 'white',
+            fontSize: '12px',
+            fontWeight: '500'
+          }}
+        >
+          {item.assignee.name[0]}
+        </div>
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <span className="text-sm text-foreground font-medium truncate">{item.assignee.name}</span>
+          <span className="text-xs text-muted-foreground">负责人</span>
         </div>
       </div>
     ),
+    className: "col-span-1",
   },
   {
-    id: "dates",
-    label: "计划完成日期",
-    value: (item) => (
-      <span className="text-muted-foreground text-xs">{format(new Date(item.dueDate), "yyyy/MM/dd")}</span>
+    id: "changeType",
+    label: "结题类型",
+    value: (item: any) => (
+      <Badge variant="secondary" className="text-sm px-1 py-0 h-5 text-center truncate">
+        {item.changeType || "项目结项"}
+      </Badge>
     ),
+    className: "col-span-1",
+  },
+  {
+    id: "plannedDate",
+    label: "计划完成",
+    value: (item: any) => (
+      <span className="text-sm text-muted-foreground truncate">
+        {format(new Date(item.dueDate), "yyyy/MM/dd")}
+      </span>
+    ),
+    className: "col-span-1",
+  },
+  {
+    id: "actualDate",
+    label: "实际完成",
+    value: (item: any) => (
+      <span className="text-sm text-muted-foreground truncate">
+        {item.actualDate ? format(new Date(item.actualDate), "yyyy/MM/dd") : "未完成"}
+      </span>
+    ),
+    className: "col-span-1",
   },
 ]
 

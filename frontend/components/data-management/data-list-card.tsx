@@ -173,7 +173,7 @@ export default function DataListCard({
       )}
       onClick={handleClick}
     >
-      <CardHeader className="p-4 pb-2">
+      <CardHeader className="p-5 pb-2">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
@@ -223,15 +223,15 @@ export default function DataListCard({
           )}
         </div>
       </CardHeader>
-      <CardContent className="p-4 pt-0">
+      <CardContent className="p-5 pt-0">
         <div className="grid gap-2 mt-2">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+          <div className="grid grid-cols-4 gap-x-2 gap-y-3">
             {fields.map((field, index) => (
               <div 
                 key={field.id} 
                 className={`text-sm ${field.className || ""}`}
               >
-                {field.label && <span className="font-medium text-xs text-muted-foreground block mb-0.5">{field.label}</span>}
+                {field.label && <span className="font-medium text-xs text-muted-foreground block mb-0.5 truncate">{field.label}</span>}
                 <div className="truncate">
                   {React.isValidElement(field.value(item)) ? field.value(item) : renderValue(field.value(item))}
                 </div>
