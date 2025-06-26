@@ -643,7 +643,7 @@ const EquipmentCard = ({
       </div>
       
       {/* 卡片内容 */}
-      <div className="p-3 flex flex-col flex-1 min-h-0">
+      <div className="pt-5 px-5 pb-4 flex flex-col flex-1 min-h-0">
         {/* 标题和型号 */}
         <div className="flex-shrink-0 mb-2">
           <h3 className="font-medium text-sm text-gray-900 transition-colors duration-300 group-hover:text-primary truncate leading-tight mb-1">
@@ -658,7 +658,7 @@ const EquipmentCard = ({
         <div className="flex-1 min-h-0"></div>
         
         {/* 预约次数和使用状态 - 固定在底部 */}
-        <div className="flex-shrink-0 flex items-center justify-between pt-2 border-t border-gray-100">
+        <div className="flex-shrink-0 flex items-center justify-between pt-2.5 border-t border-gray-100">
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground leading-none">
             预约次数：{item.bookingCount || 0}次

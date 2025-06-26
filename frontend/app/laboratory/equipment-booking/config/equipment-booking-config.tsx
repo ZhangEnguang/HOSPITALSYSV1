@@ -467,7 +467,7 @@ const EquipmentBookingCard = ({
         isSelected && "ring-2 ring-primary"
       )}
     >
-      <CardHeader className="p-4 pb-2">
+              <CardHeader className="p-5 pb-2">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
@@ -516,7 +516,7 @@ const EquipmentBookingCard = ({
           )}
         </div>
       </CardHeader>
-      <CardContent className="p-4 pt-0">
+      <CardContent className="p-5 pt-0">
         <div className="grid gap-2 mt-2">
           <div className="grid grid-cols-2 gap-x-6 gap-y-3">
             {/* 预约仪器字段 */}

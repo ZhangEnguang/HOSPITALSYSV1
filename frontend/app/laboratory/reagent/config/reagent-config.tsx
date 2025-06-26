@@ -727,7 +727,7 @@ const ReagentCard = ({
       )}
 
       {/* 上方区域：左侧图片，右侧试剂名称 */}
-      <div className="flex items-start gap-3 p-3 pb-2">
+      <div className="flex items-start gap-3 pt-5 px-5 pb-2.5">
         {/* 左侧：试剂瓶图标 */}
         <div className="w-14 h-16 rounded-lg overflow-hidden bg-white border border-gray-200 flex-shrink-0 group">
           {item.imageUrl ? (
@@ -803,9 +803,9 @@ const ReagentCard = ({
       </div>
 
       {/* 下方区域：有效期、库存量和危险标签 */}
-      <div className="px-3 mx-3 space-y-2">
+      <div className="px-5 pb-4 space-y-2">
         {/* 1. 有效期显示逻辑 - 有效期字段颜色规则 */}
-        <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-100">
+        <div className="flex items-center justify-between text-sm pt-2.5 border-t border-gray-100">
           <span className={cn(
             "text-muted-foreground"
           )}>有效期:</span>
@@ -818,7 +818,7 @@ const ReagentCard = ({
         </div>
         
         {/* 库存量 */}
-        <div className="flex items-center justify-between pb-3">
+        <div className="flex items-center justify-between">
             <span className={cn(
               "text-sm",
               "text-muted-foreground"
