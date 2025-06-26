@@ -71,7 +71,7 @@ export default function QuickReviewCard({
       )}
       onClick={handleClick}
     >
-      <CardHeader className="px-6 pt-4 pb-0">
+      <CardHeader className="flex flex-col space-y-1.5 px-5 pt-5 pb-0">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
@@ -124,11 +124,11 @@ export default function QuickReviewCard({
       </CardHeader>
       
       {/* 标题与内容之间的优雅分割线 */}
-      <div className="mx-6 mb-4 mt-3">
+      <div className="mx-5 mb-4 mt-3">
         <div className="h-[1px] bg-gradient-to-r from-blue-50 via-blue-200/40 to-blue-50"></div>
       </div>
       
-      <CardContent className="px-6 py-3 pt-0">
+      <CardContent className="px-5 py-3 pt-0 pb-5">
         {/* 使用统一的布局，确保行间距与列间距一致 */}
         <div className="grid grid-cols-2 gap-4">
           {/* 受理号 */}
