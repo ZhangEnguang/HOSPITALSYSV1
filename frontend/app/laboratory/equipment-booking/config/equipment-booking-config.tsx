@@ -27,6 +27,34 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 import React from "react"
+import { 
+  SELECTION_VARIANTS, 
+  DECORATION_VARIANTS 
+} from "../components/selection-variants"
+
+// 卡片勾选方案配置
+export const CARD_SELECTION_CONFIG = {
+  // 当前使用的勾选方案 - 可以在这里切换不同的方案
+  // variant1: 左上角圆形悬停勾选框（经典款）
+  // variant2: 右上角现代方形勾选框  
+  // variant3: 左上角极简勾选框 + 波纹效果
+  // variant4: 浮动勾选框 + 渐变阴影（优雅款）
+  // variant5: 心形收藏风格勾选
+  currentVariant: 'variant4' as keyof typeof SELECTION_VARIANTS,
+  
+  // 当前使用的装饰方案 - 可以组合多个装饰效果
+  // stripe: 左侧彩色条纹, corner: 右上角标记, glow: 底部发光, border: 边框发光, halo: 背景光晕
+  currentDecorations: ['corner', 'glow'] as Array<keyof typeof DECORATION_VARIANTS>,
+  
+  // 预设方案组合
+  presets: {
+    classic: { variant: 'variant1', decorations: ['stripe', 'glow'] },
+    modern: { variant: 'variant2', decorations: ['border', 'halo'] },
+    minimal: { variant: 'variant3', decorations: ['stripe'] },
+    elegant: { variant: 'variant4', decorations: ['corner', 'glow'] },
+    playful: { variant: 'variant5', decorations: ['corner'] },
+  }
+}
 
 // 模拟用户数据
 export const users = [
@@ -421,6 +449,7 @@ const EquipmentBookingCard = ({
   isSelected: boolean;
   onToggleSelect: (selected: boolean) => void;
 }) => {
+  const [isHovered, setIsHovered] = React.useState(false)
   const title = item.bookingTitle
   const description = item.purpose
   const status = item.status
@@ -460,18 +489,58 @@ const EquipmentBookingCard = ({
     return "";
   }
 
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    onToggleSelect(!isSelected)
+  }
+
+  // 获取当前使用的勾选组件
+  const SelectionComponent = SELECTION_VARIANTS[CARD_SELECTION_CONFIG.currentVariant]
+  
+  // 获取当前使用的装饰组件
+  const decorationComponents = CARD_SELECTION_CONFIG.currentDecorations.map(
+    key => DECORATION_VARIANTS[key]
+  )
+
   return (
     <Card
       className={cn(
-        "group transition-all duration-300 border border-[#E9ECF2] shadow-none hover:shadow-[0px_38px_45px_0px_rgba(198,210,241,0.25)] hover:border-primary/20",
-        isSelected && "ring-2 ring-primary"
+        "group relative transition-all duration-300 border cursor-pointer",
+        "border-[#E9ECF2] shadow-none hover:shadow-[0px_38px_45px_0px_rgba(198,210,241,0.25)]",
+        isSelected 
+          ? "border-primary/50 shadow-[0_0_0_2px_rgba(59,130,246,0.1)] bg-gradient-to-br from-primary/5 to-transparent" 
+          : "hover:border-primary/20",
+        "overflow-hidden"
       )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-              <CardHeader className="p-5 pb-2">
+      {/* 动态勾选组件 */}
+      <SelectionComponent 
+        isHovered={isHovered}
+        isSelected={isSelected}
+        onToggleSelect={() => onToggleSelect(!isSelected)}
+      />
+
+      {/* 选中状态的装饰性元素 */}
+      {isSelected && (
+        <>
+          {decorationComponents.map((DecorationComponent, index) => (
+            <DecorationComponent key={index} />
+          ))}
+        </>
+      )}
+
+      <CardHeader className="p-5 pb-2">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-base transition-colors duration-300 group-hover:text-primary truncate flex-1">{renderValue(title)}</h3>
+              <h3 className={cn(
+                "font-semibold text-base truncate flex-1 transition-colors duration-300",
+                isSelected ? "text-primary" : "group-hover:text-primary"
+              )}>
+                {renderValue(title)}
+              </h3>
               {status && (
                 <Badge 
                   variant={getStatusVariant(status)} 
@@ -481,12 +550,27 @@ const EquipmentBookingCard = ({
                 </Badge>
               )}
             </div>
-            {description && <p className="text-sm text-muted-foreground truncate mt-1">{renderValue(description)}</p>}
+            {description && (
+              <p className={cn(
+                "text-sm truncate mt-1 transition-colors duration-300",
+                isSelected ? "text-primary/70" : "text-muted-foreground"
+              )}>
+                {renderValue(description)}
+              </p>
+            )}
           </div>
           {actions && actions.length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2" onClick={(e) => e.stopPropagation()}>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className={cn(
+                    "h-8 w-8 -mr-2 transition-colors duration-200",
+                    isSelected ? "hover:bg-primary/10" : ""
+                  )} 
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -516,6 +600,7 @@ const EquipmentBookingCard = ({
           )}
         </div>
       </CardHeader>
+      
       <CardContent className="p-5 pt-0">
         <div className="grid gap-2 mt-2">
           <div className="grid grid-cols-2 gap-x-6 gap-y-3">
@@ -556,7 +641,7 @@ const EquipmentBookingCard = ({
             </div>
           </div>
         </div>
-      </CardContent>
+              </CardContent>
     </Card>
   );
 };
