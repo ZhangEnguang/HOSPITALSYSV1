@@ -4,7 +4,6 @@ import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import DataList from "@/components/data-management/data-list"
 import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
 import {
   quickFilters,
   advancedFilters,
@@ -361,6 +360,8 @@ function EquipmentBookingContent() {
     },
   ]
 
+
+
   return (
     <div className="space-y-6">
       <div className="equipment-booking-cards [&_.grid.grid-cols-2.gap-x-6.gap-y-3]:gap-4">
@@ -371,11 +372,12 @@ function EquipmentBookingContent() {
           searchPlaceholder="搜索预约标题、仪器名称、申请人..."
           onSearchChange={setSearchTerm}
           onSearch={() => {}}
-          onAddNew={() => router.push("/laboratory/equipment-booking/create")}
+          onAddNew={undefined}
           onAIAssist={undefined}
-          addButtonLabel="新增预约"
+          addButtonLabel=""
           settingsButtonLabel={undefined}
           onOpenSettings={undefined}
+          customActions={undefined}
           quickFilters={quickFilters}
           onQuickFilterChange={(filterId, value) =>
             setFilterValues((prev) => ({ ...prev, [filterId]: value }))
@@ -418,6 +420,8 @@ function EquipmentBookingContent() {
         onApprove={handleApproveBooking}
         onReject={handleRejectBooking}
       />
+
+
 
       {/* 删除确认对话框 */}
       <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>

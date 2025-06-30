@@ -28,6 +28,7 @@ import {
   ChevronDown,
   Microscope,
   ClipboardCheck,
+  FlaskConical,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -75,6 +76,9 @@ export default function HorizontalMenu() {
       case "待办事项": return "待办";
       case "申报管理": return "申报";
       case "项目管理": return "项目";
+      case "伦理项目": return "伦理";
+      case "伦理审查": return "审查";
+      case "实验室": return "实验";
       case "进度管理": return "进度";
       case "日历": return "日历";
       case "经费管理": return "经费";
@@ -147,6 +151,21 @@ export default function HorizontalMenu() {
         { name: "初始审查", path: "/ethic-review/initial-review" },
         { name: "跟踪报告", path: "/ethic-review/track-review" },
         { name: "人遗资源", path: "/ethic-review/human-genetics-review" },
+      ]
+    },
+    { 
+      name: "实验室", 
+      shortName: "实验",
+      icon: <FlaskConical className="h-5 w-5" />, 
+      path: "#",
+      subMenus: [
+        { name: "仪器", path: "/laboratory/equipment" },
+        { name: "仪器预约", path: "/laboratory/equipment-booking" },
+        { name: "仪器预约配置", path: "/laboratory/equipment-booking-config" },
+        { name: "试剂", path: "/laboratory/reagent" },
+        { name: "试剂申领", path: "/laboratory/reagent-application" },
+        { name: "耗材", path: "/laboratory/consumables" },
+        { name: "耗材申领", path: "/laboratory/consumables-application" },
       ]
     },
     { 
