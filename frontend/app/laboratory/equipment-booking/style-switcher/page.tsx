@@ -8,7 +8,7 @@ import { format } from "date-fns"
 import { 
   SELECTION_VARIANTS, 
   DECORATION_VARIANTS 
-} from "../components/selection-variants"
+} from "@/components/ui/card-selection-variants"
 
 // 模拟数据
 const mockItems = [

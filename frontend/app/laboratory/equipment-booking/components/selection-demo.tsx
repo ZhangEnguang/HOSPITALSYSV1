@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { 
   SELECTION_VARIANTS, 
   DECORATION_VARIANTS 
-} from "./selection-variants"
+} from "@/components/ui/card-selection-variants"
 import { CARD_SELECTION_CONFIG } from '../config/equipment-booking-config'
 
 // 模拟数据

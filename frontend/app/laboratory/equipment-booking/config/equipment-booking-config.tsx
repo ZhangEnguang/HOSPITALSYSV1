@@ -29,32 +29,13 @@ import { cn } from "@/lib/utils"
 import React from "react"
 import { 
   SELECTION_VARIANTS, 
-  DECORATION_VARIANTS 
-} from "../components/selection-variants"
+  DECORATION_VARIANTS,
+  DEFAULT_CARD_SELECTION_CONFIG,
+  type CardSelectionConfig
+} from "@/components/ui/card-selection-variants"
 
-// 卡片勾选方案配置
-export const CARD_SELECTION_CONFIG = {
-  // 当前使用的勾选方案 - 可以在这里切换不同的方案
-  // variant1: 左上角圆形悬停勾选框（经典款）
-  // variant2: 右上角现代方形勾选框  
-  // variant3: 左上角极简勾选框 + 波纹效果
-  // variant4: 浮动勾选框 + 渐变阴影（优雅款）
-  // variant5: 心形收藏风格勾选
-  currentVariant: 'variant4' as keyof typeof SELECTION_VARIANTS,
-  
-  // 当前使用的装饰方案 - 可以组合多个装饰效果
-  // stripe: 左侧彩色条纹, corner: 右上角标记, glow: 底部发光, border: 边框发光, halo: 背景光晕
-  currentDecorations: ['corner', 'glow'] as Array<keyof typeof DECORATION_VARIANTS>,
-  
-  // 预设方案组合
-  presets: {
-    classic: { variant: 'variant1', decorations: ['stripe', 'glow'] },
-    modern: { variant: 'variant2', decorations: ['border', 'halo'] },
-    minimal: { variant: 'variant3', decorations: ['stripe'] },
-    elegant: { variant: 'variant4', decorations: ['corner', 'glow'] },
-    playful: { variant: 'variant5', decorations: ['corner'] },
-  }
-}
+// 卡片勾选方案配置 - 使用默认的优雅款配置
+export const CARD_SELECTION_CONFIG: CardSelectionConfig = DEFAULT_CARD_SELECTION_CONFIG
 
 // 模拟用户数据
 export const users = [

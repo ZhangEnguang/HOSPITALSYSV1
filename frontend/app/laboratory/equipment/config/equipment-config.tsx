@@ -24,6 +24,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useState } from "react"
+import { 
+  SELECTION_VARIANTS, 
+  DECORATION_VARIANTS,
+  DEFAULT_CARD_SELECTION_CONFIG,
+  type CardSelectionConfig
+} from "@/components/ui/card-selection-variants"
+
+// 卡片勾选方案配置 - 与仪器预约模块保持一致的优雅款样式
+export const CARD_SELECTION_CONFIG: CardSelectionConfig = DEFAULT_CARD_SELECTION_CONFIG
 
 // 模拟用户数据
 export const users = [
@@ -556,14 +565,43 @@ const EquipmentCard = ({
   isSelected: boolean;
   onToggleSelect: (selected: boolean) => void;
 }) => {
+  const [isHovered, setIsHovered] = useState(false)
+
   return (
     <Card
       className={cn(
-        "group transition-all duration-200 border border-[#E9ECF2] shadow-sm hover:shadow-md hover:border-primary/20 cursor-pointer",
+        "group relative transition-all duration-300 border cursor-pointer",
+        "border-[#E9ECF2] shadow-sm hover:shadow-[0px_38px_45px_0px_rgba(198,210,241,0.25)]",
         "flex flex-col w-full h-full", // 确保卡片占据完整宽度和高度且为flex布局
-        isSelected && "ring-2 ring-primary"
+        isSelected 
+          ? "border-primary/50 shadow-[0_0_0_2px_rgba(59,130,246,0.1)] bg-gradient-to-br from-primary/5 to-transparent" 
+          : "hover:border-primary/20",
+        "overflow-hidden"
       )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
+      {/* 动态勾选组件 */}
+      {(() => {
+        const SelectionComponent = SELECTION_VARIANTS[CARD_SELECTION_CONFIG.currentVariant]
+        return (
+          <SelectionComponent 
+            isHovered={isHovered}
+            isSelected={isSelected}
+            onToggleSelect={() => onToggleSelect(!isSelected)}
+          />
+        )
+      })()}
+
+      {/* 选中状态的装饰性元素 */}
+      {isSelected && (
+        <>
+          {CARD_SELECTION_CONFIG.currentDecorations.map((decorationKey, index) => {
+            const DecorationComponent = DECORATION_VARIANTS[decorationKey]
+            return <DecorationComponent key={index} />
+          })}
+        </>
+      )}
       {/* 仪器图片区域 - 只显示第一张图片 */}
       <div 
         className="relative w-full overflow-hidden rounded-t-lg bg-gray-50 flex-shrink-0"
@@ -646,10 +684,16 @@ const EquipmentCard = ({
       <div className="pt-5 px-5 pb-4 flex flex-col flex-1 min-h-0">
         {/* 标题和型号 */}
         <div className="flex-shrink-0 mb-2">
-          <h3 className="font-medium text-sm text-gray-900 transition-colors duration-300 group-hover:text-primary truncate leading-tight mb-1">
+          <h3 className={cn(
+            "font-medium text-sm truncate leading-tight mb-1 transition-colors duration-300",
+            isSelected ? "text-primary" : "text-gray-900 group-hover:text-primary"
+          )}>
               {item.name}
             </h3>
-          <p className="text-xs text-muted-foreground truncate leading-relaxed">
+          <p className={cn(
+            "text-xs truncate leading-relaxed transition-colors duration-300",
+            isSelected ? "text-primary/70" : "text-muted-foreground"
+          )}>
               {item.model}
             </p>
         </div>

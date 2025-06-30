@@ -1,18 +1,10 @@
 import React from 'react'
 import { cn } from "@/lib/utils"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { MoreVertical } from "lucide-react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 
-// 方案一：左上角圆形悬停勾选框（当前使用的方案）
+// 通用卡片选中样式组件库
+// 提供多种卡片选中效果的方案，可在各个模块中灵活使用
+
+// 方案一：左上角圆形悬停勾选框（经典款）
 export const SelectionVariant1 = ({ 
   isHovered, 
   isSelected, 
@@ -136,7 +128,7 @@ export const SelectionVariant3 = ({
   </>
 )
 
-// 方案四：浮动勾选框 + 渐变阴影
+// 方案四：浮动勾选框 + 渐变阴影（优雅款）
 export const SelectionVariant4 = ({ 
   isHovered, 
   isSelected, 
@@ -260,4 +252,30 @@ export const DECORATION_VARIANTS = {
   glow: SelectionDecorGlow,
   border: SelectionDecorBorder,
   halo: SelectionDecorHalo,
+}
+
+// 预设配置方案
+export const CARD_SELECTION_PRESETS = {
+  classic: { variant: 'variant1', decorations: ['stripe', 'glow'] },
+  modern: { variant: 'variant2', decorations: ['border', 'halo'] },
+  minimal: { variant: 'variant3', decorations: ['stripe'] },
+  elegant: { variant: 'variant4', decorations: ['corner', 'glow'] },
+  playful: { variant: 'variant5', decorations: ['corner'] },
+}
+
+// 类型定义
+export type SelectionVariantType = keyof typeof SELECTION_VARIANTS
+export type DecorationVariantType = keyof typeof DECORATION_VARIANTS
+export type PresetType = keyof typeof CARD_SELECTION_PRESETS
+
+// 配置接口
+export interface CardSelectionConfig {
+  currentVariant: SelectionVariantType
+  currentDecorations: DecorationVariantType[]
+}
+
+// 默认配置（优雅款）
+export const DEFAULT_CARD_SELECTION_CONFIG: CardSelectionConfig = {
+  currentVariant: 'variant4',
+  currentDecorations: ['corner', 'glow'],
 } 
