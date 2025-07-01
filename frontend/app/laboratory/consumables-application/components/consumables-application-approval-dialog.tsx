@@ -30,7 +30,8 @@ import {
   Check,
   X,
   ShoppingCart,
-  Clock4
+  Clock4,
+  ClipboardCheck
 } from "lucide-react"
 
 interface ConsumablesApplicationApprovalDialogProps {
@@ -137,8 +138,9 @@ export function ConsumablesApplicationApprovalDialog({
       <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
         {/* 固定头部 */}
         <DialogHeader className="flex-shrink-0 px-6 py-4 border-b">
-          <DialogTitle className="text-xl font-semibold text-gray-900">
-            耗材审核申领
+          <DialogTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <ClipboardCheck className="h-5 w-5 text-blue-600" />
+            耗材申领审核
           </DialogTitle>
         </DialogHeader>
 
