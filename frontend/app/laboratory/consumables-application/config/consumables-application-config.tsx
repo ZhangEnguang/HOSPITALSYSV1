@@ -7,6 +7,7 @@ import { format } from "date-fns"
 import { MoreVertical } from "lucide-react"
 import { cn } from "@/lib/utils"
 import React from "react"
+import { ElegantCardSelection } from "@/components/ui/elegant-card-selection"
 import {
   Eye,
   Pencil,
@@ -458,6 +459,7 @@ const ConsumablesApplicationCard = ({
   isSelected: boolean;
   onToggleSelect: (selected: boolean) => void;
 }) => {
+  const [isHovered, setIsHovered] = React.useState(false)
   const title = item.applicationTitle
   const description = item.purpose
   const status = item.status
@@ -498,12 +500,17 @@ const ConsumablesApplicationCard = ({
   }
 
   return (
-    <Card
-      className={cn(
-        "group transition-all duration-300 border border-[#E9ECF2] shadow-none hover:shadow-[0px_38px_45px_0px_rgba(198,210,241,0.25)] hover:border-primary/20",
-        isSelected && "ring-2 ring-primary"
-      )}
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
+      <ElegantCardSelection
+        isHovered={isHovered}
+        isSelected={isSelected}
+        onToggleSelect={onToggleSelect}
+        className="group transition-all duration-300"
+      >
+        <Card>
               <CardHeader className="p-5 pb-2">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
@@ -594,7 +601,9 @@ const ConsumablesApplicationCard = ({
           </div>
         </div>
       </CardContent>
-    </Card>
+        </Card>
+      </ElegantCardSelection>
+    </div>
   );
 };
 

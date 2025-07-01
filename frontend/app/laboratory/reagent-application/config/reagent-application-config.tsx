@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 import React from "react"
+import { ElegantCardSelection } from "@/components/ui/elegant-card-selection"
 
 // 模拟用户数据
 export const users = [
@@ -458,6 +459,7 @@ const ReagentApplicationCard = ({
   isSelected: boolean;
   onToggleSelect: (selected: boolean) => void;
 }) => {
+  const [isHovered, setIsHovered] = React.useState(false)
   const title = item.applicationTitle
   const description = item.purpose
   const status = item.status
@@ -498,103 +500,110 @@ const ReagentApplicationCard = ({
   }
 
   return (
-    <Card
-      className={cn(
-        "group transition-all duration-300 border border-[#E9ECF2] shadow-none hover:shadow-[0px_38px_45px_0px_rgba(198,210,241,0.25)] hover:border-primary/20",
-        isSelected && "ring-2 ring-primary"
-      )}
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-              <CardHeader className="p-5 pb-2">
-        <div className="flex items-start justify-between">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-base transition-colors duration-300 group-hover:text-primary truncate flex-1">{renderValue(title)}</h3>
-              {status && (
-                <Badge 
-                  variant={getStatusVariant(status)} 
-                  className={cn("", getStatusCustomClass(status))}
-                >
-                  {renderValue(status)}
-                </Badge>
+      <ElegantCardSelection
+        isHovered={isHovered}
+        isSelected={isSelected}
+        onToggleSelect={onToggleSelect}
+        className="group transition-all duration-300"
+      >
+        <Card>
+          <CardHeader className="p-5 pb-2">
+            <div className="flex items-start justify-between">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-base transition-colors duration-300 group-hover:text-primary truncate flex-1">{renderValue(title)}</h3>
+                  {status && (
+                    <Badge 
+                      variant={getStatusVariant(status)} 
+                      className={cn("", getStatusCustomClass(status))}
+                    >
+                      {renderValue(status)}
+                    </Badge>
+                  )}
+                </div>
+                {description && <p className="text-sm text-muted-foreground truncate mt-1">{renderValue(description)}</p>}
+              </div>
+              {actions && actions.length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2" onClick={(e) => e.stopPropagation()}>
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-36">
+                    {actions
+                      .filter((action) => !action.hidden || !action.hidden(item))
+                      .map((action, index) => (
+                        <React.Fragment key={action.id}>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              action.onClick(item, e)
+                            }}
+                            disabled={action.disabled ? action.disabled(item) : false}
+                            className={action.variant === "destructive" ? "text-destructive" : ""}
+                          >
+                            {action.icon && <span className="mr-2">{action.icon}</span>}
+                            {action.label}
+                          </DropdownMenuItem>
+                          {index < actions.length - 1 && action.variant === "destructive" && (
+                            <DropdownMenuSeparator />
+                          )}
+                        </React.Fragment>
+                      ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
             </div>
-            {description && <p className="text-sm text-muted-foreground truncate mt-1">{renderValue(description)}</p>}
-          </div>
-          {actions && actions.length > 0 && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2" onClick={(e) => e.stopPropagation()}>
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-36">
-                {actions
-                  .filter((action) => !action.hidden || !action.hidden(item))
-                  .map((action, index) => (
-                    <React.Fragment key={action.id}>
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          action.onClick(item, e)
-                        }}
-                        disabled={action.disabled ? action.disabled(item) : false}
-                        className={action.variant === "destructive" ? "text-destructive" : ""}
-                      >
-                        {action.icon && <span className="mr-2">{action.icon}</span>}
-                        {action.label}
-                      </DropdownMenuItem>
-                      {index < actions.length - 1 && action.variant === "destructive" && (
-                        <DropdownMenuSeparator />
-                      )}
-                    </React.Fragment>
-                  ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="p-5 pt-0">
-        <div className="grid gap-2 mt-2">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-            {/* 申领试剂字段 */}
-            <div className="text-sm">
-              <span className="font-medium text-xs text-muted-foreground block mb-0.5">申领试剂</span>
-              <div className="truncate">
-                {`${item.reagentName} (${item.reagentType})`}
-              </div>
-            </div>
-            
-            {/* 申请人字段 */}
-            <div className="text-sm">
-              <span className="font-medium text-xs text-muted-foreground block mb-0.5">申请人</span>
-              <div className="truncate">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">{item.applicant.name}</span>
-                  <div className="w-px h-3 bg-gray-300"></div>
-                  <span className="text-sm text-muted-foreground">{item.department}</span>
+          </CardHeader>
+          <CardContent className="p-5 pt-0">
+            <div className="grid gap-2 mt-2">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                {/* 申领试剂字段 */}
+                <div className="text-sm">
+                  <span className="font-medium text-xs text-muted-foreground block mb-0.5">申领试剂</span>
+                  <div className="truncate">
+                    {`${item.reagentName} (${item.reagentType})`}
+                  </div>
+                </div>
+                
+                {/* 申请人字段 */}
+                <div className="text-sm">
+                  <span className="font-medium text-xs text-muted-foreground block mb-0.5">申请人</span>
+                  <div className="truncate">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{item.applicant.name}</span>
+                      <div className="w-px h-3 bg-gray-300"></div>
+                      <span className="text-sm text-muted-foreground">{item.department}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* 申领信息字段 */}
+                <div className="text-sm">
+                  <span className="font-medium text-xs text-muted-foreground block mb-0.5">申领信息</span>
+                  <div className="truncate">
+                    <span className="font-medium">{item.quantity} {item.unit}</span>
+                  </div>
+                </div>
+                
+                {/* 申请时间字段 */}
+                <div className="text-sm">
+                  <span className="font-medium text-xs text-muted-foreground block mb-0.5">申请时间</span>
+                  <div className="truncate">
+                    {format(new Date(item.applicationDate), "yyyy/MM/dd HH:mm")}
+                  </div>
                 </div>
               </div>
             </div>
-            
-            {/* 申领信息字段 */}
-            <div className="text-sm">
-              <span className="font-medium text-xs text-muted-foreground block mb-0.5">申领信息</span>
-              <div className="truncate">
-                <span className="font-medium">{item.quantity} {item.unit}</span>
-              </div>
-            </div>
-            
-            {/* 申请时间字段 */}
-            <div className="text-sm">
-              <span className="font-medium text-xs text-muted-foreground block mb-0.5">申请时间</span>
-              <div className="truncate">
-                {format(new Date(item.applicationDate), "yyyy/MM/dd HH:mm")}
-              </div>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      </ElegantCardSelection>
+    </div>
   );
 };
 

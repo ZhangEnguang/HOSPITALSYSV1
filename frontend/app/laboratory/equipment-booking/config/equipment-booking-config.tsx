@@ -512,7 +512,7 @@ const EquipmentBookingCard = ({
         </>
       )}
 
-      <CardHeader className="p-5 pb-2">
+              <CardHeader className="p-5 pb-2">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
@@ -622,7 +622,7 @@ const EquipmentBookingCard = ({
             </div>
           </div>
         </div>
-              </CardContent>
+      </CardContent>
     </Card>
   );
 };

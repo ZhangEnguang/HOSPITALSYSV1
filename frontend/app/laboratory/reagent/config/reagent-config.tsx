@@ -659,10 +659,21 @@ const ReagentCard = ({
     return "";
   };
 
+  // 6. 悬浮描边样式逻辑
+  const getHoverBorderStyle = () => {
+    if (isExpired()) {
+      return "hover:border-red-400/60";
+    } else if (isExpiringSoon()) {
+      return "hover:border-yellow-400/60";
+    }
+    return "hover:border-primary/20";
+  };
+
   return (
     <Card 
       className={cn(
-        "group cursor-pointer border transition-all duration-300 ease-in-out hover:shadow-lg hover:border-primary/20 relative",
+        "group cursor-pointer border transition-all duration-300 ease-in-out hover:shadow-lg relative",
+        getHoverBorderStyle(),
         isSelected && "ring-2 ring-primary border-primary",
         getCardStyles()
       )}

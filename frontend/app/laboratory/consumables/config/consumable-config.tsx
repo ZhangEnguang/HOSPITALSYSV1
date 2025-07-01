@@ -663,12 +663,25 @@ const ConsumableCard = ({
     return item.status === "已停用";
   };
 
+  // 5. 悬浮描边样式逻辑
+  const getHoverBorderStyle = () => {
+    if (isDisabled()) {
+      return "hover:border-gray-400/60";
+    } else if (isExpired()) {
+      return "hover:border-red-400/60";
+    } else if (isSoonExpired()) {
+      return "hover:border-yellow-400/60";
+    }
+    return "hover:border-primary/20";
+  };
+
   const stockStatus = getStockStatus();
 
   return (
     <Card 
       className={cn(
-        "group cursor-pointer border transition-all duration-300 ease-in-out hover:shadow-lg hover:border-primary/20 relative",
+        "group cursor-pointer border transition-all duration-300 ease-in-out hover:shadow-lg relative",
+        getHoverBorderStyle(),
         isSelected && "ring-2 ring-primary border-primary",
         // 已停用耗材样式
         isDisabled() && "opacity-60 bg-gray-50/50 border-gray-300",

@@ -25,6 +25,15 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 import React from "react"
+import { 
+  SELECTION_VARIANTS, 
+  DECORATION_VARIANTS,
+  DEFAULT_CARD_SELECTION_CONFIG,
+  type CardSelectionConfig
+} from "@/components/ui/card-selection-variants"
+
+// 卡片勾选方案配置 - 使用默认的优雅款配置
+export const CARD_SELECTION_CONFIG: CardSelectionConfig = DEFAULT_CARD_SELECTION_CONFIG
 
 // 状态颜色映射
 export const statusColors = {
@@ -295,6 +304,7 @@ const EquipmentConfigCard = ({
   isSelected: boolean;
   onToggleSelect: (selected: boolean) => void;
 }) => {
+  const [isHovered, setIsHovered] = React.useState(false)
   const title = item.configName
   const description = item.scopeDescription
   const status = item.status
@@ -334,18 +344,52 @@ const EquipmentConfigCard = ({
     return "";
   }
 
+  // 获取当前使用的勾选组件
+  const SelectionComponent = SELECTION_VARIANTS[CARD_SELECTION_CONFIG.currentVariant]
+  
+  // 获取当前使用的装饰组件
+  const decorationComponents = CARD_SELECTION_CONFIG.currentDecorations.map(
+    key => DECORATION_VARIANTS[key]
+  )
+
   return (
     <Card
       className={cn(
-        "group transition-all duration-300 border border-[#E9ECF2] shadow-none hover:shadow-[0px_38px_45px_0px_rgba(198,210,241,0.25)] hover:border-primary/20",
-        isSelected && "ring-2 ring-primary"
+        "group relative transition-all duration-300 border cursor-pointer",
+        "border-[#E9ECF2] shadow-none hover:shadow-[0px_38px_45px_0px_rgba(198,210,241,0.25)]",
+        isSelected 
+          ? "border-primary/50 shadow-[0_0_0_2px_rgba(59,130,246,0.1)] bg-gradient-to-br from-primary/5 to-transparent" 
+          : "hover:border-primary/20",
+        "overflow-hidden"
       )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
+      {/* 动态勾选组件 */}
+      <SelectionComponent 
+        isHovered={isHovered}
+        isSelected={isSelected}
+        onToggleSelect={() => onToggleSelect(!isSelected)}
+      />
+
+      {/* 选中状态的装饰性元素 */}
+      {isSelected && (
+        <>
+          {decorationComponents.map((DecorationComponent, index) => (
+            <DecorationComponent key={index} />
+          ))}
+        </>
+      )}
       <CardHeader className="p-5 pb-2">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-base transition-colors duration-300 group-hover:text-primary truncate flex-1">{renderValue(title)}</h3>
+              <h3 className={cn(
+                "font-semibold text-base truncate flex-1 transition-colors duration-300",
+                isSelected ? "text-primary" : "group-hover:text-primary"
+              )}>
+                {renderValue(title)}
+              </h3>
               {status && (
                 <Badge 
                   variant={getStatusVariant(status)} 
@@ -355,12 +399,27 @@ const EquipmentConfigCard = ({
                 </Badge>
               )}
             </div>
-            {description && <p className="text-sm text-muted-foreground truncate mt-1">{renderValue(description)}</p>}
+            {description && (
+              <p className={cn(
+                "text-sm truncate mt-1 transition-colors duration-300",
+                isSelected ? "text-primary/70" : "text-muted-foreground"
+              )}>
+                {renderValue(description)}
+              </p>
+            )}
           </div>
           {actions && actions.length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2" onClick={(e) => e.stopPropagation()}>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className={cn(
+                    "h-8 w-8 -mr-2 transition-colors duration-200",
+                    isSelected ? "hover:bg-primary/10" : ""
+                  )} 
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -375,12 +434,12 @@ const EquipmentConfigCard = ({
                           action.onClick(item, e)
                         }}
                         disabled={action.disabled ? action.disabled(item) : false}
-                        className={action.id === "delete" ? "text-destructive" : ""}
+                        className={action.variant === "destructive" ? "text-destructive" : ""}
                       >
                         {action.icon && <span className="mr-2">{action.icon}</span>}
                         {action.label}
                       </DropdownMenuItem>
-                      {index < actions.length - 1 && action.id === "delete" && (
+                      {index < actions.length - 1 && action.variant === "destructive" && (
                         <DropdownMenuSeparator />
                       )}
                     </React.Fragment>
