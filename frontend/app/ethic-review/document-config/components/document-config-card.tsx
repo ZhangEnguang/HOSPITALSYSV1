@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,7 @@ import {
 import { MoreVertical } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { CardAction } from "@/components/data-management/data-list-card"
+import { ElegantCardSelection } from "@/components/ui/elegant-card-selection"
 
 interface DocumentConfigCardProps {
   item: any
@@ -32,6 +33,8 @@ export default function DocumentConfigCard({
   statusVariants = {},
   getStatusName
 }: DocumentConfigCardProps) {
+  const [isHovered, setIsHovered] = useState(false)
+
   const handleClick = (e: React.MouseEvent) => {
     if (onClick) {
       onClick()
@@ -64,13 +67,23 @@ export default function DocumentConfigCard({
   }
 
   return (
-    <Card
-      className={cn(
-        "group transition-all duration-300 border border-[#E9ECF2] shadow-none hover:shadow-[0px_38px_45px_0px_rgba(198,210,241,0.25)] hover:border-primary/20 cursor-pointer",
-        isSelected && "ring-2 ring-primary"
-      )}
-      onClick={handleClick}
+    <div 
+      className="relative"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
+      <ElegantCardSelection 
+        isSelected={isSelected} 
+        isHovered={isHovered}
+        onToggleSelect={onToggleSelect}
+      >
+        <Card
+          className={cn(
+            "group transition-all duration-300 cursor-pointer bg-white",
+            "border-none shadow-none"
+          )}
+          onClick={handleClick}
+        >
       <CardHeader className="flex flex-col space-y-1.5 px-5 pt-5 pb-0">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
@@ -115,7 +128,9 @@ export default function DocumentConfigCard({
                         key={action.id}
                         onClick={(e) => {
                           e.stopPropagation()
-                          action.onClick(item, e)
+                          if (action.onClick) {
+                            action.onClick(item, e)
+                          }
                         }}
                         disabled={action.disabled ? action.disabled(item) : false}
                         className={cn(
@@ -185,6 +200,8 @@ export default function DocumentConfigCard({
           </div>
         </div>
       </CardContent>
-    </Card>
+        </Card>
+      </ElegantCardSelection>
+    </div>
   )
 } 

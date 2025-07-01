@@ -26,6 +26,14 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
 import DocumentConfigCard from "./components/document-config-card"
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle 
+} from "@/components/ui/dialog"
 
 // 定义排序选项类型
 interface SortOption {
@@ -96,21 +104,30 @@ function DocumentConfigContent() {
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem 
                     className="cursor-pointer"
-                    onClick={() => handleViewDetails(item)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleViewDetails(item);
+                    }}
                   >
                     <Eye className="mr-2 h-4 w-4" />
                     <span>查看详情</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem 
                     className="cursor-pointer"
-                    onClick={() => handleEditConfig(item)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditConfig(item);
+                    }}
                   >
                     <FileEdit className="mr-2 h-4 w-4" />
                     <span>编辑配置</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem 
                     className="cursor-pointer text-red-600 focus:text-red-600"
-                    onClick={() => handleDeleteConfig(item)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteConfig(item);
+                    }}
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     <span>删除配置</span>
@@ -157,6 +174,10 @@ function DocumentConfigContent() {
     return columns;
   })
   const [selectedRows, setSelectedRows] = useState<string[]>([])
+  
+  // 删除确认弹框状态
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [itemToDelete, setItemToDelete] = useState<any>(null)
   
   // 定义排序选项类型
   const typedSortOptions: SortOption[] = sortOptions as unknown as SortOption[]
@@ -274,102 +295,35 @@ function DocumentConfigContent() {
   }
 
   // 处理高级筛选
-  const handleAdvancedFilter = (filters: SeniorFilterDTO) => {
-    setSeniorFilterValues(filters)
+  const handleAdvancedFilter = (filters: Record<string, any>) => {
+    setSeniorFilterValues(filters as SeniorFilterDTO)
     
     // 筛选逻辑
     let filtered = [...documentConfigItems]
     
-    // 兼容旧版和新版高级筛选格式
-    if (filters.groups && filters.groupOperator) {
-      // 新版高级筛选格式 (SeniorFilterDTO)
-      
-      // 这里就是直接使用未处理的格式，实际应用中需要根据结构进行解析
+    // 新版高级筛选格式 (SeniorFilterDTO)
+    if (filters.groups && filters.groups.length > 0) {
       console.log("使用新版高级筛选格式", filters)
       
       // 简单处理：从conditions中提取字段和值进行筛选
       filters.groups.forEach((group: any) => {
-        group.conditions.forEach((condition: any) => {
-          const { fieldId, value, compareType } = condition
-          
-          if (fieldId && value) {
-            filtered = filtered.filter(item => {
-              if (compareType === "=") {
-                return (item as any)[fieldId] === value
-              } else if (compareType === "contains") {
-                return String((item as any)[fieldId]).toLowerCase().includes(String(value).toLowerCase())
-              }
-              return true
-            })
-          }
-        })
+        if (group.conditions && group.conditions.length > 0) {
+          group.conditions.forEach((condition: any) => {
+            const { fieldId, value, compareType } = condition
+            
+            if (fieldId && value) {
+              filtered = filtered.filter(item => {
+                if (compareType === "=") {
+                  return (item as any)[fieldId] === value
+                } else if (compareType === "contains") {
+                  return String((item as any)[fieldId]).toLowerCase().includes(String(value).toLowerCase())
+                }
+                return true
+              })
+            }
+          })
+        }
       })
-    } else {
-      // 旧版单字段筛选格式
-      
-      // 配置名称筛选
-      if (filters.name) {
-        filtered = filtered.filter(item => 
-          item.name.toLowerCase().includes(filters.name.toLowerCase())
-        )
-      }
-      
-      // 审查类型筛选
-      if (filters.reviewType) {
-        filtered = filtered.filter(item => item.reviewType === filters.reviewType)
-      }
-      
-      // 项目类型筛选
-      if (filters.projectType) {
-        filtered = filtered.filter(item => item.projectType === filters.projectType)
-      }
-      
-      // 状态筛选
-      if (filters.status) {
-        filtered = filtered.filter(item => item.status === filters.status)
-      }
-      
-      // 文件数量筛选
-      if (filters.documentCount) {
-        const count = parseInt(filters.documentCount)
-        if (!isNaN(count)) {
-          filtered = filtered.filter(item => item.documentCount === count)
-        }
-      }
-      
-      // 必交文件数筛选
-      if (filters.requiredCount) {
-        const count = parseInt(filters.requiredCount)
-        if (!isNaN(count)) {
-          filtered = filtered.filter(item => item.requiredCount === count)
-        }
-      }
-      
-      // 选交文件数筛选
-      if (filters.optionalCount) {
-        const count = parseInt(filters.optionalCount)
-        if (!isNaN(count)) {
-          filtered = filtered.filter(item => item.optionalCount === count)
-        }
-      }
-      
-      // 创建日期筛选
-      if (filters.createdAt) {
-        const filterDate = new Date(filters.createdAt)
-        filtered = filtered.filter(item => {
-          const itemDate = new Date(item.createdAt)
-          return itemDate.toDateString() === filterDate.toDateString()
-        })
-      }
-      
-      // 更新日期筛选
-      if (filters.updatedAt) {
-        const filterDate = new Date(filters.updatedAt)
-        filtered = filtered.filter(item => {
-          const itemDate = new Date(item.updatedAt)
-          return itemDate.toDateString() === filterDate.toDateString()
-        })
-      }
     }
     
     setData(filtered)
@@ -423,20 +377,43 @@ function DocumentConfigContent() {
     }
   }
   
-  // 处理删除配置
+  // 处理删除确认
+  const handleDeleteConfirm = (item: any) => {
+    setItemToDelete(item)
+    setDeleteDialogOpen(true)
+  }
+  
+  // 执行删除操作
+  const handleDeleteExecute = () => {
+    if (itemToDelete) {
+      console.log("删除配置", itemToDelete.id)
+      // 实际应用中应调用API删除数据
+      const newData = data.filter(config => config.id !== itemToDelete.id)
+      setData(newData)
+      setTotalItems(newData.length)
+      
+      // 显示成功提示toast
+      toast({
+        title: "删除成功",
+        description: `配置 "${itemToDelete.name}" 已删除`,
+        variant: "default",
+      })
+      
+      // 关闭弹框并清理状态
+      setDeleteDialogOpen(false)
+      setItemToDelete(null)
+    }
+  }
+  
+  // 取消删除
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false)
+    setItemToDelete(null)
+  }
+  
+  // 处理删除配置（保留原函数名以兼容现有代码）
   const handleDeleteConfig = (item: any) => {
-    console.log("删除配置", item.id)
-    // 实际应用中应调用API删除数据
-    const newData = data.filter(config => config.id !== item.id)
-    setData(newData)
-    setTotalItems(newData.length)
-    
-    // 显示成功提示toast
-    toast({
-      title: "删除成功",
-      description: `配置 "${item.name}" 已删除`,
-      variant: "destructive",
-    })
+    handleDeleteConfirm(item)
   }
   
   // 处理状态切换（启用/禁用）
@@ -517,7 +494,7 @@ function DocumentConfigContent() {
     toast({
       title: "批量删除成功",
       description: `已删除 ${selectedItems.length} 个配置`,
-      variant: "destructive",
+      variant: "default",
     })
     
     // 实际应用中应调用API删除数据
@@ -629,7 +606,7 @@ function DocumentConfigContent() {
         selectedRows={selectedRows}
         onSelectedRowsChange={handleSelectionChange}
         batchActions={batchActions}
-        onItemClick={handleItemClick}
+        onItemClick={undefined}
         onViewDetails={handleViewDetails}
         onEditConfig={handleEditConfig}
         onDeleteConfig={handleDeleteConfig}
@@ -641,6 +618,26 @@ function DocumentConfigContent() {
         onVisibleColumnsChange={handleVisibleColumnsChange}
         customCardRenderer={customCardRenderer}
       />
+      
+      {/* 删除确认弹框 */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>确认删除</DialogTitle>
+            <DialogDescription>
+              您确定要删除配置"{itemToDelete?.name}"吗？此操作不可撤销。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleDeleteCancel}>
+              取消
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteExecute}>
+              删除
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
