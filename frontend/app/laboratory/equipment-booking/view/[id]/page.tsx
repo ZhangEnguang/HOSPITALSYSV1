@@ -168,11 +168,11 @@ export default function EquipmentBookingViewPage() {
         </div>
       </div>
 
-      <div className="container mx-auto py-8">
+      <div className="container mx-auto py-4">
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-8 items-start">
           {/* 仪器信息卡片 */}
           <div className="xl:col-span-1">
-            <Card className="sticky top-8 overflow-hidden bg-white border shadow-xl hover:shadow-2xl transition-all duration-500 group">
+            <Card className="sticky top-8 overflow-hidden bg-white border hover:shadow-lg transition-all duration-500 group h-full">
               
               <CardHeader className="pb-4 h-16 flex flex-col justify-center">
                 <div className="flex items-center gap-3">
@@ -186,7 +186,7 @@ export default function EquipmentBookingViewPage() {
                 </div>
               </CardHeader>
               
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 flex-1">
                 {/* 仪器图片 */}
                 <div className="relative">
                   <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden group-hover:shadow-lg transition-shadow">
@@ -250,29 +250,7 @@ export default function EquipmentBookingViewPage() {
                       <span className="text-sm font-medium">{equipment?.location}</span>
                     </div>
                   </div>
-                  
-                  <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
-                    <p className="text-sm text-gray-700 leading-relaxed">{equipment?.description}</p>
-                  </div>
                 </div>
-                
-                {/* 技术规格 */}
-                {equipment?.specifications && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Zap className="h-4 w-4 text-blue-500" />
-                      技术规格
-                    </h4>
-                    <div className="space-y-2">
-                      {Object.entries(equipment.specifications).map(([key, value]) => (
-                        <div key={key} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
-                          <span className="text-xs text-gray-600">{getSpecificationLabel(key)}</span>
-                          <span className="text-xs font-medium text-right max-w-[60%]">{String(value)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
                 {/* 管理员信息 */}
                 {equipment?.manager && (
@@ -309,7 +287,7 @@ export default function EquipmentBookingViewPage() {
           {/* 预约信息展示 */}
           <div className="xl:col-span-3 space-y-8">
             {/* 时间信息卡片 */}
-            <Card className="overflow-hidden bg-white border shadow-xl">
+            <Card className="overflow-hidden bg-white border">
               <CardHeader className="pb-4 h-16 flex flex-col justify-center">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-blue-100 rounded-lg">
@@ -356,7 +334,7 @@ export default function EquipmentBookingViewPage() {
             </Card>
 
             {/* 预约详细信息卡片 */}
-            <Card className="overflow-hidden bg-white border shadow-xl">
+            <Card className="overflow-hidden bg-white border">
               <CardHeader className="pb-4 h-16 flex flex-col justify-center">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-green-100 rounded-lg">

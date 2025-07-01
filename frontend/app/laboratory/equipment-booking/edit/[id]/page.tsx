@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowLeft, Eye, Calendar, Clock, MapPin, User, Phone, Mail, Zap, Weight, Thermometer, Droplets, ShieldCheck, Info, ChevronRight, CheckCircle2, Brain, AlertTriangle, Lightbulb, TrendingUp, Users, FileText, Sparkles, ChevronUp, ChevronDown } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, addWeeks, addMonths, isSameDay, isToday } from "date-fns"
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, addWeeks, addMonths, isSameDay, isToday, isSameMonth } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -815,11 +815,11 @@ export default function EquipmentBookingEditPage() {
         </div>
       </div>
 
-      <div className="container mx-auto py-8">
+      <div className="container mx-auto py-4">
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-8 items-start">
           {/* 仪器信息卡片 */}
           <div className="xl:col-span-1">
-            <Card className="sticky top-8 overflow-hidden bg-white border shadow-xl hover:shadow-2xl transition-all duration-500 group">
+            <Card className="sticky top-8 overflow-hidden bg-white border hover:shadow-lg transition-all duration-500 group h-full">
               
               <CardHeader className="pb-4 h-16 flex flex-col justify-center">
                 <div className="flex items-center gap-3">
@@ -833,7 +833,7 @@ export default function EquipmentBookingEditPage() {
                 </div>
           </CardHeader>
               
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 flex-1">
                 {/* 仪器图片 */}
                 <div className="relative">
                   <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden group-hover:shadow-lg transition-shadow">
@@ -903,26 +903,6 @@ export default function EquipmentBookingEditPage() {
                       <span className="text-sm font-medium">{equipment.location}</span>
                     </div>
                   </div>
-                  
-                  <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
-                    <p className="text-sm text-gray-700 leading-relaxed">{equipment.description}</p>
-                  </div>
-                </div>
-                
-                {/* 技术规格 */}
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <Zap className="h-4 w-4 text-blue-500" />
-                    技术规格
-                  </h4>
-                  <div className="space-y-2">
-                    {Object.entries(equipment.specifications).map(([key, value]) => (
-                      <div key={key} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
-                        <span className="text-xs text-gray-600">{getSpecificationLabel(key)}</span>
-                        <span className="text-xs font-medium text-right max-w-[60%]">{String(value)}</span>
-                      </div>
-                    ))}
-                  </div>
                 </div>
 
                 {/* 管理员信息 */}
@@ -958,7 +938,7 @@ export default function EquipmentBookingEditPage() {
           {/* 预约时间选择和表单 */}
           <div className="xl:col-span-3 space-y-8">
             {/* 时间选择卡片 */}
-            <Card className="overflow-hidden bg-white border shadow-xl">
+            <Card className="overflow-hidden bg-white border">
               
               <CardHeader className="pb-4 h-16 flex flex-col justify-center">
                 <div className="flex items-center gap-3">
@@ -1143,17 +1123,18 @@ export default function EquipmentBookingEditPage() {
                           </tr>
                         </thead>
                         <tbody>
-                        {timeSlots.map((time) => (
-                            <tr key={time} className="hover:bg-gray-50/50 transition-colors">
-                              <td className="border-b border-gray-100 p-3 text-sm font-medium text-gray-700 bg-gray-50/30 sticky left-0">{time}</td>
+                          {timeSlots.map((time) => (
+                            <tr key={time} className="hover:bg-gray-50">
+                              <td className="border-b border-gray-100 p-3 text-sm font-medium text-gray-700 bg-gray-50/50">
+                                {time}
+                              </td>
                               {dates.map((date) => {
                                 const slotStyle = getTimeSlotStyle(date, time)
-                                
                                 return (
-                                  <td key={`${date.toISOString()}-${time}`} className="border-b border-gray-100 p-2">
+                                  <td key={`${date.toISOString()}-${time}`} className="border-b border-gray-100 p-1">
                                     <button
                                       className={cn(
-                                        "w-full h-10 text-xs rounded-lg font-medium transition-all duration-200",
+                                        "w-full h-10 text-xs rounded-md transition-all duration-200 font-medium",
                                         slotStyle.className
                                       )}
                                       disabled={slotStyle.disabled}
@@ -1171,30 +1152,35 @@ export default function EquipmentBookingEditPage() {
                     </div>
                   </div>
                 )}
-                
+
                 {/* 月视图 */}
                 {viewMode === "month" && (
-                  <div className="bg-white rounded-xl shadow-sm p-4 space-y-4">
-                    <div className="grid grid-cols-7 gap-2">
-                      {["一", "二", "三", "四", "五", "六", "日"].map((day) => (
-                        <div key={day} className="text-center text-sm font-semibold p-3 bg-gray-50 rounded-lg text-gray-700">
+                  <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div className="grid grid-cols-7 gap-0 border border-gray-200 rounded-lg overflow-hidden">
+                      {/* 周标题 */}
+                      {["日", "一", "二", "三", "四", "五", "六"].map((day) => (
+                        <div key={day} className="bg-gray-50 p-3 text-center text-sm font-semibold text-gray-700 border-b border-gray-200">
                           {day}
                         </div>
                       ))}
-                      {dates.map((date) => {
-                        const hasBookings = mockBookings.some(booking =>
-                          isSameDay(date, booking.startDate)
+                      
+                      {/* 月份日期 */}
+                      {generateDates().map((date, index) => {
+                        const hasBookings = mockBookings.some(booking => 
+                          isSameDay(booking.startDate, date)
                         )
-                        const hasSelectedSlots = selectedTimeSlots.some(slot =>
-                          isSameDay(date, slot.start)
+                        const hasSelectedSlots = selectedTimeSlots.some(slot => 
+                          isSameDay(slot.start, date)
                         )
                         const isSelectedDate = selectedDateForTimeSlots && isSameDay(date, selectedDateForTimeSlots)
+                        
                         return (
                           <div
-                            key={date.toISOString()}
+                            key={index}
                             className={cn(
-                              "p-3 text-sm border rounded-lg cursor-pointer hover:scale-105 transition-all duration-200",
-                              hasBookings 
+                              "min-h-[80px] p-2 border-b border-r border-gray-200 cursor-pointer transition-colors",
+                              !isSameMonth(date, currentDate) && "bg-gray-50 text-gray-400",
+                              hasBookings && !hasSelectedSlots
                                 ? "bg-red-50 border-red-200 hover:bg-red-100"
                                 : hasSelectedSlots
                                 ? "bg-blue-50 border-blue-200 hover:bg-blue-100"
@@ -1295,7 +1281,7 @@ export default function EquipmentBookingEditPage() {
             </Card>
 
             {/* 预约表单卡片 */}
-            <Card className="overflow-hidden bg-white border shadow-xl">
+            <Card className="overflow-hidden bg-white border">
               
               <CardHeader className="pb-4 h-16 flex flex-col justify-center">
                 <div className="flex items-center gap-3">

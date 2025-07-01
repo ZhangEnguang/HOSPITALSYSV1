@@ -25,7 +25,8 @@ import {
   XCircle,
   Clock3,
   Check,
-  X
+  X,
+  ClipboardCheck
 } from "lucide-react"
 
 interface BookingApprovalDialogProps {
@@ -120,8 +121,9 @@ export function BookingApprovalDialog({
       <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
         {/* 固定头部 */}
         <DialogHeader className="flex-shrink-0 px-6 py-4 border-b">
-          <DialogTitle className="text-xl font-semibold text-gray-900">
-            仪器审核预约
+          <DialogTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <ClipboardCheck className="h-5 w-5 text-blue-600" />
+            仪器预约审核
           </DialogTitle>
         </DialogHeader>
 
