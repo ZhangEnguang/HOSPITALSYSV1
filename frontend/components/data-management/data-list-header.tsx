@@ -146,7 +146,7 @@ export default function DataListHeader({
             </Button>
           )}
 
-          {addButtonLabel && (
+          {addButtonLabel && addButtonLabel !== null && (
             <>
               {addButtonDropdownItems && addButtonDropdownItems.length > 0 ? (
                 <DropdownMenu>

@@ -217,7 +217,7 @@ export const SelectionDecorStripe = () => (
 
 // 选中状态的角标
 export const SelectionDecorCorner = () => (
-  <div className="absolute top-0 right-0">
+  <div className="absolute top-0 right-0 z-20">
     <div className="w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-primary/20" />
   </div>
 )

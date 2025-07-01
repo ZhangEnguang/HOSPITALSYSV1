@@ -23,6 +23,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
+import { ElegantCardSelection } from "@/components/ui/elegant-card-selection"
+import React from "react"
 
 // 模拟用户数据
 export const users = [
@@ -583,6 +585,7 @@ const ConsumableCard = ({
   isSelected: boolean;
   onToggleSelect: (selected: boolean) => void;
 }) => {
+  const [isHovered, setIsHovered] = React.useState(false)
   // 处理别名显示，超长时省略
   const formatAliases = (aliases: string[], maxLength: number = 30) => {
     if (!aliases || aliases.length === 0) return '';
@@ -675,21 +678,42 @@ const ConsumableCard = ({
     return "hover:border-primary/20";
   };
 
+  // 6. 操作按钮背景样式逻辑 - 与卡片背景融合
+  const getActionButtonStyles = () => {
+    if (isDisabled()) {
+      return "bg-gray-50/80 hover:bg-gray-50/90";
+    } else if (isExpired()) {
+      return "bg-red-50/80 hover:bg-red-50/90";
+    } else if (isSoonExpired()) {
+      return "bg-yellow-50/80 hover:bg-yellow-50/90";
+    }
+    return "bg-white/80 hover:bg-white/90";
+  };
+
   const stockStatus = getStockStatus();
 
   return (
-    <Card 
-      className={cn(
-        "group cursor-pointer border transition-all duration-300 ease-in-out hover:shadow-lg relative",
-        getHoverBorderStyle(),
-        isSelected && "ring-2 ring-primary border-primary",
-        // 已停用耗材样式
-        isDisabled() && "opacity-60 bg-gray-50/50 border-gray-300",
-        // 卡片整体样式逻辑
-        !isDisabled() && getCardStyles()
-      )}
-      title={getTooltipText()}
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
+      <ElegantCardSelection
+        isHovered={isHovered}
+        isSelected={isSelected}
+        onToggleSelect={onToggleSelect}
+        className="group transition-all duration-300"
+      >
+        <Card 
+          className={cn(
+            "group cursor-pointer border transition-all duration-300 ease-in-out hover:shadow-lg relative",
+            getHoverBorderStyle(),
+            // 已停用耗材样式
+            isDisabled() && "opacity-60 bg-gray-50/50 border-gray-300",
+            // 卡片整体样式逻辑
+            !isDisabled() && getCardStyles()
+          )}
+          title={getTooltipText()}
+        >
       {/* 停用遮罩 */}
       {isDisabled() && (
         <div className="absolute inset-0 bg-gray-200/30 rounded-lg pointer-events-none" />
@@ -702,7 +726,10 @@ const ConsumableCard = ({
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-8 w-8 bg-white/80 hover:bg-white/90 backdrop-blur-sm"
+              className={cn(
+                "h-8 w-8 backdrop-blur-sm transition-all duration-200",
+                getActionButtonStyles()
+              )}
               onClick={(e) => e.stopPropagation()}
             >
               <MoreVertical className="h-4 w-4" />
@@ -880,6 +907,8 @@ const ConsumableCard = ({
         </div>
       </div>
     </Card>
+      </ElegantCardSelection>
+    </div>
   );
 };
 

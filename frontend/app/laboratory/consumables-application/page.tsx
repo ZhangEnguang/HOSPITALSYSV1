@@ -409,9 +409,9 @@ function ConsumablesApplicationContent() {
         searchPlaceholder="搜索申领标题、耗材名称、申请人..."
         onSearchChange={setSearchTerm}
         onSearch={() => {}}
-        onAddNew={() => router.push("/laboratory/consumables-application/create")}
+        onAddNew={null as any}
         onAIAssist={undefined}
-        addButtonLabel="新增申领"
+        addButtonLabel={null as any}
         settingsButtonLabel={undefined}
         onOpenSettings={undefined}
         quickFilters={quickFilters}

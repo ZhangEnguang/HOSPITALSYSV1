@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { MoreVertical } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ElegantCardSelection } from "@/components/ui/elegant-card-selection"
+import React from "react"
 
 // 模拟用户数据
 export const users = [
@@ -595,6 +597,8 @@ const ReagentCard = ({
   isSelected: boolean;
   onToggleSelect: (selected: boolean) => void;
 }) => {
+  const [isHovered, setIsHovered] = React.useState(false)
+  
   // 获取存储条件图标
   const getStorageIcon = (condition: string) => {
     if (condition.includes("℃")) {
@@ -669,189 +673,213 @@ const ReagentCard = ({
     return "hover:border-primary/20";
   };
 
+  // 7. 操作按钮背景样式逻辑 - 与卡片背景融合
+  const getActionButtonStyles = () => {
+    if (isExpired()) {
+      return "bg-red-50/80 hover:bg-red-50/90";
+    } else if (isExpiringSoon()) {
+      return "bg-yellow-50/80 hover:bg-yellow-50/90";
+    }
+    return "bg-white/80 hover:bg-white/90";
+  };
+
   return (
-    <Card 
-      className={cn(
-        "group cursor-pointer border transition-all duration-300 ease-in-out hover:shadow-lg relative",
-        getHoverBorderStyle(),
-        isSelected && "ring-2 ring-primary border-primary",
-        getCardStyles()
-      )}
-      title={getTooltipText()}
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      {/* 右上角操作菜单 */}
-      <div className="absolute top-2 right-2 z-10">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8 bg-white/80 hover:bg-white/90 backdrop-blur-sm"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-36">
-            {actions.map((action) => {
-              return (
-                <DropdownMenuItem 
-                  key={action.id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (action.onClick) {
-                      action.onClick(item, e);
-                    }
-                  }}
+      <ElegantCardSelection
+        isHovered={isHovered}
+        isSelected={isSelected}
+        onToggleSelect={onToggleSelect}
+        className="group transition-all duration-300"
+      >
+        <Card 
+          className={cn(
+            "group cursor-pointer border transition-all duration-300 ease-in-out hover:shadow-lg relative",
+            getHoverBorderStyle(),
+            getCardStyles()
+          )}
+          title={getTooltipText()}
+        >
+          {/* 右上角操作菜单 */}
+          <div className="absolute top-2 right-2 z-10">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
                   className={cn(
-                    "flex items-center gap-2 cursor-pointer",
-                    action.variant === "destructive" && "text-red-600 focus:text-red-600"
+                    "h-8 w-8 backdrop-blur-sm transition-all duration-200",
+                    getActionButtonStyles()
                   )}
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  {action.icon}
-                  <span>
-                    {action.label}
-                  </span>
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-36">
+                {actions.map((action) => {
+                  return (
+                    <DropdownMenuItem 
+                      key={action.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (action.onClick) {
+                          action.onClick(item, e);
+                        }
+                      }}
+                      className={cn(
+                        "flex items-center gap-2 cursor-pointer",
+                        action.variant === "destructive" && "text-red-600 focus:text-red-600"
+                      )}
+                    >
+                      {action.icon}
+                      <span>
+                        {action.label}
+                      </span>
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
-      {/* 左上角过期状态标识 */}
-      {isExpired() && (
-        <div className="absolute top-2 left-2 z-10">
-          <Badge variant="destructive" className="text-xs font-medium">
-            已过期
-          </Badge>
-        </div>
-      )}
-
-      {/* 即将过期提醒（未过期且30天内过期时显示） */}
-      {isExpiringSoon() && !isExpired() && (
-        <div className="absolute top-2 left-2 z-10">
-          <Badge variant="outline" className="text-xs font-medium bg-yellow-100 text-yellow-700 border-yellow-300">
-            即将过期
-          </Badge>
-        </div>
-      )}
-
-      {/* 上方区域：左侧图片，右侧试剂名称 */}
-      <div className="flex items-start gap-3 pt-5 px-5 pb-2.5">
-        {/* 左侧：试剂瓶图标 */}
-        <div className="w-14 h-16 rounded-lg overflow-hidden bg-white border border-gray-200 flex-shrink-0 group">
-          {item.imageUrl ? (
-            <img 
-              src={item.imageUrl} 
-              alt={`${item.name} 化学结构`}
-              className="w-full h-full object-contain transition-transform duration-300 ease-in-out group-hover:scale-110"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-                const parent = target.parentElement;
-                if (parent) {
-                  parent.innerHTML = `
-                    <div className="flex items-center justify-center w-full h-full">
-                      <div className="w-5 h-6 relative">
-                        <div className="w-full h-5 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative">
-                          <div className="absolute inset-x-0.5 top-0.5 bottom-0.5 bg-gradient-to-b from-blue-100 to-blue-200 rounded-sm opacity-80"></div>
-                          <div className="absolute inset-x-0.5 bottom-0.5 bg-gradient-to-t from-blue-500 to-blue-400 rounded-sm opacity-70" style="height: ${Math.max(20, (item.currentAmount / item.initialAmount) * 80)}%"></div>
-                        </div>
-                        <div className="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-2.5 h-1 bg-gray-400 rounded-t border border-gray-500"></div>
-                      </div>
-                    </div>
-                  `;
-                }
-              }}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <div className="w-5 h-6 relative">
-                <div className="w-full h-5 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative">
-                  {/* 瓶身 */}
-                  <div className="absolute inset-x-0.5 top-0.5 bottom-0.5 bg-gradient-to-b from-blue-100 to-blue-200 rounded-sm opacity-80"></div>
-                  {/* 液体 - 根据库存量显示高度 */}
-                  <div 
-                    className="absolute inset-x-0.5 bottom-0.5 bg-gradient-to-t from-blue-500 to-blue-400 rounded-sm opacity-70"
-                    style={{ height: `${Math.max(20, (item.currentAmount / item.initialAmount) * 80)}%` }}
-                  ></div>
-                </div>
-                {/* 瓶盖 */}
-                <div className="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-2.5 h-1 bg-gray-400 rounded-t border border-gray-500"></div>
-              </div>
+          {/* 左上角过期状态标识 */}
+          {isExpired() && (
+            <div className="absolute top-2 left-2 z-10">
+              <Badge variant="destructive" className="text-xs font-medium">
+                已过期
+              </Badge>
             </div>
           )}
-        </div>
 
-        {/* 右侧：试剂名称和别名 */}
-        <div className="flex-1 min-w-0">
-          <h3 className={cn(
-            "font-semibold text-base transition-colors duration-300 group-hover:text-primary truncate leading-tight",
-            "text-gray-900"
-          )}>
-            {item.name}
-          </h3>
-          {/* 别名作为副标题 */}
-          {item.alias && (
-            <p className={cn(
-              "text-sm mt-1 truncate",
-              "text-muted-foreground"
-            )}>
-              别名: {item.alias}
-            </p>
+          {/* 即将过期提醒（未过期且30天内过期时显示） */}
+          {isExpiringSoon() && !isExpired() && (
+            <div className="absolute top-2 left-2 z-10">
+              <Badge variant="outline" className="text-xs font-medium bg-yellow-100 text-yellow-700 border-yellow-300">
+                即将过期
+              </Badge>
+            </div>
           )}
-          {/* 线性分子式 */}
-          {item.linearFormula && (
-            <p className={cn(
-              "text-sm mt-1 truncate",
-              "text-muted-foreground"
-            )}>
-              线性分子式: {item.linearFormula}
-            </p>
+
+          {/* 上方区域：左侧图片，右侧试剂名称 */}
+          <div className="flex items-start gap-3 pt-5 px-5 pb-2.5">
+            {/* 左侧：试剂瓶图标 */}
+            <div className="w-14 h-16 rounded-lg overflow-hidden bg-white border border-gray-200 flex-shrink-0 group">
+              {item.imageUrl ? (
+                <img 
+                  src={item.imageUrl} 
+                  alt={`${item.name} 化学结构`}
+                  className="w-full h-full object-contain transition-transform duration-300 ease-in-out group-hover:scale-110"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const parent = target.parentElement;
+                    if (parent) {
+                      parent.innerHTML = `
+                        <div className="flex items-center justify-center w-full h-full">
+                          <div className="w-5 h-6 relative">
+                            <div className="w-full h-5 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative">
+                              <div className="absolute inset-x-0.5 top-0.5 bottom-0.5 bg-gradient-to-b from-blue-100 to-blue-200 rounded-sm opacity-80"></div>
+                              <div className="absolute inset-x-0.5 bottom-0.5 bg-gradient-to-t from-blue-500 to-blue-400 rounded-sm opacity-70" style="height: ${Math.max(20, (item.currentAmount / item.initialAmount) * 80)}%"></div>
+                            </div>
+                            <div className="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-2.5 h-1 bg-gray-400 rounded-t border border-gray-500"></div>
+                          </div>
+                        </div>
+                      `;
+                    }
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="w-5 h-6 relative">
+                    <div className="w-full h-5 bg-gradient-to-b from-blue-200 to-blue-300 rounded border border-blue-400 relative">
+                      {/* 瓶身 */}
+                      <div className="absolute inset-x-0.5 top-0.5 bottom-0.5 bg-gradient-to-b from-blue-100 to-blue-200 rounded-sm opacity-80"></div>
+                      {/* 液体 - 根据库存量显示高度 */}
+                      <div 
+                        className="absolute inset-x-0.5 bottom-0.5 bg-gradient-to-t from-blue-500 to-blue-400 rounded-sm opacity-70"
+                        style={{ height: `${Math.max(20, (item.currentAmount / item.initialAmount) * 80)}%` }}
+                      ></div>
+                    </div>
+                    {/* 瓶盖 */}
+                    <div className="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-2.5 h-1 bg-gray-400 rounded-t border border-gray-500"></div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 右侧：试剂名称和别名 */}
+            <div className="flex-1 min-w-0">
+              <h3 className={cn(
+                "font-semibold text-base transition-colors duration-300 group-hover:text-primary truncate leading-tight",
+                "text-gray-900"
+              )}>
+                {item.name}
+              </h3>
+              {/* 别名作为副标题 */}
+              {item.alias && (
+                <p className={cn(
+                  "text-sm mt-1 truncate",
+                  "text-muted-foreground"
+                )}>
+                  别名: {item.alias}
+                </p>
+              )}
+              {/* 线性分子式 */}
+              {item.linearFormula && (
+                <p className={cn(
+                  "text-sm mt-1 truncate",
+                  "text-muted-foreground"
+                )}>
+                  线性分子式: {item.linearFormula}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* 下方区域：有效期、库存量和危险标签 */}
+          <div className="px-5 pb-4 space-y-2">
+            {/* 1. 有效期显示逻辑 - 有效期字段颜色规则 */}
+            <div className="flex items-center justify-between text-sm pt-2.5 border-t border-gray-100">
+              <span className={cn(
+                "text-muted-foreground"
+              )}>有效期:</span>
+              <span className={cn(
+                "font-medium",
+                isExpired() ? "text-red-600" : "text-green-600"
+              )}>
+                {format(new Date(item.expiryDate), "yyyy/MM/dd")}
+              </span>
+            </div>
+            
+            {/* 库存量 */}
+            <div className="flex items-center justify-between">
+                <span className={cn(
+                  "text-sm",
+                  "text-muted-foreground"
+                )}>
+                  库存量:
+                </span>
+                <span className={cn(
+                  "text-sm font-medium",
+                  item.currentAmount <= 0 ? "text-red-600" : 
+                  item.currentAmount <= item.initialAmount * 0.5 ? "text-orange-600" : "text-green-600"
+                )}>
+                  {item.currentAmount <= 0 ? "无库存" : `${item.currentAmount}${item.unit}`}
+                </span>
+            </div>
+          </div>
+
+          {/* 用户体验优化 - 鼠标悬停提示 */}
+          {getTooltipText() && (
+            <div className="absolute inset-0 pointer-events-none" title={getTooltipText()}>
+            </div>
           )}
-        </div>
-      </div>
-
-      {/* 下方区域：有效期、库存量和危险标签 */}
-      <div className="px-5 pb-4 space-y-2">
-        {/* 1. 有效期显示逻辑 - 有效期字段颜色规则 */}
-        <div className="flex items-center justify-between text-sm pt-2.5 border-t border-gray-100">
-          <span className={cn(
-            "text-muted-foreground"
-          )}>有效期:</span>
-          <span className={cn(
-            "font-medium",
-            isExpired() ? "text-red-600" : "text-green-600"
-          )}>
-            {format(new Date(item.expiryDate), "yyyy/MM/dd")}
-          </span>
-        </div>
-        
-        {/* 库存量 */}
-        <div className="flex items-center justify-between">
-            <span className={cn(
-              "text-sm",
-              "text-muted-foreground"
-            )}>
-              库存量:
-            </span>
-            <span className={cn(
-              "text-sm font-medium",
-              item.currentAmount <= 0 ? "text-red-600" : 
-              item.currentAmount <= item.initialAmount * 0.5 ? "text-orange-600" : "text-green-600"
-            )}>
-              {item.currentAmount <= 0 ? "无库存" : `${item.currentAmount}${item.unit}`}
-            </span>
-        </div>
-      </div>
-
-      {/* 用户体验优化 - 鼠标悬停提示 */}
-      {getTooltipText() && (
-        <div className="absolute inset-0 pointer-events-none" title={getTooltipText()}>
-        </div>
-      )}
-    </Card>
+        </Card>
+      </ElegantCardSelection>
+    </div>
   );
 };
 

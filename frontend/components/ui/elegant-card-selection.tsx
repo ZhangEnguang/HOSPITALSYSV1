@@ -14,7 +14,7 @@ export const ElegantSelectionBox = ({
   className?: string
 }) => (
   <div className={cn(
-    "absolute top-2 left-2 z-10 transition-all duration-300 ease-out",
+    "absolute top-2 left-2 z-30 transition-all duration-300 ease-out",
     isHovered || isSelected ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-75 translate-y-1",
     className
   )}>
@@ -50,7 +50,7 @@ export const ElegantCornerDecor = ({
 }: {
   className?: string
 }) => (
-  <div className={cn("absolute top-0 right-0", className)}>
+  <div className={cn("absolute top-0 right-0 z-20", className)}>
     <div className="w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-primary/20" />
   </div>
 )
@@ -89,7 +89,7 @@ export const ElegantCardSelection = ({
         "relative transition-all duration-300 border cursor-pointer",
         "border-[#E9ECF2] shadow-none hover:shadow-[0px_38px_45px_0px_rgba(198,210,241,0.25)]",
         isSelected 
-          ? "border-primary/50 shadow-[0_0_0_2px_rgba(59,130,246,0.1)] bg-gradient-to-br from-primary/5 to-transparent" 
+          ? "border-primary/50 shadow-[0_0_0_2px_rgba(59,130,246,0.1)]" 
           : "hover:border-primary/20",
         "overflow-hidden rounded-lg",
         className

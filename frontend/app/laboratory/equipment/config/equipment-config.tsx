@@ -574,7 +574,7 @@ const EquipmentCard = ({
         "border-[#E9ECF2] shadow-sm hover:shadow-[0px_38px_45px_0px_rgba(198,210,241,0.25)]",
         "flex flex-col w-full h-full", // 确保卡片占据完整宽度和高度且为flex布局
         isSelected 
-          ? "border-primary/50 shadow-[0_0_0_2px_rgba(59,130,246,0.1)] bg-gradient-to-br from-primary/5 to-transparent" 
+          ? "border-primary/50 shadow-[0_0_0_2px_rgba(59,130,246,0.1)]" 
           : "hover:border-primary/20",
         "overflow-hidden"
       )}
