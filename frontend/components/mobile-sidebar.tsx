@@ -17,6 +17,7 @@ import {
   LayoutDashboard,
   ClipboardCheck,
   Microscope,
+  FlaskConical,
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -40,6 +41,7 @@ export default function MobileSidebar() {
     { name: "项目管理", icon: <FolderOpen className="h-5 w-5" />, path: "/projects" },
     { name: "伦理项目", icon: <Microscope className="h-5 w-5" />, path: "/ethic-projects" },
     { name: "伦理审查", icon: <ClipboardCheck className="h-5 w-5" />, path: "#" },
+    { name: "实验室", icon: <FlaskConical className="h-5 w-5" />, path: "/laboratory/animal-files" },
     { name: "进度管理", icon: <LineChart className="h-5 w-5" />, path: "/progress" },
     { name: "日历", icon: <Calendar className="h-5 w-5" />, path: "/calendar" },
     { name: "经费管理", icon: <Wallet className="h-5 w-5" />, path: "/funds" },
