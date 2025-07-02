@@ -270,9 +270,9 @@ export default function CreateExperimentRecordPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  // 返回动物详情页面
+  // 返回动物档案列表页面
   const handleReturnToDetail = () => {
-    router.push(`/laboratory/animal-files/${animalId}`)
+    router.push('/laboratory/animal-files')
   }
 
   // 区域标题组件
