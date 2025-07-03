@@ -303,6 +303,8 @@ function AnimalRoomsContent() {
             router.push(`/laboratory/animal-rooms/edit/${row.id}`)
           } else if (action.id === "view") {
             router.push(`/laboratory/animal-rooms/${row.id}`)
+          } else if (action.id === "reservation") {
+            router.push(`/laboratory/animal-rooms/reservation/${row.id}`)
           } else if (action.id === "manage") {
             router.push(`/laboratory/animal-rooms/manage/${row.id}/create`)
           } else if (action.id === "monitoring") {

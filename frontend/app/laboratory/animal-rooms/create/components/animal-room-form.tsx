@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { 
   ArrowLeft, 
@@ -16,12 +16,8 @@ import {
   InfoIcon,
   Thermometer,
   Droplets,
-  Users,
   Building,
   Settings,
-  Plus,
-  Search,
-  Trash2,
   Eye
 } from "lucide-react"
 
@@ -34,19 +30,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { toast } from "@/components/ui/use-toast"
-
-import { Badge } from "@/components/ui/badge"
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table"
-
-// 导入动物档案数据和类型
-import { allDemoAnimalItems } from "../../../animal-files/data/animal-files-demo-data"
 
 // 动物房表单组件接口
 interface AnimalRoomFormProps {
@@ -67,6 +50,7 @@ export function AnimalRoomForm({ roomId, isEditMode = false }: AnimalRoomFormPro
     
     // 容量信息
     capacity: "",
+    capacityUnit: "饲养笼", // 新增容量单位字段，默认为饲养笼
     currentOccupancy: "0",
     
     // 位置信息
@@ -99,13 +83,7 @@ export function AnimalRoomForm({ roomId, isEditMode = false }: AnimalRoomFormPro
     specialRequirements: "",
   })
 
-  // 关联动物列表状态
-  const [associatedAnimals, setAssociatedAnimals] = useState<any[]>([])
-  
-  // 动物选择对话框状态
-  const [showAnimalDialog, setShowAnimalDialog] = useState(false)
-  const [availableAnimals, setAvailableAnimals] = useState<any[]>([])
-  const [animalSearchTerm, setAnimalSearchTerm] = useState("")
+
   
   // 上传图片状态
   const [uploadedImages, setUploadedImages] = useState<string[]>([])
@@ -119,14 +97,7 @@ export function AnimalRoomForm({ roomId, isEditMode = false }: AnimalRoomFormPro
   // 完成对话框显示状态
   const [showCompletionDialog, setShowCompletionDialog] = useState(false)
 
-  // 加载可用动物数据
-  useEffect(() => {
-    // 过滤出健康状态良好的动物
-    const healthyAnimals = allDemoAnimalItems.filter(animal => 
-      animal.status === "健康" || animal.status === "观察中"
-    )
-    setAvailableAnimals(healthyAnimals)
-  }, [])
+
 
   // 更新表单数据
   const updateFormData = (field: string, value: any) => {
@@ -221,9 +192,7 @@ export function AnimalRoomForm({ roomId, isEditMode = false }: AnimalRoomFormPro
     // 构建完整的动物房数据
     const roomData = {
       ...formData,
-      images: uploadedImages,
-      associatedAnimals: associatedAnimals,
-      currentOccupancy: associatedAnimals.length.toString()
+      images: uploadedImages
     }
     
     console.log("提交动物房数据:", roomData)
@@ -243,6 +212,7 @@ export function AnimalRoomForm({ roomId, isEditMode = false }: AnimalRoomFormPro
       type: "",
       description: "",
       capacity: "",
+      capacityUnit: "饲养笼", // 重置时也设置默认单位
       currentOccupancy: "0",
       building: "",
       floor: "",
@@ -265,7 +235,6 @@ export function AnimalRoomForm({ roomId, isEditMode = false }: AnimalRoomFormPro
       specialRequirements: "",
     })
     
-    setAssociatedAnimals([])
     setUploadedImages([])
     setFormErrors({})
     setFormTouched({})
@@ -279,65 +248,7 @@ export function AnimalRoomForm({ roomId, isEditMode = false }: AnimalRoomFormPro
     router.push('/laboratory/animal-rooms')
   }
 
-  // 添加动物到动物房
-  const handleAddAnimal = (animal: any) => {
-    if (associatedAnimals.find(a => a.id === animal.id)) {
-      toast({
-        title: "动物已存在",
-        description: "该动物已经添加到动物房中",
-        variant: "destructive"
-      })
-      return
-    }
-    
-    // 检查容量限制（只有在设置了容量的情况下才检查）
-    if (formData.capacity && formData.capacity.trim() && associatedAnimals.length >= parseInt(formData.capacity)) {
-      toast({
-        title: "容量已满",
-        description: "动物房容量已满，无法添加更多动物",
-        variant: "destructive"
-      })
-      return
-    }
-    
-    // 添加动物到关联列表
-    setAssociatedAnimals(prev => [...prev, animal])
-    
-    // 自动更新当前入住数量
-    updateFormData("currentOccupancy", (associatedAnimals.length + 1).toString())
-    
-    toast({
-      title: "添加成功",
-      description: `动物 ${animal.animalId} 已添加到动物房`,
-    })
 
-    // 注意：这里不自动关闭弹框，让用户可以继续添加其他动物
-    // 如果需要自动关闭，取消注释下面的代码
-    // setShowAnimalDialog(false)
-    // setAnimalSearchTerm("")
-  }
-
-  // 移除关联动物
-  const handleRemoveAnimal = (animalId: string) => {
-    setAssociatedAnimals(prev => {
-      const newAnimals = prev.filter(animal => animal.id !== animalId)
-      // 自动更新当前入住数量
-      updateFormData("currentOccupancy", newAnimals.length.toString())
-      return newAnimals
-    })
-    
-    toast({
-      title: "移除成功",
-      description: "动物已从动物房中移除",
-    })
-  }
-
-  // 过滤可选动物
-  const filteredAvailableAnimals = availableAnimals.filter(animal =>
-    animal.animalId.toLowerCase().includes(animalSearchTerm.toLowerCase()) ||
-    animal.species.toLowerCase().includes(animalSearchTerm.toLowerCase()) ||
-    animal.strain.toLowerCase().includes(animalSearchTerm.toLowerCase())
-  )
 
   // 区域标题组件
   const SectionTitle = ({ icon, title }: { icon: React.ReactNode, title: string }) => {
@@ -449,19 +360,34 @@ export function AnimalRoomForm({ roomId, isEditMode = false }: AnimalRoomFormPro
               {formTouched.type && <ErrorMessage message={formErrors.type || ""} />}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="capacity" className="text-muted-foreground">容量 <span className="text-red-500">*</span></Label>
-              <Input 
-                id="capacity" 
-                type="number"
-                value={formData.capacity} 
-                onChange={(e) => updateFormData("capacity", e.target.value)} 
-                onBlur={() => handleBlur("capacity")}
-                placeholder="最大容纳动物数量"
-                className={cn(
-                  "border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
-                  formTouched.capacity && formErrors.capacity ? "border-red-500" : ""
-                )}
-              />
+              <Label htmlFor="capacity" className="text-muted-foreground">最大容量 <span className="text-red-500">*</span></Label>
+              <div className="flex gap-2">
+                <Input 
+                  id="capacity" 
+                  type="number"
+                  value={formData.capacity} 
+                  onChange={(e) => updateFormData("capacity", e.target.value)} 
+                  onBlur={() => handleBlur("capacity")}
+                  placeholder="请输入最大容量"
+                  className={cn(
+                    "border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1 flex-1",
+                    formTouched.capacity && formErrors.capacity ? "border-red-500" : ""
+                  )}
+                />
+                <Select 
+                  value={formData.capacityUnit} 
+                  onValueChange={(value) => updateFormData("capacityUnit", value)}
+                >
+                  <SelectTrigger className="w-24 border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="饲养笼">饲养笼</SelectItem>
+                    <SelectItem value="饲养栏">饲养栏</SelectItem>
+                    <SelectItem value="隔离器">隔离器</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               {formTouched.capacity && <ErrorMessage message={formErrors.capacity || ""} />}
             </div>
           </div>
@@ -642,105 +568,7 @@ export function AnimalRoomForm({ roomId, isEditMode = false }: AnimalRoomFormPro
         </CardContent>
       </Card>
 
-      {/* 关联动物 */}
-      <Card className="border-[#E9ECF2] shadow-sm">
-        <CardContent className="p-6 space-y-6">
-          <div className="flex items-center gap-2 bg-blue-50 p-3 rounded-md justify-between">
-            <div className="flex items-center gap-2">
-              <div className="text-blue-500">
-                <Users className="h-5 w-5" />
-              </div>
-              <h3 className="text-base font-medium">关联动物</h3>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setShowAnimalDialog(true)}
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              添加动物
-            </Button>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-muted-foreground">
-              当前入住: {associatedAnimals.length} / {formData.capacity || "未设置"}
-              {formData.capacity && formData.capacity.trim() && associatedAnimals.length >= parseInt(formData.capacity) && (
-                <Badge variant="destructive" className="ml-2">容量已满</Badge>
-              )}
-            </div>
-            {associatedAnimals.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setAssociatedAnimals([])
-                  updateFormData("currentOccupancy", "0")
-                  toast({
-                    title: "清空成功",
-                    description: "已清空所有关联动物",
-                  })
-                }}
-                className="text-red-500 hover:text-red-700 hover:bg-red-50"
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                清空所有
-              </Button>
-            )}
-          </div>
 
-          {associatedAnimals.length > 0 ? (
-            <div className="border rounded-md">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>动物编号</TableHead>
-                    <TableHead>种类</TableHead>
-                    <TableHead>品系</TableHead>
-                    <TableHead>性别</TableHead>
-                    <TableHead>状态</TableHead>
-                    <TableHead>责任人</TableHead>
-                    <TableHead className="w-20">操作</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {associatedAnimals.map((animal) => (
-                    <TableRow key={animal.id}>
-                      <TableCell className="font-medium">{animal.animalId}</TableCell>
-                      <TableCell>{animal.species}</TableCell>
-                      <TableCell>{animal.strain}</TableCell>
-                      <TableCell>{animal.gender}</TableCell>
-                      <TableCell>
-                        <Badge variant={animal.status === "健康" ? "default" : "secondary"}>
-                          {animal.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{animal.responsible}</TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleRemoveAnimal(animal.id)}
-                          className="h-8 w-8 text-red-500 hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          ) : (
-            <div className="text-center py-8 text-muted-foreground border border-dashed rounded-md">
-              <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p>暂无关联动物</p>
-              <p className="text-sm">点击"添加动物"关联现有动物档案</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
       {/* 管理信息 */}
       <Card className="border-[#E9ECF2] shadow-sm">
@@ -966,147 +794,7 @@ export function AnimalRoomForm({ roomId, isEditMode = false }: AnimalRoomFormPro
         </CardContent>
       </Card>
 
-      {/* 动物选择对话框 */}
-      <Dialog open={showAnimalDialog} onOpenChange={setShowAnimalDialog}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>选择动物</DialogTitle>
-            <DialogDescription>
-              从现有动物档案中选择要添加到动物房的动物
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 flex-1">
-                <Search className="h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="搜索动物编号、种类或品系..."
-                  value={animalSearchTerm}
-                  onChange={(e) => setAnimalSearchTerm(e.target.value)}
-                  className="flex-1"
-                />
-              </div>
-              <div className="text-sm text-muted-foreground ml-4">
-                找到 {filteredAvailableAnimals.length} 只动物
-              </div>
-            </div>
-            
-            {/* 容量状态提示 */}
-            {formData.capacity && formData.capacity.trim() && (
-              <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
-                <InfoIcon className="h-4 w-4 text-blue-600" />
-                <span className="text-sm text-blue-700">
-                  动物房容量: {associatedAnimals.length} / {formData.capacity} 只
-                  {associatedAnimals.length >= parseInt(formData.capacity) && 
-                    " (容量已满，无法添加更多动物)"
-                  }
-                </span>
-              </div>
-            )}
-            
-            {filteredAvailableAnimals.length > 0 ? (
-              <div className="border rounded-md">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>动物编号</TableHead>
-                      <TableHead>种类</TableHead>
-                      <TableHead>品系</TableHead>
-                      <TableHead>性别</TableHead>
-                      <TableHead>年龄</TableHead>
-                      <TableHead>状态</TableHead>
-                      <TableHead>当前位置</TableHead>
-                      <TableHead className="w-20">操作</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredAvailableAnimals.map((animal) => (
-                      <TableRow key={animal.id}>
-                        <TableCell className="font-medium">{animal.animalId}</TableCell>
-                        <TableCell>{animal.species}</TableCell>
-                        <TableCell>{animal.strain}</TableCell>
-                        <TableCell>{animal.gender}</TableCell>
-                        <TableCell>{animal.age}周</TableCell>
-                        <TableCell>
-                          <Badge variant={animal.status === "健康" ? "default" : "secondary"}>
-                            {animal.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {animal.location}
-                        </TableCell>
-                        <TableCell>
-                          {associatedAnimals.find(a => a.id === animal.id) ? (
-                            <Badge variant="secondary" className="bg-green-50 text-green-700 border-green-200 whitespace-nowrap">
-                              已添加
-                            </Badge>
-                          ) : formData.capacity && formData.capacity.trim() && associatedAnimals.length >= parseInt(formData.capacity) ? (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              disabled
-                              className="text-muted-foreground"
-                            >
-                              容量已满
-                            </Button>
-                          ) : (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleAddAnimal(animal)}
-                              className="hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300"
-                            >
-                              添加
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                <p>没有找到符合条件的动物</p>
-              </div>
-            )}
-          </div>
-          
-          <DialogFooter className="flex justify-between items-center">
-            <div className="text-sm text-muted-foreground">
-              已选择 {associatedAnimals.length} 只动物
-              {formData.capacity && formData.capacity.trim() ? ` / 最大容量 ${formData.capacity} 只` : " / 容量未设置"}
-            </div>
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setShowAnimalDialog(false)
-                  setAnimalSearchTerm("")
-                }}
-              >
-                关闭
-              </Button>
-              <Button 
-                onClick={() => {
-                  setShowAnimalDialog(false)
-                  setAnimalSearchTerm("")
-                  toast({
-                    title: "完成添加",
-                    description: `已成功添加 ${associatedAnimals.length} 只动物到动物房`,
-                  })
-                }}
-                className="bg-blue-600 hover:bg-blue-700"
-                disabled={associatedAnimals.length === 0}
-              >
-                完成添加
-              </Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
 
       {/* 完成对话框 */}
       <Dialog open={showCompletionDialog} onOpenChange={setShowCompletionDialog}>

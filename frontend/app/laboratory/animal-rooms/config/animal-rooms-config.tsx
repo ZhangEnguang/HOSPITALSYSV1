@@ -297,6 +297,11 @@ export const animalRoomActions = [
     icon: Pencil,
   },
   {
+    id: "reservation",
+    label: "预约笼位",
+    icon: Users,
+  },
+  {
     id: "manage",
     label: "饲养管理",
     icon: Settings,
@@ -421,15 +426,7 @@ const AnimalRoomCard = ({
   const [isHovered, setIsHovered] = useState(false)
   const [imageError, setImageError] = useState(false)
   
-  // 计算使用率
-  const usageRate = ((item.currentOccupancy / item.capacity) * 100).toFixed(1)
-  
-  // 获取使用率的状态色
-  const getUsageRateColor = (rate: number) => {
-    if (rate >= 90) return "text-red-600"
-    if (rate >= 70) return "text-yellow-600"
-    return "text-green-600"
-  }
+
 
 
 
@@ -570,13 +567,7 @@ const AnimalRoomCard = ({
           <div className="flex items-center gap-1">
             <Users className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium text-gray-700">
-              {item.currentOccupancy}/{item.capacity}只
-            </span>
-            <span className="text-sm text-muted-foreground">
-              · 容量利用率
-            </span>
-            <span className={cn("text-sm font-medium", getUsageRateColor(parseFloat(usageRate)))}>
-              {usageRate}%
+              {item.currentOccupancy}/{item.capacity}{item.capacityUnit || '笼位'}
             </span>
           </div>
         </div>

@@ -1,12 +1,14 @@
 // 动物房演示数据
+// 根据动物类型确定容量单位：鼠类使用饲养笼，兔类和豚鼠使用饲养栏
 export const allDemoAnimalRoomItems = [
   {
     id: "AR-001",
     roomId: "AR-001",
     name: "SPF大鼠饲养间1",
     type: "SPF饲养间",
-    capacity: 50,
-    currentOccupancy: 42,
+    capacity: 350,
+    capacityUnit: "饲养笼", // 大鼠使用饲养笼
+    currentOccupancy: 285,
     status: "使用中",
     department: "动物实验中心",
     location: "A栋1楼",
@@ -19,15 +21,16 @@ export const allDemoAnimalRoomItems = [
     lastMaintenanceDate: "2023-12-20",
     equipments: ["独立通风系统", "温湿度控制器", "紫外线消毒灯"],
     notes: "定期检查通风系统运行状态",
-    image: "/animal-rooms/spf-rat-room-1.png"
+    image: "/animal-rooms/sterile-mouse-breeding-room-new.png"
   },
   {
     id: "AR-002",
     roomId: "AR-002", 
     name: "无菌小鼠饲养间",
     type: "无菌饲养间",
-    capacity: 30,
-    currentOccupancy: 25,
+    capacity: 280,
+    capacityUnit: "饲养笼", // 小鼠使用饲养笼
+    currentOccupancy: 235,
     status: "使用中",
     department: "生物医学研究院",
     location: "A栋2楼",
@@ -40,21 +43,22 @@ export const allDemoAnimalRoomItems = [
     lastMaintenanceDate: "2023-12-25",
     equipments: ["层流净化设备", "高效过滤器", "压差监控系统"],
     notes: "每日检查无菌指标",
-    image: "/animal-rooms/sterile-mouse-room.png"
+    image: "/animal-rooms/sterile-mouse-room-new.png"
   },
   {
     id: "AR-003",
     roomId: "AR-003",
     name: "普通兔子饲养间",
     type: "普通饲养间", 
-    capacity: 20,
-    currentOccupancy: 18,
+    capacity: 450,
+    capacityUnit: "饲养栏", // 兔子使用饲养栏
+    currentOccupancy: 365,
     status: "使用中",
     department: "药学院",
     location: "B栋1楼",
     temperature: 23,
     humidity: 58,
-    description: "普通级别兔子饲养间，适合一般实验",
+    description: "大型普通级别兔子饲养间，适合一般实验",
     manager: "王五",
     establishedDate: "2022-08-20",
     lastCleaningDate: "2023-12-30",
@@ -68,8 +72,9 @@ export const allDemoAnimalRoomItems = [
     roomId: "AR-004",
     name: "SPF小鼠繁殖间A",
     type: "SPF繁殖间",
-    capacity: 15,
-    currentOccupancy: 13,
+    capacity: 180,
+    capacityUnit: "饲养笼", // 小鼠使用饲养笼
+    currentOccupancy: 156,
     status: "使用中",
     department: "基础医学院",
     location: "B栋2楼",
@@ -82,15 +87,16 @@ export const allDemoAnimalRoomItems = [
     lastMaintenanceDate: "2023-12-10",
     equipments: ["繁殖笼具", "独立通风", "恒温恒湿系统"],
     notes: "繁殖期间请保持安静环境",
-    image: "/animal-rooms/spf-mouse-breeding-a.png"
+    image: "/animal-rooms/spf-mouse-breeding-a-new.png"
   },
   {
     id: "AR-005",
     roomId: "AR-005",
     name: "大鼠繁殖间1号",
     type: "普通繁殖间",
-    capacity: 25,
-    currentOccupancy: 20,
+    capacity: 220,
+    capacityUnit: "饲养笼", // 大鼠使用饲养笼
+    currentOccupancy: 176,
     status: "使用中",
     department: "动物实验中心",
     location: "A栋1楼",
@@ -103,15 +109,16 @@ export const allDemoAnimalRoomItems = [
     lastMaintenanceDate: "2023-12-30",
     equipments: ["繁殖笼具", "新生儿保温箱", "哺乳期监控"],
     notes: "繁殖季节，注意母鼠营养补充",
-    image: "/animal-rooms/rat-breeding-1.png"
+    image: "/animal-rooms/rat-breeding-room-1-new.png"
   },
   {
     id: "AR-006",
     roomId: "AR-006",
     name: "豚鼠专用饲养间",
     type: "普通饲养间",
-    capacity: 20,
-    currentOccupancy: 15,
+    capacity: 160,
+    capacityUnit: "饲养栏", // 豚鼠使用饲养栏
+    currentOccupancy: 120,
     status: "使用中",
     department: "临床医学院",
     location: "C栋1楼",
@@ -124,15 +131,16 @@ export const allDemoAnimalRoomItems = [
     lastMaintenanceDate: "2023-12-15",
     equipments: ["专用笼具", "喂食系统", "饮水装置"],
     notes: "豚鼠对环境敏感，注意温度控制",
-    image: "/animal-rooms/guinea-pig-room.png"
+    image: "/animal-rooms/guinea-pig-room-new.png"
   },
   {
     id: "AR-007",
     roomId: "AR-007",
     name: "小鼠群体饲养间",
     type: "普通饲养间",
-    capacity: 40,
-    currentOccupancy: 35,
+    capacity: 400,
+    capacityUnit: "饲养笼", // 小鼠使用饲养笼
+    currentOccupancy: 350,
     status: "使用中",
     department: "生物医学研究院",
     location: "C栋2楼",
@@ -152,8 +160,9 @@ export const allDemoAnimalRoomItems = [
     roomId: "AR-008",
     name: "SPF大鼠繁殖间",
     type: "SPF繁殖间",
-    capacity: 30,
-    currentOccupancy: 25,
+    capacity: 320,
+    capacityUnit: "饲养笼", // 大鼠使用饲养笼
+    currentOccupancy: 267,
     status: "使用中",
     department: "动物实验中心",
     location: "A栋2楼",
@@ -173,8 +182,9 @@ export const allDemoAnimalRoomItems = [
     roomId: "AR-009",
     name: "兔子繁殖间A",
     type: "普通繁殖间",
-    capacity: 15,
-    currentOccupancy: 12,
+    capacity: 140,
+    capacityUnit: "饲养栏", // 兔子使用饲养栏
+    currentOccupancy: 112,
     status: "使用中",
     department: "药学院",
     location: "B栋1楼",
@@ -187,15 +197,16 @@ export const allDemoAnimalRoomItems = [
     lastMaintenanceDate: "2024-01-05",
     equipments: ["繁殖笼具", "产仔箱", "保温设备"],
     notes: "产仔期间需要安静环境",
-    image: "/animal-rooms/rabbit-breeding-a.png"
+    image: "/animal-rooms/rabbit-breeding-a-new.png"
   },
   {
     id: "AR-010",
     roomId: "AR-010",
     name: "无菌小鼠繁殖间",
     type: "无菌繁殖间",
-    capacity: 18,
-    currentOccupancy: 15,
+    capacity: 200,
+    capacityUnit: "饲养笼", // 小鼠使用饲养笼
+    currentOccupancy: 166,
     status: "使用中",
     department: "基础医学院",
     location: "B栋2楼",
@@ -208,15 +219,16 @@ export const allDemoAnimalRoomItems = [
     lastMaintenanceDate: "2023-11-28",
     equipments: ["无菌繁殖设备", "层流净化", "压差监控"],
     notes: "无菌环境，严格消毒",
-    image: "/animal-rooms/sterile-mouse-breeding.png"
+    image: "/animal-rooms/spf-rat-room-1.png"
   },
   {
     id: "AR-011",
     roomId: "AR-011",
     name: "SPF小鼠饲养间2",
     type: "SPF饲养间",
-    capacity: 35,
-    currentOccupancy: 28,
+    capacity: 380,
+    capacityUnit: "饲养笼", // 小鼠使用饲养笼
+    currentOccupancy: 304,
     status: "使用中",
     department: "动物实验中心",
     location: "A栋1楼",
@@ -236,8 +248,9 @@ export const allDemoAnimalRoomItems = [
     roomId: "AR-012",
     name: "豚鼠繁殖间B",
     type: "普通繁殖间",
-    capacity: 12,
-    currentOccupancy: 8,
+    capacity: 120,
+    capacityUnit: "饲养栏", // 豚鼠使用饲养栏
+    currentOccupancy: 90,
     status: "使用中",
     department: "生物医学研究院",
     location: "C栋1楼",
@@ -250,6 +263,6 @@ export const allDemoAnimalRoomItems = [
     lastMaintenanceDate: "2023-08-30",
     equipments: ["豚鼠繁殖笼", "恒温系统", "湿度调节"],
     notes: "豚鼠繁殖周期长，需耐心管理",
-    image: "/animal-rooms/spf-mouse-breeding-c.png"
+    image: "/animal-rooms/guinea-pig-breeding-b-new.png"
   }
 ] 
