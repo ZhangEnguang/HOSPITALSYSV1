@@ -683,7 +683,7 @@ export default function EthicProjectCard({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              {/* 项目副标题：项目编号 · 头像+项目负责人 · 所属科室 */}
+              {/* 项目副标题：项目编号 · 项目负责人 · 所属科室 */}
               <div className={cn(
                 "text-sm text-muted-foreground truncate",
                 // 伦理项目统一样式：副标题无下边距
@@ -694,23 +694,10 @@ export default function EthicProjectCard({
                   <span>{item.projectNumber || item.项目编号 || generateProjectNumber(type, item.id, item.createdAt)}</span>
                   <span className="text-gray-400">·</span>
                   
-                  {/* 头像+项目负责人 */}
+                  {/* 项目负责人（不显示头像） */}
                   {item.members && item.members.length > 0 && (
                     <>
-                      <div className="flex items-center gap-1">
-                        <div className="inline-flex items-center justify-center rounded-full h-4 w-4 bg-gray-400 text-white text-xs font-medium">
-                          {item.members[0].avatar ? (
-                            <img 
-                              src={item.members[0].avatar} 
-                              alt={item.members[0].name}
-                              className="w-full h-full rounded-full object-cover"
-                            />
-                          ) : (
-                            item.members[0].name.slice(0, 1)
-                          )}
-                        </div>
-                        <span>{item.members[0].name}</span>
-                      </div>
+                      <span>{item.members[0].name}</span>
                       <span className="text-gray-400">·</span>
                     </>
                   )}

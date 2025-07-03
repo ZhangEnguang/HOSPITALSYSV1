@@ -130,7 +130,9 @@ const fileTypeConfig = {
   adjustment: { label: "调整说明", icon: <FileText className="h-4 w-4" /> },
   progress: { label: "进展报告", icon: <Calendar className="h-4 w-4" /> },
   certificate: { label: "资质证明", icon: <FileCheck className="h-4 w-4" /> },
-  other: { label: "其他文件", icon: <FileText className="h-4 w-4" /> }
+  other: { label: "其他文件", icon: <FileText className="h-4 w-4" /> },
+  acceptance_notice: { label: "受理通知书", icon: <CheckCircle className="h-4 w-4" /> },
+  ethics_approval: { label: "伦理审批文件", icon: <FileCheck className="h-4 w-4" /> }
 }
 
 // 模拟数据
@@ -263,6 +265,79 @@ const mockReviewFiles = [
   }
 ]
 
+// 审查结果文件模拟数据
+const mockReviewResultFiles = [
+  // 初始审查结果文件
+  {
+    id: "result_1",
+    reviewType: "initial",
+    fileName: "初始审查受理通知书.pdf",
+    fileType: "acceptance_notice",
+    generateDate: "2024-01-22",
+    fileSize: "1.2MB",
+    status: "generated",
+    version: "1.0",
+    description: "初始审查申请已受理，开始正式审查流程"
+  },
+  {
+    id: "result_2", 
+    reviewType: "initial",
+    fileName: "初始审查伦理审批文件.pdf",
+    fileType: "ethics_approval",
+    generateDate: "2024-01-25",
+    fileSize: "2.8MB",
+    status: "generated",
+    version: "1.0",
+    description: "初始审查通过，项目获得伦理委员会批准"
+  },
+  // 变更审查结果文件
+  {
+    id: "result_3",
+    reviewType: "amendment",
+    fileName: "变更审查受理通知书.pdf", 
+    fileType: "acceptance_notice",
+    generateDate: "2024-03-15",
+    fileSize: "1.1MB",
+    status: "generated",
+    version: "1.0",
+    description: "方案变更申请已受理"
+  },
+  {
+    id: "result_4",
+    reviewType: "amendment", 
+    fileName: "变更审查伦理审批文件.pdf",
+    fileType: "ethics_approval",
+    generateDate: null, // 未生成
+    fileSize: null,
+    status: "pending",
+    version: null,
+    description: "变更审查批准文件待生成"
+  },
+  // 年度审查结果文件
+  {
+    id: "result_5",
+    reviewType: "annual",
+    fileName: "年度审查受理通知书.pdf",
+    fileType: "acceptance_notice", 
+    generateDate: null,
+    fileSize: null,
+    status: "pending",
+    version: null,
+    description: "年度审查受理通知书待生成"
+  },
+  {
+    id: "result_6",
+    reviewType: "annual",
+    fileName: "年度审查伦理审批文件.pdf",
+    fileType: "ethics_approval",
+    generateDate: null,
+    fileSize: null, 
+    status: "pending",
+    version: null,
+    description: "年度审查批准文件待生成"
+  }
+]
+
 interface ReviewFilesTabProps {
   projectId?: string
 }
@@ -294,6 +369,16 @@ export default function ReviewFilesTab({ projectId = "1" }: ReviewFilesTabProps)
   // 按审查类型分组
   const groupedFiles = reviewTypes.reduce((acc, type) => {
     acc[type.id] = filteredFiles.filter(file => file.reviewType === type.id)
+    return acc
+  }, {} as Record<string, any[]>)
+
+  // 按审查类型分组审查结果文件
+  const groupedResultFiles = mockReviewResultFiles.reduce((acc, file) => {
+    const type = file.reviewType
+    if (!acc[type]) {
+      acc[type] = []
+    }
+    acc[type].push(file)
     return acc
   }, {} as Record<string, any[]>)
 
@@ -501,18 +586,6 @@ export default function ReviewFilesTab({ projectId = "1" }: ReviewFilesTabProps)
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                                                 <Button
-                           variant="outline"
-                           size="sm"
-                           onClick={(e) => {
-                             e.stopPropagation()
-                             setUploadDialogOpen(true)
-                           }}
-                           className="h-8"
-                         >
-                           <Plus className="h-3.5 w-3.5 mr-1" />
-                           添加文件
-                         </Button>
                         {isExpanded ? (
                           <ChevronDown className="h-4 w-4 text-slate-400" />
                         ) : (
@@ -525,108 +598,307 @@ export default function ReviewFilesTab({ projectId = "1" }: ReviewFilesTabProps)
                 
                 <CollapsibleContent>
                   <CardContent className="pt-0">
-                    {typeFiles.length === 0 ? (
-                      <div className="text-center py-8 text-slate-500">
-                        <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                        <p className="font-medium">暂无{reviewType.name}文件</p>
-                        <p className="text-sm mt-1">点击上方"添加"按钮上传相关文件</p>
+                    {/* 送审材料部分 */}
+                    <div className="mb-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
+                        <h4 className="font-medium text-slate-800">送审材料</h4>
+                        <Badge variant="outline" className="text-xs">
+                          {typeFiles.length} 个文件
+                        </Badge>
                       </div>
-                    ) : (
-                      <div className="space-y-1">
-                        {/* 文件列表表头 */}
-                        <div className="grid grid-cols-12 gap-4 px-3 py-2 text-xs font-medium text-slate-500 bg-slate-50 rounded-md">
+                      
+                      {typeFiles.length === 0 ? (
+                        <div className="text-center py-6 text-slate-500 bg-slate-50 rounded-lg">
+                          <FileText className="h-8 w-8 mx-auto mb-3 opacity-50" />
+                          <p className="font-medium">暂无{reviewType.name}送审材料</p>
+                          <p className="text-sm mt-1">点击上方"添加文件"按钮上传相关文件</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-1 bg-blue-50/30 rounded-lg p-3">
+                          {/* 送审材料表头 */}
+                          <div className="grid grid-cols-12 gap-4 px-3 py-2 text-xs font-medium text-slate-500 bg-blue-100/50 rounded-md">
+                            <div className="col-span-4">文件信息</div>
+                            <div className="col-span-2">上传者</div>
+                            <div className="col-span-2">上传时间</div>
+                            <div className="col-span-2">状态</div>
+                            <div className="col-span-2 text-right">操作</div>
+                          </div>
+                          
+                          {/* 送审材料列表项 */}
+                          {typeFiles.map((file, index) => (
+                            <div
+                              key={file.id}
+                              className={`grid grid-cols-12 gap-4 px-3 py-3 text-sm border-b border-slate-100 hover:bg-blue-50 transition-colors ${
+                                index === typeFiles.length - 1 ? 'border-b-0' : ''
+                              }`}
+                            >
+                              {/* 文件信息 */}
+                              <div className="col-span-4 flex items-center gap-3">
+                                <div className={`w-8 h-8 rounded-md flex items-center justify-center ${fileStatusConfig[file.status as keyof typeof fileStatusConfig].bgColor}`}>
+                                  {fileTypeConfig[file.fileType as keyof typeof fileTypeConfig]?.icon}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-medium truncate text-slate-800">{file.fileName}</p>
+                                    <Badge variant="outline" className="text-xs shrink-0">
+                                      v{file.version}
+                                    </Badge>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                                    <span>{fileTypeConfig[file.fileType as keyof typeof fileTypeConfig]?.label}</span>
+                                    <span>•</span>
+                                    <span>{file.fileSize}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* 上传者 */}
+                              <div className="col-span-2 flex items-center">
+                                <div className="flex items-center gap-1">
+                                  <User className="h-3 w-3 text-slate-400" />
+                                  <span className="text-slate-600">{file.uploadUser}</span>
+                                </div>
+                              </div>
+                              
+                              {/* 上传时间 */}
+                              <div className="col-span-2 flex items-center">
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3 text-slate-400" />
+                                  <span className="text-slate-600">{file.uploadDate}</span>
+                                </div>
+                              </div>
+                              
+                              {/* 状态 */}
+                              <div className="col-span-2 flex items-center">
+                                <Badge className={fileStatusConfig[file.status as keyof typeof fileStatusConfig].color}>
+                                  {fileStatusConfig[file.status as keyof typeof fileStatusConfig].icon}
+                                  <span className="ml-1">
+                                    {fileStatusConfig[file.status as keyof typeof fileStatusConfig].label}
+                                  </span>
+                                </Badge>
+                              </div>
+                              
+                              {/* 操作 */}
+                              <div className="col-span-2 flex items-center justify-end">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => handleFilePreview(file)}>
+                                      <Eye className="h-4 w-4 mr-2" />
+                                      查看详情
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleFileDownload(file)}>
+                                      <Download className="h-4 w-4 mr-2" />
+                                      下载文件
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                      onClick={() => handleFileDelete(file.id)}
+                                      className="text-red-600"
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      删除文件
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 审查结果文件部分 */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-1 h-4 bg-green-500 rounded-full"></div>
+                        <h4 className="font-medium text-slate-800">审查结果文件</h4>
+                        <Badge variant="outline" className="text-xs">
+                          {(groupedResultFiles[reviewType.id] || []).length} 个文件
+                        </Badge>
+                      </div>
+                      
+                      <div className="space-y-1 bg-green-50/30 rounded-lg p-3">
+                        {/* 审查结果文件表头 */}
+                        <div className="grid grid-cols-12 gap-4 px-3 py-2 text-xs font-medium text-slate-500 bg-green-100/50 rounded-md">
                           <div className="col-span-4">文件信息</div>
-                          <div className="col-span-2">上传者</div>
-                          <div className="col-span-2">上传时间</div>
+                          <div className="col-span-2">文件类型</div>
+                          <div className="col-span-2">生成时间</div>
                           <div className="col-span-2">状态</div>
                           <div className="col-span-2 text-right">操作</div>
                         </div>
                         
-                        {/* 文件列表项 */}
-                        {typeFiles.map((file, index) => (
+                        {/* 审查结果文件列表项 */}
+                        {(groupedResultFiles[reviewType.id] || []).map((file, index) => (
                           <div
                             key={file.id}
-                            className={`grid grid-cols-12 gap-4 px-3 py-3 text-sm border-b border-slate-100 hover:bg-slate-50 transition-colors ${
-                              index === typeFiles.length - 1 ? 'border-b-0' : ''
+                            className={`grid grid-cols-12 gap-4 px-3 py-3 text-sm border-b border-slate-100 hover:bg-green-50 transition-colors ${
+                              index === (groupedResultFiles[reviewType.id] || []).length - 1 ? 'border-b-0' : ''
                             }`}
                           >
                             {/* 文件信息 */}
                             <div className="col-span-4 flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-md flex items-center justify-center ${fileStatusConfig[file.status as keyof typeof fileStatusConfig].bgColor}`}>
+                              <div className={`w-8 h-8 rounded-md flex items-center justify-center ${
+                                file.status === 'generated' ? 'bg-green-100' : 'bg-gray-100'
+                              }`}>
                                 {fileTypeConfig[file.fileType as keyof typeof fileTypeConfig]?.icon}
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
-                                  <p className="font-medium truncate text-slate-800">{file.fileName}</p>
-                                  <Badge variant="outline" className="text-xs shrink-0">
-                                    v{file.version}
-                                  </Badge>
+                                  <p className={`font-medium truncate ${
+                                    file.status === 'generated' ? 'text-slate-800' : 'text-slate-500'
+                                  }`}>{file.fileName}</p>
+                                  {file.version && (
+                                    <Badge variant="outline" className="text-xs shrink-0">
+                                      v{file.version}
+                                    </Badge>
+                                  )}
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-slate-500">
                                   <span>{fileTypeConfig[file.fileType as keyof typeof fileTypeConfig]?.label}</span>
-                                  <span>•</span>
-                                  <span>{file.fileSize}</span>
+                                  {file.fileSize && (
+                                    <>
+                                      <span>•</span>
+                                      <span>{file.fileSize}</span>
+                                    </>
+                                  )}
                                 </div>
                               </div>
                             </div>
                             
-                            {/* 上传者 */}
+                            {/* 文件类型 */}
                             <div className="col-span-2 flex items-center">
-                              <div className="flex items-center gap-1">
-                                <User className="h-3 w-3 text-slate-400" />
-                                <span className="text-slate-600">{file.uploadUser}</span>
-                              </div>
+                              <span className="text-slate-600">
+                                {fileTypeConfig[file.fileType as keyof typeof fileTypeConfig]?.label}
+                              </span>
                             </div>
                             
-                            {/* 上传时间 */}
+                            {/* 生成时间 */}
                             <div className="col-span-2 flex items-center">
                               <div className="flex items-center gap-1">
                                 <Calendar className="h-3 w-3 text-slate-400" />
-                                <span className="text-slate-600">{file.uploadDate}</span>
+                                <span className="text-slate-600">
+                                  {file.generateDate || '-'}
+                                </span>
                               </div>
                             </div>
                             
                             {/* 状态 */}
                             <div className="col-span-2 flex items-center">
-                              <Badge className={fileStatusConfig[file.status as keyof typeof fileStatusConfig].color}>
-                                {fileStatusConfig[file.status as keyof typeof fileStatusConfig].icon}
-                                <span className="ml-1">
-                                  {fileStatusConfig[file.status as keyof typeof fileStatusConfig].label}
-                                </span>
-                              </Badge>
+                              {file.status === 'generated' ? (
+                                <Badge className="bg-green-100 text-green-800 border border-green-200">
+                                  <CheckCircle className="h-3.5 w-3.5 mr-1" />
+                                  已生成
+                                </Badge>
+                              ) : (
+                                <Badge className="bg-gray-100 text-gray-600 border border-gray-200">
+                                  <Clock className="h-3.5 w-3.5 mr-1" />
+                                  待生成
+                                </Badge>
+                              )}
                             </div>
                             
                             {/* 操作 */}
                             <div className="col-span-2 flex items-center justify-end">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => handleFilePreview(file)}>
-                                    <Eye className="h-4 w-4 mr-2" />
-                                    查看详情
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleFileDownload(file)}>
-                                    <Download className="h-4 w-4 mr-2" />
-                                    下载文件
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem 
-                                    onClick={() => handleFileDelete(file.id)}
-                                    className="text-red-600"
-                                  >
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    删除文件
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                              {file.status === 'generated' ? (
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => handleFilePreview(file)}>
+                                      <Eye className="h-4 w-4 mr-2" />
+                                      查看详情
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleFileDownload(file)}>
+                                      <Download className="h-4 w-4 mr-2" />
+                                      下载文件
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              ) : (
+                                <span className="text-xs text-slate-400">待生成</span>
+                              )}
                             </div>
                           </div>
                         ))}
+                        
+                        {/* 如果没有审查结果文件，显示默认的两个文件 */}
+                        {(groupedResultFiles[reviewType.id] || []).length === 0 && (
+                          <>
+                            <div className="grid grid-cols-12 gap-4 px-3 py-3 text-sm border-b border-slate-100 hover:bg-green-50 transition-colors">
+                              <div className="col-span-4 flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-md flex items-center justify-center bg-gray-100">
+                                  <CheckCircle className="h-4 w-4" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium truncate text-slate-500">{reviewType.name}受理通知书.pdf</p>
+                                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                                    <span>受理通知书</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="col-span-2 flex items-center">
+                                <span className="text-slate-600">受理通知书</span>
+                              </div>
+                              <div className="col-span-2 flex items-center">
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3 text-slate-400" />
+                                  <span className="text-slate-600">-</span>
+                                </div>
+                              </div>
+                              <div className="col-span-2 flex items-center">
+                                <Badge className="bg-gray-100 text-gray-600 border border-gray-200">
+                                  <Clock className="h-3.5 w-3.5 mr-1" />
+                                  待生成
+                                </Badge>
+                              </div>
+                              <div className="col-span-2 flex items-center justify-end">
+                                <span className="text-xs text-slate-400">待生成</span>
+                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-12 gap-4 px-3 py-3 text-sm hover:bg-green-50 transition-colors">
+                              <div className="col-span-4 flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-md flex items-center justify-center bg-gray-100">
+                                  <FileCheck className="h-4 w-4" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium truncate text-slate-500">{reviewType.name}伦理审批文件.pdf</p>
+                                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                                    <span>伦理审批文件</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="col-span-2 flex items-center">
+                                <span className="text-slate-600">伦理审批文件</span>
+                              </div>
+                              <div className="col-span-2 flex items-center">
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3 text-slate-400" />
+                                  <span className="text-slate-600">-</span>
+                                </div>
+                              </div>
+                              <div className="col-span-2 flex items-center">
+                                <Badge className="bg-gray-100 text-gray-600 border border-gray-200">
+                                  <Clock className="h-3.5 w-3.5 mr-1" />
+                                  待生成
+                                </Badge>
+                              </div>
+                              <div className="col-span-2 flex items-center justify-end">
+                                <span className="text-xs text-slate-400">待生成</span>
+                              </div>
+                            </div>
+                          </>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </CardContent>
                 </CollapsibleContent>
               </Collapsible>
