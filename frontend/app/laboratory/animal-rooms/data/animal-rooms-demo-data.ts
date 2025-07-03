@@ -19,7 +19,7 @@ export const allDemoAnimalRoomItems = [
     lastMaintenanceDate: "2023-12-20",
     equipments: ["独立通风系统", "温湿度控制器", "紫外线消毒灯"],
     notes: "定期检查通风系统运行状态",
-    image: "/animal-rooms/image.png"
+    image: "/animal-rooms/spf-rat-room-1.png"
   },
   {
     id: "AR-002",
@@ -40,7 +40,7 @@ export const allDemoAnimalRoomItems = [
     lastMaintenanceDate: "2023-12-25",
     equipments: ["层流净化设备", "高效过滤器", "压差监控系统"],
     notes: "每日检查无菌指标",
-    image: "/animal-rooms/image copy.png"
+    image: "/animal-rooms/sterile-mouse-room.png"
   },
   {
     id: "AR-003",
@@ -61,7 +61,7 @@ export const allDemoAnimalRoomItems = [
     lastMaintenanceDate: "2023-11-15",
     equipments: ["通风扇", "温湿度计", "清洁工具"],
     notes: "注意观察兔子健康状况",
-    image: "/animal-rooms/image copy 2.png"
+    image: "/animal-rooms/regular-rabbit-room.png"
   },
   {
     id: "AR-004",
@@ -82,7 +82,7 @@ export const allDemoAnimalRoomItems = [
     lastMaintenanceDate: "2023-12-10",
     equipments: ["繁殖笼具", "独立通风", "恒温恒湿系统"],
     notes: "繁殖期间请保持安静环境",
-    image: "/animal-rooms/image copy 3.png"
+    image: "/animal-rooms/spf-mouse-breeding-a.png"
   },
   {
     id: "AR-005",
@@ -103,7 +103,7 @@ export const allDemoAnimalRoomItems = [
     lastMaintenanceDate: "2023-12-30",
     equipments: ["繁殖笼具", "新生儿保温箱", "哺乳期监控"],
     notes: "繁殖季节，注意母鼠营养补充",
-    image: "/animal-rooms/image copy 10.png"
+    image: "/animal-rooms/rat-breeding-1.png"
   },
   {
     id: "AR-006",
@@ -124,7 +124,7 @@ export const allDemoAnimalRoomItems = [
     lastMaintenanceDate: "2023-12-15",
     equipments: ["专用笼具", "喂食系统", "饮水装置"],
     notes: "豚鼠对环境敏感，注意温度控制",
-    image: "/animal-rooms/image copy 9.png"
+    image: "/animal-rooms/guinea-pig-room.png"
   },
   {
     id: "AR-007",
@@ -145,7 +145,7 @@ export const allDemoAnimalRoomItems = [
     lastMaintenanceDate: "2023-12-08",
     equipments: ["群体饲养笼", "自动饮水系统", "通风净化"],
     notes: "群体饲养，定期观察社群行为",
-    image: "/animal-rooms/image copy 6.png"
+    image: "/animal-rooms/mouse-group-room.png"
   },
   {
     id: "AR-008",
@@ -166,7 +166,7 @@ export const allDemoAnimalRoomItems = [
     lastMaintenanceDate: "2023-12-22",
     equipments: ["SPF繁殖笼", "独立通风", "恒温恒湿系统"],
     notes: "SPF繁殖期间，严格控制人员进出",
-    image: "/animal-rooms/image copy 7.png"
+    image: "/animal-rooms/spf-rat-breeding.png"
   },
   {
     id: "AR-009",
@@ -187,7 +187,7 @@ export const allDemoAnimalRoomItems = [
     lastMaintenanceDate: "2024-01-05",
     equipments: ["繁殖笼具", "产仔箱", "保温设备"],
     notes: "产仔期间需要安静环境",
-    image: "/animal-rooms/image copy 8.png"
+    image: "/animal-rooms/rabbit-breeding-a.png"
   },
   {
     id: "AR-010",
@@ -207,8 +207,8 @@ export const allDemoAnimalRoomItems = [
     lastCleaningDate: "2023-12-31",
     lastMaintenanceDate: "2023-11-28",
     equipments: ["无菌繁殖设备", "层流净化", "压差监控"],
-    notes: "无菌繁殖，人员需穿戴防护服",
-    image: "/animal-rooms/image copy 5.png"
+    notes: "无菌环境，严格消毒",
+    image: "/animal-rooms/sterile-mouse-breeding.png"
   },
   {
     id: "AR-011",
@@ -229,7 +229,7 @@ export const allDemoAnimalRoomItems = [
     lastMaintenanceDate: "2023-12-18",
     equipments: ["SPF饲养笼", "独立通风", "环境监控"],
     notes: "SPF环境，严格按标准操作",
-    image: "/animal-rooms/image copy 4.png"
+    image: "/animal-rooms/spf-mouse-breeding-b.png"
   },
   {
     id: "AR-012",
@@ -250,6 +250,6 @@ export const allDemoAnimalRoomItems = [
     lastMaintenanceDate: "2023-08-30",
     equipments: ["豚鼠繁殖笼", "恒温系统", "湿度调节"],
     notes: "豚鼠繁殖周期长，需耐心管理",
-    image: "/animal-rooms/image copy 11.png"
+    image: "/animal-rooms/spf-mouse-breeding-c.png"
   }
 ] 
