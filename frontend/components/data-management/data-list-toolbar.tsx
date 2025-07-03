@@ -126,49 +126,54 @@ export default function DataListToolbar({
 
             {quickFilters &&
               quickFilters.map((filter) => {
-                // Check if category exists and is not an empty string
-                const useDict = filter.category && filter.category.trim() !== '' && filter.category !== 'default';
-                // Check if options exist and likely have items (truthy check is often enough for arrays)
-                const useSelect = !useDict && filter.options && filter.options.length > 0; 
-                if (useDict) {
-                  // Render Dict component if category is present
-                  return (
-                    <Dict
-                      key={filter.id}
-                      dictCode={filter.category}
-                      displayType="select"
-                      value={quickFilterValues[filter.id]} // Use id for value lookup
-                      setFormData={handleDictChange}       // Use custom handler
-                      field={filter.id}                // Use id for field identification
-                      className="w-[120px]"
-                      placeholder={filter.label}
-                    />
-                  );
-                } else if (useSelect) {
-                  // Render Select component if options are present and category is not
-                  return (
-                    <Select
-                      key={filter.id}
-                      value={quickFilterValues[filter.id] || "all"} // Use id for value lookup
-                      // Directly call onQuickFilterChange for Select
-                      onValueChange={(value) => onQuickFilterChange?.(filter.id, value === 'all' ? '' : value)} 
-                    >
-                      <SelectTrigger className="w-[120px]">
-                        <SelectValue placeholder={filter.label} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">全部{filter.label}</SelectItem>
-                        {filter.options.map((option) => (
-                          <SelectItem key={option.id} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  );
-                } else {
-                  // Optionally render nothing or a placeholder if neither condition met
-                  return null; 
+                try {
+                  // Check if category exists and is not an empty string
+                  const useDict = filter.category && filter.category.trim() !== '' && filter.category !== 'default';
+                  // Check if options exist and likely have items (truthy check is often enough for arrays)
+                  const useSelect = !useDict && filter.options && filter.options.length > 0; 
+                  if (useDict) {
+                    // Render Dict component if category is present
+                    return (
+                      <Dict
+                        key={filter.id}
+                        dictCode={filter.category}
+                        displayType="select"
+                        value={quickFilterValues[filter.id]} // Use id for value lookup
+                        setFormData={handleDictChange}       // Use custom handler
+                        field={filter.id}                // Use id for field identification
+                        className="w-[120px]"
+                        placeholder={filter.label}
+                      />
+                    );
+                  } else if (useSelect) {
+                    // Render Select component if options are present and category is not
+                    return (
+                      <Select
+                        key={filter.id}
+                        value={quickFilterValues[filter.id] || "all"} // Use id for value lookup
+                        // Directly call onQuickFilterChange for Select
+                        onValueChange={(value) => onQuickFilterChange?.(filter.id, value === 'all' ? '' : value)} 
+                      >
+                        <SelectTrigger className="w-[120px]">
+                          <SelectValue placeholder={filter.label} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">全部{filter.label}</SelectItem>
+                          {filter.options && filter.options.map((option) => (
+                            <SelectItem key={option.id || option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    );
+                  } else {
+                    // Optionally render nothing or a placeholder if neither condition met
+                    return null; 
+                  }
+                } catch (error) {
+                  console.error('Error rendering filter:', filter, error);
+                  return null;
                 }
               })}
 

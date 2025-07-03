@@ -308,7 +308,10 @@ function ConsumableContent() {
   }
 
   // 处理行操作
-  const handleRowAction = (actionId: string, item: any) => {
+  const handleRowAction = (action: any, item: any) => {
+    // 兼容处理：如果第一个参数是字符串，则认为是actionId
+    const actionId = typeof action === 'string' ? action : action.id;
+    
     if (actionId === "view") {
       router.push(`/laboratory/consumables/${item.id}`)
     } else if (actionId === "edit") {

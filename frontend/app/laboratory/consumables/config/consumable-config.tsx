@@ -927,7 +927,7 @@ export const consumableCustomCardRenderer = (
     ...action,
     onClick: (item: any, e: React.MouseEvent) => {
       if (onRowActionClick) {
-        onRowActionClick(action.id, item);
+        onRowActionClick(action, item);
       } else if (action.onClick) {
         // 对于耗材入库操作，传递弹框回调函数
         if (action.id === "stockIn" && onOpenStockInDialog) {

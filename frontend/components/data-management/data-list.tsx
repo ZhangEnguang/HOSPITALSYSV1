@@ -1,8 +1,6 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import DataListHeader from "./data-list-header"
 import DataListToolbar from "./data-list-toolbar"
@@ -381,23 +379,32 @@ export default function DataList({
           currentPageData.map((item) => {
             // 如果提供了customCardRenderer，则使用自定义卡片渲染函数
             if (customCardRenderer) {
-              return (
-                <div key={item.id}>
-                  {customCardRenderer(
-                    item, 
-                    cardActions, 
-                    selectedRows.includes(item.id), 
-                    (selected: boolean) => {
-                      if (selected) {
-                        onSelectedRowsChange([...selectedRows, item.id]);
-                      } else {
-                        onSelectedRowsChange(selectedRows.filter((id) => id !== item.id));
-                      }
-                    },
-                    onRowActionClick
-                  )}
-                </div>
-              );
+              try {
+                const renderedCard = customCardRenderer(
+                  item, 
+                  cardActions, 
+                  selectedRows.includes(item.id), 
+                  (selected: boolean) => {
+                    if (selected) {
+                      onSelectedRowsChange([...selectedRows, item.id]);
+                    } else {
+                      onSelectedRowsChange(selectedRows.filter((id) => id !== item.id));
+                    }
+                  },
+                  onRowActionClick
+                );
+                
+                // 确保返回的是有效的React元素
+                if (renderedCard && React.isValidElement(renderedCard)) {
+                  return <div key={item.id}>{renderedCard}</div>;
+                } else {
+                  console.warn('Custom card renderer returned invalid React element:', renderedCard);
+                  return null;
+                }
+              } catch (error) {
+                console.error('Error in custom card renderer:', error);
+                return null;
+              }
             }
 
             // 处理卡片操作，将onRowActionClick函数应用到卡片操作
