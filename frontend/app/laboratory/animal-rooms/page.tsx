@@ -44,7 +44,7 @@ function AnimalRoomsContent() {
   const [animalRoomItems, setAnimalRoomItems] = useState(allDemoAnimalRoomItems)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterValues, setFilterValues] = useState<Record<string, any>>({})
-  const [sortOption, setSortOption] = useState("smart_desc")
+  const [sortOption, setSortOption] = useState("roomId_asc")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)

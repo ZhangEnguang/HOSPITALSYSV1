@@ -581,17 +581,19 @@ const EquipmentCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* 动态勾选组件 */}
-      {(() => {
-        const SelectionComponent = SELECTION_VARIANTS[CARD_SELECTION_CONFIG.currentVariant]
-        return (
-          <SelectionComponent 
-            isHovered={isHovered}
-            isSelected={isSelected}
-            onToggleSelect={() => onToggleSelect(!isSelected)}
-          />
-        )
-      })()}
+      {/* 动态勾选组件 - 提高z-index层级 */}
+      <div className="relative z-20">
+        {(() => {
+          const SelectionComponent = SELECTION_VARIANTS[CARD_SELECTION_CONFIG.currentVariant]
+          return (
+            <SelectionComponent 
+              isHovered={isHovered}
+              isSelected={isSelected}
+              onToggleSelect={() => onToggleSelect(!isSelected)}
+            />
+          )
+        })()}
+      </div>
 
       {/* 选中状态的装饰性元素 */}
       {isSelected && (
@@ -642,6 +644,19 @@ const EquipmentCard = ({
             </div>
           )}
         </div>
+
+        {/* 可预约/不可预约标签 - 移动到左上角 */}
+        <div className="absolute top-2 left-2 z-[5]">
+          {item.status === "正常" ? (
+            <span className="text-xs px-2 py-0.5 bg-green-50 text-green-600 rounded-full border border-green-200 leading-none">
+              可预约
+            </span>
+          ) : (
+            <span className="text-xs px-2 py-0.5 bg-gray-50 text-gray-500 rounded-full border border-gray-200 leading-none">
+              不可预约
+            </span>
+          )}
+        </div>
         
         {/* 操作按钮 - 移动到图片区域右上角 */}
         {actions && actions.length > 0 && (
@@ -684,45 +699,32 @@ const EquipmentCard = ({
       <div className="pt-5 px-5 pb-4 flex flex-col flex-1 min-h-0">
         {/* 标题和型号 */}
         <div className="flex-shrink-0 mb-2">
-          <h3 className={cn(
-            "font-medium text-sm truncate leading-tight mb-1 transition-colors duration-300",
-            isSelected ? "text-primary" : "text-gray-900 group-hover:text-primary"
-          )}>
-              {item.name}
-            </h3>
-          <p className={cn(
-            "text-xs truncate leading-relaxed transition-colors duration-300",
-            isSelected ? "text-primary/70" : "text-muted-foreground"
-          )}>
-              {item.model}
-            </p>
+          <h3 
+            className={cn(
+              "truncate leading-tight mb-1 transition-colors duration-300 !text-base font-medium",
+              isSelected ? "text-primary" : "text-gray-900 group-hover:text-primary"
+            )}
+          >
+            {item.name}
+          </h3>
+          <p 
+            className={cn(
+              "truncate leading-relaxed transition-colors duration-300 !text-sm",
+              isSelected ? "text-primary/70" : "text-muted-foreground"
+            )}
+          >
+            {item.model}
+          </p>
         </div>
 
         {/* 填充空间 */}
         <div className="flex-1 min-h-0"></div>
         
-        {/* 预约次数和使用状态 - 固定在底部 */}
-        <div className="flex-shrink-0 flex items-center justify-between pt-2.5 border-t border-gray-100">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground leading-none">
+        {/* 预约次数 - 固定在底部 */}
+        <div className="flex-shrink-0 pt-2.5 border-t border-gray-100">
+          <span className="text-muted-foreground leading-none !text-sm">
             预约次数：{item.bookingCount || 0}次
           </span>
-            {item.status === "正常" ? (
-              <span className="text-xs px-2 py-0.5 bg-green-50 text-green-600 rounded-full border border-green-200 leading-none">
-                可预约
-              </span>
-            ) : (
-              <span className="text-xs px-2 py-0.5 bg-gray-50 text-gray-500 rounded-full border border-gray-200 leading-none">
-                不可预约
-              </span>
-            )}
-          </div>
-          <Badge 
-            variant={(statusColors[item.status] || "secondary") as any}
-            className="font-medium text-xs leading-none"
-          >
-            {item.status}
-          </Badge>
         </div>
       </div>
     </Card>

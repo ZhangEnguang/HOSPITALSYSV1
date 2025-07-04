@@ -8,7 +8,7 @@ export const allDemoAnimalRoomItems = [
     type: "SPF饲养间",
     capacity: 350,
     capacityUnit: "饲养笼", // 大鼠使用饲养笼
-    currentOccupancy: 285,
+    currentOccupancy: 180,
     status: "使用中",
     department: "动物实验中心",
     location: "A栋1楼",
@@ -30,7 +30,7 @@ export const allDemoAnimalRoomItems = [
     type: "无菌饲养间",
     capacity: 280,
     capacityUnit: "饲养笼", // 小鼠使用饲养笼
-    currentOccupancy: 235,
+    currentOccupancy: 145,
     status: "使用中",
     department: "生物医学研究院",
     location: "A栋2楼",
@@ -52,7 +52,7 @@ export const allDemoAnimalRoomItems = [
     type: "普通饲养间", 
     capacity: 450,
     capacityUnit: "饲养栏", // 兔子使用饲养栏
-    currentOccupancy: 365,
+    currentOccupancy: 220,
     status: "使用中",
     department: "药学院",
     location: "B栋1楼",
@@ -74,7 +74,7 @@ export const allDemoAnimalRoomItems = [
     type: "SPF繁殖间",
     capacity: 180,
     capacityUnit: "饲养笼", // 小鼠使用饲养笼
-    currentOccupancy: 156,
+    currentOccupancy: 95,
     status: "使用中",
     department: "基础医学院",
     location: "B栋2楼",

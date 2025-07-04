@@ -224,7 +224,7 @@ export default function DataListToolbar({
                     排序
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent>
+                <DropdownMenuContent align="end" className="w-[280px]">
                   <DropdownMenuLabel>排序方式</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   {sortOptions.map((option) => (

@@ -188,7 +188,13 @@ export const advancedFilters = [
 
 // 排序选项
 export const sortOptions = [
-  { id: "smart_desc", field: "smart", direction: "desc" as const, label: "智能排序" },
+  { 
+    id: "smart_desc", 
+    field: "smart", 
+    direction: "desc" as const, 
+    label: "🤖 智能排序 (推荐)",
+    description: "状态优先级 → 使用率 → 容量 → 房间号"
+  },
   { id: "roomId_asc", field: "roomId", direction: "asc" as const, label: "房间编号 ↑" },
   { id: "roomId_desc", field: "roomId", direction: "desc" as const, label: "房间编号 ↓" },
   { id: "name_asc", field: "name", direction: "asc" as const, label: "房间名称 ↑" },
@@ -406,15 +412,9 @@ const AnimalRoomCard = ({
   const [showDropdown, setShowDropdown] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [imageError, setImageError] = useState(false)
-  
-
-
-
 
   // 获取卡片选中配置
   const SelectionComponent = SELECTION_VARIANTS[CARD_SELECTION_CONFIG.currentVariant]
-
-
 
   // 根据房间类型获取默认图标
   const getRoomTypeIcon = () => {
@@ -425,17 +425,19 @@ const AnimalRoomCard = ({
     if (type.includes("普通")) return "🏠"
     return "🏠"
   }
+
+  // 计算使用率
+  const usageRate = Math.round((item.currentOccupancy / item.capacity) * 100)
   
   return (
     <Card
       className={cn(
         "group relative transition-all duration-300 border cursor-pointer",
         "border-[#E9ECF2] shadow-sm hover:shadow-[0px_38px_45px_0px_rgba(198,210,241,0.25)]",
-        "flex flex-col w-full h-full", // 确保卡片占据完整宽度和高度且为flex布局
+        "flex flex-col w-full h-full overflow-hidden",
         isSelected 
           ? "border-primary/50 shadow-[0_0_0_2px_rgba(59,130,246,0.1)]" 
           : "hover:border-primary/20",
-        "overflow-hidden"
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -459,14 +461,14 @@ const AnimalRoomCard = ({
         </>
       )}
 
-      {/* 操作按钮 - 移到图片区域 */}
-      <div className="absolute top-2 right-2 z-20">
+      {/* 操作按钮 */}
+      <div className="absolute top-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <DropdownMenu open={showDropdown} onOpenChange={setShowDropdown}>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-white hover:text-white hover:bg-black/30 bg-black/20 backdrop-blur-sm transition-all duration-300 opacity-70 hover:opacity-100"
+              className="h-8 w-8 bg-white/90 hover:bg-white shadow-sm border border-gray-200/50 text-gray-600 hover:text-gray-900 transition-all duration-300"
               onClick={(e) => {
                 e.stopPropagation()
                 setShowDropdown(!showDropdown)
@@ -498,76 +500,148 @@ const AnimalRoomCard = ({
       </div>
 
       {/* 图片区域 */}
-      <div className="relative w-full h-48 bg-gray-100 overflow-hidden">
+      <div className="relative w-full h-40 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
         {!imageError && item.image ? (
           <img
             src={item.image}
             alt={item.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             onError={() => setImageError(true)}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
             <div className="text-center">
-              <div className="text-4xl mb-2">{getRoomTypeIcon()}</div>
-              <div className="text-sm text-gray-500 font-medium">{item.type}</div>
+              <div className="text-3xl mb-2 opacity-60">{getRoomTypeIcon()}</div>
+              <div className="text-xs text-gray-400 font-medium tracking-wide uppercase">{item.type}</div>
             </div>
           </div>
         )}
         
-
+        {/* 状态标识 */}
+        <div className="absolute top-3 left-3">
+          <Badge
+            variant={statusColors[item.status] ? statusColors[item.status] as any : "secondary"}
+            className="text-xs font-medium shadow-sm backdrop-blur-sm bg-white/90"
+          >
+            {item.status}
+          </Badge>
+        </div>
       </div>
 
-      <div className="flex flex-col flex-1 min-h-0" style={{ padding: '20px' }}>
-        {/* 标题和状态 */}
-        <div className="flex-shrink-0" style={{ marginBottom: '8px' }}>
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className={cn(
-              "font-semibold text-base leading-tight transition-colors duration-300 flex-1 min-w-0 truncate",
-              isSelected ? "text-primary" : "text-gray-900 group-hover:text-primary"
-            )}>
-              {item.name}
-            </h3>
-            <Badge
-              variant={statusColors[item.status] ? statusColors[item.status] as any : "secondary"}
-              className="text-xs font-medium flex-shrink-0"
-            >
-              {item.status}
-            </Badge>
-          </div>
-          <p className={cn(
-            "text-sm text-muted-foreground truncate leading-relaxed transition-colors duration-300",
-            isSelected && "text-primary/70"
+      {/* 内容区域 */}
+      <div className="flex flex-col flex-1 p-5 min-h-0">
+        {/* 标题区域 */}
+        <div className="mb-4">
+          <h3 className={cn(
+            "leading-tight mb-1 transition-colors duration-300 !text-base font-medium",
+            isSelected ? "text-primary" : "text-gray-900 group-hover:text-primary"
           )}>
-            {item.roomId} · {item.type}
-          </p>
+            {item.name}
+          </h3>
+          <div className="flex items-center gap-2 !text-sm text-gray-500">
+            <span className="font-mono font-medium">{item.roomId}</span>
+            <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+            <span>{item.department}</span>
+          </div>
         </div>
 
-        {/* 容量/已预约信息 */}
-        <div className="flex-shrink-0" style={{ marginBottom: '8px' }}>
-          <div className="flex items-center gap-1">
-            <Users className="h-4 w-4 text-muted-foreground" />
-            <div className="flex items-center gap-1 text-sm">
-              <span className="text-gray-500">容量</span>
-              <span className="font-medium text-gray-700">{item.capacity}</span>
-              <span className="text-gray-400">|</span>
-              <span className="text-gray-500">已预约</span>
-              <span className="font-medium text-gray-700">{item.currentOccupancy}</span>
+        {/* 容量信息 - 创新展示 */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between">
+            {/* 左侧：圆环进度 + 数据 */}
+            <div className="flex items-center gap-3">
+              <div className="relative w-12 h-12 flex items-center justify-center">
+                {/* 背景圆环 */}
+                <svg className="w-12 h-12 transform -rotate-90" viewBox="0 0 48 48">
+                  <circle
+                    cx="24"
+                    cy="24"
+                    r="18"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    fill="none"
+                    className="text-gray-100"
+                  />
+                  <circle
+                    cx="24"
+                    cy="24"
+                    r="18"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    fill="none"
+                    strokeDasharray={`${2 * Math.PI * 18}`}
+                    strokeDashoffset={`${2 * Math.PI * 18 * (1 - usageRate / 100)}`}
+                    className={cn(
+                      "transition-all duration-1000 ease-out",
+                      usageRate >= 90 ? "text-red-400" :
+                      usageRate >= 70 ? "text-amber-400" :
+                      "text-emerald-400"
+                    )}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                {/* 中心百分比 */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className={cn(
+                    "text-xs font-bold transition-colors duration-300",
+                    usageRate >= 90 ? "text-red-500" :
+                    usageRate >= 70 ? "text-amber-500" :
+                    "text-emerald-500"
+                  )}>
+                    {usageRate}%
+                  </span>
+                </div>
+              </div>
+              
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Users className="h-4 w-4 text-gray-400" />
+                  <span className="!text-sm font-medium text-gray-700">使用情况</span>
+                </div>
+                <div className="!text-sm text-gray-600">
+                  <span className="font-medium text-gray-900">{item.currentOccupancy}</span>
+                  <span className="text-gray-400 mx-1">/</span>
+                  <span className="text-gray-500">{item.capacity}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 右侧：状态指示器 */}
+            <div className="flex flex-col items-end">
+              <div className={cn(
+                "w-3 h-3 rounded-full mb-1 transition-all duration-500",
+                usageRate >= 90 ? "bg-red-400 shadow-lg shadow-red-200" :
+                usageRate >= 70 ? "bg-amber-400 shadow-lg shadow-amber-200" :
+                "bg-emerald-400 shadow-lg shadow-emerald-200"
+              )}>
+                <div className={cn(
+                  "w-full h-full rounded-full animate-pulse",
+                  usageRate >= 90 ? "bg-red-300" :
+                  usageRate >= 70 ? "bg-amber-300" :
+                  "bg-emerald-300"
+                )}></div>
+              </div>
+              <span className="!text-sm text-gray-500 font-medium">
+                {usageRate >= 90 ? "高负荷" :
+                 usageRate >= 70 ? "中负荷" :
+                 "低负荷"}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* 环境信息 - 最后一个元素，不需要下边距 */}
-        <div className="flex-shrink-0">
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-1">
-              <Thermometer className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{item.temperature}°C</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Droplets className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{item.humidity}%</span>
-            </div>
+        {/* 环境信息 - 简化设计 */}
+        <div className="flex items-center justify-between !text-sm">
+          <div className="flex items-center gap-1 text-gray-600">
+            <Thermometer className="h-4 w-4 text-blue-500" />
+            <span className="font-medium">{item.temperature}°C</span>
+          </div>
+          <div className="flex items-center gap-1 text-gray-600">
+            <Droplets className="h-4 w-4 text-blue-500" />
+            <span className="font-medium">{item.humidity}%</span>
+          </div>
+          <div className="text-xs text-gray-400 font-medium tracking-wide">
+            {item.location}
           </div>
         </div>
       </div>
