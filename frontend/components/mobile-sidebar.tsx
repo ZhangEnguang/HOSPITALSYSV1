@@ -18,6 +18,11 @@ import {
   ClipboardCheck,
   Microscope,
   FlaskConical,
+  ShieldCheck,
+  Gavel,
+  Dna,
+  Rabbit,
+  TestTube,
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -39,9 +44,11 @@ export default function MobileSidebar() {
     { name: "待办事项", icon: <CheckSquare className="h-5 w-5" />, path: "/todos" },
     { name: "申报管理", icon: <ClipboardList className="h-5 w-5" />, path: "/applications" },
     { name: "项目管理", icon: <FolderOpen className="h-5 w-5" />, path: "/projects" },
-    { name: "伦理项目", icon: <Microscope className="h-5 w-5" />, path: "/ethic-projects" },
+    { name: "伦理项目", icon: <ShieldCheck className="h-5 w-5" />, path: "/ethic-projects" },
     { name: "伦理审查", icon: <ClipboardCheck className="h-5 w-5" />, path: "#" },
-    { name: "实验室", icon: <FlaskConical className="h-5 w-5" />, path: "/laboratory/animal-files" },
+    { name: "人遗专项", icon: <Dna className="h-5 w-5" />, path: "/ethic-review/human-genetics-review" },
+    { name: "动物中心", icon: <Rabbit className="h-5 w-5" />, path: "/laboratory/animal-files" },
+    { name: "实验室", icon: <FlaskConical className="h-5 w-5" />, path: "/laboratory/equipment" },
     { name: "进度管理", icon: <LineChart className="h-5 w-5" />, path: "/progress" },
     { name: "日历", icon: <Calendar className="h-5 w-5" />, path: "/calendar" },
     { name: "经费管理", icon: <Wallet className="h-5 w-5" />, path: "/funds" },

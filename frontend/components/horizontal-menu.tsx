@@ -29,6 +29,11 @@ import {
   Microscope,
   ClipboardCheck,
   FlaskConical,
+  ShieldCheck,
+  Gavel,
+  Dna,
+  Rabbit,
+  TestTube,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -78,6 +83,8 @@ export default function HorizontalMenu() {
       case "项目管理": return "项目";
       case "伦理项目": return "伦理";
       case "伦理审查": return "审查";
+      case "人遗专项": return "人遗";
+      case "动物中心": return "动物";
       case "实验室": return "实验";
       case "进度管理": return "进度";
       case "日历": return "日历";
@@ -135,7 +142,7 @@ export default function HorizontalMenu() {
     { 
       name: "伦理项目", 
       shortName: "伦理",
-      icon: <Microscope className="h-5 w-5" />, 
+      icon: <ShieldCheck className="h-5 w-5" />, 
       path: "/ethic-projects",
       subMenus: [
         { name: "动物伦理", path: "/ethic-projects?tab=animal" },
@@ -150,7 +157,26 @@ export default function HorizontalMenu() {
       subMenus: [
         { name: "初始审查", path: "/ethic-review/initial-review" },
         { name: "跟踪报告", path: "/ethic-review/track-review" },
+      ]
+    },
+    { 
+      name: "人遗专项", 
+      shortName: "人遗",
+      icon: <Dna className="h-5 w-5" />, 
+      path: "#",
+      subMenus: [
         { name: "人遗资源", path: "/ethic-review/human-genetics-review" },
+      ]
+    },
+    { 
+      name: "动物中心", 
+      shortName: "动物",
+      icon: <Rabbit className="h-5 w-5" />, 
+      path: "#",
+      subMenus: [
+        { name: "动物房", path: "/laboratory/animal-rooms" },
+        { name: "笼位预约", path: "/laboratory/cage-booking" },
+        { name: "动物档案", path: "/laboratory/animal-files" },
       ]
     },
     { 
