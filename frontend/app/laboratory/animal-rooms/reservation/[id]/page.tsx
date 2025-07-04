@@ -50,6 +50,13 @@ interface CageData {
   number: number
   status: CageStatus
   notes?: string
+  reservationInfo?: {
+    applicantName: string
+    department: string
+    startTime: string
+    endTime: string
+    reservationId: string
+  }
 }
 
 // 预约表单数据接口
@@ -60,12 +67,27 @@ interface ReservationForm {
   contactPhone: string
   purpose: string
   notes: string
+  startTime: string
+  endTime: string
+  duration: string
+  // 动物信息字段
+  animalSpecies: string
+  animalStrain: string
+  animalAge: string
+  animalCount: string
+  genderRatio: string
 }
 
 export default function AnimalRoomReservationPage() {
   const params = useParams()
   const router = useRouter()
   const roomId = params?.id as string
+
+  // 模拟当前用户信息（在实际应用中应该从认证系统获取）
+  const currentUser = {
+    name: "张三", // 当前登录用户姓名
+    department: "生物医学研究院" // 当前用户所属单位
+  }
 
   // 获取动物房数据
   const roomData = allDemoAnimalRoomItems.find(room => room.id === roomId)
@@ -76,14 +98,49 @@ export default function AnimalRoomReservationPage() {
   const [isCageAreaExpanded, setIsCageAreaExpanded] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [quickReservationCount, setQuickReservationCount] = useState<string>("")
+  const [isReservationFormExpanded, setIsReservationFormExpanded] = useState(false)
   const [reservationForm, setReservationForm] = useState<ReservationForm>({
     applicantName: "",
     department: "",
     relatedProject: "",
     contactPhone: "",
     purpose: "",
-    notes: ""
+    notes: "",
+    startTime: "",
+    endTime: "",
+    duration: "",
+    // 动物信息字段初始化
+    animalSpecies: "",
+    animalStrain: "",
+    animalAge: "",
+    animalCount: "",
+    genderRatio: ""
   })
+
+  // 检查并释放过期预约
+  const checkExpiredReservations = () => {
+    const now = new Date()
+    setCages(prev => prev.map(cage => {
+      if (cage.reservationInfo && cage.status === "unavailable") {
+        const endTime = new Date(cage.reservationInfo.endTime)
+        if (now > endTime) {
+          // 预约已过期，释放笼位
+          return {
+            ...cage,
+            status: "available",
+            reservationInfo: undefined
+          }
+        }
+      }
+      return cage
+    }))
+  }
+
+  // 定时检查过期预约（每分钟检查一次）
+  useEffect(() => {
+    const interval = setInterval(checkExpiredReservations, 60000) // 60秒检查一次
+    return () => clearInterval(interval)
+  }, [])
 
   // 分页配置
   const CAGES_PER_PAGE = 25
@@ -127,7 +184,8 @@ export default function AnimalRoomReservationPage() {
           id: `cage-${i}`,
           number: i,
           status,
-          notes: ""
+          notes: "",
+          reservationInfo: undefined
         })
       }
       
@@ -192,16 +250,39 @@ export default function AnimalRoomReservationPage() {
     }
   }
 
+  // 检查笼位是否为当前用户预约
+  const isMyReservation = (cage: CageData) => {
+    return cage.reservationInfo && 
+           cage.reservationInfo.applicantName === currentUser.name &&
+           cage.reservationInfo.department === currentUser.department
+  }
+
   // 处理笼位选择
   const handleCageSelect = (cageId: string) => {
     const cage = cages.find(c => c.id === cageId)
     if (cage?.status !== "available") return
 
-    setSelectedCages(prev => 
-      prev.includes(cageId) 
-        ? prev.filter(id => id !== cageId)
-        : [...prev, cageId]
-    )
+    const newSelectedCages = selectedCages.includes(cageId) 
+      ? selectedCages.filter(id => id !== cageId)
+      : [...selectedCages, cageId]
+    
+    setSelectedCages(newSelectedCages)
+    
+    // 智能展开/收缩预约表单
+    if (newSelectedCages.length > 0 && !isReservationFormExpanded) {
+      // 选择笼位后自动展开
+      setIsReservationFormExpanded(true)
+      // 延迟滚动到表单位置
+      setTimeout(() => {
+        const formElement = document.getElementById('reservation-form')
+        if (formElement) {
+          formElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }, 300)
+    } else if (newSelectedCages.length === 0) {
+      // 取消所有选择时自动收缩
+      setIsReservationFormExpanded(false)
+    }
   }
 
   // 快捷预约功能
@@ -259,7 +340,20 @@ export default function AnimalRoomReservationPage() {
     }
 
     // 更新选中状态
-    setSelectedCages(selectedGroup.map(cage => cage.id))
+    const newSelectedCages = selectedGroup.map(cage => cage.id)
+    setSelectedCages(newSelectedCages)
+    
+    // 智能展开预约表单
+    if (!isReservationFormExpanded) {
+      setIsReservationFormExpanded(true)
+      // 延迟滚动到表单位置
+      setTimeout(() => {
+        const formElement = document.getElementById('reservation-form')
+        if (formElement) {
+          formElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }, 300)
+    }
     
     // 跳转到第一个选中笼位所在的页面
     const firstCageNumber = selectedGroup[0].number
@@ -303,56 +397,205 @@ export default function AnimalRoomReservationPage() {
     }
   }
 
-  // 提交预约
-  const handleSubmitReservation = () => {
-    if (selectedCages.length === 0) {
+  // 时间验证函数
+  const validateTimeRange = (startTime: string, endTime: string) => {
+    if (!startTime || !endTime) return false
+    
+    const start = new Date(startTime)
+    const end = new Date(endTime)
+    const now = new Date()
+    
+    // 开始时间不能早于当前时间
+    if (start < now) {
       toast({
-        title: `请选择${roomData?.capacityUnit || '笼位'}`,
-        description: `请至少选择一个可预约的${roomData?.capacityUnit || '笼位'}`,
+        title: "时间设置错误",
+        description: "开始时间不能早于当前时间",
         variant: "destructive"
       })
-      return
+      return false
     }
-
-    if (!reservationForm.applicantName || !reservationForm.department) {
+    
+    // 结束时间必须晚于开始时间
+    if (end <= start) {
       toast({
-        title: "请填写必填信息",
-        description: "预约人和所属单位为必填项",
+        title: "时间设置错误", 
+        description: "结束时间必须晚于开始时间",
         variant: "destructive"
       })
-      return
+      return false
     }
+    
+    // 预约时长不能超过6个月
+    const maxDuration = 6 * 30 * 24 * 60 * 60 * 1000 // 6个月的毫秒数
+    if (end.getTime() - start.getTime() > maxDuration) {
+      toast({
+        title: "预约时长过长",
+        description: "预约时长不能超过6个月",
+        variant: "destructive"
+      })
+      return false
+    }
+    
+    return true
+  }
 
-    // 更新笼位状态
-    setCages(prev => prev.map(cage => {
-      if (selectedCages.includes(cage.id)) {
-        return {
-          ...cage,
-          status: "unavailable"
-        }
+  // 计算预约时长
+  const calculateDuration = (startTime: string, endTime: string) => {
+    if (!startTime || !endTime) return ""
+    
+    const start = new Date(startTime)
+    const end = new Date(endTime)
+    const diffTime = end.getTime() - start.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    if (diffDays <= 7) {
+      return `${diffDays}天`
+    } else if (diffDays <= 30) {
+      const weeks = Math.floor(diffDays / 7)
+      const remainingDays = diffDays % 7
+      return `${weeks}周${remainingDays > 0 ? remainingDays + '天' : ''}`
+    } else {
+      const months = Math.floor(diffDays / 30)
+      const remainingDays = diffDays % 30
+      return `${months}个月${remainingDays > 0 ? remainingDays + '天' : ''}`
+    }
+  }
+
+  // 处理时间变化
+  const handleTimeChange = (field: 'startTime' | 'endTime', value: string) => {
+    setReservationForm(prev => {
+      const newForm = { ...prev, [field]: value }
+      
+      // 自动计算时长
+      if (newForm.startTime && newForm.endTime) {
+        newForm.duration = calculateDuration(newForm.startTime, newForm.endTime)
       }
-      return cage
-    }))
+      
+      return newForm
+    })
+  }
 
-          // 清空选择和表单
-      setSelectedCages([])
-      setQuickReservationCount("")
-      setReservationForm({
-        applicantName: "",
-        department: "",
-        relatedProject: "",
-        contactPhone: "",
-        purpose: "",
-        notes: ""
+  // 预约管理工具函数
+  const reservationManager = {
+    // 创建预约
+    createReservation: (cageIds: string[], reservationData: {
+      applicantName: string
+      department: string
+      startTime: string
+      endTime: string
+      relatedProject?: string
+      contactPhone?: string
+      purpose?: string
+      notes?: string
+    }) => {
+      const reservationId = `RES-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      
+      setCages(prev => prev.map(cage => {
+        if (cageIds.includes(cage.id)) {
+          return {
+            ...cage,
+            status: "unavailable",
+            reservationInfo: {
+              applicantName: reservationData.applicantName,
+              department: reservationData.department,
+              startTime: reservationData.startTime,
+              endTime: reservationData.endTime,
+              reservationId: reservationId
+            }
+          }
+        }
+        return cage
+      }))
+
+      // 设置自动释放定时器
+      const endTime = new Date(reservationData.endTime)
+      const now = new Date()
+      const timeout = endTime.getTime() - now.getTime()
+      
+      if (timeout > 0) {
+        setTimeout(() => {
+          reservationManager.releaseReservation(reservationId)
+        }, timeout)
+      }
+
+      return reservationId
+    },
+
+    // 释放预约
+    releaseReservation: (reservationId: string) => {
+      setCages(prev => prev.map(cage => {
+        if (cage.reservationInfo?.reservationId === reservationId) {
+          return {
+            ...cage,
+            status: "available",
+            reservationInfo: undefined
+          }
+        }
+        return cage
+      }))
+      
+      toast({
+        title: "笼位已释放",
+        description: "预约时间已到，笼位已自动释放并可重新预约",
+        duration: 3000,
+      })
+    },
+
+    // 检查预约冲突
+    checkConflict: (cageIds: string[], startTime: string, endTime: string) => {
+      const conflicts = cages.filter(cage => {
+        if (!cageIds.includes(cage.id) || !cage.reservationInfo) return false
+        
+        const existingStart = new Date(cage.reservationInfo.startTime)
+        const existingEnd = new Date(cage.reservationInfo.endTime)
+        const newStart = new Date(startTime)
+        const newEnd = new Date(endTime)
+        
+        // 检查时间重叠
+        return (newStart < existingEnd && newEnd > existingStart)
       })
       
-      // 跳转到第一页
-      setCurrentPage(1)
+      return conflicts
+    },
 
-    toast({
-      title: "预约成功",
-              description: `已成功预约 ${selectedCages.length} 个${roomData?.capacityUnit || '笼位'}`,
-    })
+         // 获取预约统计
+     getReservationStats: () => {
+       const reservedCages = cages.filter(cage => cage.reservationInfo)
+       const myCages = reservedCages.filter(cage => isMyReservation(cage))
+       const othersCages = reservedCages.filter(cage => !isMyReservation(cage))
+       const expiringSoon = reservedCages.filter(cage => {
+         const endTime = new Date(cage.reservationInfo!.endTime)
+         const now = new Date()
+         const hoursLeft = (endTime.getTime() - now.getTime()) / (1000 * 60 * 60)
+         return hoursLeft <= 24 && hoursLeft > 0 // 24小时内到期
+       })
+       
+       return {
+         totalReserved: reservedCages.length,
+         myReservations: myCages.length,
+         othersReservations: othersCages.length,
+         expiringSoon: expiringSoon.length,
+         availableForReservation: cages.filter(cage => cage.status === "available").length
+       }
+     }
+  }
+
+  // 检查表单完成状态
+  const checkFormCompletion = () => {
+    const requiredFields = [
+      reservationForm.applicantName,
+      reservationForm.department,
+      reservationForm.startTime,
+      reservationForm.endTime
+    ]
+    const requiredFieldsCompleted = requiredFields.every(field => field.trim() !== "")
+    const hasCagesSelected = selectedCages.length > 0
+    
+    return {
+      hasCagesSelected,
+      requiredFieldsCompleted,
+      isFullyCompleted: hasCagesSelected && requiredFieldsCompleted
+    }
   }
 
   // 使用率计算
@@ -491,6 +734,8 @@ export default function AnimalRoomReservationPage() {
                     </div>
                   </div>
                 </div>
+
+
 
                 {/* 管理员联系方式 */}
                 <div className="bg-gray-50 rounded-lg p-4">
@@ -703,12 +948,20 @@ export default function AnimalRoomReservationPage() {
                         onClick={() => handleCageSelect(cage.id)}
                         title={
                           cage.status === "unavailable"
-                                                    ? `此${roomData?.capacityUnit || '笼位'}不可预约`
-                        : `点击预约此${roomData?.capacityUnit || '笼位'}`
+                            ? cage.reservationInfo 
+                              ? isMyReservation(cage)
+                                ? `我的预约\n时间：${new Date(cage.reservationInfo.startTime).toLocaleString()} 至 ${new Date(cage.reservationInfo.endTime).toLocaleString()}`
+                                : `此${roomData?.capacityUnit || '笼位'}已被预约\n预约人：${cage.reservationInfo.applicantName}\n单位：${cage.reservationInfo.department}\n时间：${new Date(cage.reservationInfo.startTime).toLocaleString()} 至 ${new Date(cage.reservationInfo.endTime).toLocaleString()}`
+                              : `此${roomData?.capacityUnit || '笼位'}不可预约`
+                            : `点击预约此${roomData?.capacityUnit || '笼位'}`
                         }
                       >
                         <Icon className="h-4 w-4 mx-auto mb-1" />
                         <p className="text-xs font-medium">#{cage.number}</p>
+                        {cage.reservationInfo && isMyReservation(cage) && (
+                          <div className="absolute -top-1 -left-1 w-3 h-3 bg-blue-500 rounded-full" 
+                               title={`我的预约 - 预约至 ${new Date(cage.reservationInfo.endTime).toLocaleString()}`} />
+                        )}
                         {isSelected && (
                           <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
                             <CheckCircle className="h-3 w-3 text-white" />
@@ -732,30 +985,118 @@ export default function AnimalRoomReservationPage() {
                       </div>
                     )
                   })}
+                  {/* 我的预约状态图例 */}
+                  <div className="flex items-center gap-2">
+                    <div className="relative p-2 rounded border bg-gray-100 border-gray-200">
+                      <div className="w-3 h-3 bg-blue-500 rounded-full absolute -top-1 -left-1" />
+                      <XCircle className="h-3 w-3 text-gray-600" />
+                    </div>
+                    <span className="text-sm">我的预约</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* 填写预约信息卡片 */}
-            <Card className="overflow-hidden bg-white border">
+            {/* 填写预约信息卡片 - 智能折叠 */}
+            <Card 
+              id="reservation-form"
+              className="overflow-hidden bg-white border border-gray-200 transition-all duration-500"
+            >
               
-              <CardHeader className="pb-4 h-16 flex flex-col justify-center">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Plus className="h-4 w-4 text-blue-600" />
+              <CardHeader 
+                className="pb-4 h-16 flex flex-col justify-center cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => {
+                  if (selectedCages.length > 0) {
+                    setIsReservationFormExpanded(!isReservationFormExpanded)
+                  }
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "p-2 rounded-lg transition-colors",
+                      selectedCages.length === 0 
+                        ? "bg-gray-100" 
+                        : checkFormCompletion().isFullyCompleted
+                          ? "bg-green-100"
+                          : "bg-orange-100"
+                    )}>
+                      {selectedCages.length === 0 ? (
+                        <Plus className="h-4 w-4 text-gray-400" />
+                      ) : checkFormCompletion().isFullyCompleted ? (
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <AlertCircle className="h-4 w-4 text-orange-600" />
+                      )}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-base">填写预约信息</CardTitle>
+                        {selectedCages.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            {checkFormCompletion().isFullyCompleted ? (
+                              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs">
+                                已完成
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 text-xs">
+                                请填写
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <CardDescription className="text-xs">
+                        {selectedCages.length === 0 
+                          ? "请先选择笼位，然后填写预约信息" 
+                          : isReservationFormExpanded 
+                            ? "请填写预约申请信息，带*为必填项"
+                            : "点击展开填写预约信息"
+                        }
+                      </CardDescription>
+                    </div>
                   </div>
-                  <div>
-                    <CardTitle className="text-base">填写预约信息</CardTitle>
-                    <CardDescription className="text-xs">
-                      请填写预约申请信息，带*为必填项
-                    </CardDescription>
-                  </div>
+                  
+                  {/* 展开/收缩指示器 */}
+                  {selectedCages.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-gray-400">
+                        {isReservationFormExpanded ? "收缩" : "展开"}
+                      </span>
+                      <div className={cn(
+                        "transition-transform duration-300",
+                        isReservationFormExpanded ? "rotate-180" : "rotate-0"
+                      )}>
+                        <ChevronRight className="h-4 w-4 text-gray-400" />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardHeader>
               
-              <CardContent className="space-y-6">
-                {/* 选中笼位展示 */}
-                {selectedCages.length > 0 && (
+              {/* 表单内容 - 条件渲染 */}
+              {selectedCages.length === 0 ? (
+                // 未选择笼位时的提示内容
+                <CardContent className="py-8">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Users className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <p className="text-gray-500 text-sm">请先在上方选择需要预约的{roomData?.capacityUnit || '笼位'}</p>
+                    <p className="text-gray-400 text-xs mt-1">选择后此区域将自动展开预约表单</p>
+                  </div>
+                </CardContent>
+              ) : (
+                // 选择笼位后的表单内容
+                <div className={cn(
+                  "transition-all duration-500 ease-in-out",
+                  isReservationFormExpanded 
+                    ? "max-h-[2000px] opacity-100" 
+                    : "max-h-0 opacity-0 overflow-hidden"
+                )}>
+                  <CardContent className="space-y-6">
+                    {/* 选中笼位展示 */}
+                    {selectedCages.length > 0 && (
                   <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                     <div className="flex items-center gap-2 mb-2">
                       <CheckCircle className="h-4 w-4 text-green-600" />
@@ -853,8 +1194,161 @@ export default function AnimalRoomReservationPage() {
                   </div>
                 </div>
 
+                {/* 动物信息 - 新增字段 */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Users className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium text-gray-900">动物信息</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* 动物种类 */}
+                    <div className="space-y-2">
+                      <Label htmlFor="animalSpecies" className="text-sm font-medium">
+                        动物种类
+                      </Label>
+                      <Select 
+                        value={reservationForm.animalSpecies} 
+                        onValueChange={(value) => setReservationForm(prev => ({...prev, animalSpecies: value}))}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="请选择动物种类" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="小鼠">小鼠</SelectItem>
+                          <SelectItem value="大鼠">大鼠</SelectItem>
+                          <SelectItem value="兔">兔</SelectItem>
+                          <SelectItem value="豚鼠">豚鼠</SelectItem>
+                          <SelectItem value="猴">猴</SelectItem>
+                          <SelectItem value="其他">其他</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* 品系与级别 */}
+                    <div className="space-y-2">
+                      <Label htmlFor="animalStrain" className="text-sm font-medium">
+                        品系与级别
+                      </Label>
+                      <Input
+                        id="animalStrain"
+                        value={reservationForm.animalStrain}
+                        onChange={(e) => setReservationForm(prev => ({...prev, animalStrain: e.target.value}))}
+                        placeholder="如：C57BL/6J、SPF级等"
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* 动物年龄 */}
+                    <div className="space-y-2">
+                      <Label htmlFor="animalAge" className="text-sm font-medium">
+                        动物年龄
+                      </Label>
+                      <Input
+                        id="animalAge"
+                        value={reservationForm.animalAge}
+                        onChange={(e) => setReservationForm(prev => ({...prev, animalAge: e.target.value}))}
+                        placeholder="如：6-8周龄、成年等"
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* 动物数量 */}
+                    <div className="space-y-2">
+                      <Label htmlFor="animalCount" className="text-sm font-medium">
+                        动物数量
+                      </Label>
+                      <Input
+                        id="animalCount"
+                        type="number"
+                        value={reservationForm.animalCount}
+                        onChange={(e) => setReservationForm(prev => ({...prev, animalCount: e.target.value}))}
+                        placeholder="请输入动物数量"
+                        className="w-full"
+                        min="1"
+                      />
+                    </div>
+                  </div>
+
+                  {/* 性别比例 - 占整行 */}
+                  <div className="space-y-2">
+                    <Label htmlFor="genderRatio" className="text-sm font-medium">
+                      性别比例
+                    </Label>
+                    <Select 
+                      value={reservationForm.genderRatio} 
+                      onValueChange={(value) => setReservationForm(prev => ({...prev, genderRatio: value}))}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="请选择性别比例" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="雄性">全雄性</SelectItem>
+                        <SelectItem value="雌性">全雌性</SelectItem>
+                        <SelectItem value="1:1">雄雌1:1</SelectItem>
+                        <SelectItem value="2:1">雄雌2:1</SelectItem>
+                        <SelectItem value="1:2">雄雌1:2</SelectItem>
+                        <SelectItem value="混合">混合（不限比例）</SelectItem>
+                        <SelectItem value="其他">其他（请在备注中说明）</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* 时间设置 - 必填 */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium text-gray-900">使用时间设置</span>
+                    <span className="text-red-500 text-sm">*</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* 起始时间 */}
+                    <div className="space-y-2">
+                      <Label htmlFor="startTime" className="text-sm font-medium">
+                        起始时间 <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="startTime"
+                        type="datetime-local"
+                        value={reservationForm.startTime}
+                        onChange={(e) => handleTimeChange('startTime', e.target.value)}
+                        className="w-full"
+                        min={new Date().toISOString().slice(0, 16)}
+                      />
+                    </div>
+
+                    {/* 完成时间 */}
+                    <div className="space-y-2">
+                      <Label htmlFor="endTime" className="text-sm font-medium">
+                        完成时间 <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="endTime"
+                        type="datetime-local"
+                        value={reservationForm.endTime}
+                        onChange={(e) => handleTimeChange('endTime', e.target.value)}
+                        className="w-full"
+                        min={reservationForm.startTime || new Date().toISOString().slice(0, 16)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* 预约时长显示 */}
+                  {reservationForm.duration && (
+                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm font-medium text-blue-800">预约时长</span>
+                      </div>
+                      <p className="text-sm text-blue-700 mt-1">{reservationForm.duration}</p>
+                    </div>
+                  )}
+                </div>
+
                 {/* 备注说明 - 选填 */}
-                <div className="space-y-2">
+                <div className="-mt-3">
                   <Label htmlFor="notes" className="text-sm font-medium">
                     备注说明
                   </Label>
@@ -864,7 +1358,7 @@ export default function AnimalRoomReservationPage() {
                     onChange={(e) => setReservationForm(prev => ({...prev, notes: e.target.value}))}
                     placeholder="请输入备注说明或特殊要求"
                     rows={4}
-                    className="w-full"
+                    className="w-full mt-2"
                   />
                 </div>
 
@@ -875,13 +1369,22 @@ export default function AnimalRoomReservationPage() {
                     onClick={() => {
                       setSelectedCages([])
                       setQuickReservationCount("")
+                      setIsReservationFormExpanded(false) // 取消时收缩表单
                       setReservationForm({
                         applicantName: "",
                         department: "",
                         relatedProject: "",
                         contactPhone: "",
                         purpose: "",
-                        notes: ""
+                        notes: "",
+                        startTime: "",
+                        endTime: "",
+                        duration: "",
+                        animalSpecies: "",
+                        animalStrain: "",
+                        animalAge: "",
+                        animalCount: "",
+                        genderRatio: ""
                       })
                       setCurrentPage(1)
                     }}
@@ -889,14 +1392,94 @@ export default function AnimalRoomReservationPage() {
                     取消
                   </Button>
                   <Button 
-                    onClick={handleSubmitReservation}
-                    disabled={selectedCages.length === 0 || !reservationForm.applicantName || !reservationForm.department}
+                    onClick={() => {
+                      if (selectedCages.length === 0) {
+                        toast({
+                          title: `请选择${roomData?.capacityUnit || '笼位'}`,
+                          description: `请至少选择一个可预约的${roomData?.capacityUnit || '笼位'}`,
+                          variant: "destructive"
+                        })
+                        return
+                      }
+
+                      if (!reservationForm.applicantName || !reservationForm.department) {
+                        toast({
+                          title: "请填写必填信息",
+                          description: "预约人和所属单位为必填项",
+                          variant: "destructive"
+                        })
+                        return
+                      }
+
+                      if (!reservationForm.startTime || !reservationForm.endTime) {
+                        toast({
+                          title: "请设置使用时间",
+                          description: "请设置笼位使用的开始时间和结束时间",
+                          variant: "destructive"
+                        })
+                        return
+                      }
+
+                      if (!validateTimeRange(reservationForm.startTime, reservationForm.endTime)) {
+                        return
+                      }
+
+                      const reservationId = reservationManager.createReservation(selectedCages, {
+                        applicantName: reservationForm.applicantName,
+                        department: reservationForm.department,
+                        startTime: reservationForm.startTime,
+                        endTime: reservationForm.endTime,
+                        relatedProject: reservationForm.relatedProject,
+                        contactPhone: reservationForm.contactPhone,
+                        purpose: reservationForm.purpose,
+                        notes: reservationForm.notes
+                      })
+
+                      // 清空选择和表单
+                      setSelectedCages([])
+                      setQuickReservationCount("")
+                      setIsReservationFormExpanded(false) // 提交成功后收缩表单
+                      setReservationForm({
+                        applicantName: "",
+                        department: "",
+                        relatedProject: "",
+                        contactPhone: "",
+                        purpose: "",
+                        notes: "",
+                        startTime: "",
+                        endTime: "",
+                        duration: "",
+                        animalSpecies: "",
+                        animalStrain: "",
+                        animalAge: "",
+                        animalCount: "",
+                        genderRatio: ""
+                      })
+                      
+                      // 跳转到第一页
+                      setCurrentPage(1)
+
+                      toast({
+                        title: "预约成功",
+                        description: `已成功预约 ${selectedCages.length} 个${roomData?.capacityUnit || '笼位'}，预约时间：${reservationForm.startTime} 至 ${reservationForm.endTime}`,
+                        duration: 5000,
+                      })
+                    }}
+                    disabled={
+                      selectedCages.length === 0 || 
+                      !reservationForm.applicantName || 
+                      !reservationForm.department ||
+                      !reservationForm.startTime ||
+                      !reservationForm.endTime
+                    }
                     className="bg-primary hover:bg-primary/90"
                   >
                     提交预约
                   </Button>
                 </div>
-              </CardContent>
+                  </CardContent>
+                </div>
+              )}
             </Card>
           </div>
         </div>
