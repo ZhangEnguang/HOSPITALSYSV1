@@ -1,7 +1,6 @@
 "use client"
 
-import type React from "react"
-import { useState } from "react"
+import React, { useState } from "react"
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Checkbox } from "@/components/client-wrapped-checkbox"
@@ -222,9 +221,34 @@ export default function DataListTable<T extends { id: string }>({
                                       }
                                     }}
                                     disabled={action.disabled ? action.disabled(item) : false}
-                                    className={action.id === "delete" ? "text-destructive" : ""}
+                                    className={action.variant === "destructive" ? "text-destructive" : ""}
                                   >
-                                    {action.icon && <span className="mr-2">{action.icon}</span>}
+                                    {action.icon && (
+                                      (() => {
+                                        try {
+                                          // 如果是字符串，直接显示
+                                          if (typeof action.icon === 'string') {
+                                            return <span className="mr-2">{action.icon}</span>
+                                          }
+                                          // 如果是React元素，直接渲染
+                                          if (React.isValidElement(action.icon)) {
+                                            return <span className="mr-2">{action.icon}</span>
+                                          }
+                                          // 如果是React组件，作为组件渲染
+                                          if (typeof action.icon === 'function') {
+                                            const IconComponent = action.icon
+                                            return <IconComponent className="mr-2 h-4 w-4" />
+                                          }
+                                          // 默认情况：尝试作为组件渲染
+                                          const IconComponent = action.icon
+                                          return <IconComponent className="mr-2 h-4 w-4" />
+                                        } catch (error) {
+                                          // 如果渲染失败，返回空
+                                          console.warn('Failed to render action icon:', error)
+                                          return null
+                                        }
+                                      })()
+                                    )}
                                     {action.label}
                                   </DropdownMenuItem>
                                 ))}

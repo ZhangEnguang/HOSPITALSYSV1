@@ -153,12 +153,6 @@ export const advancedFilters = [
         type: "number",
         placeholder: "请输入容量范围",
       },
-      {
-        id: "currentOccupancy",
-        label: "当前入住数",
-        type: "number",
-        placeholder: "请输入当前入住数",
-      },
     ],
   },
   {
@@ -201,8 +195,6 @@ export const sortOptions = [
   { id: "name_desc", field: "name", direction: "desc" as const, label: "房间名称 ↓" },
   { id: "capacity_asc", field: "capacity", direction: "asc" as const, label: "容量 ↑" },
   { id: "capacity_desc", field: "capacity", direction: "desc" as const, label: "容量 ↓" },
-  { id: "currentOccupancy_asc", field: "currentOccupancy", direction: "asc" as const, label: "入住数 ↑" },
-  { id: "currentOccupancy_desc", field: "currentOccupancy", direction: "desc" as const, label: "入住数 ↓" },
   { id: "status_asc", field: "status", direction: "asc" as const, label: "状态 ↑" },
   { id: "status_desc", field: "status", direction: "desc" as const, label: "状态 ↓" },
 ]
@@ -225,16 +217,12 @@ export const animalRoomColumns = [
     accessorKey: "type",
   },
   {
-    id: "capacity",
-    header: "容量",
+    id: "capacityReservation",
+    header: "容量/已预约",
     accessorKey: "capacity",
-    cell: (row: any) => `${row.capacity}只`,
-  },
-  {
-    id: "currentOccupancy",
-    header: "当前入住",
-    accessorKey: "currentOccupancy",
-    cell: (row: any) => `${row.currentOccupancy}只`,
+    cell: (row: any) => {
+      return `${row.capacity}/${row.currentOccupancy}`
+    },
   },
   {
     id: "status",
@@ -376,18 +364,11 @@ export const animalRoomCardFields = [
     type: "text",
   },
   {
-    id: "capacity",
-    label: "容量",
+    id: "capacityReservation",
+    label: "容量/已预约",
     field: "capacity",
     type: "text",
-    render: (item: any) => `${item.capacity}只`,
-  },
-  {
-    id: "occupancy",
-    label: "入住率",
-    field: "occupancy",
-    type: "text",
-    render: (item: any) => `${item.currentOccupancy}/${item.capacity}只`,
+    render: (item: any) => `${item.capacity}/${item.currentOccupancy}`,
   },
   {
     id: "status",
@@ -537,9 +518,9 @@ const AnimalRoomCard = ({
 
       </div>
 
-      <div className="p-4 flex flex-col flex-1 min-h-0">
+      <div className="flex flex-col flex-1 min-h-0" style={{ padding: '20px' }}>
         {/* 标题和状态 */}
-        <div className="flex-shrink-0 mb-3">
+        <div className="flex-shrink-0" style={{ marginBottom: '8px' }}>
           <div className="flex items-center gap-2 mb-1">
             <h3 className={cn(
               "font-semibold text-base leading-tight transition-colors duration-300 flex-1 min-w-0 truncate",
@@ -562,18 +543,22 @@ const AnimalRoomCard = ({
           </p>
         </div>
 
-        {/* 容量信息 */}
-        <div className="flex-shrink-0 mb-3">
+        {/* 容量/已预约信息 */}
+        <div className="flex-shrink-0" style={{ marginBottom: '8px' }}>
           <div className="flex items-center gap-1">
             <Users className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium text-gray-700">
-              {item.currentOccupancy}/{item.capacity}{item.capacityUnit || '笼位'}
-            </span>
+            <div className="flex items-center gap-1 text-sm">
+              <span className="text-gray-500">容量</span>
+              <span className="font-medium text-gray-700">{item.capacity}</span>
+              <span className="text-gray-400">|</span>
+              <span className="text-gray-500">已预约</span>
+              <span className="font-medium text-gray-700">{item.currentOccupancy}</span>
+            </div>
           </div>
         </div>
 
-        {/* 环境信息 */}
-        <div className="flex-shrink-0 mb-3">
+        {/* 环境信息 - 最后一个元素，不需要下边距 */}
+        <div className="flex-shrink-0">
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-1">
               <Thermometer className="h-4 w-4 text-muted-foreground" />
@@ -585,9 +570,6 @@ const AnimalRoomCard = ({
             </div>
           </div>
         </div>
-
-        {/* 填充空间 */}
-        <div className="flex-1 min-h-0"></div>
       </div>
     </Card>
   )
