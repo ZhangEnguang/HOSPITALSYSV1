@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
+import AnimalRoomAISummary from "./animal-room-ai-summary"
 
 interface AnimalRoomOverviewTabProps {
   data: any
@@ -14,6 +15,9 @@ interface AnimalRoomOverviewTabProps {
 export default function AnimalRoomOverviewTab({ data }: AnimalRoomOverviewTabProps) {
   return (
     <div className="space-y-6">
+      {/* AI智能分析 */}
+      <AnimalRoomAISummary roomData={data} />
+
       {/* 基本信息 */}
       <Card className="border border-gray-100 rounded-md bg-white mb-6">
         <div className="p-4 pb-3">

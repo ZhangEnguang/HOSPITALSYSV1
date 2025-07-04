@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { format } from "date-fns"
+import AnimalAISummary from "./animal-ai-summary"
 
 interface AnimalOverviewTabProps {
   data: any
@@ -26,6 +27,9 @@ export default function AnimalOverviewTab({ data }: AnimalOverviewTabProps) {
 
   return (
     <div className="space-y-6">
+      {/* AI智能分析 */}
+      <AnimalAISummary animalData={data} />
+
       {/* 动物基本信息 */}
       <Card className="border border-gray-100 rounded-md bg-white mb-6">
         <div className="p-4 pb-3">

@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import Image from "next/image"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -18,11 +17,11 @@ import {
   Sparkles
 } from "lucide-react"
 
-interface AISummaryProps {
-  equipmentData: any
+interface AnimalRoomAISummaryProps {
+  roomData: any
 }
 
-export default function AISummary({ equipmentData }: AISummaryProps) {
+export default function AnimalRoomAISummary({ roomData }: AnimalRoomAISummaryProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isUpdatingAnalysis, setIsUpdatingAnalysis] = useState(false)
   const [isAnalysisUpdated, setIsAnalysisUpdated] = useState(false)
@@ -41,83 +40,91 @@ export default function AISummary({ equipmentData }: AISummaryProps) {
     }, 3000)
   }
   
-  // 根据仪器类型生成不同的AI摘要内容
+  // 根据动物房类型和状态生成不同的AI摘要内容
   const generateAISummary = (isUpdated: boolean) => {
-    const category = equipmentData.category || "未知类型"
-    const status = equipmentData.status || "未知状态"
+    const type = roomData.type || "未知类型"
+    const status = roomData.status || "未知状态"
+    const occupancyRate = ((roomData.currentOccupancy || 0) / (roomData.capacity || 1) * 100).toFixed(1)
     
     if (isUpdated) {
-      if (category === "分析仪器") {
-        return `该${equipmentData.name}是高精度分析仪器，主要用于材料成分分析和结构表征。最新分析显示，设备运行状态优良，使用频率为${equipmentData.useFrequency || "中等"}，预约次数达${equipmentData.bookingCount || 0}次。设备维护状态为${equipmentData.maintenanceStatus || "正常"}，建议按计划进行定期维护以确保测试精度。该设备在科研项目中发挥重要作用，为多个研究方向提供关键数据支持，设备利用率达到78%，表现优异。`
-      } else if (category === "光学仪器") {
-        return `该${equipmentData.name}是精密光学仪器，具有高分辨率和稳定性。最新分析显示，设备光学系统性能稳定，测量精度符合技术指标要求。当前使用状态为${status}，预约使用率较高，建议优化预约时间安排。设备存放环境良好，温湿度控制在规定范围内，有利于设备长期稳定运行。光学元件清洁度良好，建议继续保持当前维护水平。`
-      } else if (category === "电子仪器") {
-        return `该${equipmentData.name}是先进电子测试仪器，具备多种测试功能和高精度测量能力。最新分析显示，设备电子系统运行正常，校准状态良好。使用频率为${equipmentData.useFrequency || "中等"}，设备利用率合理。建议定期进行电子系统检查和校准，确保测量数据的准确性和可靠性。设备故障率低，维护成本控制良好。`
+      if (type === "SPF饲养间") {
+        return `该${roomData.name}是SPF级动物饲养间，配备先进的空气净化和温湿度控制系统。最新分析显示，房间运行状态为${status}，当前入住${roomData.currentOccupancy}只动物，容量使用率${occupancyRate}%。环境参数稳定，温度控制在${roomData.temperature}°C，湿度维持${roomData.humidity}%，符合SPF级动物饲养标准。建议继续保持严格的清洁消毒制度，确保微生物控制达标。该房间为多个科研项目提供高质量的实验动物，使用效率较高，管理规范，动物健康状况良好。`
+      } else if (type === "普通饲养间") {
+        return `该${roomData.name}是标准动物饲养间，具备基础的环境控制设施。最新分析显示，房间状态为${status}，入住率${occupancyRate}%，环境条件稳定。温度控制在${roomData.temperature}°C范围内，湿度保持${roomData.humidity}%，满足常规实验动物饲养要求。建议定期检查通风系统和环境监控设备，确保动物饲养环境的稳定性。该房间为科研项目提供可靠的动物饲养支持，管理制度完善。`
+      } else if (type === "隔离饲养间") {
+        return `该${roomData.name}是隔离动物饲养间，专用于新入所动物的隔离观察和检疫。最新分析显示，房间运行正常，当前状态为${status}，入住率${occupancyRate}%。严格的隔离措施和环境控制确保了动物健康状态的有效监控。建议继续执行隔离期管理规程，定期进行健康检查和环境消毒。该房间是动物质量控制的重要环节，为后续实验提供健康保障。`
       } else {
-        return `该${equipmentData.name}是重要的科研设备，在相关领域具有重要应用价值。最新分析显示，设备整体状态良好，使用情况正常。当前维护状态为${equipmentData.maintenanceStatus || "正常"}，建议按照维护计划进行定期保养。设备为多个科研项目提供技术支持，使用效率较高，用户满意度达到90%以上。`
+        return `该${roomData.name}是实验动物饲养设施，配备完善的环境控制系统。最新分析显示，房间运行状态为${status}，使用率${occupancyRate}%，环境参数稳定。当前入住${roomData.currentOccupancy}只动物，温度${roomData.temperature}°C，湿度${roomData.humidity}%。建议按照标准操作程序进行管理维护。该房间为科研项目提供可靠的动物饲养支持，管理规范，使用效率良好，符合动物福利要求。`
       }
     } else {
-      if (category === "分析仪器") {
-        return `该${equipmentData.name}是高精度分析仪器，主要用于材料成分分析和结构表征。设备具有高分辨率、高精度的特点，能够提供准确的分析数据。当前状态为${status}，使用频率${equipmentData.useFrequency || "中等"}，是科研工作的重要工具。`
-      } else if (category === "光学仪器") {
-        return `该${equipmentData.name}是精密光学仪器，具有高分辨率和稳定性。设备采用先进的光学技术，能够进行精确的光学测量和分析。当前使用状态为${status}，为光学相关研究提供重要支持。`
-      } else if (category === "电子仪器") {
-        return `该${equipmentData.name}是先进电子测试仪器，具备多种测试功能和高精度测量能力。设备能够进行各种电子参数的测量和分析，是电子技术研究的重要工具。当前状态为${status}。`
+      if (type === "SPF饲养间") {
+        return `该${roomData.name}是SPF级动物饲养间，严格按照无特定病原体动物饲养标准运行。房间具备先进的空气净化系统和精确的环境控制设备。当前状态为${status}，使用率${occupancyRate}%，为高质量的科研工作提供可靠保障。`
+      } else if (type === "普通饲养间") {
+        return `该${roomData.name}是标准动物饲养间，配备基础的环境控制设施，满足常规实验动物的饲养需求。房间运行稳定，当前状态为${status}，使用率${occupancyRate}%，为科研项目提供基础饲养支持。`
+      } else if (type === "隔离饲养间") {
+        return `该${roomData.name}是隔离动物饲养间，专门用于新入所动物的隔离检疫。严格的隔离措施确保动物健康状态的有效监控。当前状态为${status}，是动物质量控制的重要环节。`
       } else {
-        return `该${equipmentData.name}是重要的科研设备，在相关领域具有重要应用价值。设备功能完善，技术先进，为科研工作提供有力支持。当前状态为${status}，请查看详细信息了解更多。`
+        return `该${roomData.name}是实验动物饲养设施，配备完善的环境控制系统。房间运行稳定，环境参数良好，当前状态为${status}，为科研工作提供可靠的动物饲养支持。`
       }
     }
   }
   
   // 生成AI建议内容
   const generateAIRecommendations = (isUpdated: boolean) => {
-    const category = equipmentData.category || "未知类型"
-    const maintenanceStatus = equipmentData.maintenanceStatus || "正常"
+    const type = roomData.type || "未知类型"
+    const status = roomData.status || "正常"
+    const occupancyRate = ((roomData.currentOccupancy || 0) / (roomData.capacity || 1) * 100)
     
     if (isUpdated) {
-      if (category === "分析仪器") {
+      if (type === "SPF饲养间") {
         return [
-          "建议定期校准设备，确保分析结果的准确性和可靠性",
-          "加强设备使用培训，提高操作人员的专业技能水平",
-          "建立完善的样品预处理流程，提高分析效率和质量"
+          "严格执行SPF级操作规程，确保人员进入前完成消毒程序",
+          "定期检测微生物指标，维持无特定病原体环境",
+          "优化空气净化系统运行参数，确保环境质量稳定"
         ]
-      } else if (category === "光学仪器") {
+      } else if (type === "普通饲养间") {
         return [
-          "保持设备清洁，定期清理光学元件，避免灰尘影响测量精度",
-          "控制环境温湿度，确保设备在最佳条件下运行",
-          "建议建立设备使用日志，记录每次使用情况和异常现象"
+          "加强日常清洁消毒工作，维持良好的卫生环境",
+          "定期校准环境监控设备，确保数据准确性",
+          "建立完善的饲养记录体系，提高管理效率"
         ]
-      } else if (category === "电子仪器") {
+      } else if (type === "隔离饲养间") {
         return [
-          "定期进行电子系统检查，确保各项功能正常",
-          "建议制定标准操作程序，规范设备使用流程",
-          "加强设备防护，避免电磁干扰影响测量结果"
+          "严格执行隔离期管理规程，避免交叉感染",
+          "加强动物健康监测，及时发现异常情况",
+          "定期进行环境消毒，确保隔离效果"
         ]
       } else {
         return [
-          "建议制定详细的设备维护计划，确保设备长期稳定运行",
-          "加强设备使用管理，提高设备利用率",
-          "定期评估设备性能，及时发现和解决潜在问题"
+          "建立标准化的房间管理流程，提高运营效率",
+          "加强环境参数监控，确保动物饲养条件稳定",
+          "定期进行设备维护保养，保证系统正常运行"
         ]
       }
     } else {
-      if (maintenanceStatus === "正常") {
+      if (occupancyRate >= 90) {
         return [
-          "设备状态良好，建议继续按计划进行维护",
-          "优化设备使用安排，提高使用效率",
-          "加强设备操作培训，确保规范使用"
+          "当前使用率较高，建议合理安排动物入住计划",
+          "加强房间清洁维护，确保高密度饲养的环境质量",
+          "考虑优化空间布局，提高饲养效率"
         ]
-      } else if (maintenanceStatus === "待维护") {
+      } else if (occupancyRate <= 30) {
         return [
-          "建议尽快安排设备维护，确保设备正常运行",
-          "检查设备关键部件，及时更换老化元件",
-          "制定维护后的验证程序，确保设备性能恢复"
+          "当前使用率较低，可考虑安排更多实验项目",
+          "定期维护房间设施，保持良好的待用状态",
+          "优化资源配置，提高房间利用效率"
+        ]
+      } else if (status === "维修中") {
+        return [
+          "尽快完成维修工作，减少对科研项目的影响",
+          "检查维修质量，确保设备正常运行",
+          "制定预防性维护计划，减少故障发生"
         ]
       } else {
         return [
-          "建议详细检查设备状态，制定相应的处理方案",
-          "加强设备日常巡检，及时发现异常情况",
-          "建立设备故障处理流程，提高响应效率"
+          "继续保持良好的管理状态，确保饲养质量",
+          "定期评估房间运行效果，持续改进管理",
+          "加强人员培训，提高专业操作水平"
         ]
       }
     }
@@ -170,7 +177,7 @@ export default function AISummary({ equipmentData }: AISummaryProps) {
                   v2.4.1
                 </Badge>
               </CardTitle>
-              <p className="text-xs text-slate-500 mt-0.5">AI模型: GPT-Scientific 2023</p>
+              <p className="text-xs text-slate-500 mt-0.5">AI模型: GPT-Animal 2023</p>
             </div>
           </div>
           <Button
@@ -209,7 +216,7 @@ export default function AISummary({ equipmentData }: AISummaryProps) {
               <div className="w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden">
                 <div className="h-full bg-primary animate-progress rounded-full"></div>
               </div>
-              <div className="text-xs text-slate-500 mt-2">正在处理设备数据并生成智能洞察...</div>
+              <div className="text-xs text-slate-500 mt-2">正在分析动物房数据并生成智能洞察...</div>
             </div>
           )}
 
@@ -226,21 +233,21 @@ export default function AISummary({ equipmentData }: AISummaryProps) {
                 <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                   <BarChart3 className="h-4 w-4 text-blue-600" />
                   <div className="text-xs text-slate-600">
-                    <span>设备状态</span>
+                    <span>运行状态</span>
                     <div className="font-semibold text-sm text-slate-900">{isAnalysisUpdated ? "优秀" : "良好"}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                   <PieChart className="h-4 w-4 text-amber-600" />
                   <div className="text-xs text-slate-600">
-                    <span>利用率评估</span>
+                    <span>环境评估</span>
                     <div className="font-semibold text-sm text-slate-900">
                       {isAnalysisUpdated ? (
                         <>
-                          高利用率 <span className="text-green-600 text-xs">↑</span>
+                          环境稳定 <span className="text-green-600 text-xs">✓</span>
                         </>
                       ) : (
-                        "中等"
+                        "稳定"
                       )}
                     </div>
                   </div>
@@ -248,8 +255,8 @@ export default function AISummary({ equipmentData }: AISummaryProps) {
                 <div className="flex items-center gap-1.5">
                   <LineChart className="h-4 w-4 text-green-600" />
                   <div className="text-xs text-slate-600">
-                    <span>性能评估</span>
-                    <div className="font-semibold text-sm text-slate-900">{isAnalysisUpdated ? "优异" : "良好"}</div>
+                    <span>使用效率</span>
+                    <div className="font-semibold text-sm text-slate-900">{isAnalysisUpdated ? "高效" : "良好"}</div>
                   </div>
                 </div>
               </motion.div>
@@ -266,7 +273,7 @@ export default function AISummary({ equipmentData }: AISummaryProps) {
                   <>
                     <div className="flex items-center gap-2 mb-3 text-sm text-amber-600 bg-amber-50 p-2 rounded-md border border-amber-100">
                       <LayoutGrid className="h-4 w-4" />
-                      <span className="font-medium">最新分析已更新 - 检测到设备使用数据变化</span>
+                      <span className="font-medium">最新分析已更新 - 检测到动物房运行和环境变化</span>
                     </div>
                     <p>
                       {generateAISummary(true)}
@@ -275,24 +282,24 @@ export default function AISummary({ equipmentData }: AISummaryProps) {
                       <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                         <BarChart3 className="h-4 w-4 text-blue-600" />
                         <div className="text-xs text-slate-600">
-                          <span>设备状态</span>
+                          <span>运行状态</span>
                           <div className="font-semibold text-sm text-slate-900">优秀</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                         <PieChart className="h-4 w-4 text-amber-600" />
                         <div className="text-xs text-slate-600">
-                          <span>利用率评估</span>
+                          <span>环境评估</span>
                           <div className="font-semibold text-sm text-slate-900">
-                            高利用率 <span className="text-green-600 text-xs">↑</span>
+                            环境稳定 <span className="text-green-600 text-xs">✓</span>
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <LineChart className="h-4 w-4 text-green-600" />
                         <div className="text-xs text-slate-600">
-                          <span>性能评估</span>
-                          <div className="font-semibold text-sm text-slate-900">优异</div>
+                          <span>使用效率</span>
+                          <div className="font-semibold text-sm text-slate-900">高效</div>
                         </div>
                       </div>
                     </div>
@@ -316,21 +323,21 @@ export default function AISummary({ equipmentData }: AISummaryProps) {
                       <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                         <BarChart3 className="h-4 w-4 text-blue-600" />
                         <div className="text-xs text-slate-600">
-                          <span>设备状态</span>
+                          <span>运行状态</span>
                           <div className="font-semibold text-sm text-slate-900">良好</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                         <PieChart className="h-4 w-4 text-amber-600" />
                         <div className="text-xs text-slate-600">
-                          <span>利用率评估</span>
-                          <div className="font-semibold text-sm text-slate-900">中等</div>
+                          <span>环境评估</span>
+                          <div className="font-semibold text-sm text-slate-900">稳定</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <LineChart className="h-4 w-4 text-green-600" />
                         <div className="text-xs text-slate-600">
-                          <span>性能评估</span>
+                          <span>使用效率</span>
                           <div className="font-semibold text-sm text-slate-900">良好</div>
                         </div>
                       </div>
@@ -353,9 +360,9 @@ export default function AISummary({ equipmentData }: AISummaryProps) {
           <div className="flex justify-end items-center text-xs text-slate-500 mt-3 pt-2 border-t border-slate-100">
             <div className="flex-1 flex items-center gap-2">
               <div className="inline-flex h-5 items-center rounded-full border border-slate-200 bg-white px-2 text-xs font-semibold text-slate-900">
-                可信度 94%
+                可信度 95%
               </div>
-              <span>分析时间: {isAnalysisUpdated ? "2024-04-03 17:42" : "2024-04-01 10:32"}</span>
+              <span>分析时间: {isAnalysisUpdated ? "2024-04-03 17:45" : "2024-04-01 10:35"}</span>
             </div>
             <div className="flex items-center">
               <Button
@@ -407,4 +414,4 @@ export default function AISummary({ equipmentData }: AISummaryProps) {
       />
     </Card>
   )
-} 
+}

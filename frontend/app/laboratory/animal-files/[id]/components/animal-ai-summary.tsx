@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import Image from "next/image"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -18,16 +17,29 @@ import {
   Sparkles
 } from "lucide-react"
 
-interface AISummaryProps {
-  equipmentData: any
+interface AnimalAISummaryProps {
+  animalData: any
 }
 
-export default function AISummary({ equipmentData }: AISummaryProps) {
+export default function AnimalAISummary({ animalData }: AnimalAISummaryProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isUpdatingAnalysis, setIsUpdatingAnalysis] = useState(false)
   const [isAnalysisUpdated, setIsAnalysisUpdated] = useState(false)
   const [hasAiWritten, setHasAiWritten] = useState(true)
   const [aiInputValue, setAiInputValue] = useState("已生成")
+  
+  // 获取动物图标
+  const getAnimalIcon = (species: string) => {
+    const icons: Record<string, string> = {
+      "小鼠": "🐭",
+      "大鼠": "🐀", 
+      "兔": "🐰",
+      "豚鼠": "🐹",
+      "猴": "🐒",
+      "犬": "🐕"
+    };
+    return icons[species] || "🐾";
+  };
   
   // 处理更新分析
   const handleUpdateAnalysis = () => {
@@ -41,83 +53,104 @@ export default function AISummary({ equipmentData }: AISummaryProps) {
     }, 3000)
   }
   
-  // 根据仪器类型生成不同的AI摘要内容
+  // 根据动物种类和状态生成不同的AI摘要内容
   const generateAISummary = (isUpdated: boolean) => {
-    const category = equipmentData.category || "未知类型"
-    const status = equipmentData.status || "未知状态"
+    const species = animalData.species || "未知物种"
+    const status = animalData.status || "未知状态"
+    const healthScore = animalData.healthScore || "良好"
+    const age = animalData.age || "未知"
+    const weight = animalData.weight || "未知"
     
     if (isUpdated) {
-      if (category === "分析仪器") {
-        return `该${equipmentData.name}是高精度分析仪器，主要用于材料成分分析和结构表征。最新分析显示，设备运行状态优良，使用频率为${equipmentData.useFrequency || "中等"}，预约次数达${equipmentData.bookingCount || 0}次。设备维护状态为${equipmentData.maintenanceStatus || "正常"}，建议按计划进行定期维护以确保测试精度。该设备在科研项目中发挥重要作用，为多个研究方向提供关键数据支持，设备利用率达到78%，表现优异。`
-      } else if (category === "光学仪器") {
-        return `该${equipmentData.name}是精密光学仪器，具有高分辨率和稳定性。最新分析显示，设备光学系统性能稳定，测量精度符合技术指标要求。当前使用状态为${status}，预约使用率较高，建议优化预约时间安排。设备存放环境良好，温湿度控制在规定范围内，有利于设备长期稳定运行。光学元件清洁度良好，建议继续保持当前维护水平。`
-      } else if (category === "电子仪器") {
-        return `该${equipmentData.name}是先进电子测试仪器，具备多种测试功能和高精度测量能力。最新分析显示，设备电子系统运行正常，校准状态良好。使用频率为${equipmentData.useFrequency || "中等"}，设备利用率合理。建议定期进行电子系统检查和校准，确保测量数据的准确性和可靠性。设备故障率低，维护成本控制良好。`
+      if (species === "小鼠") {
+        return `该${animalData.animalId}号小鼠为${animalData.strain}品系，${animalData.gender}性，年龄${age}周，体重${weight}g。最新分析显示，动物健康状态为${status}，健康评分${healthScore}，生长发育正常。该小鼠适应性良好，活动正常，食欲稳定，无明显应激反应。建议继续按照标准饲养程序管理，定期监测体重变化和行为表现。该动物在实验研究中表现稳定，数据可靠性高，为科研项目提供优质的实验对象。`
+      } else if (species === "大鼠") {
+        return `该${animalData.animalId}号大鼠为${animalData.strain}品系，${animalData.gender}性，年龄${age}周，体重${weight}g。最新分析显示，动物整体状况为${status}，健康评分${healthScore}，各项生理指标正常。大鼠活动能力强，反应敏捷，社交行为正常，无异常症状。建议继续保持良好的饲养环境，注意营养均衡和环境富集。该动物为实验研究提供可靠的数据支撑，实验价值较高。`
+      } else if (species === "兔") {
+        return `该${animalData.animalId}号兔为${animalData.strain}品系，${animalData.gender}性，年龄${age}周，体重${weight}g。最新分析显示，动物健康状况为${status}，健康评分${healthScore}，体型发育良好。兔子精神状态佳，食欲正常，毛色光泽，无呼吸道疾病症状。建议注意饲料质量和饮水清洁，定期检查牙齿和爪子健康。该动物符合实验标准，为相关研究提供高质量的实验支持。`
+      } else if (species === "豚鼠") {
+        return `该${animalData.animalId}号豚鼠为${animalData.strain}品系，${animalData.gender}性，年龄${age}周，体重${weight}g。最新分析显示，动物状态为${status}，健康评分${healthScore}，适应环境良好。豚鼠活泼好动，发声正常，社群行为稳定，无应激症状。建议补充维生素C，保持适宜的温湿度环境，提供充足的运动空间。该动物健康状况优良，为实验研究提供可靠保障。`
       } else {
-        return `该${equipmentData.name}是重要的科研设备，在相关领域具有重要应用价值。最新分析显示，设备整体状态良好，使用情况正常。当前维护状态为${equipmentData.maintenanceStatus || "正常"}，建议按照维护计划进行定期保养。设备为多个科研项目提供技术支持，使用效率较高，用户满意度达到90%以上。`
+        return `该${animalData.animalId}号${species}为${animalData.strain || "标准"}品系，${animalData.gender}性，年龄${age}周，体重${weight}g。最新分析显示，动物整体状况为${status}，健康评分${healthScore}，各项指标正常。建议按照标准动物福利要求进行饲养管理，定期健康检查。该动物为科研工作提供可靠的实验支持，数据质量良好。`
       }
     } else {
-      if (category === "分析仪器") {
-        return `该${equipmentData.name}是高精度分析仪器，主要用于材料成分分析和结构表征。设备具有高分辨率、高精度的特点，能够提供准确的分析数据。当前状态为${status}，使用频率${equipmentData.useFrequency || "中等"}，是科研工作的重要工具。`
-      } else if (category === "光学仪器") {
-        return `该${equipmentData.name}是精密光学仪器，具有高分辨率和稳定性。设备采用先进的光学技术，能够进行精确的光学测量和分析。当前使用状态为${status}，为光学相关研究提供重要支持。`
-      } else if (category === "电子仪器") {
-        return `该${equipmentData.name}是先进电子测试仪器，具备多种测试功能和高精度测量能力。设备能够进行各种电子参数的测量和分析，是电子技术研究的重要工具。当前状态为${status}。`
+      if (species === "小鼠") {
+        return `该${animalData.animalId}号小鼠为${animalData.strain}品系实验动物，具有良好的遗传稳定性和实验重现性。当前健康状态为${status}，年龄${age}周，体重${weight}g，适合用于多种生物医学研究。`
+      } else if (species === "大鼠") {
+        return `该${animalData.animalId}号大鼠为${animalData.strain}品系实验动物，具有较强的适应性和稳定的生理特征。当前状态为${status}，为行为学和生理学研究提供良好的实验对象。`
+      } else if (species === "兔") {
+        return `该${animalData.animalId}号兔为${animalData.strain}品系实验动物，体型适中，生理特征稳定。当前健康状态为${status}，适合用于药理学和毒理学研究。`
+      } else if (species === "豚鼠") {
+        return `该${animalData.animalId}号豚鼠为${animalData.strain}品系实验动物，具有独特的生理特征和良好的实验适应性。当前状态为${status}，为特定研究领域提供重要支持。`
       } else {
-        return `该${equipmentData.name}是重要的科研设备，在相关领域具有重要应用价值。设备功能完善，技术先进，为科研工作提供有力支持。当前状态为${status}，请查看详细信息了解更多。`
+        return `该${animalData.animalId}号${species}为实验动物，具有稳定的遗传背景和良好的健康状况。当前状态为${status}，为科研项目提供可靠的实验支持。`
       }
     }
   }
   
   // 生成AI建议内容
   const generateAIRecommendations = (isUpdated: boolean) => {
-    const category = equipmentData.category || "未知类型"
-    const maintenanceStatus = equipmentData.maintenanceStatus || "正常"
+    const species = animalData.species || "未知物种"
+    const status = animalData.status || "正常"
+    const age = animalData.age || 0
+    const weight = animalData.weight || 0
     
     if (isUpdated) {
-      if (category === "分析仪器") {
+      if (species === "小鼠") {
         return [
-          "建议定期校准设备，确保分析结果的准确性和可靠性",
-          "加强设备使用培训，提高操作人员的专业技能水平",
-          "建立完善的样品预处理流程，提高分析效率和质量"
+          "定期监测体重变化，确保营养状况良好",
+          "观察日常行为活动，及时发现异常症状", 
+          "保持饲养环境清洁，减少感染风险"
         ]
-      } else if (category === "光学仪器") {
+      } else if (species === "大鼠") {
         return [
-          "保持设备清洁，定期清理光学元件，避免灰尘影响测量精度",
-          "控制环境温湿度，确保设备在最佳条件下运行",
-          "建议建立设备使用日志，记录每次使用情况和异常现象"
+          "加强环境富集，提供适当的运动空间",
+          "定期健康检查，监测生理指标变化",
+          "注意社群管理，避免打斗和应激"
         ]
-      } else if (category === "电子仪器") {
+      } else if (species === "兔") {
         return [
-          "定期进行电子系统检查，确保各项功能正常",
-          "建议制定标准操作程序，规范设备使用流程",
-          "加强设备防护，避免电磁干扰影响测量结果"
+          "确保饲料新鲜，避免霉变和污染",
+          "定期检查牙齿健康，预防牙齿过度生长",
+          "保持适宜温度，避免热应激"
+        ]
+      } else if (species === "豚鼠") {
+        return [
+          "补充维生素C，预防坏血病发生",
+          "保持环境安静，减少噪音应激",
+          "定期清洁笼具，维护卫生环境"
         ]
       } else {
         return [
-          "建议制定详细的设备维护计划，确保设备长期稳定运行",
-          "加强设备使用管理，提高设备利用率",
-          "定期评估设备性能，及时发现和解决潜在问题"
+          "按照物种特性制定饲养管理方案",
+          "定期进行健康评估和行为观察",
+          "确保动物福利要求得到满足"
         ]
       }
     } else {
-      if (maintenanceStatus === "正常") {
+      if (status === "健康") {
         return [
-          "设备状态良好，建议继续按计划进行维护",
-          "优化设备使用安排，提高使用效率",
-          "加强设备操作培训，确保规范使用"
+          "继续保持良好的饲养管理状态",
+          "定期进行健康监测和记录",
+          "确保动物福利和实验质量"
         ]
-      } else if (maintenanceStatus === "待维护") {
+      } else if (status === "观察中") {
         return [
-          "建议尽快安排设备维护，确保设备正常运行",
-          "检查设备关键部件，及时更换老化元件",
-          "制定维护后的验证程序，确保设备性能恢复"
+          "加强健康监测，密切观察动物状态",
+          "必要时进行兽医检查和治疗",
+          "记录观察结果，制定后续方案"
+        ]
+      } else if (age > 52) { // 超过一年的动物
+        return [
+          "关注老龄动物的特殊需求",
+          "调整饲养管理方案和营养配比",
+          "定期评估实验适用性"
         ]
       } else {
         return [
-          "建议详细检查设备状态，制定相应的处理方案",
-          "加强设备日常巡检，及时发现异常情况",
-          "建立设备故障处理流程，提高响应效率"
+          "建立完善的动物健康档案",
+          "制定个性化的饲养管理计划",
+          "确保动物在最佳状态下参与实验"
         ]
       }
     }
@@ -170,7 +203,7 @@ export default function AISummary({ equipmentData }: AISummaryProps) {
                   v2.4.1
                 </Badge>
               </CardTitle>
-              <p className="text-xs text-slate-500 mt-0.5">AI模型: GPT-Scientific 2023</p>
+              <p className="text-xs text-slate-500 mt-0.5">AI模型: GPT-Animal 2023</p>
             </div>
           </div>
           <Button
@@ -209,7 +242,7 @@ export default function AISummary({ equipmentData }: AISummaryProps) {
               <div className="w-48 h-1.5 bg-slate-200 rounded-full overflow-hidden">
                 <div className="h-full bg-primary animate-progress rounded-full"></div>
               </div>
-              <div className="text-xs text-slate-500 mt-2">正在处理设备数据并生成智能洞察...</div>
+              <div className="text-xs text-slate-500 mt-2">正在分析动物档案数据并生成智能洞察...</div>
             </div>
           )}
 
@@ -226,21 +259,21 @@ export default function AISummary({ equipmentData }: AISummaryProps) {
                 <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                   <BarChart3 className="h-4 w-4 text-blue-600" />
                   <div className="text-xs text-slate-600">
-                    <span>设备状态</span>
+                    <span>健康状态</span>
                     <div className="font-semibold text-sm text-slate-900">{isAnalysisUpdated ? "优秀" : "良好"}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                   <PieChart className="h-4 w-4 text-amber-600" />
                   <div className="text-xs text-slate-600">
-                    <span>利用率评估</span>
+                    <span>适应性评估</span>
                     <div className="font-semibold text-sm text-slate-900">
                       {isAnalysisUpdated ? (
                         <>
-                          高利用率 <span className="text-green-600 text-xs">↑</span>
+                          适应良好 <span className="text-green-600 text-xs">✓</span>
                         </>
                       ) : (
-                        "中等"
+                        "稳定"
                       )}
                     </div>
                   </div>
@@ -248,8 +281,8 @@ export default function AISummary({ equipmentData }: AISummaryProps) {
                 <div className="flex items-center gap-1.5">
                   <LineChart className="h-4 w-4 text-green-600" />
                   <div className="text-xs text-slate-600">
-                    <span>性能评估</span>
-                    <div className="font-semibold text-sm text-slate-900">{isAnalysisUpdated ? "优异" : "良好"}</div>
+                    <span>实验价值</span>
+                    <div className="font-semibold text-sm text-slate-900">{isAnalysisUpdated ? "高价值" : "良好"}</div>
                   </div>
                 </div>
               </motion.div>
@@ -266,7 +299,7 @@ export default function AISummary({ equipmentData }: AISummaryProps) {
                   <>
                     <div className="flex items-center gap-2 mb-3 text-sm text-amber-600 bg-amber-50 p-2 rounded-md border border-amber-100">
                       <LayoutGrid className="h-4 w-4" />
-                      <span className="font-medium">最新分析已更新 - 检测到设备使用数据变化</span>
+                      <span className="font-medium">最新分析已更新 - 检测到动物健康和生长状态变化</span>
                     </div>
                     <p>
                       {generateAISummary(true)}
@@ -275,24 +308,24 @@ export default function AISummary({ equipmentData }: AISummaryProps) {
                       <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                         <BarChart3 className="h-4 w-4 text-blue-600" />
                         <div className="text-xs text-slate-600">
-                          <span>设备状态</span>
+                          <span>健康状态</span>
                           <div className="font-semibold text-sm text-slate-900">优秀</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                         <PieChart className="h-4 w-4 text-amber-600" />
                         <div className="text-xs text-slate-600">
-                          <span>利用率评估</span>
+                          <span>适应性评估</span>
                           <div className="font-semibold text-sm text-slate-900">
-                            高利用率 <span className="text-green-600 text-xs">↑</span>
+                            适应良好 <span className="text-green-600 text-xs">✓</span>
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <LineChart className="h-4 w-4 text-green-600" />
                         <div className="text-xs text-slate-600">
-                          <span>性能评估</span>
-                          <div className="font-semibold text-sm text-slate-900">优异</div>
+                          <span>实验价值</span>
+                          <div className="font-semibold text-sm text-slate-900">高价值</div>
                         </div>
                       </div>
                     </div>
@@ -316,21 +349,21 @@ export default function AISummary({ equipmentData }: AISummaryProps) {
                       <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                         <BarChart3 className="h-4 w-4 text-blue-600" />
                         <div className="text-xs text-slate-600">
-                          <span>设备状态</span>
+                          <span>健康状态</span>
                           <div className="font-semibold text-sm text-slate-900">良好</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
                         <PieChart className="h-4 w-4 text-amber-600" />
                         <div className="text-xs text-slate-600">
-                          <span>利用率评估</span>
-                          <div className="font-semibold text-sm text-slate-900">中等</div>
+                          <span>适应性评估</span>
+                          <div className="font-semibold text-sm text-slate-900">稳定</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <LineChart className="h-4 w-4 text-green-600" />
                         <div className="text-xs text-slate-600">
-                          <span>性能评估</span>
+                          <span>实验价值</span>
                           <div className="font-semibold text-sm text-slate-900">良好</div>
                         </div>
                       </div>
@@ -355,7 +388,7 @@ export default function AISummary({ equipmentData }: AISummaryProps) {
               <div className="inline-flex h-5 items-center rounded-full border border-slate-200 bg-white px-2 text-xs font-semibold text-slate-900">
                 可信度 94%
               </div>
-              <span>分析时间: {isAnalysisUpdated ? "2024-04-03 17:42" : "2024-04-01 10:32"}</span>
+              <span>分析时间: {isAnalysisUpdated ? "2024-04-03 17:45" : "2024-04-01 10:35"}</span>
             </div>
             <div className="flex items-center">
               <Button
@@ -407,4 +440,4 @@ export default function AISummary({ equipmentData }: AISummaryProps) {
       />
     </Card>
   )
-} 
+}
