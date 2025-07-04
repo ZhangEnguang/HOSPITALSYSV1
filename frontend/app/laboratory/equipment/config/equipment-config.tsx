@@ -645,22 +645,22 @@ const EquipmentCard = ({
           )}
         </div>
 
-        {/* 可预约/不可预约标签 - 移动到左上角 */}
-        <div className="absolute top-2 left-2 z-[5]">
+        {/* 可预约/不可预约标签 - 左上角位置优化 */}
+        <div className="absolute top-3 left-3 z-[5]">
           {item.status === "正常" ? (
-            <span className="text-xs px-2 py-0.5 bg-green-50 text-green-600 rounded-full border border-green-200 leading-none">
+            <span className="text-xs px-2.5 py-1 bg-green-50 text-green-600 rounded-full border border-green-200 leading-none shadow-sm">
               可预约
             </span>
           ) : (
-            <span className="text-xs px-2 py-0.5 bg-gray-50 text-gray-500 rounded-full border border-gray-200 leading-none">
+            <span className="text-xs px-2.5 py-1 bg-gray-50 text-gray-500 rounded-full border border-gray-200 leading-none shadow-sm">
               不可预约
             </span>
           )}
         </div>
         
-        {/* 操作按钮 - 移动到图片区域右上角 */}
+        {/* 操作按钮 - 图片区域右上角位置优化 */}
         {actions && actions.length > 0 && (
-          <div className="absolute top-2 right-2 z-10">
+          <div className="absolute top-3 right-3 z-10">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
