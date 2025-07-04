@@ -46,7 +46,6 @@ export default function MobileSidebar() {
     { name: "项目管理", icon: <FolderOpen className="h-5 w-5" />, path: "/projects" },
     { name: "伦理项目", icon: <ShieldCheck className="h-5 w-5" />, path: "/ethic-projects" },
     { name: "伦理审查", icon: <ClipboardCheck className="h-5 w-5" />, path: "#" },
-    { name: "人遗专项", icon: <Dna className="h-5 w-5" />, path: "/ethic-review/human-genetics-review" },
     { name: "动物中心", icon: <Rabbit className="h-5 w-5" />, path: "/laboratory/animal-files" },
     { name: "实验室", icon: <FlaskConical className="h-5 w-5" />, path: "/laboratory/equipment" },
     { name: "进度管理", icon: <LineChart className="h-5 w-5" />, path: "/progress" },

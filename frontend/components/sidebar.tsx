@@ -229,17 +229,10 @@ export default function Sidebar() {
       subMenus: [
         { name: "初始审查", path: "/ethic-review/initial-review" },
         { name: "跟踪报告", path: "/ethic-review/track-review" },
+        { name: "人遗资源", path: "/ethic-review/human-genetics-review" },
         { name: "快速审查", path: "/ethic-review/quick-review" },
         { name: "会议审查", path: "/ethic-review/meeting-review" },
         { name: "送审文件配置", path: "/ethic-review/document-config" },
-      ]
-    },
-    { 
-      name: "人遗专项", 
-      icon: <Dna className="h-5 w-5" />, 
-      path: "#",
-      subMenus: [
-        { name: "人遗资源", path: "/ethic-review/human-genetics-review" },
       ]
     },
     { 
@@ -342,8 +335,8 @@ export default function Sidebar() {
     // 如果点击的是当前活动项，并且有子菜单，则切换展开/折叠状态
     if (activeItem === name && menuItems.find(item => item.name === name)?.subMenus) {
       setExpandedMenu(expandedMenu === name ? null : name);
-    } else if (name === "伦理审查" || name === "人遗专项" || name === "实验室" || name === "动物中心") {
-      // 对于伦理审查、人遗专项、实验室和动物中心特殊处理，只切换展开/折叠状态，不进行导航
+    } else if (name === "伦理审查" || name === "实验室" || name === "动物中心") {
+      // 对于伦理审查、实验室和动物中心特殊处理，只切换展开/折叠状态，不进行导航
       setActiveItem(name);
       setExpandedMenu(expandedMenu === name ? null : name);
     } else {

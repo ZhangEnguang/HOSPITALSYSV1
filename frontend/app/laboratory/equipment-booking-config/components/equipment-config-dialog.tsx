@@ -273,7 +273,6 @@ export function EquipmentConfigDialog({
                       <SelectContent>
                         <SelectItem value="启用">启用</SelectItem>
                         <SelectItem value="禁用">禁用</SelectItem>
-                        <SelectItem value="维护中">维护中</SelectItem>
                         <SelectItem value="草稿">草稿</SelectItem>
                       </SelectContent>
                     </Select>

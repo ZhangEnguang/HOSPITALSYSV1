@@ -7,7 +7,7 @@ export interface EquipmentConfigItem {
   applicableScope?: string     // 适用范围类型（仪器类别、指定仪器、实验室、部门）
   targetScope?: string         // 具体适用目标
   scopeDescription: string     // 适用范围描述
-  status: "启用" | "禁用" | "维护中" | "草稿"
+  status: "启用" | "禁用" | "草稿"
   lastUpdated: string
   updatedBy: string
   
@@ -173,7 +173,7 @@ export const allDemoEquipmentConfigItems: EquipmentConfigItem[] = [
     applicableScope: "指定仪器",
     targetScope: "EQ001",
     scopeDescription: "气相色谱-质谱联用仪 (EQ001)",
-    status: "维护中",
+    status: "禁用",
     lastUpdated: "2024-01-08 19:20",
     updatedBy: "赵六",
     maxAdvanceBookingDays: 90,

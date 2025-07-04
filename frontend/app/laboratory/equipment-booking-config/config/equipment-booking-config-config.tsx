@@ -39,7 +39,6 @@ export const CARD_SELECTION_CONFIG: CardSelectionConfig = DEFAULT_CARD_SELECTION
 export const statusColors = {
   "启用": "default",
   "禁用": "secondary", 
-  "维护中": "destructive",
   "草稿": "outline"
 } as const
 
@@ -52,7 +51,6 @@ export const quickFilters = [
       { id: "status_all", label: "全部状态", value: "all" },
       { id: "status_enabled", label: "启用", value: "启用" },
       { id: "status_disabled", label: "禁用", value: "禁用" },
-      { id: "status_maintenance", label: "维护中", value: "维护中" },
       { id: "status_draft", label: "草稿", value: "草稿" }
     ]
   },

@@ -83,7 +83,6 @@ export default function HorizontalMenu() {
       case "项目管理": return "项目";
       case "伦理项目": return "伦理";
       case "伦理审查": return "审查";
-      case "人遗专项": return "人遗";
       case "动物中心": return "动物";
       case "实验室": return "实验";
       case "进度管理": return "进度";
@@ -157,14 +156,6 @@ export default function HorizontalMenu() {
       subMenus: [
         { name: "初始审查", path: "/ethic-review/initial-review" },
         { name: "跟踪报告", path: "/ethic-review/track-review" },
-      ]
-    },
-    { 
-      name: "人遗专项", 
-      shortName: "人遗",
-      icon: <Dna className="h-5 w-5" />, 
-      path: "#",
-      subMenus: [
         { name: "人遗资源", path: "/ethic-review/human-genetics-review" },
       ]
     },
