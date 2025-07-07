@@ -189,6 +189,9 @@ export default function AnimalEthicProjectsPage() {
   // 视图模式
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   
+  // 选中状态管理
+  const [selectedRows, setSelectedRows] = useState<string[]>([])
+  
   // 表格列可见性 - 修改为符合DataList组件要求的格式
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
     "projectNumber": true,
@@ -239,6 +242,29 @@ export default function AnimalEthicProjectsPage() {
       })
     }, 500)
   }
+
+  // 批量操作函数
+  const handleBatchDelete = async () => {
+    try {
+      setProjects(prevProjects => prevProjects.filter(p => !selectedRows.includes(p.id)))
+      setTotalItems(prev => prev - selectedRows.length)
+      
+      toast({
+        title: "批量删除成功",
+        description: `已删除 ${selectedRows.length} 个动物伦理项目`,
+      })
+      setSelectedRows([])
+    } catch (error) {
+      console.error("批量删除失败:", error)
+      toast({
+        title: "批量删除失败",
+        description: "操作未能完成，请稍后再试",
+        variant: "destructive",
+      })
+    }
+  }
+
+
   
   // 分页项目数据
   const paginatedProjects = projects
@@ -437,34 +463,14 @@ export default function AnimalEthicProjectsPage() {
     },
   ]
   
-  // 卡片字段配置
-  const cardFields = [
+  // 批量操作配置
+  const batchActions = [
     {
-      id: "animalType",
-      label: "动物种系",
-      value: (item: any) => item.animalType || item.动物种系 || "-",
-      className: "",
-    },
-    {
-      id: "animalCount",
-      label: "动物数量",
-      value: (item: any) => item.animalCount || item.动物数量 || "-",
-      className: "",
-    },
-    {
-      id: "ethicsCommittee",
-      label: "伦理委员会",
-      value: (item: any) => item.ethicsCommittee || item.伦理委员会 || "医学院伦理审查委员会",
-      className: "",
-    },
-    {
-      id: "facilityUnit",
-      label: "实验执行单位",
-      value: (item: any) => item.facilityUnit || item.实验执行单位 || item.动物实施设备单位 || "基础医学实验中心",
-      className: "",
+      label: "批量删除",
+      onClick: handleBatchDelete,
     },
   ]
-  
+
   // 卡片操作
   const customCardActions = [
     {
@@ -496,6 +502,34 @@ export default function AnimalEthicProjectsPage() {
     },
   ]
 
+  // 卡片字段配置
+  const cardFields = [
+    {
+      id: "animalType",
+      label: "动物种系",
+      value: (item: any) => item.animalType || item.动物种系 || "-",
+      className: "",
+    },
+    {
+      id: "animalCount",
+      label: "动物数量",
+      value: (item: any) => item.animalCount || item.动物数量 || "-",
+      className: "",
+    },
+    {
+      id: "ethicsCommittee",
+      label: "伦理委员会",
+      value: (item: any) => item.ethicsCommittee || item.伦理委员会 || "医学院伦理审查委员会",
+      className: "",
+    },
+    {
+      id: "facilityUnit",
+      label: "实验执行单位",
+      value: (item: any) => item.facilityUnit || item.实验执行单位 || item.动物实施设备单位 || "基础医学实验中心",
+      className: "",
+    },
+  ]
+  
   // 处理视图模式变更
   const handleViewModeChange = (mode: string) => {
     setViewMode(mode as "grid" | "list");
@@ -552,6 +586,9 @@ export default function AnimalEthicProjectsPage() {
               totalItems={totalItems}
               onPageChange={setCurrentPage}
               onPageSizeChange={setPageSize}
+              selectedRows={selectedRows}
+              onSelectedRowsChange={setSelectedRows}
+              batchActions={batchActions}
               categories={filterCategories}
               onItemClick={(item: any) => router.push(`/ethic-projects/animal/${item.id}`)}
               detailsUrlPrefix="/ethic-projects/animal"

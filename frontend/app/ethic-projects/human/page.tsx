@@ -185,12 +185,7 @@ export default function HumanEthicProjectsPage() {
     }
   }
 
-  const handleBatchApprove = () => {
-    toast({
-      title: "批量审批",
-      description: `已选择 ${selectedRows.length} 个伦理项目进行审批`,
-    })
-  }
+
 
   // 扩展项目数据函数
   const extendProjectData = (item: EthicProject, index: number) => {
@@ -364,11 +359,6 @@ export default function HumanEthicProjectsPage() {
   // 批量操作配置
   const batchActions = [
     {
-      id: "approve",
-      label: "批量审批",
-      onClick: handleBatchApprove,
-    },
-    {
       id: "delete",
       label: "批量删除",
       onClick: handleBatchDelete,
@@ -380,10 +370,6 @@ export default function HumanEthicProjectsPage() {
   const configuredBatchActions = [
     {
       ...batchActions[0],
-      onClick: handleBatchApprove,
-    },
-    {
-      ...batchActions[1],
       onClick: handleBatchDelete,
     },
   ]
@@ -553,9 +539,9 @@ export default function HumanEthicProjectsPage() {
   // 为customCardRenderer添加类型注解
   const customCardRenderer = (
     item: EthicProject, 
-    globalCardConfig: any, 
-    onCardSelection: (id: string) => void, 
-    selectedCardId: string | null
+    actions: any[], 
+    isSelected: boolean, 
+    onToggleSelect: (selected: boolean) => void
   ) => {
     // 获取随机数据
     const getRandomData = (index: number) => {
@@ -567,7 +553,7 @@ export default function HumanEthicProjectsPage() {
       const leaderDepartments = ["基础医学院", "临床医学院", "公共卫生学院", "药学院", "护理学院", "医学技术学院", "口腔医学院"];
       
       // 使用项目ID的哈希或索引来选择数据
-      const hash = item.id.charCodeAt(0) + index;
+      const hash = item.id.charCodeAt(0) + 0;
       return {
         projectType: projectTypes[hash % projectTypes.length],
         projectSource: projectSources[(hash + 1) % projectSources.length],
@@ -629,7 +615,7 @@ export default function HumanEthicProjectsPage() {
 
     // 输出扩展后的项目对象，方便调试
     console.log(`渲染卡片: 项目ID=${extendedItem.id}, 项目名称=${extendedItem.name}`);
-          console.log(`扩展的字段: 研究类型=${extendedItem.研究类型}, 项目来源=${extendedItem.项目来源}`);
+    console.log(`扩展的字段: 研究类型=${extendedItem.研究类型}, 项目来源=${extendedItem.项目来源}`);
 
     // 确保ID是字符串类型
     const itemId = String(item.id);
@@ -637,7 +623,7 @@ export default function HumanEthicProjectsPage() {
     return (
       <CustomCardWrapper
         item={extendedItem}
-        actions={customCardActions}
+        actions={actions}
         fields={cardFields}
         titleField="name"
         descriptionField="description"
@@ -647,8 +633,8 @@ export default function HumanEthicProjectsPage() {
         tasksField={{ completed: "tasks.completed", total: "tasks.total" }}
         detailsUrl={`/ethic-projects/human/${itemId}`}
         className=""
-        selected={selectedCardId === item.id}
-        onSelect={() => onCardSelection(item.id)}
+        selected={isSelected}
+        onSelect={onToggleSelect}
         onClick={() => {
           console.log("卡片点击: 项目ID=", itemId, "类型:", typeof itemId);
           router.push(`/ethic-projects/human/${itemId}`);
