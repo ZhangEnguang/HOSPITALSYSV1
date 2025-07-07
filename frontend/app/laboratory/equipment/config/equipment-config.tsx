@@ -644,19 +644,6 @@ const EquipmentCard = ({
             </div>
           )}
         </div>
-
-        {/* 可预约/不可预约标签 - 左上角位置优化 */}
-        <div className="absolute top-3 left-3 z-[5]">
-          {item.status === "正常" ? (
-            <span className="text-xs px-2.5 py-1 bg-green-50 text-green-600 rounded-full border border-green-200 leading-none shadow-sm">
-              可预约
-            </span>
-          ) : (
-            <span className="text-xs px-2.5 py-1 bg-gray-50 text-gray-500 rounded-full border border-gray-200 leading-none shadow-sm">
-              不可预约
-            </span>
-          )}
-        </div>
         
         {/* 操作按钮 - 图片区域右上角位置优化 */}
         {actions && actions.length > 0 && (
@@ -720,11 +707,20 @@ const EquipmentCard = ({
         {/* 填充空间 */}
         <div className="flex-1 min-h-0"></div>
         
-        {/* 预约次数 - 固定在底部 */}
-        <div className="flex-shrink-0 pt-2.5 border-t border-gray-100">
+        {/* 预约次数和可预约状态 - 固定在底部，同一行显示 */}
+        <div className="flex-shrink-0 pt-2.5 border-t border-gray-100 flex items-center justify-between">
           <span className="text-muted-foreground leading-none !text-sm">
             预约次数：{item.bookingCount || 0}次
           </span>
+          {item.status === "正常" ? (
+            <span className="text-xs px-2.5 py-1 bg-green-50 text-green-600 rounded-full border border-green-200 leading-none shadow-sm">
+              可预约
+            </span>
+          ) : (
+            <span className="text-xs px-2.5 py-1 bg-gray-50 text-gray-500 rounded-full border border-gray-200 leading-none shadow-sm">
+              不可预约
+            </span>
+          )}
         </div>
       </div>
     </Card>

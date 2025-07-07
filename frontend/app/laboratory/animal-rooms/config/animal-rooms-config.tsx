@@ -464,19 +464,19 @@ const AnimalRoomCard = ({
       )}
 
       {/* 操作按钮 */}
-      <div className="absolute top-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      <div className="absolute top-3 right-3 z-20">
         <DropdownMenu open={showDropdown} onOpenChange={setShowDropdown}>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 bg-white/90 hover:bg-white shadow-sm border border-gray-200/50 text-gray-600 hover:text-gray-900 transition-all duration-300"
+              className="h-7 w-7 bg-black/10 hover:bg-black/20 shadow-none border-0 text-white/80 hover:text-white transition-all duration-300 backdrop-blur-sm"
               onClick={(e) => {
                 e.stopPropagation()
                 setShowDropdown(!showDropdown)
               }}
             >
-              <MoreVertical className="h-4 w-4" />
+              <MoreVertical className="h-3.5 w-3.5" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-36">
@@ -519,7 +519,8 @@ const AnimalRoomCard = ({
           </div>
         )}
         
-        {/* 状态标识 */}
+        {/* 状态标识 - 已隐藏 */}
+        {/* 
         <div className="absolute top-3 left-3">
           <Badge
             variant={statusColors[item.status] ? statusColors[item.status] as any : "secondary"}
@@ -528,6 +529,7 @@ const AnimalRoomCard = ({
             {item.status}
           </Badge>
         </div>
+        */}
       </div>
 
       {/* 内容区域 */}

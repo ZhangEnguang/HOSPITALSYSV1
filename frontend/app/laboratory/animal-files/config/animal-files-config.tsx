@@ -564,23 +564,23 @@ const AnimalCard = ({
             </DropdownMenu>
           </div>
 
-          {/* 左上角状态标识 */}
-          {needsAttention() && (
+          {/* 左上角状态标识 - 已隐藏 */}
+          {/* {needsAttention() && (
             <div className="absolute top-2 left-2 z-10">
               <Badge variant="outline" className="text-xs font-medium bg-orange-100 text-orange-700 border-orange-300">
                 需要关注
               </Badge>
             </div>
-          )}
+          )} */}
 
-          {/* 死亡状态标识 */}
-          {item.status === "死亡" && (
+          {/* 死亡状态标识 - 已隐藏 */}
+          {/* {item.status === "死亡" && (
             <div className="absolute top-2 left-2 z-10">
               <Badge variant="destructive" className="text-xs font-medium">
                 已死亡
               </Badge>
             </div>
-          )}
+          )} */}
 
           {/* 上方区域：左侧动物图标，右侧基本信息 */}
           <div className="flex items-start gap-3 pt-5 px-5 pb-2.5">
