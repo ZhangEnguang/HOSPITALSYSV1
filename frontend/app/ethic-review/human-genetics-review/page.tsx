@@ -34,6 +34,7 @@ import {
 import { useToast } from "@/components/ui/use-toast"
 import { SeniorFilterDTO } from "@/components/data-management/data-list-advanced-filter"
 import HumanGeneticsReviewCard from "./components/human-genetics-review-card"
+import { CheckCircle, Trash2 } from "lucide-react"
 
 // 定义排序选项类型
 interface SortOption {
@@ -238,6 +239,7 @@ function HumanGeneticsReviewContent() {
   const batchActions = [
     {
       label: "批量审核",
+      icon: <CheckCircle className="h-4 w-4" />,
       onClick: () => {
         toast({
           title: "批量审核",
@@ -248,6 +250,7 @@ function HumanGeneticsReviewContent() {
     },
     {
       label: "批量删除",
+      icon: <Trash2 className="h-4 w-4" />,
       onClick: () => {
         toast({
           title: "批量删除",

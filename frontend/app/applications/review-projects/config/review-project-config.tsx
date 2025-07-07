@@ -16,6 +16,7 @@ export const typeColors = {
 }
 
 import { ProjectReviewButton } from "../components/project-review-button"
+import { Users, Trash2, Check, X } from "lucide-react"
 
 // 表格列配置
 export const tableColumns = [
@@ -124,7 +125,7 @@ export const cardActions = [
   {
     id: "assign",
     label: "分派专家",
-    icon: "users",
+    icon: <Users className="h-4 w-4" />,
     onClick: (row: any) => console.log("分派专家", row),
   },
 ]
@@ -134,13 +135,13 @@ export const tableActions = [
   {
     id: "assign",
     label: "分派专家",
-    icon: "Users",
+    icon: <Users className="h-4 w-4" />,
     onClick: (item: any) => console.log("分派专家", item),
   },
   {
     id: "delete",
     label: "删除",
-    icon: "Trash2",
+    icon: <Trash2 className="h-4 w-4" />,
     onClick: (item: any) => console.log("删除", item),
     variant: "destructive",
   },
@@ -151,13 +152,13 @@ export const batchActions = [
   {
     id: "approve",
     label: "批量通过",
-    icon: "check",
+    icon: <Check className="h-4 w-4" />,
     onClick: (rows: any[]) => console.log("批量通过", rows),
   },
   {
     id: "reject",
     label: "批量拒绝",
-    icon: "x",
+    icon: <X className="h-4 w-4" />,
     onClick: (rows: any[]) => console.log("批量拒绝", rows),
   },
 ]

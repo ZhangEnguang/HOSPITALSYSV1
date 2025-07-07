@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import DataList from "@/components/data-management/data-list"
 import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
+import { Plus, CheckCircle, RefreshCw, Trash } from "lucide-react"
 import {
   quickFilters,
   advancedFilters,
@@ -225,19 +225,19 @@ function AnimalRoomsContent() {
     {
       id: "setInUse",
       label: "设为使用中",
-      icon: "CheckCircle",
+      icon: <CheckCircle className="h-4 w-4" />,
       onClick: handleBatchSetInUse,
     },
     {
       id: "setCleaning",
       label: "设为清洁中",
-      icon: "RefreshCw",
+      icon: <RefreshCw className="h-4 w-4" />,
       onClick: handleBatchSetCleaning,
     },
     {
       id: "delete",
       label: "批量删除",
-      icon: "Trash",
+      icon: <Trash className="h-4 w-4" />,
       variant: "destructive",
       onClick: handleBatchDelete,
     },

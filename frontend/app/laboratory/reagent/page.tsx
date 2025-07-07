@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import DataList from "@/components/data-management/data-list"
 import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
+import { Plus, X, Clock, CheckCircle, Trash } from "lucide-react"
 import {
   quickFilters,
   advancedFilters,
@@ -388,25 +388,25 @@ function ReagentContent() {
     {
       id: "outOfStock",
       label: "标记用完",
-      icon: "X",
+      icon: <X className="h-4 w-4" />,
       onClick: handleBatchSetOutOfStock,
     },
     {
       id: "expired",
       label: "标记过期",
-      icon: "Clock",
+      icon: <Clock className="h-4 w-4" />,
       onClick: handleBatchSetExpired,
     },
     {
       id: "normal",
       label: "标记正常",
-      icon: "CheckCircle",
+      icon: <CheckCircle className="h-4 w-4" />,
       onClick: handleBatchSetNormal,
     },
     {
       id: "delete",
       label: "批量删除",
-      icon: "Trash",
+      icon: <Trash className="h-4 w-4" />,
       variant: "destructive",
       onClick: handleBatchDelete,
     },

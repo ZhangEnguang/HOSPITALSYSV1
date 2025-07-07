@@ -18,6 +18,7 @@ import {
   X,
   Home,
   MapPin,
+  Trash,
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
@@ -228,17 +229,17 @@ export const batchActions = [
   {
     id: "approve",
     label: "批量审核",
-    icon: "Check",
+    icon: <Check className="h-4 w-4" />,
   },
   {
     id: "reject",
     label: "批量退回",
-    icon: "X",
+    icon: <X className="h-4 w-4" />,
   },
   {
     id: "delete",
     label: "批量删除",
-    icon: "Trash",
+    icon: <Trash className="h-4 w-4" />,
     variant: "destructive",
   },
 ]

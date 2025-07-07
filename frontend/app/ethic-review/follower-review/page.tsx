@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { toast } from "@/components/ui/use-toast"
 import DataList from "@/components/data-management/data-list"
+import { CheckCircle, Trash2 } from "lucide-react"
 
 export default function EthicFollowerReviewPage() {
   const [selectedRows, setSelectedRows] = useState<string[]>([])
@@ -16,6 +17,7 @@ export default function EthicFollowerReviewPage() {
   const batchActions = [
     {
       label: "批量审核",
+      icon: <CheckCircle className="h-4 w-4" />,
       onClick: () => {
         toast({
           title: "批量审核",
@@ -25,6 +27,7 @@ export default function EthicFollowerReviewPage() {
     },
     {
       label: "批量删除",
+      icon: <Trash2 className="h-4 w-4" />,
       onClick: () => {
         toast({
           title: "批量删除",

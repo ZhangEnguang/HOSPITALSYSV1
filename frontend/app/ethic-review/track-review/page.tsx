@@ -12,7 +12,7 @@ declare global {
 import { useRouter, useSearchParams } from "next/navigation"
 import DataList from "@/components/data-management/data-list"
 import { Button } from "@/components/ui/button"
-import { PlusCircle, Settings, PlusSquare, Sparkles } from "lucide-react"
+import { PlusCircle, Settings, PlusSquare, Sparkles, CheckCircle, Trash2 } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -219,6 +219,7 @@ function TrackReviewContent() {
   const batchActions = [
     {
       label: "批量审核",
+      icon: <CheckCircle className="h-4 w-4" />,
       onClick: () => {
         toast({
           title: "批量审核",
@@ -229,6 +230,7 @@ function TrackReviewContent() {
     },
     {
       label: "批量删除",
+      icon: <Trash2 className="h-4 w-4" />,
       onClick: () => {
         toast({
           title: "批量删除",

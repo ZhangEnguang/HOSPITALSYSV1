@@ -12,6 +12,8 @@ import {
   Clock,
   CheckCircle,
   MoreVertical,
+  RefreshCw,
+  Trash,
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
@@ -318,17 +320,17 @@ export const batchActions = [
   {
     id: "setInUse",
     label: "设为使用中",
-    icon: "CheckCircle",
+    icon: <CheckCircle className="h-4 w-4" />,
   },
   {
     id: "setCleaning",
     label: "设为清洁中",
-    icon: "RefreshCw",
+    icon: <RefreshCw className="h-4 w-4" />,
   },
   {
     id: "delete",
     label: "批量删除",
-    icon: "Trash",
+    icon: <Trash className="h-4 w-4" />,
     variant: "destructive",
   },
 ]

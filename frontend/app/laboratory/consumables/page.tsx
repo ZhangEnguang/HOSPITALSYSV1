@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import DataList from "@/components/data-management/data-list"
 import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
+import { Plus, X, AlertTriangle, CheckCircle, Trash } from "lucide-react"
 import {
   quickFilters,
   advancedFilters,
@@ -366,25 +366,25 @@ function ConsumableContent() {
     {
       id: "outOfStock",
       label: "标记缺货",
-      icon: "X",
+      icon: <X className="h-4 w-4" />,
       onClick: handleBatchSetOutOfStock,
     },
     {
       id: "lowStock",
       label: "标记库存不足",
-      icon: "AlertTriangle",
+      icon: <AlertTriangle className="h-4 w-4" />,
       onClick: handleBatchSetLowStock,
     },
     {
       id: "normal",
       label: "标记充足",
-      icon: "CheckCircle",
+      icon: <CheckCircle className="h-4 w-4" />,
       onClick: handleBatchSetNormal,
     },
     {
       id: "delete",
       label: "批量删除",
-      icon: "Trash",
+      icon: <Trash className="h-4 w-4" />,
       variant: "destructive",
       onClick: handleBatchDelete,
     },

@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import DataList from "@/components/data-management/data-list"
 import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
+import { Plus, CheckCircle, Wrench, Trash } from "lucide-react"
 import {
   quickFilters,
   advancedFilters,
@@ -259,19 +259,19 @@ function EquipmentContent() {
     {
       id: "setInUse",
       label: "设为正常",
-      icon: "CheckCircle",
+      icon: <CheckCircle className="h-4 w-4" />,
       onClick: handleBatchSetInUse,
     },
     {
       id: "setMaintenance",
       label: "设为维修中",
-      icon: "Tool",
+      icon: <Wrench className="h-4 w-4" />,
       onClick: handleBatchSetMaintenance,
     },
     {
       id: "delete",
       label: "批量删除",
-      icon: "Trash",
+      icon: <Trash className="h-4 w-4" />,
       variant: "destructive",
       onClick: handleBatchDelete,
     },

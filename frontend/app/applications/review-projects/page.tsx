@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import DataList from "@/components/data-management/data-list"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Eye, ClipboardCheck, Users, Download, Trash2, CheckCircle, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -352,31 +352,31 @@ const cardActions = [
   {
     id: "view",
     label: "查看详情",
-    icon: "Eye",
+    icon: <Eye className="h-4 w-4" />,
     onClick: (item: ReviewProjectItem) => router.push(`/applications/review-projects/${item.id}`),
   },
   {
     id: "review",
     label: "评审",
-    icon: "ClipboardCheck",
+    icon: <ClipboardCheck className="h-4 w-4" />,
     onClick: (item: ReviewProjectItem) => router.push(`/applications/review-projects/${item.id}`),
   },
   {
     id: "assign",
     label: "分派专家",
-    icon: "Users",
+    icon: <Users className="h-4 w-4" />,
     onClick: (item: ReviewProjectItem) => router.push(`/applications/assign-reviewers/${item.id}`),
   },
   {
     id: "download",
     label: "下载申报书",
-    icon: "Download",
+    icon: <Download className="h-4 w-4" />,
     onClick: (item: ReviewProjectItem) => console.log("下载申报书", item),
   },
   {
     id: "delete",
     label: "删除",
-    icon: "Trash2",
+    icon: <Trash2 className="h-4 w-4" />,
     onClick: (item: ReviewProjectItem) => console.log("删除", item),
     variant: "destructive",
   },
@@ -387,26 +387,26 @@ const batchActions = [
   {
     id: "batchReview",
     label: "批量评审",
-    icon: "ClipboardCheck",
+    icon: <ClipboardCheck className="h-4 w-4" />,
     onClick: () => console.log("批量评审"),
   },
   {
     id: "batchApprove",
     label: "批量通过",
-    icon: "CheckCircle",
+    icon: <CheckCircle className="h-4 w-4" />,
     onClick: () => console.log("批量通过"),
   },
   {
     id: "batchReject",
     label: "批量拒绝",
-    icon: "XCircle",
+    icon: <XCircle className="h-4 w-4" />,
     onClick: () => console.log("批量拒绝"),
     variant: "destructive",
   },
   {
     id: "batchDelete",
     label: "批量删除",
-    icon: "Trash2",
+    icon: <Trash2 className="h-4 w-4" />,
     onClick: () => console.log("批量删除"),
     variant: "destructive",
   },

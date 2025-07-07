@@ -361,6 +361,7 @@ export default function HumanEthicProjectsPage() {
     {
       id: "delete",
       label: "批量删除",
+      icon: <Trash2 className="h-4 w-4" />,
       onClick: handleBatchDelete,
       type: "destructive",
     },
