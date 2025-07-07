@@ -679,6 +679,7 @@ export default function EthicReviewReview({ params }: { params: { id: string } }
           projectId={currentProject.id}
           projectTitle={currentProject.title}
           projectData={currentProject}
+          returnPath="/ethic-review/human-genetics-review"
           getStatusColor={(status: string) => {
             const colors = getStatusColors();
             return colors[status as keyof typeof colors] || "bg-gray-50 text-gray-700 border-gray-200";

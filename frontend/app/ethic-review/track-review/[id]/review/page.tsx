@@ -948,6 +948,7 @@ export default function TrackReportReview({ params }: { params: { id: string } }
           projectId={currentProject.id}
           projectTitle={currentProject.title}
           projectData={currentProject}
+          returnPath="/ethic-review/track-review"
         />
       }
       statusColors={getStatusColors()}

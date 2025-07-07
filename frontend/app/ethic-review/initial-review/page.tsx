@@ -68,6 +68,7 @@ function InitialReviewContent() {
   const [filterValues, setFilterValues] = useState<Record<string, any>>({
     reviewType: "全部审查",
     status: "全部状态",
+    reviewMethod: "全部方式",
     projectType: "全部类型",
     ethicsCommittee: "全部委员会"
   })
@@ -91,6 +92,7 @@ function InitialReviewContent() {
     department: true,
     ethicsCommittee: true,
     status: true,
+    reviewMethod: true,
     actions: true,
   })
 
@@ -146,6 +148,10 @@ function InitialReviewContent() {
     
     if (newFilterValues.status && newFilterValues.status !== "全部状态") {
       filtered = filtered.filter(item => item.status === newFilterValues.status)
+    }
+    
+    if (newFilterValues.reviewMethod && newFilterValues.reviewMethod !== "全部方式") {
+      filtered = filtered.filter(item => item.reviewMethod === newFilterValues.reviewMethod)
     }
     
     if (newFilterValues.projectType && newFilterValues.projectType !== "全部类型") {

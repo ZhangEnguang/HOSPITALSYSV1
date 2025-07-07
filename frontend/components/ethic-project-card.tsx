@@ -643,188 +643,188 @@ export default function EthicProjectCard({
         isSelected={selected}
         onToggleSelect={(selectedState) => onSelect && onSelect(selectedState)}
         className="group transition-all duration-300"
+    >
+      <Card
+        className={cn(
+          "group cursor-pointer transition-all duration-200 border border-gray-200 shadow-sm hover:shadow-md rounded-lg bg-white overflow-hidden",
+          getBorderColor(),
+          className
+        )}
       >
-        <Card
-          className={cn(
-            "group cursor-pointer transition-all duration-200 border border-gray-200 shadow-sm hover:shadow-md rounded-lg bg-white overflow-hidden",
-            getBorderColor(),
-            className
-          )}
-        >
-          <CardHeader className={cn(
-            // 伦理项目统一样式：仅保留上方和左右padding
-            (type === "animal" || type === "human") ? "px-6 pt-4 pb-0" : "px-6 py-4", 
-            getHeaderBgColor()
-          )}>
-            <div className="flex items-start justify-between">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-lg transition-colors duration-300 group-hover:text-blue-600 truncate flex-1">
-                    {title}
-                  </h3>
+        <CardHeader className={cn(
+          // 伦理项目统一样式：仅保留上方和左右padding
+          (type === "animal" || type === "human") ? "px-6 pt-4 pb-0" : "px-6 py-4", 
+          getHeaderBgColor()
+        )}>
+          <div className="flex items-start justify-between">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-lg transition-colors duration-300 group-hover:text-blue-600 truncate flex-1">
+                  {title}
+                </h3>
 
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 opacity-70 hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-36">
-                      {actions
-                        .filter((action) => !action.hidden || !action.hidden(item))
-                        .map((action) => (
-                          <DropdownMenuItem
-                            key={action.id}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              console.log(`点击${action.label}按钮, 项目ID=${item.id}, action=${action.id}`);
-                              console.log("传递给action.onClick的item:", item);
-                              action.onClick(item, e);
-                            }}
-                            disabled={action.disabled ? action.disabled(item) : false}
-                            className={cn(
-                              "flex items-center gap-2 py-1.5 px-2 text-sm cursor-pointer",
-                              action.id === "delete" ? "text-destructive hover:text-destructive" : ""
-                            )}
-                          >
-                            {action.icon && <span className="h-4 w-4">{action.icon}</span>}
-                            <span>{action.label}</span>
-                          </DropdownMenuItem>
-                        ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                {/* 项目副标题：项目编号 · 项目负责人 · 所属科室 */}
-                <div className={cn(
-                  "text-sm text-muted-foreground truncate",
-                  // 伦理项目统一样式：副标题无下边距
-                  (type === "animal" || type === "human") ? "mt-1 mb-0" : "mt-1"
-                )}>
-                  <div className="flex items-center gap-1">
-                    {/* 项目编号 */}
-                    <span>{item.projectNumber || item.项目编号 || generateProjectNumber(type, item.id, item.createdAt)}</span>
-                    <span className="text-gray-400">·</span>
-                    
-                    {/* 项目负责人（不显示头像） */}
-                    {item.members && item.members.length > 0 && (
-                      <>
-                        <span>{item.members[0].name}</span>
-                        <span className="text-gray-400">·</span>
-                      </>
-                    )}
-                    
-                    {/* 负责人所属单位（人体伦理）或项目归属单位（动物伦理） */}
-                    <span>{type === "human" ? leaderDepartment : (item.department || item.项目归属单位 || item.所属科室 || ethicsCommittee)}</span>
-                  </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 opacity-70 hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-36">
+                    {actions
+                      .filter((action) => !action.hidden || !action.hidden(item))
+                      .map((action) => (
+                        <DropdownMenuItem
+                          key={action.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.log(`点击${action.label}按钮, 项目ID=${item.id}, action=${action.id}`);
+                            console.log("传递给action.onClick的item:", item);
+                            action.onClick(item, e);
+                          }}
+                          disabled={action.disabled ? action.disabled(item) : false}
+                          className={cn(
+                            "flex items-center gap-2 py-1.5 px-2 text-sm cursor-pointer",
+                            action.id === "delete" ? "text-destructive hover:text-destructive" : ""
+                          )}
+                        >
+                          {action.icon && <span className="h-4 w-4">{action.icon}</span>}
+                          <span>{action.label}</span>
+                        </DropdownMenuItem>
+                      ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              {/* 项目副标题：项目编号 · 项目负责人 · 所属科室 */}
+              <div className={cn(
+                "text-sm text-muted-foreground truncate",
+                // 伦理项目统一样式：副标题无下边距
+                (type === "animal" || type === "human") ? "mt-1 mb-0" : "mt-1"
+              )}>
+                <div className="flex items-center gap-1">
+                  {/* 项目编号 */}
+                  <span>{item.projectNumber || item.项目编号 || generateProjectNumber(type, item.id, item.createdAt)}</span>
+                  <span className="text-gray-400">·</span>
+                  
+                  {/* 项目负责人（不显示头像） */}
+                  {item.members && item.members.length > 0 && (
+                    <>
+                      <span>{item.members[0].name}</span>
+                      <span className="text-gray-400">·</span>
+                    </>
+                  )}
+                  
+                  {/* 负责人所属单位（人体伦理）或项目归属单位（动物伦理） */}
+                  <span>{type === "human" ? leaderDepartment : (item.department || item.项目归属单位 || item.所属科室 || ethicsCommittee)}</span>
                 </div>
               </div>
             </div>
-          </CardHeader>
-          {/* 标题与内容之间的高端分割线 */}
-          <div className={cn(
-            "mx-6",
-            // 伦理项目统一样式：增加分割线的margin-bottom
-            (type === "animal" || type === "human") ? "mb-4 mt-3" : "mb-2"
-          )}>
-            <div className="h-[1px] bg-gradient-to-r from-blue-50 via-blue-200/40 to-blue-50"></div>
           </div>
-          <CardContent className="px-6 py-3 pt-0">
-            <div className="flex flex-col gap-4">
-              {/* 项目信息区 */}
-              <div className="grid grid-cols-1 gap-2">
-                {type === "animal" ? (
-                  // 动物伦理卡片字段
-                  <>
-                    <div className="flex items-center justify-between text-sm whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        {getAnimalIcon(animalType)}
-                        <span className="text-gray-600 flex-shrink-0">动物种系:</span>
-                      </div>
-                      <span className="font-medium truncate">{animalType}</span>
+        </CardHeader>
+        {/* 标题与内容之间的高端分割线 */}
+        <div className={cn(
+          "mx-6",
+          // 伦理项目统一样式：增加分割线的margin-bottom
+          (type === "animal" || type === "human") ? "mb-4 mt-3" : "mb-2"
+        )}>
+          <div className="h-[1px] bg-gradient-to-r from-blue-50 via-blue-200/40 to-blue-50"></div>
+        </div>
+        <CardContent className="px-6 py-3 pt-0">
+          <div className="flex flex-col gap-4">
+            {/* 项目信息区 */}
+            <div className="grid grid-cols-1 gap-2">
+              {type === "animal" ? (
+                // 动物伦理卡片字段
+                <>
+                  <div className="flex items-center justify-between text-sm whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      {getAnimalIcon(animalType)}
+                      <span className="text-gray-600 flex-shrink-0">动物种系:</span>
                     </div>
-                    <div className="flex items-center justify-between text-sm whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        <span className="text-gray-600 flex-shrink-0">动物数量:</span>
-                      </div>
-                      <span className="font-medium truncate">{animalCount}</span>
+                    <span className="font-medium truncate">{animalType}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <span className="text-gray-600 flex-shrink-0">动物数量:</span>
                     </div>
-                    <div className="flex items-center justify-between text-sm whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        <span className="text-gray-600 flex-shrink-0">伦理委员会:</span>
-                      </div>
-                      <span className="font-medium truncate">{ethicsCommittee}</span>
+                    <span className="font-medium truncate">{animalCount}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <span className="text-gray-600 flex-shrink-0">伦理委员会:</span>
                     </div>
-                    <div className="flex items-center justify-between text-sm whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <BriefcaseMedical className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        <span className="text-gray-600 flex-shrink-0">实验执行单位:</span>
-                      </div>
-                      <span className="font-medium truncate">{facilityUnit}</span>
+                    <span className="font-medium truncate">{ethicsCommittee}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <BriefcaseMedical className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <span className="text-gray-600 flex-shrink-0">实验执行单位:</span>
                     </div>
-                  </>
-                ) : (
-                  // 人体伦理卡片字段
-                  <>
-                    <div className="flex items-center justify-between text-sm whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <Tag className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        <span className="text-gray-600 flex-shrink-0">研究类型:</span>
-                      </div>
-                      <span className="font-medium truncate">{projectType}</span>
+                    <span className="font-medium truncate">{facilityUnit}</span>
+                  </div>
+                </>
+              ) : (
+                // 人体伦理卡片字段
+                <>
+                  <div className="flex items-center justify-between text-sm whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <Tag className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <span className="text-gray-600 flex-shrink-0">研究类型:</span>
                     </div>
-                    <div className="flex items-center justify-between text-sm whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <Bookmark className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        <span className="text-gray-600 flex-shrink-0">项目来源:</span>
-                      </div>
-                      <span className="font-medium truncate">{projectSource}</span>
+                    <span className="font-medium truncate">{projectType}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <Bookmark className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <span className="text-gray-600 flex-shrink-0">项目来源:</span>
                     </div>
-                    <div className="flex items-center justify-between text-sm whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        <span className="text-gray-600 flex-shrink-0">伦理委员会:</span>
-                      </div>
-                      <span className="font-medium truncate">{ethicsCommittee}</span>
+                    <span className="font-medium truncate">{projectSource}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <span className="text-gray-600 flex-shrink-0">伦理委员会:</span>
                     </div>
-                    <div className="flex items-center justify-between text-sm whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <BriefcaseMedical className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        <span className="text-gray-600 flex-shrink-0">研究执行单位:</span>
-                      </div>
-                      <span className="font-medium truncate">{humanFacilityUnit}</span>
+                    <span className="font-medium truncate">{ethicsCommittee}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <BriefcaseMedical className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <span className="text-gray-600 flex-shrink-0">研究执行单位:</span>
                     </div>
-                  </>
-                )}
-              </div>
+                    <span className="font-medium truncate">{humanFacilityUnit}</span>
+                  </div>
+                </>
+              )}
             </div>
-          </CardContent>
-          <CardFooter className="flex justify-between items-center px-6 py-3 border-t border-gray-100 bg-gradient-to-r from-gray-50/80 to-gray-50/40">
-            <div className="flex items-center gap-1">
-              <div className="flex items-center px-2 py-0.5 bg-green-50 rounded-full border border-green-100">
-                <CheckCircle2 className="h-3.5 w-3.5 text-green-500 mr-1" />
-                <span className="text-xs text-green-700 font-medium">{completedCount} 已批准</span>
-              </div>
-              <div className="flex items-center px-2 py-0.5 bg-amber-50 rounded-full border border-amber-100">
-                <Clock className="h-3.5 w-3.5 text-amber-500 mr-1" />
-                <span className="text-xs text-amber-700 font-medium">{inProgressCount} 审批中</span>
-              </div>
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-between items-center px-6 py-3 border-t border-gray-100 bg-gradient-to-r from-gray-50/80 to-gray-50/40">
+          <div className="flex items-center gap-1">
+            <div className="flex items-center px-2 py-0.5 bg-green-50 rounded-full border border-green-100">
+              <CheckCircle2 className="h-3.5 w-3.5 text-green-500 mr-1" />
+              <span className="text-xs text-green-700 font-medium">{completedCount} 已批准</span>
             </div>
-            <div>
-              {/* 创建审查按钮 */}
-              <Button
-                size="sm"
-                variant="outline"
-                className="flex items-center gap-1.5 h-8 border-blue-200 bg-blue-50/50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm"
-                onClick={openCreateReviewDialog}
-              >
-                <FileText className="h-3.5 w-3.5" />
-                创建审查
-              </Button>
+            <div className="flex items-center px-2 py-0.5 bg-amber-50 rounded-full border border-amber-100">
+              <Clock className="h-3.5 w-3.5 text-amber-500 mr-1" />
+              <span className="text-xs text-amber-700 font-medium">{inProgressCount} 审批中</span>
             </div>
-          </CardFooter>
-        </Card>
+          </div>
+          <div>
+            {/* 创建审查按钮 */}
+            <Button
+              size="sm"
+              variant="outline"
+              className="flex items-center gap-1.5 h-8 border-blue-200 bg-blue-50/50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm"
+              onClick={openCreateReviewDialog}
+            >
+              <FileText className="h-3.5 w-3.5" />
+              创建审查
+            </Button>
+          </div>
+        </CardFooter>
+      </Card>
       </ElegantCardSelection>
       
       {/* 使用对应的审查弹框组件 */}

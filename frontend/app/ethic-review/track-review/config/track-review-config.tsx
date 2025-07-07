@@ -168,6 +168,24 @@ export const tableColumns = [
     },
   },
   {
+    id: "reviewMethod",
+    header: "审查方式",
+    accessorKey: "reviewMethod",
+    cell: (item: any) => {
+      const reviewMethod = item.reviewMethod
+      if (!reviewMethod) return <span className="text-gray-400">-</span>
+      
+      // 根据审查方式显示不同的颜色
+      if (reviewMethod === "快速审查") {
+        return <span className="text-blue-600 font-medium">{reviewMethod}</span>
+      } else if (reviewMethod === "会议审查") {
+        return <span className="text-green-600 font-medium">{reviewMethod}</span>
+      } else {
+        return <span className="text-gray-500">{reviewMethod}</span>
+      }
+    },
+  },
+  {
     id: "actions",
     header: "操作",
     accessorKey: "actions",
@@ -232,6 +250,23 @@ export const cardFields = [
     id: "department",
     label: "所属院系",
     value: (item: any) => item.department || "-",
+  },
+  {
+    id: "reviewMethod",
+    label: "审查方式",
+    value: (item: any) => {
+      const reviewMethod = item.reviewMethod
+      if (!reviewMethod) return "-"
+      
+      // 根据审查方式显示不同的颜色
+      if (reviewMethod === "快速审查") {
+        return <span className="text-blue-600 font-medium">{reviewMethod}</span>
+      } else if (reviewMethod === "会议审查") {
+        return <span className="text-green-600 font-medium">{reviewMethod}</span>
+      } else {
+        return <span className="text-gray-500">{reviewMethod}</span>
+      }
+    },
   },
   {
     id: "ethicsCommittee",
@@ -361,6 +396,17 @@ export const quickFilters = [
       { id: "submitted", label: "已提交", value: "已提交" },
       { id: "formalPassed", label: "形审通过", value: "形审通过" },
       { id: "formalRejected", label: "形审退回", value: "形审退回" },
+    ],
+  },
+  {
+    id: "reviewMethod",
+    label: "审查方式",
+    value: "全部方式",
+    options: [
+      { id: "all", label: "全部方式", value: "全部方式" },
+      { id: "quick", label: "快速审查", value: "快速审查" },
+      { id: "meeting", label: "会议审查", value: "会议审查" },
+      { id: "pending", label: "待定", value: "待定" },
     ],
   },
   {

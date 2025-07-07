@@ -31,6 +31,7 @@ interface ReviewSidebarProps {
   showReviewHistoryTab?: boolean
   showOperationHistoryTab?: boolean
   projectData?: any
+  returnPath?: string  // 新增：自定义返回路径
 }
 
 export default function ReviewSidebar({
@@ -68,6 +69,7 @@ export default function ReviewSidebar({
   showReviewHistoryTab = true,
   showOperationHistoryTab = true,
   projectData,
+  returnPath,
 }: ReviewSidebarProps) {
   const router = useRouter()
 
@@ -189,7 +191,7 @@ export default function ReviewSidebar({
         <div className="flex-1 overflow-hidden">
           {showReviewTabState && status !== "已通过" && status !== "已退回" && (
             <TabsContent value="review" className="mt-0 h-full">
-              <ReviewTab projectId={projectId} projectTitle={projectTitle} />
+              <ReviewTab projectId={projectId} projectTitle={projectTitle} returnPath={returnPath} />
             </TabsContent>
           )}
 

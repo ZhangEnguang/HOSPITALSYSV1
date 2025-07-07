@@ -97,6 +97,7 @@ export const getColumnVisibility = () => {
     department: true,
     ethicsCommittee: true,
     status: true,
+    reviewMethod: true,
     actions: true,
   }
 }
@@ -175,6 +176,24 @@ export const tableColumns = [
     },
   },
   {
+    id: "reviewMethod",
+    header: "审查方式",
+    accessorKey: "reviewMethod",
+    cell: (item: any) => {
+      const reviewMethod = item.reviewMethod
+      if (!reviewMethod) return <span className="text-gray-400">-</span>
+      
+      // 根据审查方式显示不同的颜色
+      if (reviewMethod === "快速审查") {
+        return <span className="text-blue-600 font-medium">{reviewMethod}</span>
+      } else if (reviewMethod === "会议审查") {
+        return <span className="text-green-600 font-medium">{reviewMethod}</span>
+      } else {
+        return <span className="text-gray-500">{reviewMethod}</span>
+      }
+    },
+  },
+  {
     id: "actions",
     header: "操作",
     accessorKey: "actions",
@@ -242,6 +261,16 @@ export const quickFilters = [
     ],
   },
   {
+    id: "reviewMethod",
+    label: "审查方式",
+    options: [
+      { value: "全部方式", label: "全部方式" },
+      { value: "快速审查", label: "快速审查" },
+      { value: "会议审查", label: "会议审查" },
+      { value: "待定", label: "待定" },
+    ],
+  },
+  {
     id: "projectType",
     label: "项目类型",
     options: [
@@ -281,6 +310,23 @@ export const cardFields = [
     id: "projectType",
     label: "项目类型",
     value: (item: any) => item.projectType || "-",
+  },
+  {
+    id: "reviewMethod",
+    label: "审查方式",
+    value: (item: any) => {
+      const reviewMethod = item.reviewMethod
+      if (!reviewMethod) return "-"
+      
+      // 根据审查方式显示不同的颜色
+      if (reviewMethod === "快速审查") {
+        return <span className="text-blue-600 font-medium">{reviewMethod}</span>
+      } else if (reviewMethod === "会议审查") {
+        return <span className="text-green-600 font-medium">{reviewMethod}</span>
+      } else {
+        return <span className="text-gray-500">{reviewMethod}</span>
+      }
+    },
   },
   {
     id: "department",

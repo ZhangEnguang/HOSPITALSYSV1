@@ -68,6 +68,7 @@ function TrackReviewContent() {
   const [filterValues, setFilterValues] = useState<Record<string, any>>({
     reviewType: "全部审查",
     status: "全部状态",
+    reviewMethod: "全部方式",
     ethicsCommittee: "全部委员会"
   })
   const [seniorFilterValues, setSeniorFilterValues] = useState<SeniorFilterDTO>({
@@ -89,6 +90,7 @@ function TrackReviewContent() {
     department: true,
     ethicsCommittee: true,
     status: true,
+    reviewMethod: true,
     dueDate: true,
     actions: true,
   })
@@ -145,6 +147,10 @@ function TrackReviewContent() {
     
     if (newFilterValues.status && newFilterValues.status !== "全部状态") {
       filtered = filtered.filter(item => item.status === newFilterValues.status)
+    }
+    
+    if (newFilterValues.reviewMethod && newFilterValues.reviewMethod !== "全部方式") {
+      filtered = filtered.filter(item => item.reviewMethod === newFilterValues.reviewMethod)
     }
     
     if (newFilterValues.ethicsCommittee && newFilterValues.ethicsCommittee !== "全部委员会") {

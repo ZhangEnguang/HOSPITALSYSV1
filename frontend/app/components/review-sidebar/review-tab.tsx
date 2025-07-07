@@ -5,6 +5,14 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/components/ui/use-toast"
 import { CheckCircle, XCircle } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 import { AuditKeyPointsSection } from "./review-tab/audit-key-points-section"
 import { ReviewCommentSection } from "./review-tab/review-comment-section"
@@ -17,9 +25,10 @@ interface ReviewTabProps {
   projectId?: string
   projectTitle?: string
   onStatusChange?: (newStatus: string) => void
+  returnPath?: string  // 新增：自定义返回路径
 }
 
-export default function ReviewTab({ projectId, projectTitle, onStatusChange }: ReviewTabProps) {
+export default function ReviewTab({ projectId, projectTitle, onStatusChange, returnPath }: ReviewTabProps) {
   // 审核状态
   const [isReviewCompleted, setIsReviewCompleted] = useState(false)
   const [finalStatus, setFinalStatus] = useState<"已通过" | "已退回" | "">("")
@@ -50,6 +59,10 @@ export default function ReviewTab({ projectId, projectTitle, onStatusChange }: R
   const [showResultDialog, setShowResultDialog] = useState(false)
   const [resultAction, setResultAction] = useState<"approval" | "rejection">("approval")
 
+  // 审查方式选择弹框
+  const [showReviewMethodDialog, setShowReviewMethodDialog] = useState(false)
+  const [selectedReviewMethod, setSelectedReviewMethod] = useState<'quick' | 'meeting' | null>(null)
+
   // 其他
   const router = useRouter()
   const { toast } = useToast()
@@ -64,47 +77,72 @@ export default function ReviewTab({ projectId, projectTitle, onStatusChange }: R
     }
   }, [commentText, commentError])
 
-  // 审核通过处理
+  // 审核通过处理 - 显示审查方式选择弹框
   const handleApprove = () => {
-    // 审核通过不需要验证评论是否已填写
-    if (commentText.trim()) {
-      const newReview = {
-        id: reviews.length + 1,
-        reviewer: "科研院审核员",
-        date: new Date().toISOString(),
-        status: "通过",
-        comments: commentText,
-      }
-      setReviews([...reviews, newReview])
-    }
-
     // 清除任何之前的错误
     setCommentError(false)
     setCommentErrorMessage("")
 
-    // 更新状态为已通过
-    setFinalStatus("已通过")
-    setIsReviewCompleted(true)
+    // 显示审查方式选择弹框
+    setShowReviewMethodDialog(true)
+  }
 
-    // 调用父组件的状态更新回调
-    if (onStatusChange) {
-      onStatusChange("已通过")
-      // 确保状态更新立即生效
-      setTimeout(() => {
-        onStatusChange("已通过")
-      }, 50)
+  // 处理审查方式选择
+  const handleReviewMethodSelect = (method: 'quick' | 'meeting') => {
+    setSelectedReviewMethod(method)
+  }
+
+  // 确认审查方式选择
+  const handleConfirmReviewMethod = () => {
+    if (!selectedReviewMethod) return
+
+    // 关闭审查方式选择弹框
+    setShowReviewMethodDialog(false)
+
+    // 根据选择的方式进行不同的处理
+    let methodText = ""
+
+    switch (selectedReviewMethod) {
+      case 'quick':
+        methodText = "快速审查"
+        break
+      case 'meeting':
+        methodText = "会议审查"
+        break
+
     }
 
     // 显示成功提示
     toast({
       title: "操作成功",
-      description: "项目已通过审核",
+      description: `项目已通过审核，选择审查方式：${methodText}`,
       duration: 3000,
     })
 
-    // 显示审核结果弹框
-    setResultAction("approval")
-    setShowResultDialog(true)
+    // 重置选择状态
+    setSelectedReviewMethod(null)
+
+    // 根据returnPath或当前路径决定返回地址
+    if (returnPath) {
+      router.push(returnPath)
+    } else {
+      // 如果没有指定returnPath，根据当前路径自动判断
+      const currentPath = window.location.pathname
+      if (currentPath.includes('/human-genetics-review/')) {
+        router.push("/ethic-review/human-genetics-review")
+      } else if (currentPath.includes('/track-review/')) {
+        router.push("/ethic-review/track-review")
+      } else {
+        // 默认返回初始审查列表
+        router.push("/ethic-review/initial-review")
+      }
+    }
+  }
+
+  // 取消审查方式选择
+  const handleCancelReviewMethod = () => {
+    setShowReviewMethodDialog(false)
+    setSelectedReviewMethod(null)
   }
 
   // 审核退回处理
@@ -295,6 +333,137 @@ export default function ReviewTab({ projectId, projectTitle, onStatusChange }: R
           onViewDetails={handleViewDetails}
           onBackToList={handleBackToList}
         />
+
+        {/* 审查方式选择弹框 */}
+        <Dialog open={showReviewMethodDialog} onOpenChange={handleCancelReviewMethod}>
+          <DialogContent className="sm:max-w-[480px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-blue-600" />
+                选择审查方式
+              </DialogTitle>
+              <DialogDescription>
+                项目已通过初步审核，请选择后续的审查方式
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="py-4">
+              {/* 主要选项 - 横向排列 */}
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                {/* 快速审查选项 */}
+                <div 
+                  className={`relative rounded-lg border p-4 cursor-pointer transition-all duration-200 ${
+                    selectedReviewMethod === 'quick'
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/50'
+                  }`}
+                  onClick={() => handleReviewMethodSelect('quick')}
+                >
+                  <div className="text-center space-y-3">
+                    {/* 选择器 */}
+                    <div className="flex justify-center">
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                        selectedReviewMethod === 'quick'
+                          ? 'border-blue-500 bg-blue-500'
+                          : 'border-gray-300'
+                      }`}>
+                        {selectedReviewMethod === 'quick' && (
+                          <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* 图标 */}
+                    <div className="flex justify-center">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        selectedReviewMethod === 'quick'
+                          ? 'bg-blue-500'
+                          : 'bg-blue-100'
+                      }`}>
+                        <svg className={`w-5 h-5 ${
+                          selectedReviewMethod === 'quick' ? 'text-white' : 'text-blue-600'
+                        }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                      </div>
+                    </div>
+                    
+                    {/* 文字内容 */}
+                    <div>
+                      <div className="font-medium text-gray-900 mb-1">快速审查</div>
+                      <div className="text-sm text-gray-600">
+                        适用于风险较低的项目<br />审查周期较短
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 会议审查选项 */}
+                <div 
+                  className={`relative rounded-lg border p-4 cursor-pointer transition-all duration-200 ${
+                    selectedReviewMethod === 'meeting'
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-gray-200 hover:border-green-300 hover:bg-green-50/50'
+                  }`}
+                  onClick={() => handleReviewMethodSelect('meeting')}
+                >
+                  <div className="text-center space-y-3">
+                    {/* 选择器 */}
+                    <div className="flex justify-center">
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                        selectedReviewMethod === 'meeting'
+                          ? 'border-green-500 bg-green-500'
+                          : 'border-gray-300'
+                      }`}>
+                        {selectedReviewMethod === 'meeting' && (
+                          <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* 图标 */}
+                    <div className="flex justify-center">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        selectedReviewMethod === 'meeting'
+                          ? 'bg-green-500'
+                          : 'bg-green-100'
+                      }`}>
+                        <svg className={`w-5 h-5 ${
+                          selectedReviewMethod === 'meeting' ? 'text-white' : 'text-green-600'
+                        }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                      </div>
+                    </div>
+                    
+                    {/* 文字内容 */}
+                    <div>
+                      <div className="font-medium text-gray-900 mb-1">会议审查</div>
+                      <div className="text-sm text-gray-600">
+                        召开伦理委员会会议<br />进行集体审查
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+            </div>
+
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={handleCancelReviewMethod}>
+                取消
+              </Button>
+              <Button 
+                onClick={handleConfirmReviewMethod}
+                disabled={!selectedReviewMethod}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                确认选择
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </>
   )

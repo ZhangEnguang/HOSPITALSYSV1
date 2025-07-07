@@ -60,6 +60,7 @@ function HumanGeneticsReviewContent() {
   const [filterValues, setFilterValues] = useState({
     reviewType: "全部类型",
     status: "全部状态",
+    reviewMethod: "全部方式",
     projectType: "全部类型",
     ethicsCommittee: "全部委员会",
     approvalType: "全部类型",
@@ -77,6 +78,7 @@ function HumanGeneticsReviewContent() {
     department: true,
     ethicsCommittee: true,
     status: true,
+    reviewMethod: true,
     actions: true,
   })
   const [selectedRows, setSelectedRows] = useState<string[]>([])
@@ -190,6 +192,11 @@ function HumanGeneticsReviewContent() {
     // 状态筛选
     if (newFilters.status !== "全部状态") {
       filtered = filtered.filter(item => item.status === newFilters.status)
+    }
+    
+    // 审查方式筛选
+    if (newFilters.reviewMethod !== "全部方式") {
+      filtered = filtered.filter(item => item.reviewMethod === newFilters.reviewMethod)
     }
     
     // 伦理委员会筛选
