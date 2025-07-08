@@ -1,5 +1,5 @@
 # 使用 Node.js 构建前端
-FROM node:18.20
+FROM node:18.20-alpine
 
 # 设置工作目录
 WORKDIR /app

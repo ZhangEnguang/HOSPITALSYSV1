@@ -1,7 +1,7 @@
 services:
-  kyalpha-frontend:
+  hospitalsysv1-frontend:
     build: .
-    container_name: kyalpha-frontend
+    container_name: hospitalsysv1-frontend
     ports:
-      - "3200:3200"
+      - "3300:3300"
     restart: always
