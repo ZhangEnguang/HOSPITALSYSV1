@@ -591,7 +591,7 @@ export default function AnimalEthicProjectsPage() {
               onSelectedRowsChange={setSelectedRows}
               batchActions={batchActions}
               categories={filterCategories}
-              onItemClick={(item: any) => router.push(`/ethic-projects/animal/${item.id}`)}
+              onItemClick={undefined}
               detailsUrlPrefix="/ethic-projects/animal"
               onAdvancedFilter={() => {
                 console.log("应用高级筛选")
@@ -629,7 +629,7 @@ export default function AnimalEthicProjectsPage() {
                     type="animal"
                     selected={isSelected}
                     onSelect={onToggleSelect}
-                    onClick={() => router.push(`/ethic-projects/animal/${item.id}`)}
+                    onClick={undefined}
                   />
                 );
               }}

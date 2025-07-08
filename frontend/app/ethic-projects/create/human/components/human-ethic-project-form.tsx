@@ -1024,7 +1024,7 @@ export function HumanEthicProjectForm({ initialData, editMode = false }: HumanEt
           onMouseDown={() => console.log("鼠标按下确认按钮")}
           className="bg-blue-600 hover:bg-blue-700 text-white rounded-md h-10 px-4 py-2 transition-colors focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1" 
         >
-          {editMode ? "更新" : "确认"}
+          确认
         </Button>
       </div>
 

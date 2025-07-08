@@ -636,10 +636,7 @@ export default function HumanEthicProjectsPage() {
         className=""
         selected={isSelected}
         onSelect={onToggleSelect}
-        onClick={() => {
-          console.log("卡片点击: 项目ID=", itemId, "类型:", typeof itemId);
-          router.push(`/ethic-projects/human/${itemId}`);
-        }}
+        onClick={undefined}
         type="human"
       />
     );
@@ -708,11 +705,7 @@ export default function HumanEthicProjectsPage() {
               selectedRows={selectedRows}
               onSelectedRowsChange={setSelectedRows}
               batchActions={configuredBatchActions}
-              onItemClick={(item: EthicProject) => {
-                const itemId = String(item.id);
-                console.log("DataList onItemClick: 项目ID=", itemId, "类型:", typeof itemId);
-                router.push(`/ethic-projects/human/${itemId}`);
-              }}
+              onItemClick={undefined}
               detailsUrlPrefix="/ethic-projects/human"
               categories={filterCategories}
               seniorFilterValues={seniorFilterValues}

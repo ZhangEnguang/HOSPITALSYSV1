@@ -1061,148 +1061,67 @@ export function AIFileReviewResult({
                 ) : (
                   <>
                     <div className="mb-4 mt-4">
+                      {/* 根据实际问题数据动态显示自动修复和手动修复 */}
+                      {(() => {
+                        // 过滤出可自动修复和需手动修复的问题
+                        const autoFixableIssues = sortedIssues.filter(issue => issue.autoFixable && !issue.fixed);
+                        const manualFixIssues = sortedIssues.filter(issue => !issue.autoFixable && !issue.fixed);
+                        
+                        return (
+                          <>
                       {/* 自动修复区域 */}
-                      <div className="relative bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-5 border-animation-wrapper">
+                            {autoFixableIssues.length > 0 && (
+                              <div className="relative bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-5 border-animation-wrapper mb-4">
                         {/* 流动边框动画 */}
                         <div className="absolute inset-0 rounded-xl border-gradient-animation"></div>
                         <div className="relative z-10">
-                        {!isFixing ? (
-                          <>
                             <div className="mb-4">
                               <h3 className="font-medium text-purple-800">
-                                自动修复 8 个
+                                      自动修复 {autoFixableIssues.length} 个
                               </h3>
                             </div>
                             <ul className="space-y-2 text-sm">
-                              {/* 文件格式问题演示数据 */}
-                              <li className="flex items-start">
+                                    {autoFixableIssues.map((issue, index) => (
+                                      <li key={index} className="flex items-start">
                                 <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 mr-2 flex-shrink-0"></div>
                                 <span className="text-purple-700">
-                                  文件格式问题 <span className="text-purple-600 ml-1">(受试者招募材料.doc)</span>
+                                          {getIssueTypeName(issue.issueType)} <span className="text-purple-600 ml-1">({issue.fileName || '未命名文件'})</span>
                                 </span>
                               </li>
-                              <li className="flex items-start">
-                                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 mr-2 flex-shrink-0"></div>
-                                <span className="text-purple-700">
-                                  文件格式问题 <span className="text-purple-600 ml-1">(知情同意书_V1.2.docx)</span>
-                                </span>
-                              </li>
-                              
-                              {/* 文件版本号问题演示数据 */}
-                              <li className="flex items-start">
-                                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 mr-2 flex-shrink-0"></div>
-                                <span className="text-purple-700">
-                                  文件版本号问题 <span className="text-purple-600 ml-1">(项目研究方案.pdf)</span>
-                                </span>
-                          </li>
-                              <li className="flex items-start">
-                                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 mr-2 flex-shrink-0"></div>
-                                <span className="text-purple-700">
-                                  文件版本号问题 <span className="text-purple-600 ml-1">(研究者手册.pdf)</span>
-                                </span>
-                              </li>
-                              
-                              {/* 文件命名规范问题演示数据 */}
-                              <li className="flex items-start">
-                                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 mr-2 flex-shrink-0"></div>
-                                <span className="text-purple-700">
-                                  文件命名规范问题 <span className="text-purple-600 ml-1">(伦理审查申请表.docx)</span>
-                                </span>
-                              </li>
-                              <li className="flex items-start">
-                                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 mr-2 flex-shrink-0"></div>
-                                <span className="text-purple-700">
-                                  文件命名规范问题 <span className="text-purple-600 ml-1">(病例报告表-最终版.xlsx)</span>
-                                </span>
-                              </li>
-                              
-                              {/* 文件大小问题演示数据 */}
-                              <li className="flex items-start">
-                                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 mr-2 flex-shrink-0"></div>
-                                <span className="text-purple-700">
-                                  文件大小问题 <span className="text-purple-600 ml-1">(临床试验协议书.pdf)</span>
-                                </span>
-                              </li>
-                              <li className="flex items-start">
-                                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 mr-2 flex-shrink-0"></div>
-                                <span className="text-purple-700">
-                                  文件大小问题 <span className="text-purple-600 ml-1">(数据管理计划.docx)</span>
-                                </span>
-                              </li>
+                                    ))}
                       </ul>
-                          </>
-                        ) : (
-                          <>
-                            <div className="mb-4">
-                              <div className="flex items-center justify-between">
-                                <h3 className="font-medium text-purple-800">
-                                  正在修复 8 个问题
-                                </h3>
-                                <span className="text-sm text-purple-600">
-                                  {progressValue}%
-                                </span>
-                    </div>
-                              <div className="mt-2">
-                                <Progress value={progressValue} className="h-2 bg-purple-100" />
+                                </div>
                               </div>
+                            )}
+                            
+                            {/* 手动修复区域 */}
+                            {manualFixIssues.length > 0 && (
+                              <div className="relative bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-5 border border-amber-200 mb-4">
+                                <div className="relative z-10">
+                            <div className="mb-4">
+                                    <h3 className="font-medium text-amber-800">
+                                      手动修复 {manualFixIssues.length} 个
+                                </h3>
+                                    <p className="text-xs text-amber-600 mt-1">
+                                      这些问题需要您手动处理或上传新文件
+                                    </p>
                             </div>
                             <ul className="space-y-2 text-sm">
-                              {/* 动态显示修复进度 */}
-                              {[
-                                { fileName: "受试者招募材料.doc", type: "文件格式问题", threshold: 12 },
-                                { fileName: "知情同意书_V1.2.docx", type: "文件格式问题", threshold: 24 },
-                                { fileName: "项目研究方案.pdf", type: "文件版本号问题", threshold: 36 },
-                                { fileName: "研究者手册.pdf", type: "文件版本号问题", threshold: 48 },
-                                { fileName: "伦理审查申请表.docx", type: "文件命名规范问题", threshold: 60 },
-                                { fileName: "病例报告表-最终版.xlsx", type: "文件命名规范问题", threshold: 72 },
-                                { fileName: "临床试验协议书.pdf", type: "文件大小问题", threshold: 84 },
-                                { fileName: "数据管理计划.docx", type: "文件大小问题", threshold: 96 }
-                              ].map((item, index) => {
-                                const isCompleted = progressValue >= item.threshold;
-                                const isInProgress = progressValue >= item.threshold - 12 && progressValue < item.threshold;
-                                
-                                return (
+                                    {manualFixIssues.map((issue, index) => (
                                   <li key={index} className="flex items-start">
-                                    <div className="w-4 h-4 mt-1 mr-2 flex-shrink-0 flex items-center justify-center">
-                                      {isCompleted ? (
-                                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                                      ) : isInProgress ? (
-                                        <Loader2 className="h-3 w-3 text-purple-600 animate-spin" />
-                                      ) : (
-                                        <div className="w-1.5 h-1.5 bg-purple-300 rounded-full"></div>
-                                      )}
-                                    </div>
-                                    <span className={`${
-                                      isCompleted 
-                                        ? 'text-green-700 line-through' 
-                                        : isInProgress 
-                                          ? 'text-purple-800 font-medium' 
-                                          : 'text-purple-600'
-                                    }`}>
-                                      {item.type} <span className="text-purple-500 ml-1">({item.fileName})</span>
-                                      {isInProgress && <span className="text-purple-600 ml-2 text-xs">修复中...</span>}
-                                      {isCompleted && <span className="text-green-600 ml-2 text-xs">已完成</span>}
+                                        <div className="w-1.5 h-1.5 bg-amber-400 rounded-full mt-2 mr-2 flex-shrink-0"></div>
+                                        <span className="text-amber-700">
+                                          {getIssueTypeName(issue.issueType)} <span className="text-amber-600 ml-1">({issue.fileName || '未命名文件'})</span>
                                     </span>
                                   </li>
-                                );
-                              })}
+                                    ))}
                         </ul>
-                            {progressValue === 100 && (
-                              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                                <div className="flex items-center">
-                                  <CheckCircle2 className="h-5 w-5 text-green-600 mr-2" />
-                                  <span className="text-green-800 font-medium">修复已完成！</span>
                                 </div>
-                                <p className="text-green-700 text-sm mt-1">
-                                  所有 8 个问题已成功修复，文件已自动更新
-                                </p>
                       </div>
                     )}
                           </>
-                        )}
-                        </div>
-                      </div>
-                    
+                        );
+                      })()}
                     </div>
                   </>
                 )}

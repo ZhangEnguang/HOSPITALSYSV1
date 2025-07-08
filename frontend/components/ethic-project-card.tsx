@@ -561,9 +561,10 @@ export default function EthicProjectCard({
   };
 
   const handleClick = (e: React.MouseEvent) => {
-    if (onClick) {
-      onClick();
-    }
+    // 取消卡片点击跳转功能
+    // if (onClick) {
+    //   onClick();
+    // }
   };
 
   // 动物种类和数量处理
@@ -646,7 +647,7 @@ export default function EthicProjectCard({
     >
       <Card
         className={cn(
-          "group cursor-pointer transition-all duration-200 border border-gray-200 shadow-sm hover:shadow-md rounded-lg bg-white overflow-hidden",
+          "group transition-all duration-200 border border-gray-200 shadow-sm hover:shadow-md rounded-lg bg-white overflow-hidden",
           getBorderColor(),
           className
         )}

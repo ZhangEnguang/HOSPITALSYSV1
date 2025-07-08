@@ -17,6 +17,7 @@ import {
   Mail,
   Phone,
   Users,
+  User,
   ExternalLink,
   Sparkles,
 } from "lucide-react"
@@ -663,53 +664,61 @@ export default function EthicProjectOverviewTab({
             <CardTitle className="text-lg">项目团队成员</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {todo.members.map((member: any, index: number) => (
                 <div key={index} className="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
                   {/* 头像和基本信息 */}
                   <div className="flex items-center space-x-3 mb-3">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold flex items-center justify-center text-sm flex-shrink-0">
+                    <div className="h-10 w-10 rounded-full bg-gray-100 border-2 border-gray-200 text-gray-600 font-medium flex items-center justify-center text-sm flex-shrink-0">
                       {member.name ? member.name.charAt(0) : '?'}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-gray-900 text-sm truncate">{member.name || '未知'}</h4>
-                      <p className="text-xs text-muted-foreground truncate">{member.title || '未设置'}</p>
+                      <h4 className="font-semibold text-gray-900 text-sm mb-1">{member.name || '未知'}</h4>
+                      <p className="text-xs text-muted-foreground">{member.title || '未设置'}</p>
                     </div>
                   </div>
                   
-                  {/* 角色标签 */}
-                  {member.role && (
-                    <div className="mb-3">
-                      <Badge variant="outline" className="text-xs">
-                        {member.role}
-                      </Badge>
-                    </div>
-                  )}
-                  
-                  {/* 详细信息 */}
-                  <div className="space-y-2 text-xs">
-                    <div>
+                  {/* 详细信息：四个字段，两行显示 */}
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="flex items-center gap-1">
+                      <Building className="h-3 w-3 text-gray-400" />
                       <span className="text-muted-foreground">部门：</span>
-                      <span className="font-medium">{member.department || '未设置'}</span>
+                    </div>
+                    <div className="text-xs font-medium truncate" title={member.department || '未设置'}>
+                      {member.department || '未设置'}
                     </div>
                     
-                    {member.email && (
-                      <div>
-                        <span className="text-muted-foreground">邮箱：</span>
-                        <a href={`mailto:${member.email}`} className="font-medium text-blue-600 hover:text-blue-800 break-all">
+                    <div className="flex items-center gap-1">
+                      <Mail className="h-3 w-3 text-gray-400" />
+                      <span className="text-muted-foreground">邮箱：</span>
+                    </div>
+                    <div className="text-xs font-medium truncate" title={member.email || '未设置'}>
+                      {member.email ? (
+                        <a href={`mailto:${member.email}`} className="text-blue-600 hover:text-blue-800">
                           {member.email}
                         </a>
-                      </div>
-                    )}
+                      ) : '未设置'}
+                    </div>
                     
-                    {member.phone && (
-                      <div>
-                        <span className="text-muted-foreground">电话：</span>
-                        <a href={`tel:${member.phone}`} className="font-medium text-blue-600 hover:text-blue-800">
+                    <div className="flex items-center gap-1">
+                      <Phone className="h-3 w-3 text-gray-400" />
+                      <span className="text-muted-foreground">电话：</span>
+                    </div>
+                    <div className="text-xs font-medium">
+                      {member.phone ? (
+                        <a href={`tel:${member.phone}`} className="text-blue-600 hover:text-blue-800">
                           {member.phone}
                         </a>
-                      </div>
-                    )}
+                      ) : '未设置'}
+                    </div>
+                    
+                    <div className="flex items-center gap-1">
+                      <Users className="h-3 w-3 text-gray-400" />
+                      <span className="text-muted-foreground">角色：</span>
+                    </div>
+                    <div className="text-xs font-medium truncate" title={member.role || '成员'}>
+                      {member.role || '成员'}
+                    </div>
                   </div>
                 </div>
               ))}
