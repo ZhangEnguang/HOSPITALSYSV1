@@ -80,71 +80,7 @@ function DocumentConfigContent() {
   const router = useRouter()
   const { toast } = useToast()
   
-  // 确保表格列包含操作列
-  const ensureTableColumns = () => {
-    // 检查是否已经包含操作列
-    const hasActionsColumn = tableColumns.some(col => col.id === 'actions');
-    
-    if (!hasActionsColumn) {
-      // 添加操作列到表格列
-      return [...tableColumns, {
-        id: "actions",
-        header: "操作",
-        className: "w-[120px] text-right pr-4",
-        cell: (item: any) => {
-          return (
-            <div className="flex items-center justify-end">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreVertical className="h-4 w-4" />
-                    <span className="sr-only">打开菜单</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem 
-                    className="cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleViewDetails(item);
-                    }}
-                  >
-                    <Eye className="mr-2 h-4 w-4" />
-                    <span>查看详情</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    className="cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditConfig(item);
-                    }}
-                  >
-                    <FileEdit className="mr-2 h-4 w-4" />
-                    <span>编辑配置</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    className="cursor-pointer text-red-600 focus:text-red-600"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteConfig(item);
-                    }}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    <span>删除配置</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          );
-        }
-      }];
-    }
-    
-    return tableColumns;
-  };
-  
-  // 获取处理后的表格列
-  const processedTableColumns = ensureTableColumns();
+
   
   // 状态管理
   const [data, setData] = useState(documentConfigItems)
@@ -164,13 +100,11 @@ function DocumentConfigContent() {
     groups: []
   })
   const [visibleColumns, setVisibleColumns] = useState(() => {
-    // 确保actions列可见
-    const columns = processedTableColumns.reduce(
-      (acc, col) => ({ ...acc, [col.id]: true }), 
+    // 初始化所有列为可见
+    const columns = tableColumns.reduce(
+      (acc: Record<string, boolean>, col: any) => ({ ...acc, [col.id]: true }), 
       {} as Record<string, boolean>
     );
-    // 明确设置actions列为可见
-    columns['actions'] = true;
     return columns;
   })
   const [selectedRows, setSelectedRows] = useState<string[]>([])
@@ -590,7 +524,7 @@ function DocumentConfigContent() {
         categories={filterCategories}
         seniorFilterValues={seniorFilterValues}
         onAdvancedFilter={handleAdvancedFilter}
-        tableColumns={processedTableColumns as any}
+        tableColumns={tableColumns as any}
         cardFields={adaptedCardFields}
         cardActions={cardActions}
         titleField="name"

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "@/components/ui/use-toast"
 
@@ -148,8 +148,8 @@ const getMockReviewRecords = (projectTitle: string): ReviewRecord[] => [
   }
 ]
 
-// 动物伦理复审表单组件
-export function AnimalRecheckReview({
+// 动物伦理复审表单组件内容
+function AnimalRecheckReviewContent({
   projectData: initialProjectData = DEFAULT_PROJECT_DATA
 }) {
   const router = useRouter()
@@ -968,5 +968,16 @@ export function AnimalRecheckReview({
         </div>
       )}
     </ReviewFormBase>
+  )
+}
+
+// 动物伦理复审表单组件
+export function AnimalRecheckReview({
+  projectData: initialProjectData = DEFAULT_PROJECT_DATA
+}) {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+      <AnimalRecheckReviewContent projectData={initialProjectData} />
+    </Suspense>
   )
 } 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { ArrowLeft, ChevronRight, Zap, User, ClipboardList, Calendar, CheckCircle2, BookOpen, Check, UserRoundPlus, ArrowRight, LucideCheck, FileText, CheckCircle, X, AlertTriangle, FileCheck, FileSignature, Filter, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -135,7 +135,7 @@ const mockWorksheets: Worksheet[] = [
   }
 ];
 
-export default function BatchAssignPage() {
+function BatchAssignPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { toast } = useToast()
@@ -1419,5 +1419,22 @@ export default function BatchAssignPage() {
         </div>
       )}
     </div>
+  )
+}
+
+// 批量分配页面
+export default function BatchAssignPage() {
+  return (
+    <Suspense fallback={
+      <div className="p-8 flex flex-col items-center justify-center">
+        <div className="mb-4">
+          <div className="w-10 h-10 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
+        </div>
+        <div className="text-lg font-medium">正在加载...</div>
+        <div className="text-sm text-gray-500 mt-2">请稍候，正在初始化页面</div>
+      </div>
+    }>
+      <BatchAssignPageContent />
+    </Suspense>
   )
 } 

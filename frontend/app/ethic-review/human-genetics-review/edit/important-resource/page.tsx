@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "@/components/ui/use-toast"
 
@@ -45,7 +45,7 @@ type CustomReviewFileItem = Omit<ReviewFileItem, 'files'> & {
 }
 
 // 重要家系资源备案编辑页面
-export default function EditImportantResourceReviewPage() {
+function EditImportantResourceReviewPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { isLoading, startLoading, stopLoading } = useLoading()
@@ -323,5 +323,22 @@ export default function EditImportantResourceReviewPage() {
         onChange={(newFiles) => setReviewFiles(newFiles as any)}
       />
     </ReviewFormBase>
+  )
+}
+
+// 重要家系资源备案编辑页面
+export default function EditImportantResourceReviewPage() {
+  return (
+    <Suspense fallback={
+      <div className="p-8 flex flex-col items-center justify-center">
+        <div className="mb-4">
+          <div className="w-10 h-10 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
+        </div>
+        <div className="text-lg font-medium">正在加载...</div>
+        <div className="text-sm text-gray-500 mt-2">请稍候，正在初始化页面</div>
+      </div>
+    }>
+      <EditImportantResourceReviewPageContent />
+    </Suspense>
   )
 } 

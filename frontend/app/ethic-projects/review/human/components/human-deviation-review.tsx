@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "@/components/ui/use-toast"
 
@@ -19,8 +19,8 @@ const DEFAULT_PROJECT_DATA = {
   ethicsCommittee: "北京医学伦理委员会"
 }
 
-// 人体伦理偏离方案审查表单组件
-export function HumanDeviationReview({
+// 人体伦理偏离方案审查表单组件内容
+function HumanDeviationReviewContent({
   projectData: initialProjectData = DEFAULT_PROJECT_DATA
 }) {
   const router = useRouter()
@@ -206,5 +206,16 @@ export function HumanDeviationReview({
         onChange={setReviewFiles}
       />
     </ReviewFormBase>
+  )
+}
+
+// 人体伦理偏离方案审查表单组件
+export function HumanDeviationReview({
+  projectData: initialProjectData = DEFAULT_PROJECT_DATA
+}) {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+      <HumanDeviationReviewContent projectData={initialProjectData} />
+    </Suspense>
   )
 } 

@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { humanGeneticsReviewItems } from "../data/human-genetics-review-demo-data"
 import { toast } from "@/components/ui/use-toast"
 
-export default function HumanGeneticsReviewEdit() {
+function HumanGeneticsReviewEditContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const id = searchParams?.get("id") || null
@@ -84,5 +84,20 @@ export default function HumanGeneticsReviewEdit() {
         <p className="text-slate-500 mt-2">正在跳转到相应的编辑页面</p>
       </div>
     </div>
+  )
+}
+
+export default function HumanGeneticsReviewEdit() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-screen bg-slate-50">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-slate-700">加载中...</h2>
+          <p className="text-slate-500 mt-2">正在初始化页面</p>
+        </div>
+      </div>
+    }>
+      <HumanGeneticsReviewEditContent />
+    </Suspense>
   )
 } 

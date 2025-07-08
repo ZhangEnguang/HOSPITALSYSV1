@@ -1,9 +1,9 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, Suspense } from "react"
 
-export default function EthicProjectsPage() {
+function EthicProjectsPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   
@@ -24,4 +24,12 @@ export default function EthicProjectsPage() {
   
   // 返回null，不渲染任何内容，立即重定向
   return null
+}
+
+export default function EthicProjectsPage() {
+  return (
+    <Suspense fallback={<div>重定向中...</div>}>
+      <EthicProjectsPageContent />
+    </Suspense>
+  )
 } 

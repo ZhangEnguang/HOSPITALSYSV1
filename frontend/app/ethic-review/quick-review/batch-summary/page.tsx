@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { ArrowLeft, ChevronRight, FileText, Download, Printer, Clock, AlertCircle, CheckCircle, ClipboardList, Share2, FileDown, FileSpreadsheet } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/components/ui/use-toast"
 import { Separator } from "@/components/ui/separator"
 
-export default function BatchSummaryPage() {
+function BatchSummaryPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { toast } = useToast()
@@ -479,5 +479,13 @@ export default function BatchSummaryPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function BatchSummaryPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+      <BatchSummaryPageContent />
+    </Suspense>
   )
 } 
