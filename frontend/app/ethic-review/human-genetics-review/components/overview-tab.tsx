@@ -61,10 +61,10 @@ export default function EthicProjectOverviewTab({
       }
     } else if (project.projectType === "人遗" || project.reviewType === "人遗") {
       return {
-        overview: "该人类遗传学研究项目按计划稳步推进，各项研究活动有序开展。",
-        progress: "项目当前进度为38%，符合预期计划。经费使用率为29.6%，资金配置合理。",
-        achievements: "已完成遗传样本收集和初步分析，包括基因型检测、家系调查与遗传风险评估。",
-        cooperation: "研究进展良好，已获得3家医学遗传学中心合作支持，样本质量和数据完整性高于同类研究平均水平28%。"
+        overview: "该人类遗传学研究项目按计划稳步推进，各项研究活动有序开展。项目当前进度为38%，符合预期计划，经费使用率为29.6%，资金配置合理。已完成遗传样本收集和初步分析，包括基因型检测、家系调查与遗传风险评估。研究进展良好，已获得3家医学遗传学中心合作支持，样本质量和数据完整性高于同类研究平均水平28%。",
+        progress: "",
+        achievements: "",
+        cooperation: ""
       }
     } else {
       return {
@@ -334,21 +334,26 @@ export default function EthicProjectOverviewTab({
                       </div>
                       <div className="space-y-3">
                         <p className="text-slate-700 leading-relaxed">
-                          <span className="font-medium text-slate-800">项目概况：</span>
                           {aiSummaryContent?.overview || "暂无概况信息"}
                         </p>
-                        <p className="text-slate-700 leading-relaxed">
-                          <span className="font-medium text-slate-800">项目进展：</span>
-                          {aiSummaryContent?.progress || "暂无进展信息"}
-                        </p>
-                        <p className="text-slate-700 leading-relaxed">
-                          <span className="font-medium text-slate-800">研究成果：</span>
-                          {aiSummaryContent?.achievements || "暂无成果信息"}
-                        </p>
-                        <p className="text-slate-700 leading-relaxed">
-                          <span className="font-medium text-slate-800">合作情况：</span>
-                          {aiSummaryContent?.cooperation || "暂无合作信息"}
-                        </p>
+                        {aiSummaryContent?.progress && (
+                          <p className="text-slate-700 leading-relaxed">
+                            <span className="font-medium text-slate-800">项目进展：</span>
+                            {aiSummaryContent.progress}
+                          </p>
+                        )}
+                        {aiSummaryContent?.achievements && (
+                          <p className="text-slate-700 leading-relaxed">
+                            <span className="font-medium text-slate-800">研究成果：</span>
+                            {aiSummaryContent.achievements}
+                          </p>
+                        )}
+                        {aiSummaryContent?.cooperation && (
+                          <p className="text-slate-700 leading-relaxed">
+                            <span className="font-medium text-slate-800">合作情况：</span>
+                            {aiSummaryContent.cooperation}
+                          </p>
+                        )}
                       </div>
                       <div className="flex items-start gap-4 my-3 py-2">
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
@@ -390,21 +395,26 @@ export default function EthicProjectOverviewTab({
                     <>
                       <div className="space-y-3">
                         <p className="text-slate-700 leading-relaxed">
-                          <span className="font-medium text-slate-800">项目概况：</span>
                           {aiSummaryContent?.overview || "暂无概况信息"}
                         </p>
-                        <p className="text-slate-700 leading-relaxed">
-                          <span className="font-medium text-slate-800">项目进展：</span>
-                          {aiSummaryContent?.progress || "暂无进展信息"}
-                        </p>
-                        <p className="text-slate-700 leading-relaxed">
-                          <span className="font-medium text-slate-800">研究成果：</span>
-                          {aiSummaryContent?.achievements || "暂无成果信息"}
-                        </p>
-                        <p className="text-slate-700 leading-relaxed">
-                          <span className="font-medium text-slate-800">合作情况：</span>
-                          {aiSummaryContent?.cooperation || "暂无合作信息"}
-                        </p>
+                        {aiSummaryContent?.progress && (
+                          <p className="text-slate-700 leading-relaxed">
+                            <span className="font-medium text-slate-800">项目进展：</span>
+                            {aiSummaryContent.progress}
+                          </p>
+                        )}
+                        {aiSummaryContent?.achievements && (
+                          <p className="text-slate-700 leading-relaxed">
+                            <span className="font-medium text-slate-800">研究成果：</span>
+                            {aiSummaryContent.achievements}
+                          </p>
+                        )}
+                        {aiSummaryContent?.cooperation && (
+                          <p className="text-slate-700 leading-relaxed">
+                            <span className="font-medium text-slate-800">合作情况：</span>
+                            {aiSummaryContent.cooperation}
+                          </p>
+                        )}
                       </div>
                       <div className="flex items-start gap-4 my-3 py-2">
                         <div className="flex items-center gap-1.5 border-r border-slate-200 pr-4">
@@ -458,9 +468,7 @@ export default function EthicProjectOverviewTab({
                   className="h-6 gap-1 text-slate-500 hover:text-slate-900"
                   onClick={() => {
                     // 复制文本到剪贴板
-                    const copyText = isAnalysisUpdated
-                      ? `项目概况：该科研项目当前进度为35%，符合预期计划。\n\n项目进展：项目经费使用率为31.2%（↑2.7%），整体于计划进度内。\n\n研究成果：项目已产出3篇研究论文，包括实验设计方案、动物伦理规范与代谢机制初步分析。\n\n合作情况：成果转化进展良好，已有2家制药企业表达合作意向，高于同类项目平均水平25%。`
-                      : `项目概况：${aiSummaryContent.overview}\n\n项目进展：${aiSummaryContent.progress}\n\n研究成果：${aiSummaryContent.achievements}\n\n合作情况：${aiSummaryContent.cooperation}`;
+                    const copyText = aiSummaryContent.overview || "暂无概况信息";
                     
                     navigator.clipboard.writeText(copyText)
                     toast({

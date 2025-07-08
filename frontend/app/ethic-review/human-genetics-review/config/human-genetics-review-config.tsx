@@ -251,9 +251,9 @@ export const cardFields = [
     ),
   },
   {
-    id: "reviewType",
-    label: "研究类型",
-    value: (item: any) => item.reviewType || "-",
+    id: "approvalType",
+    label: "审查类型",
+    value: (item: any) => item.approvalType || "-",
   },
   {
     id: "reviewMethod",

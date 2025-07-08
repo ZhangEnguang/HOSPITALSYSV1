@@ -301,9 +301,9 @@ export const cardFields = [
     value: (item: any) => item.acceptanceNumber || item.id || "-",
   },
   {
-    id: "projectSubType",
-    label: "项目类型",
-    value: (item: any) => item.projectSubType || "-",
+    id: "reviewType",
+    label: "审查类型",
+    value: (item: any) => item.reviewType || "-",
   },
   {
     id: "projectLeader",

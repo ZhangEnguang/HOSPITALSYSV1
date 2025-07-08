@@ -149,11 +149,11 @@ export default function QuickReviewCard({
               </div>
             </div>
             
-            {/* 项目类型 */}
+            {/* 审查类型 */}
             <div className="text-sm">
-              <span className="font-medium text-xs text-muted-foreground block mb-1">项目类型</span>
+              <span className="font-medium text-xs text-muted-foreground block mb-1">审查类型</span>
               <div className="truncate">
-                {item.projectSubType || "-"}
+                {item.reviewType || "-"}
               </div>
             </div>
             

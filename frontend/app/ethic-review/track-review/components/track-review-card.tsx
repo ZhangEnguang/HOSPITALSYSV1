@@ -164,19 +164,19 @@ export default function TrackReviewCard({
               </div>
             </div>
             
+            {/* 审查类型 */}
+            <div className="text-sm">
+              <span className="font-medium text-xs text-muted-foreground block mb-1">审查类型</span>
+              <div className="truncate">
+                {item.reviewType || "-"}
+              </div>
+            </div>
+            
             {/* 伦理委员会 */}
             <div className="text-sm">
               <span className="font-medium text-xs text-muted-foreground block mb-1">伦理委员会</span>
               <div className="truncate">
                 {item.ethicsCommittee || "-"}
-              </div>
-            </div>
-            
-            {/* 预计完成时间 */}
-            <div className="text-sm">
-              <span className="font-medium text-xs text-muted-foreground block mb-1">预计完成时间</span>
-              <div className="truncate">
-                {item.dueDate || "-"}
               </div>
             </div>
           </div>

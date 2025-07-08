@@ -274,9 +274,9 @@ export const cardFields = [
     value: (item: any) => item.ethicsCommittee || "-",
   },
   {
-    id: "dueDate",
-    label: "预计完成时间",
-    value: (item: any) => item.dueDate || "-",
+    id: "reviewType",
+    label: "审查类型",
+    value: (item: any) => item.reviewType || "-",
   },
 ]
 

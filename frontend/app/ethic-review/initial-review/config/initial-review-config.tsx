@@ -307,9 +307,9 @@ export const cardFields = [
     ),
   },
   {
-    id: "projectType",
-    label: "项目类型",
-    value: (item: any) => item.projectType || "-",
+    id: "reviewType",
+    label: "审查类型",
+    value: (item: any) => item.reviewType || "-",
   },
   {
     id: "reviewMethod",

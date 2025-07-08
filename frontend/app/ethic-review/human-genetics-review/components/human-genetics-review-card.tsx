@@ -156,19 +156,19 @@ export default function HumanGeneticsReviewCard({
               </div>
             </div>
             
-            {/* 研究类型 */}
-            <div className="text-sm">
-              <span className="font-medium text-xs text-muted-foreground block mb-1">研究类型</span>
-              <div className="truncate">
-                {item.reviewType || "-"}
-              </div>
-            </div>
-            
             {/* 所属院系 */}
             <div className="text-sm">
               <span className="font-medium text-xs text-muted-foreground block mb-1">所属院系</span>
               <div className="truncate">
                 {item.department || "-"}
+              </div>
+            </div>
+            
+            {/* 审查类型 */}
+            <div className="text-sm">
+              <span className="font-medium text-xs text-muted-foreground block mb-1">审查类型</span>
+              <div className="truncate">
+                {item.approvalType || "-"}
               </div>
             </div>
             
