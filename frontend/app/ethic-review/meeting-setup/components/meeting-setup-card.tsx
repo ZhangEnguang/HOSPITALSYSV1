@@ -152,10 +152,10 @@ export default function MeetingSetupCard({
           </div>
           
           <CardContent className="px-5 py-3 pt-0 pb-5">
-            {/* 第一行：组织者、参会人数 */}
+            {/* 第一行：会议主持人、参会人数 */}
             <div className="grid grid-cols-2 gap-4 mb-2">
               <div className="text-sm">
-                <span className="font-medium text-xs text-muted-foreground block mb-1">组织者</span>
+                <span className="font-medium text-xs text-muted-foreground block mb-1">会议主持人</span>
                 <div className="truncate">
                   <div className="flex items-center gap-2">
                     <Avatar className="h-6 w-6">

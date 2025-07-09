@@ -405,7 +405,7 @@ function MeetingSetupContent() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         searchValue={searchValue}
-        searchPlaceholder="搜索会议编号、标题、场地或组织者..."
+        searchPlaceholder="搜索会议编号、标题、场地或会议主持人..."
         noResultsText="没有找到符合条件的会议"
         onSearchChange={(value) => setSearchValue(value)}
         onSearch={handleSearchExecute}

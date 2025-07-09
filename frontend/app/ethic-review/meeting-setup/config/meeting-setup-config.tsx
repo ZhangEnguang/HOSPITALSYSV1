@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
-import { Eye, FileEdit, Trash2, Clock, CheckCircle, XCircle, AlertTriangle, ClipboardCheck, MoreVertical, Calendar, Users, MapPin } from "lucide-react"
+import { Eye, FileEdit, Trash2, Clock, CheckCircle, XCircle, AlertTriangle, ClipboardCheck, MoreVertical, Calendar, Users, MapPin, Vote } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
@@ -142,7 +142,7 @@ export const tableColumns = [
   },
   {
     id: "organizer",
-    header: "组织者",
+    header: "会议主持人",
     accessorKey: "organizer",
     cell: (item: any) => (
       <div className="flex items-center gap-2">
@@ -207,6 +207,10 @@ export const tableColumns = [
             <DropdownMenuItem onClick={() => window.location.href = `/ethic-review/meeting-setup/${item.id}`}>
               <Eye className="h-4 w-4 mr-2" />
               查看详情
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => window.location.href = `/ethic-review/meeting-setup/voting/${item.id}`}>
+              <Vote className="h-4 w-4 mr-2" />
+              进入投票
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => window.location.href = `/ethic-review/meeting-setup/edit/${item.id}`}>
               <FileEdit className="h-4 w-4 mr-2" />
@@ -295,7 +299,7 @@ export const quickFilters = [
 export const cardFields = [
   {
     id: "organizer",
-    label: "组织者",
+    label: "会议主持人",
     value: (item: any) => (
       <div className="flex items-center gap-2">
         <Avatar className="h-6 w-6">
@@ -359,6 +363,14 @@ export const cardActions = [
     },
   },
   {
+    id: "voting",
+    icon: <Vote className="h-4 w-4" />,
+    label: "进入投票",
+    onClick: (item: any) => {
+      window.location.href = `/ethic-review/meeting-setup/voting/${item.id}`
+    },
+  },
+  {
     id: "edit",
     icon: <FileEdit className="h-4 w-4" />,
     label: "编辑会议",
@@ -406,13 +418,13 @@ export const sortOptions = [
   },
   {
     id: "organizerAsc",
-    label: "组织者 A-Z",
+    label: "会议主持人 A-Z",
     field: "organizer",
     direction: "asc",
   },
   {
     id: "organizerDesc",
-    label: "组织者 Z-A",
+    label: "会议主持人 Z-A",
     field: "organizer",
     direction: "desc",
   },

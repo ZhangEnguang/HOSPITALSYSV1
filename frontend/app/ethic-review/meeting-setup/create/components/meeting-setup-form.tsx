@@ -215,7 +215,7 @@ export function MeetingSetupForm({ mode = 'create', initialData }: MeetingSetupF
         isValid = false
         newErrors[field] = `请填写${field === "title" ? "会议标题" : 
                             field === "venue" ? "会议场地" : 
-                            field === "organizer" ? "组织者" : 
+                            field === "organizer" ? "会议主持人" : 
                             field === "committee" ? "参会委员会" : ""}`
       }
     })
@@ -523,16 +523,16 @@ export function MeetingSetupForm({ mode = 'create', initialData }: MeetingSetupF
             </div>
           </div>
 
-          {/* 第三行：组织者、伦理委员会 */}
+          {/* 第三行：会议主持人、伦理委员会 */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="organizer" className="text-muted-foreground">组织者 <span className="text-red-500">*</span></Label>
+              <Label htmlFor="organizer" className="text-muted-foreground">会议主持人 <span className="text-red-500">*</span></Label>
               <Input 
                 id="organizer" 
                 value={formData.organizer} 
                 onChange={(e) => updateFormData("organizer", e.target.value)} 
                 onBlur={() => handleBlur("organizer")}
-                placeholder="请输入组织者姓名"
+                placeholder="请输入会议主持人姓名"
                 className={cn(
                   "border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1",
                   formTouched.organizer && formErrors.organizer ? "border-red-500" : ""

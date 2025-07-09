@@ -87,7 +87,7 @@ export default function MeetingOverviewTab({ item: meeting }: MeetingOverviewTab
               <div className="font-medium">{meeting.venue || meeting.location || "线上会议"}</div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">组织者</div>
+              <div className="text-sm text-muted-foreground">会议主持人</div>
               <div className="font-medium">{meeting.organizer?.name || meeting.organizer || "王五"}</div>
             </div>
             <div>
