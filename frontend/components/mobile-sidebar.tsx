@@ -122,6 +122,12 @@ export default function MobileSidebar() {
                       >
                         <span>跟踪报告</span>
                       </Link>
+                      <Link
+                        href="/ethic-review/meeting-setup"
+                        className="flex items-center p-2 rounded-md text-[13px] text-gray-600 hover:bg-[#2156FF]/10 hover:text-[#2156FF]"
+                      >
+                        <span>会议管理</span>
+                      </Link>
                     </div>
                   )}
                 </>
