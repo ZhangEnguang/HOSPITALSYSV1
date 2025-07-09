@@ -68,12 +68,13 @@ export const statusVariants: Record<string, StatusVariant> = {
   "驳回": { color: "bg-red-100 text-red-700 border-red-300" },
 }
 
-// 定义审查结果变体和颜色
+// 定义审查结果变体和颜色 - 使用更加内敛统一的颜色方案
 export const reviewResultVariants: Record<string, StatusVariant> = {
-  "审查通过": { color: "bg-green-100 text-green-700 border-green-300" },
-  "必要的修改后同意": { color: "bg-yellow-100 text-yellow-700 border-yellow-300" },
-  "不同意": { color: "bg-red-100 text-red-700 border-red-300" },
-  "终止或暂停已同意的研究": { color: "bg-purple-100 text-purple-700 border-purple-300" },
+  "审查通过": { color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  "必要的修改后同意": { color: "bg-amber-50 text-amber-700 border-amber-200" },
+  "不同意": { color: "bg-rose-50 text-rose-700 border-rose-200" },
+  "终止或暂停已同意的研究": { color: "bg-slate-50 text-slate-700 border-slate-200" },
+  "未出结果": { color: "bg-gray-50 text-gray-600 border-gray-200" },
 }
 
 // 为 DataList 组件提供的状态变体
@@ -213,16 +214,21 @@ export const tableColumns = [
     cell: (item: any) => {
       const result = item.reviewResult;
       const variant = result ? 
-        (reviewResultVariants[result] || { color: "bg-gray-100 text-gray-700 border-gray-300" }) : 
-        { color: "bg-gray-100 text-gray-700 border-gray-300" };
+        (reviewResultVariants[result] || reviewResultVariants["未出结果"]) : 
+        reviewResultVariants["未出结果"];
       
       return (
         <div className="flex justify-center">
-          <div className="w-20">
-            <Badge variant="outline" className={cn("px-2 py-0.5 border text-xs inline-block", variant.color)}>
-              {result || "未出结果"}
-            </Badge>
-          </div>
+          <Badge 
+            variant="outline" 
+            className={cn(
+              "px-2 py-1 border text-xs font-medium min-w-0 max-w-[110px] truncate", 
+              variant.color
+            )}
+            title={result || "未出结果"}
+          >
+            {result || "未出结果"}
+          </Badge>
         </div>
       );
     },

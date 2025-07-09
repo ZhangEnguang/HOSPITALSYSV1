@@ -348,12 +348,7 @@ export function ExpertReviewTab({
                     <span className="font-medium">对比模式已启用</span>
                   </div>
                   
-                  {/* 选择状态 */}
-                  <div className="flex items-center px-2.5 py-1 bg-blue-100 rounded-full border border-blue-300">
-                    <span className="text-xs font-medium text-blue-800">
-                      已选择 {selectedExperts.size}/4
-                    </span>
-                  </div>
+
                 </div>
                 
                 <p className="text-xs text-blue-600 mb-3">
@@ -391,17 +386,25 @@ export function ExpertReviewTab({
                     )}
                   </div>
                   
-                  {/* 开始对比按钮 */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={openCompareDialog}
-                    disabled={selectedExperts.size < 2}
-                    className="text-sm border-green-200 text-green-700 hover:bg-green-50 disabled:opacity-50"
-                  >
-                    <BarChart3 className="h-4 w-4 mr-1.5" />
-                    开始对比 ({selectedExperts.size})
-                  </Button>
+                  {/* 右侧：已选择标签和开始对比按钮 */}
+                  <div className="flex items-center space-x-3">
+                    {/* 已选择标签 */}
+                    <span className="text-xs text-gray-600">
+                      已选择{selectedExperts.size}/4
+                    </span>
+                    
+                    {/* 开始对比按钮 */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={openCompareDialog}
+                      disabled={selectedExperts.size < 2}
+                      className="text-sm border-green-200 text-green-700 hover:bg-green-50 disabled:opacity-50"
+                    >
+                      <BarChart3 className="h-4 w-4 mr-1.5" />
+                      开始对比
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}

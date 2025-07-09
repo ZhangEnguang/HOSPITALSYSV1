@@ -36,6 +36,8 @@ interface AISummaryPanelProps {
   aiSummary?: any; // 兼容旧的格式
   onExport?: (format: "pdf" | "docx" | "excel") => void;
   onPrint?: () => void;
+  onSubmit?: () => void; // 提交回调
+  onClose?: () => void; // 关闭回调
 }
 
 export default function AISummaryPanel({
@@ -44,6 +46,8 @@ export default function AISummaryPanel({
   aiSummary,
   onExport,
   onPrint,
+  onSubmit,
+  onClose,
 }: AISummaryPanelProps) {
   // 处理旧版数据格式转换为新格式
   const defaultAISummaryText = aiSummary ? 
@@ -435,10 +439,33 @@ export default function AISummaryPanel({
           <Button 
             className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-medium py-2.5 rounded-lg transition-all duration-200 shadow-lg"
             onClick={() => {
-              toast({
-                title: "提交成功",
-                description: "AI审查意见已提交",
-              });
+              if (!selectedResult) {
+                toast({
+                  title: "请选择审查结果",
+                  description: "请先选择一个审查结果",
+                  variant: "destructive",
+                });
+                return;
+              }
+              
+              if (!summaryText.trim()) {
+                toast({
+                  title: "请填写审查意见",
+                  description: "请填写AI审查意见",
+                  variant: "destructive",
+                });
+                return;
+              }
+              
+              // 执行提交操作
+              if (onSubmit) {
+                onSubmit();
+              } else {
+                toast({
+                  title: "提交成功",
+                  description: `AI审查意见已提交，审查结果：${selectedResult}`,
+                });
+              }
             }}
           >
             <Check className="h-4 w-4 mr-2" />
@@ -448,14 +475,18 @@ export default function AISummaryPanel({
             variant="outline"
             className="flex-1 border-slate-300 text-slate-700 hover:bg-slate-50 font-medium py-2.5 rounded-lg transition-colors"
             onClick={() => {
-              toast({
-                title: "已关闭",
-                description: "AI意见汇总面板已关闭",
-              });
+              if (onClose) {
+                onClose();
+              } else {
+                toast({
+                  title: "已关闭",
+                  description: "返回会议审查模块列表",
+                });
+              }
             }}
           >
             <X className="h-4 w-4 mr-2" />
-            关闭
+            返回列表
           </Button>
         </div>
       </div>

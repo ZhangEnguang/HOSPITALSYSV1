@@ -47,7 +47,7 @@ export default function MeetingReviewCard({
   }
 
   const getStatusCustomClass = (reviewResult: string) => {
-    return statusVariants[reviewResult] || "bg-gray-100 text-gray-700 border-gray-300"
+    return statusVariants[reviewResult] || statusVariants["未出结果"] || "bg-gray-50 text-gray-600 border-gray-200"
   }
 
   const getDisplayStatus = () => {
@@ -84,14 +84,18 @@ export default function MeetingReviewCard({
         <CardHeader className="flex flex-col space-y-1.5 px-5 pt-5 pb-0">
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <h3 className="font-semibold text-base transition-colors duration-300 group-hover:text-primary truncate flex-1">
                   {renderValue(item.name)}
                 </h3>
                 {/* 显示审查结果标签 */}
                 <Badge 
                   variant="outline" 
-                  className={cn("px-2 py-0.5 border", getStatusCustomClass(item.reviewResult || "未出结果"))}
+                  className={cn(
+                    "px-2 py-1 border text-xs font-medium shrink-0 max-w-[110px] truncate", 
+                    getStatusCustomClass(item.reviewResult || "未出结果")
+                  )}
+                  title={getDisplayStatus()}
                 >
                   {renderValue(getDisplayStatus())}
                 </Badge>

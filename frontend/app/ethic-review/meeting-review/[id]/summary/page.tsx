@@ -87,7 +87,7 @@ const mockExpertOpinions = [
     opinion: "项目方案设计科学，但对CRISPR技术应用范围的限制说明不够详细，建议明确技术应用边界，确保不会用于非诊断目的。修改后同意实施。",
     detailedOpinion: "该项目的科学设计总体合理，CRISPR技术在罕见遗传病诊断中的应用具有创新性和科学价值。方法学上选择的技术路线符合当前研究趋势。\n\n但项目存在以下需要改进的问题：\n1. CRISPR技术应用范围的限制说明不够详细，需要明确技术应用边界，特别是要明确规定该技术仅用于疾病诊断而非基因编辑或其他目的\n2. 对于可能的误诊问题，缺乏应对措施和解决方案\n3. 数据分析方法中，对于假阳性和假阴性的控制措施描述不足\n\n建议项目组补充以上内容，明确技术应用的限制条件和范围，完善质控措施，修改后可以实施。",
     rating: 3.8,
-    result: "修改后同意",
+    result: "必要的修改后同意",
     category: "科学性审查",
     specialty: "CRISPR基因技术",
     expertise: ["基因编辑", "CRISPR技术", "分子诊断"],
@@ -204,9 +204,9 @@ const mockAISummary = {
   version: "v1.0"
 };
 
-export default function SummaryPage({ params }: { params: { id: string } }) {
-  // 使用正确的use函数解包params，使用断言解决类型问题
-  const projectId = use(params as any).id;
+export default function SummaryPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = React.use(params);
+  const projectId = resolvedParams.id;
   
   const router = useRouter();
   const { startLoading, stopLoading, isLoading } = useLoading();
@@ -478,6 +478,33 @@ export default function SummaryPage({ params }: { params: { id: string } }) {
     return baseFields;
   };
 
+  // 处理提交审查意见
+  const handleSubmitReview = () => {
+    startLoading();
+    toast({
+      title: "提交中",
+      description: "正在提交AI审查意见...",
+    });
+    
+    setTimeout(() => {
+      stopLoading();
+      toast({
+        title: "提交成功",
+        description: "AI审查意见已提交，正在返回会议审查列表",
+      });
+      
+      // 返回会议审查列表
+      setTimeout(() => {
+        router.push('/ethic-review/meeting-review');
+      }, 1000);
+    }, 2000);
+  };
+
+  // 处理关闭并返回列表
+  const handleCloseAndReturn = () => {
+    router.push('/ethic-review/meeting-review');
+  };
+
   // AI意见汇总侧边栏组件
   const aiSidebar = (
     <AISummaryPanel
@@ -486,6 +513,8 @@ export default function SummaryPage({ params }: { params: { id: string } }) {
       aiSummary={mockAISummary}
       onExport={handleExport}
       onPrint={handlePrint}
+      onSubmit={handleSubmitReview}
+      onClose={handleCloseAndReturn}
     />
   );
 
@@ -510,8 +539,8 @@ export default function SummaryPage({ params }: { params: { id: string } }) {
             icon: <ClipboardCheck className="h-4 w-4" />,
             component: (
               <ExpertReviewTab 
-                expertOpinions={mockExpertOpinions}
-                advisorResponses={mockAdvisorResponses}
+                expertOpinions={currentProject?.expertOpinions || mockExpertOpinions}
+                advisorResponses={currentProject?.advisorResponses || mockAdvisorResponses}
               />
             )
           },

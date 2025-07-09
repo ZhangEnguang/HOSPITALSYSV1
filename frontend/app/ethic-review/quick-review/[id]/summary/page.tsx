@@ -513,6 +513,33 @@ export default function SummaryPage({ params }: { params: Promise<{ id: string }
     return baseFields;
   };
 
+  // 处理提交审查意见
+  const handleSubmitReview = () => {
+    startLoading();
+    toast({
+      title: "提交中",
+      description: "正在提交AI审查意见...",
+    });
+    
+    setTimeout(() => {
+      stopLoading();
+      toast({
+        title: "提交成功",
+        description: "AI审查意见已提交，正在返回快速审查列表",
+      });
+      
+      // 返回快速审查列表
+      setTimeout(() => {
+        router.push('/ethic-review/quick-review');
+      }, 1000);
+    }, 2000);
+  };
+
+  // 处理关闭并返回列表
+  const handleCloseAndReturn = () => {
+    router.push('/ethic-review/quick-review');
+  };
+
   // 获取AI推荐面板作为侧边栏
   const aiSidebar = currentProject ? (
     <AISummaryPanel 
@@ -521,6 +548,8 @@ export default function SummaryPage({ params }: { params: Promise<{ id: string }
       expertOpinions={currentProject.expertOpinions}
       onExport={handleExport}
       onPrint={handlePrint}
+      onSubmit={handleSubmitReview}
+      onClose={handleCloseAndReturn}
     />
   ) : null;
 
