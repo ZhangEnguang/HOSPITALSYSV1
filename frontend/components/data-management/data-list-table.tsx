@@ -125,7 +125,7 @@ export default function DataListTable<T extends { id: string }>({
 
               {/* 操作列 - 固定在右侧 */}
               {actions && actions.length > 0 && (
-                <TableHead className="text-right whitespace-nowrap sticky right-0 bg-background pr-4">
+                <TableHead className="w-[120px] text-right whitespace-nowrap sticky right-0 bg-background pr-4">
                   操作
                 </TableHead>
               )}
@@ -195,7 +195,7 @@ export default function DataListTable<T extends { id: string }>({
                     {/* 操作列单元格 - 固定在右侧 */}
                     {actions && actions.length > 0 && (
                       <TableCell 
-                        className="text-right whitespace-nowrap sticky right-0 bg-background pr-4" 
+                        className="w-[120px] text-right whitespace-nowrap sticky right-0 bg-background pr-4" 
                         onClick={(e) => e.stopPropagation()}
                         data-action-cell="true"
                       >
