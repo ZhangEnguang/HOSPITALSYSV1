@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "@/components/ui/use-toast"
 import DetailPage from "@/components/detail-page/detail-page"
@@ -682,7 +682,8 @@ const mockReviewProjects = [
   }
 ];
 
-export default function TrackReportReview({ params }: { params: { id: string } }) {
+export default function TrackReportReview({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params)
   const router = useRouter();
   const { isLoading, startLoading, stopLoading } = useLoading();
   const [currentProject, setCurrentProject] = useState<any>(null);
@@ -690,20 +691,20 @@ export default function TrackReportReview({ params }: { params: { id: string } }
 
   // 获取项目详情
   const getProjectDetail = () => {
-    // 根据 params.id 查找对应的项目
-    const project = mockReviewProjects.find(p => p.id === params.id);
+    // 根据 resolvedParams.id 查找对应的项目
+    const project = mockReviewProjects.find(p => p.id === resolvedParams.id);
     
     if (project) {
       setCurrentProject(project);
       setProjectTitle(project.title);
     } else {
       // 如果找不到项目，设置默认数据
-      console.warn(`未找到ID为 ${params.id} 的项目`);
+      console.warn(`未找到ID为 ${resolvedParams.id} 的项目`);
       
       // 创建一个默认项目对象，包含基本信息
       const defaultProject = {
-        id: params.id,
-        title: `跟踪报告项目 ${params.id}`,
+        id: resolvedParams.id,
+        title: `跟踪报告项目 ${resolvedParams.id}`,
         status: "待审核",
         statusLabel: "待审核", 
         reviewType: "跟踪审查",
@@ -715,7 +716,7 @@ export default function TrackReportReview({ params }: { params: { id: string } }
         createdAt: "2024-05-18",
         deadline: "2024-06-18",
         submittedAt: "2024-05-18",
-        reviewNumber: params.id,
+        reviewNumber: resolvedParams.id,
         progress: 0,
         description: "项目描述暂未设置",
         aiSummary: "暂无AI摘要信息",
@@ -751,10 +752,10 @@ export default function TrackReportReview({ params }: { params: { id: string } }
 
   // 页面加载时获取项目数据
   useEffect(() => {
-    if (params.id) {
+    if (resolvedParams.id) {
       getProjectDetail();
     }
-  }, [params.id]);
+  }, [resolvedParams.id]);
 
   // 状态映射函数
   const mapStatus = (status: string): string => {
@@ -846,7 +847,7 @@ export default function TrackReportReview({ params }: { params: { id: string } }
           <div className="w-10 h-10 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
         </div>
         <div className="text-lg font-medium">加载中...</div>
-        <div className="text-sm text-gray-500 mt-2">正在加载项目ID: {params.id} 的审核数据</div>
+        <div className="text-sm text-gray-500 mt-2">正在加载项目ID: {resolvedParams.id} 的审核数据</div>
       </div>
     );
   }
@@ -935,8 +936,8 @@ export default function TrackReportReview({ params }: { params: { id: string } }
 
   return (
     <DetailPage
-      id={params.id}
-      title={projectTitle || currentProject.title || `跟踪报告审核 ${params.id}`}
+      id={resolvedParams.id}
+      title={projectTitle || currentProject.title || `跟踪报告审核 ${resolvedParams.id}`}
       status={currentProject.status}
       statusLabel={currentProject.statusLabel}
       onTitleEdit={handleTitleEdit}

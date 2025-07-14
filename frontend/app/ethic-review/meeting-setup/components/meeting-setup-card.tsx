@@ -205,7 +205,10 @@ export default function MeetingSetupCard({
                   <div className="flex items-center gap-2">
                     <Zap className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium text-blue-600">{item.quickReviewCount || 0}</span>
-                    <span className="text-sm text-muted-foreground">项</span>
+                    <span className="text-sm text-muted-foreground">/</span>
+                    <span className="text-sm text-muted-foreground">
+                      {item.limitProjectCount ? `${item.quickReviewLimit || 0}项` : "不限额"}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -215,7 +218,10 @@ export default function MeetingSetupCard({
                   <div className="flex items-center gap-2">
                     <FileText className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium text-green-600">{item.meetingReviewCount || 0}</span>
-                    <span className="text-sm text-muted-foreground">项</span>
+                    <span className="text-sm text-muted-foreground">/</span>
+                    <span className="text-sm text-muted-foreground">
+                      {item.limitProjectCount ? `${item.meetingReviewLimit || 0}项` : "不限额"}
+                    </span>
                   </div>
                 </div>
               </div>

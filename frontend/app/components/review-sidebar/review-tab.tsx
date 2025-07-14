@@ -13,6 +13,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 
 import { AuditKeyPointsSection } from "./review-tab/audit-key-points-section"
 import { ReviewCommentSection } from "./review-tab/review-comment-section"
@@ -62,6 +64,115 @@ export default function ReviewTab({ projectId, projectTitle, onStatusChange, ret
   // 审查方式选择弹框
   const [showReviewMethodDialog, setShowReviewMethodDialog] = useState(false)
   const [selectedReviewMethod, setSelectedReviewMethod] = useState<'quick' | 'meeting' | null>(null)
+  const [selectedMeeting, setSelectedMeeting] = useState<string>("")
+
+  // 会议数据 - 2025年3-7月份，每半个月一次
+  const meetingData = [
+    {
+      id: "1",
+      date: "2025-03-01",
+      title: "2025年第一季度初始审查会议",
+      quickReviewCount: 5,
+      meetingReviewCount: 8,
+      quickReviewLimit: 5,
+      meetingReviewLimit: 8
+    },
+    {
+      id: "2", 
+      date: "2025-03-15",
+      title: "动物实验伦理跟踪审查会议",
+      quickReviewCount: 1,
+      meetingReviewCount: 2,
+      quickReviewLimit: 5,
+      meetingReviewLimit: 8
+    },
+    {
+      id: "3",
+      date: "2025-04-01", 
+      title: "紧急快速审查会议",
+      quickReviewCount: 4,
+      meetingReviewCount: 1,
+      quickReviewLimit: 5,
+      meetingReviewLimit: 8
+    },
+    {
+      id: "4",
+      date: "2025-04-15",
+      title: "人体研究伦理审查会议", 
+      quickReviewCount: 0,
+      meetingReviewCount: 4,
+      quickReviewLimit: 5,
+      meetingReviewLimit: 8
+    },
+    {
+      id: "5",
+      date: "2025-05-01",
+      title: "基因编辑技术专项审查会议",
+      quickReviewCount: 3,
+      meetingReviewCount: 2,
+      quickReviewLimit: 5,
+      meetingReviewLimit: 8
+    },
+    {
+      id: "6",
+      date: "2025-05-15", 
+      title: "多中心研究协调会议",
+      quickReviewCount: 5,
+      meetingReviewCount: 8,
+      quickReviewLimit: 5,
+      meetingReviewLimit: 8
+    },
+    {
+      id: "7",
+      date: "2025-06-01",
+      title: "研究伦理培训会议",
+      quickReviewCount: 1,
+      meetingReviewCount: 3,
+      quickReviewLimit: 5,
+      meetingReviewLimit: 8
+    },
+    {
+      id: "8",
+      date: "2025-06-15",
+      title: "年中总结会议", 
+      quickReviewCount: 0,
+      meetingReviewCount: 2,
+      quickReviewLimit: 5,
+      meetingReviewLimit: 8
+    },
+    {
+      id: "9",
+      date: "2025-07-01",
+      title: "特殊项目审查会议",
+      quickReviewCount: 2,
+      meetingReviewCount: 1,
+      quickReviewLimit: 5,
+      meetingReviewLimit: 8
+    },
+    {
+      id: "10",
+      date: "2025-07-15",
+      title: "伦理审查规范修订会议",
+      quickReviewCount: 1,
+      meetingReviewCount: 0,
+      quickReviewLimit: 5,
+      meetingReviewLimit: 8
+    }
+  ]
+
+  // 检查会议是否满额的函数
+  const isMeetingFull = (meeting: any) => {
+    return meeting.quickReviewCount >= meeting.quickReviewLimit && 
+           meeting.meetingReviewCount >= meeting.meetingReviewLimit
+  }
+
+  // 获取默认会议的函数
+  const getDefaultMeeting = () => {
+    // 按日期排序，找到最近的未满额会议
+    const sortedMeetings = [...meetingData].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    const availableMeeting = sortedMeetings.find(meeting => !isMeetingFull(meeting))
+    return availableMeeting?.id || sortedMeetings[0]?.id || ""
+  }
 
   // 其他
   const router = useRouter()
@@ -83,6 +194,9 @@ export default function ReviewTab({ projectId, projectTitle, onStatusChange, ret
     setCommentError(false)
     setCommentErrorMessage("")
 
+    // 设置默认会议
+    setSelectedMeeting(getDefaultMeeting())
+
     // 显示审查方式选择弹框
     setShowReviewMethodDialog(true)
   }
@@ -96,31 +210,47 @@ export default function ReviewTab({ projectId, projectTitle, onStatusChange, ret
   const handleConfirmReviewMethod = () => {
     if (!selectedReviewMethod) return
 
+    // 不管选择哪种审查方式，都需要选择关联会议
+    if (!selectedMeeting) {
+      toast({
+        title: "请选择关联会议",
+        description: "请选择一个关联的会议",
+        variant: "destructive",
+        duration: 3000,
+      })
+      return
+    }
+
     // 关闭审查方式选择弹框
     setShowReviewMethodDialog(false)
 
     // 根据选择的方式进行不同的处理
     let methodText = ""
+    let description = ""
 
+    const selectedMeetingData = meetingData.find(m => m.id === selectedMeeting)
+    
     switch (selectedReviewMethod) {
       case 'quick':
         methodText = "快速审查"
+        description = `项目已通过审核，选择审查方式：快速审查，关联会议：${selectedMeetingData?.title}`
         break
       case 'meeting':
         methodText = "会议审查"
+        description = `项目已通过审核，选择审查方式：会议审查，关联会议：${selectedMeetingData?.title}`
         break
-
     }
 
     // 显示成功提示
     toast({
       title: "操作成功",
-      description: `项目已通过审核，选择审查方式：${methodText}`,
+      description: description,
       duration: 3000,
     })
 
     // 重置选择状态
     setSelectedReviewMethod(null)
+    setSelectedMeeting("")
 
     // 根据returnPath或当前路径决定返回地址
     if (returnPath) {
@@ -143,6 +273,7 @@ export default function ReviewTab({ projectId, projectTitle, onStatusChange, ret
   const handleCancelReviewMethod = () => {
     setShowReviewMethodDialog(false)
     setSelectedReviewMethod(null)
+    setSelectedMeeting("")
   }
 
   // 审核退回处理
@@ -336,7 +467,7 @@ export default function ReviewTab({ projectId, projectTitle, onStatusChange, ret
 
         {/* 审查方式选择弹框 */}
         <Dialog open={showReviewMethodDialog} onOpenChange={handleCancelReviewMethod}>
-          <DialogContent className="sm:max-w-[480px]">
+          <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-blue-600" />
@@ -352,35 +483,35 @@ export default function ReviewTab({ projectId, projectTitle, onStatusChange, ret
               <div className="grid grid-cols-2 gap-4 mb-6">
                 {/* 快速审查选项 */}
                 <div 
-                  className={`relative rounded-lg border p-4 cursor-pointer transition-all duration-200 ${
+                  className={`relative rounded-lg border p-3 cursor-pointer transition-all duration-200 ${
                     selectedReviewMethod === 'quick'
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/50'
                   }`}
                   onClick={() => handleReviewMethodSelect('quick')}
                 >
-                  <div className="text-center space-y-3">
-                    {/* 选择器 */}
-                    <div className="flex justify-center">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        selectedReviewMethod === 'quick'
-                          ? 'border-blue-500 bg-blue-500'
-                          : 'border-gray-300'
-                      }`}>
-                        {selectedReviewMethod === 'quick' && (
-                          <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
-                        )}
-                      </div>
+                  {/* 选择器 - 左上角 */}
+                  <div className="absolute top-3 left-3">
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                      selectedReviewMethod === 'quick'
+                        ? 'border-blue-500 bg-blue-500'
+                        : 'border-gray-300'
+                    }`}>
+                      {selectedReviewMethod === 'quick' && (
+                        <div className="w-2 h-2 rounded-full bg-white"></div>
+                      )}
                     </div>
-                    
+                  </div>
+
+                  <div className="text-center space-y-2 pt-4">
                     {/* 图标 */}
                     <div className="flex justify-center">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                         selectedReviewMethod === 'quick'
                           ? 'bg-blue-500'
                           : 'bg-blue-100'
                       }`}>
-                        <svg className={`w-5 h-5 ${
+                        <svg className={`w-4 h-4 ${
                           selectedReviewMethod === 'quick' ? 'text-white' : 'text-blue-600'
                         }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -391,7 +522,7 @@ export default function ReviewTab({ projectId, projectTitle, onStatusChange, ret
                     {/* 文字内容 */}
                     <div>
                       <div className="font-medium text-gray-900 mb-1">快速审查</div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-xs text-gray-600">
                         适用于风险较低的项目<br />审查周期较短
                       </div>
                     </div>
@@ -400,35 +531,35 @@ export default function ReviewTab({ projectId, projectTitle, onStatusChange, ret
 
                 {/* 会议审查选项 */}
                 <div 
-                  className={`relative rounded-lg border p-4 cursor-pointer transition-all duration-200 ${
+                  className={`relative rounded-lg border p-3 cursor-pointer transition-all duration-200 ${
                     selectedReviewMethod === 'meeting'
                       ? 'border-green-500 bg-green-50'
                       : 'border-gray-200 hover:border-green-300 hover:bg-green-50/50'
                   }`}
                   onClick={() => handleReviewMethodSelect('meeting')}
                 >
-                  <div className="text-center space-y-3">
-                    {/* 选择器 */}
-                    <div className="flex justify-center">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        selectedReviewMethod === 'meeting'
-                          ? 'border-green-500 bg-green-500'
-                          : 'border-gray-300'
-                      }`}>
-                        {selectedReviewMethod === 'meeting' && (
-                          <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
-                        )}
-                      </div>
+                  {/* 选择器 - 左上角 */}
+                  <div className="absolute top-3 left-3">
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                      selectedReviewMethod === 'meeting'
+                        ? 'border-green-500 bg-green-500'
+                        : 'border-gray-300'
+                    }`}>
+                      {selectedReviewMethod === 'meeting' && (
+                        <div className="w-2 h-2 rounded-full bg-white"></div>
+                      )}
                     </div>
-                    
+                  </div>
+
+                  <div className="text-center space-y-2 pt-4">
                     {/* 图标 */}
                     <div className="flex justify-center">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                         selectedReviewMethod === 'meeting'
                           ? 'bg-green-500'
                           : 'bg-green-100'
                       }`}>
-                        <svg className={`w-5 h-5 ${
+                        <svg className={`w-4 h-4 ${
                           selectedReviewMethod === 'meeting' ? 'text-white' : 'text-green-600'
                         }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -439,7 +570,7 @@ export default function ReviewTab({ projectId, projectTitle, onStatusChange, ret
                     {/* 文字内容 */}
                     <div>
                       <div className="font-medium text-gray-900 mb-1">会议审查</div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-xs text-gray-600">
                         召开伦理委员会会议<br />进行集体审查
                       </div>
                     </div>
@@ -447,7 +578,58 @@ export default function ReviewTab({ projectId, projectTitle, onStatusChange, ret
                 </div>
               </div>
 
-
+              {/* 关联会议选择 - 独立显示 */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  关联会议 <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={selectedMeeting}
+                  onChange={(e) => setSelectedMeeting(e.target.value)}
+                  className="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">请选择会议</option>
+                  {meetingData.map((meeting) => (
+                    <option key={meeting.id} value={meeting.id}>
+                      {meeting.date} - {meeting.title}{isMeetingFull(meeting) ? ' (已满额)' : ''}
+                    </option>
+                  ))}
+                </select>
+                
+                {/* 显示选中会议的项目统计 */}
+                {selectedMeeting && (
+                  <div className="mt-3 p-3 bg-gray-50 rounded-md">
+                    {(() => {
+                      const meeting = meetingData.find(m => m.id === selectedMeeting)
+                      if (!meeting) return null
+                      
+                      const isQuickFull = meeting.quickReviewCount >= meeting.quickReviewLimit
+                      const isMeetingReviewFull = meeting.meetingReviewCount >= meeting.meetingReviewLimit
+                      const isFullyBooked = isMeetingFull(meeting)
+                      
+                      return (
+                        <div>
+                          <div className="flex justify-between text-sm">
+                            <span className={isQuickFull ? 'text-red-600' : 'text-gray-600'}>
+                              快速审查: {meeting.quickReviewCount}/{meeting.quickReviewLimit}
+                              {isQuickFull && ' (已满)'}
+                            </span>
+                            <span className={isMeetingReviewFull ? 'text-red-600' : 'text-gray-600'}>
+                              会议审查: {meeting.meetingReviewCount}/{meeting.meetingReviewLimit}
+                              {isMeetingReviewFull && ' (已满)'}
+                            </span>
+                          </div>
+                          {isFullyBooked && (
+                            <div className="mt-2 text-xs text-red-500 font-medium">
+                              ⚠️ 此会议已满额，建议选择其他会议
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })()}
+                  </div>
+                )}
+              </div>
             </div>
 
             <DialogFooter className="gap-2">
@@ -456,7 +638,7 @@ export default function ReviewTab({ projectId, projectTitle, onStatusChange, ret
               </Button>
               <Button 
                 onClick={handleConfirmReviewMethod}
-                disabled={!selectedReviewMethod}
+                disabled={!selectedReviewMethod || !selectedMeeting}
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 确认选择

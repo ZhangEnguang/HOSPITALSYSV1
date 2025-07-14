@@ -253,6 +253,36 @@ export default function MeetingProjectsTab({ item }: MeetingProjectsTabProps) {
 
   return (
     <div className="space-y-6">
+      {/* 项目限制概览 */}
+      <Card className="border border-gray-100 rounded-md bg-white">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-blue-500" />
+              <span className="text-sm font-medium text-gray-700">项目限制数量</span>
+            </div>
+            <Badge variant="outline" className={item?.limitProjectCount ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-gray-50 text-gray-700 border-gray-200"}>
+              {item?.limitProjectCount ? "是" : "否"}
+            </Badge>
+          </div>
+          
+          {item?.limitProjectCount && (
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="flex items-center gap-2 text-sm">
+                <Zap className="h-4 w-4 text-blue-500" />
+                <span className="text-gray-600">快速审查项目限制额度</span>
+                <span className="font-medium text-gray-900">{item?.quickReviewLimit || 0}项</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <FileText className="h-4 w-4 text-green-500" />
+                <span className="text-gray-600">会议审查项目限制额度</span>
+                <span className="font-medium text-gray-900">{item?.meetingReviewLimit || 0}项</span>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* 快速审查项目 */}
       <Card className="border border-gray-100 rounded-md bg-white">
         <CardHeader className="border-b border-gray-100 bg-gray-50/50">

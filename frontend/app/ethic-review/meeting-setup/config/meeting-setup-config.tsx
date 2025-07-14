@@ -158,23 +158,41 @@ export const tableColumns = [
     id: "quickReviewCount",
     header: "快速审查项目",
     accessorKey: "quickReviewCount",
-    cell: (item: any) => (
-      <div className="text-center">
-        <span className="font-medium text-blue-600">{item.quickReviewCount || 0}</span>
-        <span className="text-sm text-muted-foreground ml-1">项</span>
-      </div>
-    ),
+    cell: (item: any) => {
+      const currentCount = item.quickReviewCount || 0;
+      const isLimited = item.limitProjectCount;
+      const limit = item.quickReviewLimit || 0;
+      
+      return (
+        <div className="text-center">
+          <span className="font-medium text-blue-600">{currentCount}</span>
+          <span className="text-sm text-muted-foreground mx-1">/</span>
+          <span className="text-sm text-muted-foreground">
+            {isLimited ? `${limit}项` : "不限额"}
+          </span>
+        </div>
+      );
+    },
   },
   {
     id: "meetingReviewCount",
     header: "会议审查项目",
     accessorKey: "meetingReviewCount",
-    cell: (item: any) => (
-      <div className="text-center">
-        <span className="font-medium text-green-600">{item.meetingReviewCount || 0}</span>
-        <span className="text-sm text-muted-foreground ml-1">项</span>
-      </div>
-    ),
+    cell: (item: any) => {
+      const currentCount = item.meetingReviewCount || 0;
+      const isLimited = item.limitProjectCount;
+      const limit = item.meetingReviewLimit || 0;
+      
+      return (
+        <div className="text-center">
+          <span className="font-medium text-green-600">{currentCount}</span>
+          <span className="text-sm text-muted-foreground mx-1">/</span>
+          <span className="text-sm text-muted-foreground">
+            {isLimited ? `${limit}项` : "不限额"}
+          </span>
+        </div>
+      );
+    },
   },
   {
     id: "status",

@@ -61,6 +61,10 @@ export function MeetingSetupForm({ mode = 'create', initialData }: MeetingSetupF
         description: initialData.description || "",
         quickReviewCount: initialData.quickReviewCount || 0,
         meetingReviewCount: initialData.meetingReviewCount || 0,
+        // 项目限制相关
+        limitProjectCount: initialData.limitProjectCount !== undefined ? initialData.limitProjectCount : true,
+        quickReviewLimit: initialData.quickReviewLimit || 10,
+        meetingReviewLimit: initialData.meetingReviewLimit || 15,
       }
     } else {
       return {
@@ -77,6 +81,10 @@ export function MeetingSetupForm({ mode = 'create', initialData }: MeetingSetupF
         // 会议报告项目（系统自动计数，不可编辑）
         quickReviewCount: 0,
         meetingReviewCount: 0,
+        // 项目限制相关
+        limitProjectCount: true, // 默认限制项目数量
+        quickReviewLimit: 10, // 默认快速审查限制
+        meetingReviewLimit: 15, // 默认会议审查限制
       }
     }
   })
@@ -396,6 +404,10 @@ export function MeetingSetupForm({ mode = 'create', initialData }: MeetingSetupF
       description: "",
       quickReviewCount: 0,
       meetingReviewCount: 0,
+      // 项目限制相关
+      limitProjectCount: true,
+      quickReviewLimit: 10,
+      meetingReviewLimit: 15,
     })
     setMembers([])
     setFormErrors({})
@@ -603,38 +615,95 @@ export function MeetingSetupForm({ mode = 'create', initialData }: MeetingSetupF
             title="会议报告项目" 
           />
           
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="quickReviewCount" className="text-muted-foreground">快速审查项目</Label>
-              <div className="flex items-center gap-2">
-                <Zap className="h-4 w-4 text-muted-foreground" />
-                <Input 
-                  id="quickReviewCount" 
-                  type="number"
-                  value={formData.quickReviewCount} 
-                  disabled
-                  className="border-[#E9ECF2] rounded-md bg-gray-50 text-gray-600 cursor-not-allowed"
+          {/* 是否限制审查会议项目数量 */}
+          <div className="space-y-4">
+            <Label className="text-base font-medium text-gray-900">是否限制审查会议项目数量</Label>
+            <div className="flex items-center gap-6">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  id="limitYes"
+                  name="limitProjectCount"
+                  checked={formData.limitProjectCount === true}
+                  onChange={() => updateFormData("limitProjectCount", true)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                 />
-                <span className="text-sm text-muted-foreground">项</span>
+                <Label htmlFor="limitYes" className="text-sm font-medium text-gray-700">是</Label>
               </div>
-              <p className="text-xs text-muted-foreground">系统自动计数，不可编辑</p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="meetingReviewCount" className="text-muted-foreground">会议审查项目</Label>
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-muted-foreground" />
-                <Input 
-                  id="meetingReviewCount" 
-                  type="number"
-                  value={formData.meetingReviewCount} 
-                  disabled
-                  className="border-[#E9ECF2] rounded-md bg-gray-50 text-gray-600 cursor-not-allowed"
+              <div className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  id="limitNo"
+                  name="limitProjectCount"
+                  checked={formData.limitProjectCount === false}
+                  onChange={() => updateFormData("limitProjectCount", false)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                 />
-                <span className="text-sm text-muted-foreground">项</span>
+                <Label htmlFor="limitNo" className="text-sm font-medium text-gray-700">否</Label>
               </div>
-              <p className="text-xs text-muted-foreground">系统自动计数，不可编辑</p>
             </div>
           </div>
+
+          {/* 项目限制设置 */}
+          {formData.limitProjectCount ? (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="quickReviewLimit" className="text-muted-foreground">快速审查项目限制额度</Label>
+                <div className="flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    id="quickReviewLimit" 
+                    type="number"
+                    min="1"
+                    value={formData.quickReviewLimit} 
+                    onChange={(e) => updateFormData("quickReviewLimit", parseInt(e.target.value) || 0)}
+                    className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+                  />
+                  <span className="text-sm text-muted-foreground">项</span>
+                </div>
+                <p className="text-xs text-muted-foreground">当前已有 {formData.quickReviewCount} 项</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="meetingReviewLimit" className="text-muted-foreground">会议审查项目限制额度</Label>
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    id="meetingReviewLimit" 
+                    type="number"
+                    min="1"
+                    value={formData.meetingReviewLimit} 
+                    onChange={(e) => updateFormData("meetingReviewLimit", parseInt(e.target.value) || 0)}
+                    className="border-[#E9ECF2] rounded-md focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+                  />
+                  <span className="text-sm text-muted-foreground">项</span>
+                </div>
+                <p className="text-xs text-muted-foreground">当前已有 {formData.meetingReviewCount} 项</p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-muted-foreground">快速审查项目额度</Label>
+                <div className="flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-muted-foreground" />
+                  <div className="flex-1 px-3 py-2 bg-gray-50 border border-[#E9ECF2] rounded-md text-gray-600">
+                    不限制
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">当前已有 {formData.quickReviewCount} 项</p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-muted-foreground">会议审查项目额度</Label>
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <div className="flex-1 px-3 py-2 bg-gray-50 border border-[#E9ECF2] rounded-md text-gray-600">
+                    不限制
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">当前已有 {formData.meetingReviewCount} 项</p>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -725,22 +794,14 @@ export function MeetingSetupForm({ mode = 'create', initialData }: MeetingSetupF
               </table>
             </div>
           ) : (
-            <div className="bg-white border border-dashed border-gray-300 rounded-md px-6 py-10 text-center">
+            <div className="bg-white border border-dashed border-gray-300 rounded-md px-6 py-8 text-center">
               <div className="mx-auto w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
                 <Users className="h-8 w-8 text-blue-500" />
               </div>
               <h3 className="text-base font-medium text-gray-900 mb-1">暂无参会人员</h3>
               <p className="text-sm text-gray-500 mb-6 max-w-md mx-auto">
-                您可以添加参会人员，支持一键添加委员会成员或单独添加成员
+                您可以点击右上角的"添加成员"按钮来添加参会人员
               </p>
-              <Button
-                type="button"
-                onClick={handleOpenAddMemberDialog}
-                className="bg-blue-600 hover:bg-blue-700 text-white rounded-md h-9 px-4 py-2 transition-colors focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
-              >
-                <PlusCircle className="h-4 w-4 mr-2" />
-                添加参会人员
-              </Button>
             </div>
           )}
         </CardContent>

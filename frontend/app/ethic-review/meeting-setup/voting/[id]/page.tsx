@@ -425,7 +425,7 @@ export default function MeetingVotingPage({ params }: { params: { id: string } }
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <BarChart3 className="h-5 w-5" />
+                  <BarChart3 className="h-5 w-5 text-blue-500" />
                   投票概览
                 </CardTitle>
               </CardHeader>
@@ -468,7 +468,7 @@ export default function MeetingVotingPage({ params }: { params: { id: string } }
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2 text-lg">
-                    <FileText className="h-5 w-5" />
+                    <FileText className="h-5 w-5 text-indigo-500" />
                     项目投票列表
                   </CardTitle>
                   <div className="flex items-center gap-2">

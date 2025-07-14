@@ -64,7 +64,7 @@ function MeetingSetupContent() {
   const [pageSize, setPageSize] = useState<number>(10)
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [totalItems, setTotalItems] = useState<number>(0)
-  const [sortOption, setSortOption] = useState<string>("dueDateDesc")
+  const [sortOption, setSortOption] = useState<string>("dateDesc")
   const [filterValues, setFilterValues] = useState<Record<string, any>>({
     meetingType: "全部类型",
     status: "全部状态",
@@ -76,7 +76,7 @@ function MeetingSetupContent() {
     groupOperator: "and" as const,
     groups: []
   })
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list")
   
   // 删除确认弹框状态
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -99,8 +99,15 @@ function MeetingSetupContent() {
   useEffect(() => {
     // 模拟加载数据
     setTimeout(() => {
-      setData(meetingSetupItems)
-      setTotalItems(meetingSetupItems.length)
+      const initialData = meetingSetupItems
+      // 应用默认排序（日期 晚-早）
+      const sorted = [...initialData].sort((a, b) => {
+        const dateA = new Date(a.date)
+        const dateB = new Date(b.date)
+        return dateB.getTime() - dateA.getTime()
+      })
+      setData(sorted)
+      setTotalItems(sorted.length)
       setLoading(false)
     }, 500)
     
@@ -195,6 +202,13 @@ function MeetingSetupContent() {
           bValue = b.organizer?.name || ""
         }
         
+        // 日期比较
+        if (field === "date") {
+          const dateA = new Date(aValue)
+          const dateB = new Date(bValue)
+          return direction === "asc" ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime()
+        }
+        
         // 字符串比较
         if (typeof aValue === "string" && typeof bValue === "string") {
           return direction === "asc" 
@@ -203,20 +217,7 @@ function MeetingSetupContent() {
         }
         
         // 数字比较
-        if (typeof aValue === "number" && typeof bValue === "number") {
-          return direction === "asc" ? aValue - bValue : bValue - aValue
-        }
-        
-        // 日期比较
-        if (field === "date") {
-          const aDate = new Date(aValue)
-          const bDate = new Date(bValue)
-          return direction === "asc" 
-            ? aDate.getTime() - bDate.getTime()
-            : bDate.getTime() - aDate.getTime()
-        }
-        
-        return 0
+        return direction === "asc" ? (aValue - bValue) : (bValue - aValue)
       })
       
       setData(sorted)
