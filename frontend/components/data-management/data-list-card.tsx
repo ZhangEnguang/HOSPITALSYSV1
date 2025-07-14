@@ -21,8 +21,8 @@ import { Dict } from "../dict"
 
 export interface CardAction {
   id: string
-  label: string
-  icon?: React.ReactNode
+  label: string | ((item: any) => string)
+  icon?: React.ReactNode | ((item: any) => React.ReactNode)
   onClick: (item: any, e: React.MouseEvent) => void
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"
   disabled?: (item: any) => boolean
@@ -214,8 +214,12 @@ export default function DataListCard({
                       disabled={action.disabled ? action.disabled(item) : false}
                       className={action.id === "delete" ? "text-destructive" : ""}
                     >
-                      {action.icon && <span className="mr-2">{action.icon}</span>}
-                      {action.label}
+                      {action.icon && (
+                        <span className="mr-2">
+                          {typeof action.icon === 'function' ? action.icon(item) : action.icon}
+                        </span>
+                      )}
+                      {typeof action.label === 'function' ? action.label(item) : action.label}
                     </DropdownMenuItem>
                   ))}
               </DropdownMenuContent>

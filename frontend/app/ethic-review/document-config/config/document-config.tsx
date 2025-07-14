@@ -167,85 +167,7 @@ export const tableColumns = [
       );
     },
   },
-  {
-    id: "actions",
-    header: "操作",
-    className: "w-[120px] text-right pr-4",
-    cell: (item: any) => {
-      // 获取来自于 DataList 组件的动作处理器
-      // 添加对服务器端渲染的安全检查
-      const handlers = typeof window !== 'undefined' ? (window as any).__dataListHandlers : null;
-      const handleViewDetails = handlers?.handleViewDetails;
-      const handleEditConfig = handlers?.handleEditConfig;
-      const handleDeleteConfig = handlers?.handleDeleteConfig;
-      const handleToggleStatus = handlers?.handleToggleStatus;
-    
-      const isEnabled = item.status === "enabled";
-      
-      return (
-        <div className="flex items-center justify-end">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
-                <span className="sr-only">打开菜单</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem 
-                className="cursor-pointer"
-                onClick={() => handleViewDetails?.(item)}
-              >
-                <Eye className="mr-2 h-4 w-4" />
-                <span>查看详情</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                className="cursor-pointer"
-                onClick={(event) => {
-                  event?.stopPropagation?.();
-                  // 直接导航到编辑页面，不依赖handleEditConfig
-                  if (typeof window !== 'undefined') {
-                    const editUrl = `/ethic-review/document-config/edit/${item.id}`;
-                    console.log("从表格按钮直接导航到:", editUrl);
-                    window.location.href = editUrl;
-                  }
-                }}
-              >
-                <FileEdit className="mr-2 h-4 w-4" />
-                <span>编辑配置</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                className="cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleToggleStatus?.(item);
-                }}
-              >
-                {isEnabled ? (
-                  <>
-                    <XCircle className="mr-2 h-4 w-4" />
-                    <span>禁用配置</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                    <span>启用配置</span>
-                  </>
-                )}
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                className="cursor-pointer text-red-600 focus:text-red-600"
-                onClick={() => handleDeleteConfig?.(item)}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                <span>删除配置</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      );
-    },
-  },
+
 ];
 
 // 卡片字段配置
@@ -306,13 +228,8 @@ export const cardActions = [
     label: "查看详情",
     icon: <Eye className="h-4 w-4" />,
     onClick: (item: any) => {
-      // 避免服务器端渲染错误
-      if (typeof window === 'undefined') return;
-      
-      const handleViewDetails = (window as any).__dataListHandlers?.handleViewDetails;
-      if (handleViewDetails) {
-        handleViewDetails(item);
-      }
+      // 此函数将被 onRowActionClick 覆盖，但保留作为后备
+      console.log("查看详情", item);
     },
   },
   {
@@ -320,20 +237,9 @@ export const cardActions = [
     label: "编辑配置",
     icon: <FileEdit className="h-4 w-4" />,
     onClick: (item: any, event?: React.MouseEvent) => {
-      // 避免服务器端渲染错误
-      if (typeof window === 'undefined') return;
-      
-      console.log("编辑配置按钮点击", item.id);
-      
-      // 阻止事件冒泡，确保不会触发行点击事件
+      // 此函数将被 onRowActionClick 覆盖，但保留作为后备
+      console.log("编辑配置", item);
       event?.stopPropagation?.();
-      
-      // 使用硬编码的URL直接导航到编辑页面
-      const editUrl = `/ethic-review/document-config/edit/${item.id}`;
-      console.log("正在强制导航到:", editUrl);
-      
-      // 优先使用window.location.href进行导航，这是最可靠的导航方式
-      window.location.href = editUrl;
     },
   },
   {
@@ -343,16 +249,9 @@ export const cardActions = [
       ? <XCircle className="h-4 w-4" />
       : <CheckCircle className="h-4 w-4" />,
     onClick: (item: any, event?: React.MouseEvent) => {
-      // 避免服务器端渲染错误
-      if (typeof window === 'undefined') return;
-      
-      // 阻止事件冒泡
+      // 此函数将被 onRowActionClick 覆盖，但保留作为后备
+      console.log("切换状态", item);
       event?.stopPropagation?.();
-      
-      const handleToggleStatus = (window as any).__dataListHandlers?.handleToggleStatus;
-      if (handleToggleStatus) {
-        handleToggleStatus(item);
-      }
     },
   },
   {
@@ -361,13 +260,8 @@ export const cardActions = [
     icon: <Trash2 className="h-4 w-4" />,
     variant: "destructive",
     onClick: (item: any) => {
-      // 避免服务器端渲染错误
-      if (typeof window === 'undefined') return;
-      
-      const handleDeleteConfig = (window as any).__dataListHandlers?.handleDeleteConfig;
-      if (handleDeleteConfig) {
-        handleDeleteConfig(item);
-      }
+      // 此函数将被 onRowActionClick 覆盖，但保留作为后备
+      console.log("删除配置", item);
     },
   },
 ];

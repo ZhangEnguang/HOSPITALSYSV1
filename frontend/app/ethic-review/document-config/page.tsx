@@ -317,6 +317,21 @@ function DocumentConfigContent() {
     setDeleteDialogOpen(true)
   }
   
+  // 处理行操作点击
+  const handleRowActionClick = (action: any, item: any) => {
+    console.log("行操作点击", action, item);
+    
+    if (action.id === "view") {
+      handleViewDetails(item);
+    } else if (action.id === "edit") {
+      handleEditConfig(item);
+    } else if (action.id === "toggle-status") {
+      handleToggleStatus(item);
+    } else if (action.id === "delete") {
+      handleDeleteConfig(item);
+    }
+  }
+  
   // 执行删除操作
   const handleDeleteExecute = () => {
     if (itemToDelete) {
@@ -525,6 +540,35 @@ function DocumentConfigContent() {
         seniorFilterValues={seniorFilterValues}
         onAdvancedFilter={handleAdvancedFilter}
         tableColumns={tableColumns as any}
+        tableActions={[
+          {
+            id: "view",
+            label: "查看详情",
+            icon: <Eye className="h-4 w-4" />,
+            onClick: (item: any) => handleViewDetails(item),
+          },
+          {
+            id: "edit",
+            label: "编辑配置",
+            icon: <FileEdit className="h-4 w-4" />,
+            onClick: (item: any) => handleEditConfig(item),
+          },
+          {
+            id: "toggle-status",
+            label: (item: any) => item.status === "enabled" ? "禁用配置" : "启用配置",
+            icon: (item: any) => item.status === "enabled" 
+              ? <XCircle className="h-4 w-4" />
+              : <CheckCircle className="h-4 w-4" />,
+            onClick: (item: any) => handleToggleStatus(item),
+          },
+          {
+            id: "delete",
+            label: "删除配置",
+            icon: <Trash2 className="h-4 w-4" />,
+            variant: "destructive",
+            onClick: (item: any) => handleDeleteConfig(item),
+          },
+        ]}
         cardFields={adaptedCardFields}
         cardActions={cardActions}
         titleField="name"
@@ -544,6 +588,7 @@ function DocumentConfigContent() {
         onViewDetails={handleViewDetails}
         onEditConfig={handleEditConfig}
         onDeleteConfig={handleDeleteConfig}
+        onRowActionClick={handleRowActionClick}
         detailsUrlPrefix="/ethic-review/document-config"
         onAddNew={handleAddNew}
         addButtonLabel="新建送审文件配置"

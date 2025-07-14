@@ -234,9 +234,15 @@ export default function DataListTable<T extends { id: string }>({
                                           if (React.isValidElement(action.icon)) {
                                             return <span className="mr-2">{action.icon}</span>
                                           }
-                                          // 如果是React组件，作为组件渲染
+                                          // 如果是函数，先调用函数获取结果
                                           if (typeof action.icon === 'function') {
-                                            const IconComponent = action.icon
+                                            const iconResult = action.icon(item)
+                                            // 如果函数返回React元素，直接渲染
+                                            if (React.isValidElement(iconResult)) {
+                                              return <span className="mr-2">{iconResult}</span>
+                                            }
+                                            // 如果函数返回组件，作为组件渲染
+                                            const IconComponent = iconResult
                                             return <IconComponent className="mr-2 h-4 w-4" />
                                           }
                                           // 默认情况：尝试作为组件渲染
@@ -249,7 +255,7 @@ export default function DataListTable<T extends { id: string }>({
                                         }
                                       })()
                                     )}
-                                    {action.label}
+                                    {typeof action.label === 'function' ? action.label(item) : action.label}
                                   </DropdownMenuItem>
                                 ))}
                             </DropdownMenuContent>
