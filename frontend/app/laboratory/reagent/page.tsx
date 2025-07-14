@@ -499,6 +499,7 @@ function ReagentContent() {
         open={unavailableDialogOpen}
         onOpenChange={setUnavailableDialogOpen}
         reagent={selectedReagentForUnavailable}
+        onOpenApplyDialog={handleOpenApplyDialog}
       />
     </div>
   )

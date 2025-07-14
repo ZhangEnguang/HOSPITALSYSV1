@@ -44,12 +44,14 @@ interface ReagentUnavailableDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   reagent: any
+  onOpenApplyDialog?: (reagent: any) => void
 }
 
 export function ReagentUnavailableDialog({ 
   open, 
   onOpenChange, 
-  reagent 
+  reagent,
+  onOpenApplyDialog
 }: ReagentUnavailableDialogProps) {
   const router = useRouter()
   const [recommendedReagents, setRecommendedReagents] = useState<any[]>([])
@@ -181,8 +183,13 @@ export function ReagentUnavailableDialog({
   
   const handleApplyRedirect = (item: any) => {
     onOpenChange(false)
-    // 这里可以直接打开申领弹框或跳转到申领页面
-    router.push(`/laboratory/reagent/apply/${item.id}`)
+    // 如果提供了申领弹框回调函数，则直接打开申领弹框
+    if (onOpenApplyDialog) {
+      onOpenApplyDialog(item)
+    } else {
+      // 否则跳转到申领页面
+      router.push(`/laboratory/reagent/apply/${item.id}`)
+    }
   }
   
   const handleContactManager = (type: 'phone' | 'email') => {
@@ -339,11 +346,7 @@ export function ReagentUnavailableDialog({
                   <AlertTriangle className="h-4 w-4 text-orange-500" />
                   不可申领原因
                 </h4>
-                <div className={cn(
-                  "p-4 rounded-lg border",
-                  reason.severity === "high" ? "bg-red-50 border-red-200" :
-                  reason.severity === "medium" ? "bg-orange-50 border-orange-200" : "bg-gray-50 border-gray-200"
-                )}>
+                <div className="space-y-2">
                   <p className={cn(
                     "text-sm font-medium",
                     reason.severity === "high" ? "text-red-800" :
@@ -352,7 +355,7 @@ export function ReagentUnavailableDialog({
                     {reason.description}
                   </p>
                   <p className={cn(
-                    "text-xs mt-2",
+                    "text-xs",
                     reason.severity === "high" ? "text-red-600" :
                     reason.severity === "medium" ? "text-orange-600" : "text-gray-600"
                   )}>

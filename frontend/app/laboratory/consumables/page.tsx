@@ -477,6 +477,7 @@ function ConsumableContent() {
         open={unavailableDialogOpen}
         onOpenChange={setUnavailableDialogOpen}
         consumable={selectedConsumableForUnavailable}
+        onOpenApplyDialog={handleOpenApplyDialog}
       />
     </div>
   )
