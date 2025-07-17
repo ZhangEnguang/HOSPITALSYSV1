@@ -30,6 +30,7 @@ import {
   Dna,
   Rabbit,
   TestTube,
+  BarChart3,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
@@ -192,6 +193,7 @@ export default function Sidebar() {
         { name: "成果统计", path: "/workbench?tab=achievement-statistics" },
       ]
     },
+
     { name: "待办事项", icon: <CheckSquare className="h-5 w-5" />, path: "/todos" },
     { 
       name: "申报管理", 

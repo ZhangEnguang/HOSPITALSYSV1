@@ -34,6 +34,7 @@ import {
   Dna,
   Rabbit,
   TestTube,
+  BarChart3,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -78,6 +79,7 @@ export default function HorizontalMenu() {
   const getShortName = (name: string): string => {
     switch(name) {
       case "仪表盘": return "仪表";
+      case "数据看板": return "看板";
       case "待办事项": return "待办";
       case "申报管理": return "申报";
       case "项目管理": return "项目";
@@ -110,6 +112,7 @@ export default function HorizontalMenu() {
         { name: "成果统计", path: "/workbench?tab=achievement-statistics" },
       ]
     },
+
     { 
       name: "待办事项", 
       shortName: "待办",

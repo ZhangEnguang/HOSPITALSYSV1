@@ -21,6 +21,7 @@ import {
   Check,
   ListFilter,
   Network,
+  BarChart3,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -72,6 +73,7 @@ export default function TabsNavigation() {
     icon: React.ReactNode
     path: string
   }> = [
+    { id: "data-dashboard", title: "数据看板", icon: <BarChart3 className="h-4 w-4" />, path: "/data-dashboard" },
     { id: "todos", title: "待办事项", icon: <CheckSquare className="h-4 w-4" />, path: "/todos" },
     { id: "applications", title: "申报管理", icon: <ClipboardList className="h-4 w-4" />, path: "/applications" },
     { id: "projects", title: "项目管理", icon: <FolderOpen className="h-4 w-4" />, path: "/projects" },

@@ -17,6 +17,7 @@ import {
   LayoutDashboard,
   X,
   ClipboardCheck,
+  BarChart3,
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"

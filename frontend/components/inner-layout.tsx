@@ -12,8 +12,8 @@ import { cn } from "@/lib/utils"
 
 export default function InnerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const showLayout = pathname !== '/' && pathname !== '/login';
-  const isFullscreenPage = pathname === '/' || pathname === '/login';
+  const showLayout = pathname !== '/' && pathname !== '/login' && pathname !== '/data-dashboard';
+  const isFullscreenPage = pathname === '/' || pathname === '/login' || pathname === '/data-dashboard';
   const [layoutType, setLayoutType] = useState("vertical");
 
   // 在组件挂载后从HTML文档属性中获取布局类型
@@ -44,7 +44,7 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
     }
   }, []);
 
-  // 对于欢迎页和登录页，不添加任何额外的容器或样式限制
+  // 对于欢迎页、登录页和数据看板页，不添加任何额外的容器或样式限制
   if (isFullscreenPage) {
     return <>{children}</>;
   }

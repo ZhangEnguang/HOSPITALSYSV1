@@ -17,6 +17,7 @@ import {
   Minimize2,
   Moon,
   Sun,
+  Monitor,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -111,7 +112,7 @@ export default function Header() {
   const router = useRouter()
   const { user, logout, switchRole, isAuthenticated, refreshUserInfo } = useAuthStore()
   const { settings } = useSettings()
-  const { layoutType: authLayoutType, glassEffect: authGlassEffect, sidebarExpanded, setSidebarExpanded } = settings
+  const { layoutType: authLayoutType, glassEffect: authGlassEffect } = settings
 
   // 确保主题切换在客户端渲染
   useEffect(() => {
@@ -508,6 +509,19 @@ export default function Header() {
               </Button>
             </div>
 
+            {/* 数据看板按钮 */}
+            <div className="relative hidden md:block">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => router.push('/data-dashboard')}
+                className="relative hidden md:flex"
+                title="点击进入数据看板"
+              >
+                <Monitor className="h-5 w-5" />
+              </Button>
+            </div>
+
             {/* 全屏切换按钮 */}
             <Button
               variant="ghost"
@@ -646,8 +660,8 @@ export default function Header() {
         <RoleSwitcher
           open={roleSwitcherOpen}
           onOpenChange={setRoleSwitcherOpen}
-          currentRole={user.currentRole}
-          roles={user.roles || []}
+          currentRole={user.currentRole?.roleName || user.currentRole?.name || ""}
+          availableRoles={user.roles || []}
           onRoleChange={handleRoleChange}
         />
       )}
