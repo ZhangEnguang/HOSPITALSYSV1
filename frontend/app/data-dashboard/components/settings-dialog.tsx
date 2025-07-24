@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { 
   X, 
@@ -23,6 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 interface SettingsDialogProps {
   open: boolean
@@ -30,11 +31,6 @@ interface SettingsDialogProps {
 }
 
 export default function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
-  // 统计时间设置
-  const [statisticsRange, setStatisticsRange] = useState('year')
-  const [customStartDate, setCustomStartDate] = useState('')
-  const [customEndDate, setCustomEndDate] = useState('')
-  
   // 数据刷新设置
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [refreshInterval, setRefreshInterval] = useState('5')
@@ -58,46 +54,46 @@ export default function SettingsDialog({ open, onOpenChange }: SettingsDialogPro
   const [exportFormat, setExportFormat] = useState('excel')
   const [includeCharts, setIncludeCharts] = useState(true)
 
-  if (!open) return null
+  // 管理body滚动
+  useEffect(() => {
+    if (open) {
+      // 弹框打开时禁用body滚动
+      document.body.style.overflow = 'hidden'
+    } else {
+      // 弹框关闭时恢复body滚动
+      document.body.style.overflow = 'unset'
+    }
+
+    // 清理函数
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [open])
+
+  // 保存设置
+  const handleSaveSettings = () => {
+    // 这里可以添加其他设置的保存逻辑
+    onOpenChange(false)
+  }
 
   return (
-    <div className="fixed inset-0 bg-black/20 z-50 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        transition={{ duration: 0.2 }}
-        className="w-full max-w-4xl bg-white rounded-xl shadow-2xl overflow-hidden h-[80vh] flex flex-col"
-      >
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 gap-0">
         {/* 标题栏 */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-2">
+        <DialogHeader className="flex flex-col space-y-1.5 text-left px-6 pt-5 pb-2 shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-100 rounded-lg">
               <Settings className="h-5 w-5 text-blue-600" />
             </div>
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">数据看板设置</h2>
-            </div>
+            <DialogTitle className="text-xl font-semibold text-gray-900">数据看板设置</DialogTitle>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onOpenChange(false)}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
+        </DialogHeader>
 
         {/* 内容区域 */}
         <div className="flex-1 overflow-hidden flex flex-col">
-          <Tabs defaultValue="statistics" className="w-full flex flex-col h-full">
-            <div className="px-6">
-                             <TabsList className="grid w-full grid-cols-4 mt-3 mb-4 shrink-0 h-12 p-1">
-                <TabsTrigger value="statistics" className="flex items-center gap-1.5 text-sm px-3 py-2 h-10 min-w-0">
-                  <Calendar className="h-4 w-4 shrink-0" />
-                  <span className="truncate">统计时间</span>
-                </TabsTrigger>
+          <Tabs defaultValue="display" className="w-full flex flex-col h-full">
+            <div className="px-6 shrink-0">
+              <TabsList className="grid w-full grid-cols-3 mt-3 mb-4 h-12 p-1">
                 <TabsTrigger value="display" className="flex items-center gap-1.5 text-sm px-3 py-2 h-10 min-w-0">
                   <Monitor className="h-4 w-4 shrink-0" />
                   <span className="truncate">显示设置</span>
@@ -110,108 +106,10 @@ export default function SettingsDialog({ open, onOpenChange }: SettingsDialogPro
                   <Download className="h-4 w-4 shrink-0" />
                   <span className="truncate">导出设置</span>
                 </TabsTrigger>
-            </TabsList>
+              </TabsList>
             </div>
 
             <div className="flex-1 overflow-y-auto px-6 pb-4">
-              {/* 统计时间设置 */}
-              <TabsContent value="statistics" className="space-y-4 mt-0">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Clock className="h-5 w-5 text-blue-600" />
-                      统计时间范围
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="statistics-range">时间范围</Label>
-                        <Select value={statisticsRange} onValueChange={setStatisticsRange}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="week">近一周</SelectItem>
-                            <SelectItem value="month">近一个月</SelectItem>
-                            <SelectItem value="quarter">近三个月</SelectItem>
-                            <SelectItem value="semester">本学期</SelectItem>
-                            <SelectItem value="year">本学年</SelectItem>
-                            <SelectItem value="academic_year">本学术年度</SelectItem>
-                            <SelectItem value="custom">自定义范围</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      {statisticsRange === 'custom' && (
-                        <>
-                          <div className="space-y-2">
-                            <Label htmlFor="start-date">开始日期</Label>
-                            <Input
-                              id="start-date"
-                              type="date"
-                              value={customStartDate}
-                              onChange={(e) => setCustomStartDate(e.target.value)}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="end-date">结束日期</Label>
-                            <Input
-                              id="end-date"
-                              type="date"
-                              value={customEndDate}
-                              onChange={(e) => setCustomEndDate(e.target.value)}
-                            />
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Calendar className="h-5 w-5 text-green-600" />
-                      学期设置
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>当前学期</Label>
-                        <Select defaultValue="spring2024">
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="spring2024">2024年春季学期</SelectItem>
-                            <SelectItem value="fall2024">2024年秋季学期</SelectItem>
-                            <SelectItem value="spring2025">2025年春季学期</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label>学年度</Label>
-                        <Select defaultValue="2024">
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="2023">2023学年</SelectItem>
-                            <SelectItem value="2024">2024学年</SelectItem>
-                            <SelectItem value="2025">2025学年</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-
-
               {/* 显示设置 */}
               <TabsContent value="display" className="space-y-4 mt-0">
                 <Card>
@@ -483,7 +381,7 @@ export default function SettingsDialog({ open, onOpenChange }: SettingsDialogPro
         </div>
 
         {/* 底部按钮 */}
-        <div className="flex items-center justify-between px-6 py-4 shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 shrink-0 border-t">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             取消
           </Button>
@@ -491,12 +389,12 @@ export default function SettingsDialog({ open, onOpenChange }: SettingsDialogPro
             <Button variant="outline">
               重置默认
             </Button>
-            <Button onClick={() => onOpenChange(false)}>
+            <Button onClick={handleSaveSettings}>
               保存设置
             </Button>
           </div>
         </div>
-      </motion.div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 } 

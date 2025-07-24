@@ -4,19 +4,20 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { ArrowLeft, BarChart3, Heart, Users, FileText, Award, Search, Settings, ChevronDown, UserCog, Shield, User, LogOut } from "lucide-react"
+import { ArrowLeft, BarChart3, Heart, Users, FileText, Award, Search, Settings, ChevronDown, UserCog, Shield, User, LogOut, Clock, ChevronUp, Calendar, CalendarDays, CalendarRange, GraduationCap, BookOpen, School, Edit3 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import MedicalResearchDashboard from "@/components/medical-research-dashboard"
 import SearchDialog from "@/components/search/search-dialog"
 import SettingsDialog from './components/settings-dialog'
+import TimeRangeDialog from './components/time-range-dialog'
 import { AnimatePresence } from "framer-motion"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
+  DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { useAuthStore } from "@/stores/auth-store"
 
 export default function DataDashboardPage() {
@@ -25,17 +26,84 @@ export default function DataDashboardPage() {
   const [activeModule, setActiveModule] = useState("overview")
   const [searchDialogOpen, setSearchDialogOpen] = useState(false)
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false)
+  const [timeRangeDialogOpen, setTimeRangeDialogOpen] = useState(false)
+  const [timeRangeDropdownOpen, setTimeRangeDropdownOpen] = useState(false)
+  
+  // 时间范围状态管理
+  const [currentTimeRange, setCurrentTimeRange] = useState({
+    range: 'year',
+    startDate: '',
+    endDate: ''
+  })
   
   // 获取用户信息和认证状态
   const { user, logout, isAuthenticated } = useAuthStore()
 
   // 模块配置
   const modules = [
-    { id: "overview", name: "数据总览", shortName: "总览", fullName: "数据总览", icon: BarChart3 },
-    { id: "projects", name: "科研项目", shortName: "科研", fullName: "科研项目", icon: FileText },
-    { id: "funding", name: "经费管理", shortName: "经费", fullName: "经费管理", icon: Award },
-    { id: "ethics", name: "伦理审查", shortName: "伦理", fullName: "伦理审查", icon: Heart }
+    { id: "overview", name: "数据总览", shortName: "总览", fullName: "总览", icon: BarChart3 },
+    { id: "funding", name: "成果转化", shortName: "成果转化", fullName: "成果转化", icon: Award },
+    { id: "ethics", name: "伦理审查", shortName: "伦理", fullName: "伦理", icon: Heart }
   ]
+
+  // 时间范围选项
+  const timeRangeOptions = [
+    { value: 'week', label: '近一周', icon: CalendarDays },
+    { value: 'month', label: '近一个月', icon: Calendar },
+    { value: 'quarter', label: '近三个月', icon: CalendarRange },
+    { value: 'semester', label: '本学期', icon: School },
+    { value: 'year', label: '本学年', icon: GraduationCap },
+    { value: 'academic_year', label: '本学术年度', icon: BookOpen },
+    { value: 'custom', label: '自定义范围', icon: Edit3 },
+  ]
+
+  // 格式化时间范围显示
+  const formatTimeRangeDisplay = () => {
+    const { range, startDate, endDate } = currentTimeRange
+    
+    switch (range) {
+      case 'week':
+        return '近一周'
+      case 'month':
+        return '近一个月'
+      case 'quarter':
+        return '近三个月'
+      case 'semester':
+        return '本学期'
+      case 'year':
+        return '本学年'
+      case 'academic_year':
+        return '本学术年度'
+      case 'custom':
+        if (startDate && endDate) {
+          return `${startDate} 至 ${endDate}`
+        }
+        return '自定义范围'
+      default:
+        return '本学年'
+    }
+  }
+
+  // 处理时间范围变化
+  const handleTimeRangeChange = (range: string, startDate?: string, endDate?: string) => {
+    setCurrentTimeRange({
+      range,
+      startDate: startDate || '',
+      endDate: endDate || ''
+    })
+  }
+
+  // 处理下拉菜单选择
+  const handleTimeRangeSelect = (range: string) => {
+    if (range === 'custom') {
+      // 如果选择自定义范围，打开弹框
+      setTimeRangeDialogOpen(true)
+    } else {
+      // 直接应用预设时间范围
+      handleTimeRangeChange(range)
+    }
+    setTimeRangeDropdownOpen(false)
+  }
 
   useEffect(() => {
     // 模拟数据加载
@@ -192,13 +260,15 @@ export default function DataDashboardPage() {
         </div>
       )}
       
+
+      
       {/* 内容容器 */}
       <div className="relative z-10">
               {/* 顶部标题栏 */}
-        <div className="bg-white/50 backdrop-blur-md border-b border-white/20">
+        <div className="bg-transparent border-b border-white/20">
         <div className="w-full px-6 py-4">
           <div className="flex items-center justify-between">
-            {/* 左侧：返回按钮和标题 */}
+            {/* 左侧：返回按钮、logo、标题和五个按钮 */}
             <div className="flex items-center gap-4">
               <TooltipProvider>
                 <Tooltip>
@@ -224,10 +294,80 @@ export default function DataDashboardPage() {
                 </div>
                 <span className="text-[1.1rem] font-bold truncate hidden md:block app-title">医院科研数据看板</span>
               </div>
+              
+              {/* 分隔线 */}
+              <div className="h-6 w-px bg-gray-300"></div>
+              
+              {/* 五个按钮 */}
+              <div className="flex items-center gap-2">
+                {/* 模块导航按钮 */}
+                <div className="flex gap-2">
+                  {modules.map((module) => (
+                    <Button
+                      key={module.id}
+                      variant={activeModule === module.id ? "default" : "ghost"}
+                      className={cn(
+                        "flex items-center gap-2 px-3 py-2 h-9 transition-all duration-200",
+                        activeModule === module.id 
+                          ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                          : "hover:bg-gray-100/80 hover:text-gray-900"
+                      )}
+                      onClick={() => setActiveModule(module.id)}
+                    >
+                      <module.icon className="h-4 w-4" />
+                      <span className="font-medium">{module.fullName}</span>
+                    </Button>
+                  ))}
+                </div>
+
+                {/* 设置按钮 */}
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 px-3 py-2 h-9 hover:bg-gray-100/80 hover:text-gray-900 transition-all duration-200"
+                  onClick={() => setSettingsDialogOpen(true)}
+                >
+                  <Settings className="h-4 w-4" />
+                  <span className="font-medium">设置</span>
+                </Button>
+              </div>
             </div>
 
-            {/* 中间：搜索框 */}
-            <div className="flex-1 flex justify-center">
+            {/* 右侧：时间范围显示和搜索框 */}
+            <div className="flex items-center gap-3">
+              {/* 时间范围下拉菜单 */}
+              <DropdownMenu open={timeRangeDropdownOpen} onOpenChange={setTimeRangeDropdownOpen}>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 text-sm text-gray-600 bg-white/60 px-3 py-2 rounded-lg border border-gray-200/60 hover:bg-white/80 hover:border-gray-300 hover:shadow-sm transition-all duration-200 cursor-pointer">
+                    <Clock className="h-3 w-3 text-blue-600" />
+                    <span className="text-xs font-medium">{formatTimeRangeDisplay()}</span>
+                    {timeRangeDropdownOpen ? (
+                      <ChevronUp className="h-3 w-3 text-gray-400" />
+                    ) : (
+                      <ChevronDown className="h-3 w-3 text-gray-400" />
+                    )}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  {timeRangeOptions.map((option) => {
+                    const IconComponent = option.icon
+                    return (
+                      <DropdownMenuItem
+                        key={option.value}
+                        onClick={() => handleTimeRangeSelect(option.value)}
+                        className={cn(
+                          "cursor-pointer",
+                          currentTimeRange.range === option.value && "bg-blue-50 text-blue-700"
+                        )}
+                      >
+                        <IconComponent className="h-4 w-4 mr-2 text-blue-600" />
+                        {option.label}
+                      </DropdownMenuItem>
+                    )
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
+              {/* 搜索框 */}
               <div className="relative hidden md:block">
                 <Button
                   variant="outline"
@@ -245,121 +385,6 @@ export default function DataDashboardPage() {
                   </kbd>
                 </Button>
               </div>
-            </div>
-
-            {/* 右侧：模块导航按钮 */}
-            <div className="flex items-center gap-3">
-
-              {/* 模块导航按钮 */}
-              <div className="flex gap-2">
-                {modules.map((module) => (
-                  <Button
-                    key={module.id}
-                    variant={activeModule === module.id ? "default" : "ghost"}
-                    className="group flex items-center gap-2 transition-all duration-300 px-3 py-2 h-9"
-                    onClick={() => setActiveModule(module.id)}
-                  >
-                    <module.icon className="h-4 w-4" />
-                    <span className="group-hover:hidden">{module.shortName}</span>
-                    <span className="hidden group-hover:inline">{module.fullName}</span>
-                  </Button>
-                ))}
-              </div>
-
-              {/* 设置按钮 */}
-              <Button
-                variant="ghost"
-                className="flex items-center gap-2 px-3 py-2 h-9"
-                onClick={() => setSettingsDialogOpen(true)}
-              >
-                <Settings className="h-4 w-4" />
-                <span>设置</span>
-              </Button>
-
-              {/* 个人中心 */}
-              {isAuthenticated && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center gap-2 pl-2 pr-1">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={getUserAvatar()} alt="用户头像" />
-                        <AvatarFallback>{getAvatarFallback()}</AvatarFallback>
-                      </Avatar>
-                      <div className="hidden md:block text-left">
-                        <div className="text-sm font-medium">{getUserName()}</div>
-                        <div className="text-xs text-gray-500 flex items-center">
-                          <span className="truncate max-w-[100px]">{getCurrentRoleName()}</span>
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              "ml-1 h-2 w-2 p-0 rounded-full",
-                              (user?.currentRole?.roleName || user?.roles?.[0]?.roleName || "").includes("管理员")
-                                ? "bg-green-500"
-                                : "bg-blue-500"
-                            )}
-                          />
-                          {user?.roles && user.roles.length > 1 && (
-                            <span className="text-xs ml-1 text-gray-400">
-                              +{user.roles.length - 1}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <ChevronDown className="h-4 w-4 opacity-50" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[260px] p-0 rounded-xl">
-                    {/* 用户信息头部 */}
-                    <div className="p-3 flex items-center gap-3 hover:bg-gray-50 cursor-pointer">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage src={getUserAvatar()} alt="用户头像" />
-                        <AvatarFallback>{getAvatarFallback()}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="text-base font-medium">{getUserName()}</div>
-                        <div className="text-xs text-gray-500 flex items-center mt-0.5">
-                          当前角色: <span className="font-medium ml-1">{getCurrentRoleName()}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* 快捷操作区 */}
-                    <div className="py-4 px-3 grid grid-cols-3 gap-2 border-t border-b">
-                      <div className="flex flex-col items-center gap-1.5 cursor-pointer group">
-                        <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center transition-all group-hover:bg-primary/10 group-hover:scale-105">
-                          <UserCog className="h-5 w-5 text-gray-600 group-hover:text-primary transition-colors" />
-                        </div>
-                        <span className="text-xs group-hover:text-primary transition-colors">切换角色</span>
-                      </div>
-
-                      <div className="flex flex-col items-center gap-1.5 cursor-pointer group">
-                        <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center transition-all group-hover:bg-primary/10 group-hover:scale-105">
-                          <Shield className="h-5 w-5 text-gray-600 group-hover:text-primary transition-colors" />
-                        </div>
-                        <span className="text-xs group-hover:text-primary transition-colors">账号授权</span>
-                      </div>
-
-                      <div className="flex flex-col items-center gap-1.5 cursor-pointer group">
-                        <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center transition-all group-hover:bg-primary/10 group-hover:scale-105">
-                          <User className="h-5 w-5 text-gray-600 group-hover:text-primary transition-colors" />
-                        </div>
-                        <span className="text-xs group-hover:text-primary transition-colors">个人资料</span>
-                      </div>
-                    </div>
-
-                    {/* 退出登录 */}
-                    <div className="py-3 flex justify-center">
-                      <div 
-                        className="flex items-center gap-1.5 text-gray-600 hover:text-red-500 cursor-pointer transition-colors group"
-                        onClick={handleLogout}
-                      >
-                        <LogOut className="h-4 w-4 group-hover:text-red-500 transition-colors" />
-                        <span className="text-sm">退出登录</span>
-                      </div>
-                    </div>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
             </div>
           </div>
         </div>
@@ -386,6 +411,20 @@ export default function DataDashboardPage() {
           <SettingsDialog 
             open={settingsDialogOpen} 
             onOpenChange={setSettingsDialogOpen}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* 时间范围选择对话框 */}
+      <AnimatePresence>
+        {timeRangeDialogOpen && (
+          <TimeRangeDialog 
+            open={timeRangeDialogOpen} 
+            onOpenChange={setTimeRangeDialogOpen}
+            onTimeRangeChange={handleTimeRangeChange}
+            currentRange={currentTimeRange.range}
+            currentStartDate={currentTimeRange.startDate}
+            currentEndDate={currentTimeRange.endDate}
           />
         )}
       </AnimatePresence>
